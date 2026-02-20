@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — TBT3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<style>
+.contact-grid { display: grid; grid-template-columns: 1fr 420px; gap: 80px; align-items: start; }
+@media(max-width:900px){ .contact-grid { grid-template-columns: 1fr; gap: 48px; } }
+
+.contact-info-item { display: flex; gap: 16px; align-items: flex-start; padding: 20px 0; border-bottom: 1px solid var(--border); }
+.contact-info-item:last-child { border-bottom: none; }
+.contact-info-icon { width: 40px; height: 40px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.contact-info-icon svg { width: 18px; height: 18px; }
+.contact-info-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.contact-info-value { font-size: 14px; color: var(--black); }
+.contact-info-value a { text-decoration: none; color: var(--black); border-bottom: 1px solid var(--border); transition: border-color .15s; }
+.contact-info-value a:hover { border-color: var(--black); }
+
+.form-card { background: var(--bg); border-radius: 12px; padding: 36px; border: 1px solid var(--border); }
+.form-card h2 { font-size: 20px; font-weight: 500; margin-bottom: 24px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:500px){ .form-row { grid-template-columns: 1fr; } }
+
+.submit-btn { width: 100%; margin-top: 8px; }
+
+/* Sélecteur sujet */
+.subject-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.subject-chip { padding: 7px 14px; border: 1.5px solid var(--border); border-radius: 50px; font-size: 12px; cursor: pointer; transition: all .15s; color: var(--soft); background: var(--white); font-family: var(--font); }
+.subject-chip:hover, .subject-chip.on { border-color: var(--black); background: var(--black); color: var(--white); }
+</style>
+</head>
+<body data-page="contact">
+
+<!-- NAVBAR -->
+<header id="navbar">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo"><svg viewBox="0 0 200 90" fill="none"><rect x="4" y="8" width="46" height="8" fill="currentColor"/><rect x="21" y="8" width="9" height="56" fill="currentColor"/><rect x="56" y="8" width="9" height="56" fill="currentColor"/><path d="M65 8h22c7 0 12 5 12 11s-5 11-12 11H65V8z" fill="currentColor"/><path d="M65 30h24c8 0 14 5 14 12s-6 12-14 12H65V30z" fill="currentColor"/><text x="72" y="80" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="currentColor">3D</text></svg></a>
+    <nav class="nav-links">
+      <a href="/index.html" data-page="home">Home</a><a href="/boutique.html" data-page="boutique">Boutique</a><a href="/devis.html" data-page="devis">Devis STL</a><a href="/a-propos.html" data-page="apropos">À propos</a><a href="/contact.html" data-page="contact">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="nav-icon" onclick="toggleSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>
+      <button class="nav-icon nav-burger" onclick="toggleMobileNav()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="search-bar" id="searchBar"><div class="search-inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" id="searchInput" placeholder="Rechercher..." onkeydown="if(event.key==='Escape')toggleSearch()"><button onclick="toggleSearch()">×</button></div></div>
+  <div class="mobile-nav" id="mobileNav"><a href="/index.html">Home</a><a href="/boutique.html">Boutique</a><a href="/devis.html">Devis STL</a><a href="/a-propos.html">À propos</a><a href="/contact.html">Contact</a></div>
+</header>
+
+<!-- CONTENU -->
+<div class="container">
+  <div class="section">
+
+    <div class="page-header" style="padding-top:0">
+      <div class="section-eyebrow">On vous répond sous 24h</div>
+      <h1>Contact</h1>
+      <p>Une question sur une commande, un projet sur mesure, ou juste envie de discuter impression 3D ?</p>
+    </div>
+
+    <div class="contact-grid">
+
+      <!-- Infos -->
+      <div>
+        <div class="contact-info-item">
+          <div class="contact-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <div>
+            <div class="contact-info-label">Email</div>
+            <div class="contact-info-value"><a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a></div>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="contact-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div>
+            <div class="contact-info-label">Atelier</div>
+            <div class="contact-info-value">Lille, Hauts-de-France 🇫🇷</div>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="contact-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div>
+          <div>
+            <div class="contact-info-label">Délai de réponse</div>
+            <div class="contact-info-value">Sous 24h en semaine</div>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="contact-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></div>
+          <div>
+            <div class="contact-info-label">Réseaux</div>
+            <div class="contact-info-value">
+              <a href="#">Instagram</a> &nbsp;·&nbsp; <a href="#">TikTok</a>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:36px;padding:24px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:500;margin-bottom:8px">💡 Vous avez un fichier STL ?</div>
+          <div style="font-size:13px;color:var(--soft);line-height:1.7;margin-bottom:16px">Obtenez un devis instantané directement en ligne — pas besoin de nous contacter pour ça.</div>
+          <a href="/devis.html" class="btn btn-primary" style="font-size:13px;padding:10px 20px">Calculer mon devis →</a>
+        </div>
+      </div>
+
+      <!-- Formulaire -->
+      <div class="form-card">
+        <h2>Envoyer un message</h2>
+
+        <div id="successMsg" class="alert alert-success" style="display:none">
+          ✓ Message envoyé ! On vous répond sous 24h.
+        </div>
+
+        <div class="form-row">
+          <div class="field"><label>Prénom</label><input type="text" id="fPrenom" placeholder="Marie"></div>
+          <div class="field"><label>Nom</label><input type="text" id="fNom" placeholder="Dupont"></div>
+        </div>
+        <div class="field"><label>Email</label><input type="email" id="fEmail" placeholder="marie@email.com"></div>
+
+        <div class="field" style="margin-bottom:8px"><label>Sujet</label></div>
+        <div class="subject-chips" id="subjectChips">
+          <button class="subject-chip on" data-v="commande">Commande</button>
+          <button class="subject-chip" data-v="devis">Devis sur mesure</button>
+          <button class="subject-chip" data-v="info">Renseignement</button>
+          <button class="subject-chip" data-v="autre">Autre</button>
+        </div>
+        <div style="height:16px"></div>
+
+        <div class="field"><label>Message</label><textarea id="fMsg" placeholder="Décrivez votre demande..." rows="5"></textarea></div>
+
+        <button class="btn btn-primary submit-btn" onclick="sendContact()">Envoyer le message</button>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px">Vos données ne sont pas revendues. Jamais.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="footer">
+  <div class="footer-inner">
+    <div class="footer-brand"><a href="/index.html" class="footer-logo"><svg viewBox="0 0 200 90" fill="none"><rect x="4" y="8" width="46" height="8" fill="currentColor"/><rect x="21" y="8" width="9" height="56" fill="currentColor"/><rect x="56" y="8" width="9" height="56" fill="currentColor"/><path d="M65 8h22c7 0 12 5 12 11s-5 11-12 11H65V8z" fill="currentColor"/><path d="M65 30h24c8 0 14 5 14 12s-6 12-14 12H65V30z" fill="currentColor"/><text x="72" y="80" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="currentColor">3D</text></svg></a><p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p><p class="footer-tagline">Made in France 🇫🇷</p></div>
+    <div class="footer-col"><div class="footer-col-title">Navigation</div><a href="/index.html">Home</a><a href="/boutique.html">Boutique</a><a href="/devis.html">Impression sur mesure</a><a href="/a-propos.html">À propos</a><a href="/contact.html">Contact</a></div>
+    <div class="footer-col"><div class="footer-col-title">Légal</div><a href="/mentions-legales.html">Mentions légales</a><a href="/cgv.html">CGV</a><a href="/politique-confidentialite.html">Confidentialité</a><a href="/politique-retour.html">Retours</a></div>
+    <div class="footer-col"><div class="footer-col-title">Contact</div><a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a><a href="/contact.html">Formulaire</a><div class="footer-social"><a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a></div></div>
+  </div>
+  <div class="footer-bottom"><span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span></div>
+</footer>
+
+<script src="/main.js"></script>
+<script>
+// Chips sujet
+let selectedSubject = 'commande';
+document.querySelectorAll('.subject-chip').forEach(chip => {
+  chip.onclick = () => {
+    document.querySelectorAll('.subject-chip').forEach(c => c.classList.remove('on'));
+    chip.classList.add('on');
+    selectedSubject = chip.dataset.v;
+  };
+});
+
+// Envoi formulaire via Netlify Forms (aucun backend requis)
+async function sendContact() {
+  const prenom = document.getElementById('fPrenom').value.trim();
+  const nom    = document.getElementById('fNom').value.trim();
+  const email  = document.getElementById('fEmail').value.trim();
+  const msg    = document.getElementById('fMsg').value.trim();
+  if (!prenom || !email || !msg) { alert('Merci de remplir les champs obligatoires.'); return; }
+
+  // Netlify Forms : ajoute name="contact" sur le form et netlify="true"
+  // Ici on simule — à connecter à votre backend ou Netlify Forms
+  const body = new URLSearchParams({
+    'form-name': 'contact',
+    prenom, nom, email,
+    sujet: selectedSubject,
+    message: msg
+  });
+
+  try {
+    await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+  } catch(e) {}
+
+  document.getElementById('successMsg').style.display = 'block';
+  document.getElementById('fPrenom').value = '';
+  document.getElementById('fNom').value = '';
+  document.getElementById('fEmail').value = '';
+  document.getElementById('fMsg').value = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

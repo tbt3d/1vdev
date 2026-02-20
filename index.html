@@ -3,691 +3,524 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Impression sur mesure — TBT3D</title>
+<title>TBT3D — Lampes imprimées en 3D, Made in France</title>
+<meta name="description" content="Lampes modernes, modulables et imprimées en 3D. Pensées et fabriquées à Lille avec passion.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --white: #fff;
+  --black: #111;
   --bg: #f9f9f9;
-  --border: #e5e5e5;
-  --text: #111;
+  --border: #e8e8e8;
   --muted: #888;
   --soft: #555;
+  --font: 'Inter', system-ui, sans-serif;
+  --nav-h: 70px;
+  --max: 1280px;
   --r: 50px;
 }
-body { background: var(--white); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400; line-height: 1.5; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); color: var(--black); background: var(--white); padding-top: var(--nav-h); }
 
-/* NAV */
-header { position: sticky; top: 0; z-index: 200; background: var(--white); border-bottom: 1px solid var(--border); height: 72px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
-.logo-svg { height: 44px; width: auto; }
-.nav-links { display: flex; gap: 36px; list-style: none; }
-.nav-links a { text-decoration: none; color: var(--text); font-size: 14px; transition: opacity .15s; }
-.nav-links a:hover { opacity: .6; }
-.nav-icons { display: flex; gap: 20px; align-items: center; }
-.nav-icons svg { width: 20px; height: 20px; cursor: pointer; }
-.nav-icons svg:hover { opacity: .6; }
+/* ─── NAVBAR ─── */
+#navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--white); border-bottom: 1px solid var(--border); transition: box-shadow .2s; }
+#navbar.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,.06); }
+.nav-inner { max-width: var(--max); margin: 0 auto; height: var(--nav-h); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.nav-logo svg { height: 42px; width: auto; color: var(--black); display: block; }
+.nav-links { display: flex; align-items: center; }
+.nav-links a { text-decoration: none; color: var(--soft); font-size: 14px; padding: 8px 16px; border-radius: 6px; transition: color .15s, background .15s; white-space: nowrap; }
+.nav-links a:hover, .nav-links a.active { color: var(--black); }
+.nav-links a.active { font-weight: 500; }
+.nav-actions { display: flex; align-items: center; gap: 4px; }
+.nav-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; border-radius: 6px; color: var(--black); transition: background .15s; text-decoration: none; }
+.nav-icon:hover { background: var(--bg); }
+.nav-icon svg { width: 20px; height: 20px; }
+.nav-burger { display: none; }
+.search-bar { display: none; border-top: 1px solid var(--border); background: var(--white); padding: 12px 32px; }
+.search-bar.open { display: block; }
+.search-inner { max-width: 600px; margin: 0 auto; display: flex; align-items: center; gap: 12px; border: 1.5px solid var(--border); border-radius: 50px; padding: 10px 18px; transition: border-color .2s; }
+.search-inner:focus-within { border-color: var(--black); }
+.search-inner input { flex: 1; border: none; outline: none; font-family: var(--font); font-size: 14px; background: transparent; }
+.search-inner button { background: none; border: none; cursor: pointer; font-size: 20px; color: var(--muted); }
+.mobile-nav { display: none; flex-direction: column; padding: 16px 24px 20px; border-top: 1px solid var(--border); gap: 4px; }
+.mobile-nav.open { display: flex; }
+.mobile-nav a { text-decoration: none; color: var(--black); font-size: 15px; padding: 10px 12px; border-radius: 6px; transition: background .15s; }
+.mobile-nav a:hover { background: var(--bg); }
+@media(max-width:768px){ .nav-links { display: none; } .nav-burger { display: flex; } .nav-inner { padding: 0 20px; } }
 
-/* LAYOUT */
-.page { display: grid; grid-template-columns: 1fr 480px; min-height: calc(100vh - 72px); }
-@media(max-width:900px){ .page { grid-template-columns: 1fr; } }
+/* ─── HERO ─── */
+.hero {
+  position: relative;
+  height: calc(100vh - var(--nav-h));
+  min-height: 560px;
+  max-height: 860px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: #1a1a1a;
+}
+/* Image de fond — sera remplacée par ta photo */
+.hero-bg-img {
+  position: absolute;
+  inset: 0;
+  background-image: url('images/hero.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: .55;
+}
+.hero-content {
+  position: relative;
+  text-align: center;
+  color: var(--white);
+  padding: 0 24px;
+  max-width: 680px;
+}
+.hero-eyebrow {
+  font-size: 12px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+  margin-bottom: 20px;
+}
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 300;
+  line-height: 1.1;
+  margin-bottom: 20px;
+  letter-spacing: -.02em;
+}
+.hero-title strong { font-weight: 600; }
+.hero-sub {
+  font-size: 16px;
+  color: rgba(255,255,255,.7);
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+.btn-hero {
+  display: inline-block;
+  padding: 15px 36px;
+  background: var(--white);
+  color: var(--black);
+  border-radius: var(--r);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  transition: opacity .2s;
+  margin: 0 6px;
+}
+.btn-hero:hover { opacity: .88; }
+.btn-hero.outline {
+  background: transparent;
+  color: var(--white);
+  border: 1.5px solid rgba(255,255,255,.5);
+}
+.btn-hero.outline:hover { border-color: var(--white); }
+.hero-scroll {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.4);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  animation: bounce 2s infinite;
+}
+.hero-scroll svg { width: 18px; height: 18px; }
+@keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
 
-/* GAUCHE */
-.left { display: flex; background: var(--white); }
-.thumbs { width: 88px; padding: 16px 12px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid var(--border); }
-.thumb-stl { width: 64px; height: 64px; background: var(--bg); border-radius: 4px; border: 1.5px dashed var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; color: var(--muted); cursor: pointer; gap: 3px; }
-.thumb-stl.loaded { border-color: #111; color: #111; font-weight: 600; }
+/* ─── SECTION HEADER ─── */
+.section-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.section-eyebrow {
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.section-title {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 400;
+  letter-spacing: -.01em;
+}
+.section-sub {
+  font-size: 15px;
+  color: var(--soft);
+  margin-top: 12px;
+  line-height: 1.7;
+}
 
-.viewer-wrap { flex: 1; }
-.viewer { width: 100%; aspect-ratio: 1/1; max-height: calc(100vh - 72px); background: var(--bg); display: flex; align-items: center; justify-content: center; position: sticky; top: 72px; overflow: hidden; }
-#preview-canvas { display: none; width: 100% !important; height: 100% !important; }
+/* ─── PRODUITS VEDETTES ─── */
+.section { padding: 80px 32px; max-width: var(--max); margin: 0 auto; }
+@media(max-width:600px){ .section { padding: 60px 20px; } }
 
-.drop-zone { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 48px; cursor: pointer; transition: background .2s; }
-.drop-zone:hover, .drop-zone.over { background: #f0f0f0; }
-.drop-icon { width: 72px; height: 72px; border: 1.5px dashed #ccc; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; background: var(--white); }
-.drop-icon svg { opacity: .4; }
-.drop-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
-.drop-sub { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
-.drop-cta { padding: 10px 24px; border: 1.5px solid var(--text); background: var(--white); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: var(--r); transition: all .2s; color: var(--text); }
-.drop-cta:hover { background: var(--text); color: var(--white); }
-#fileInput { display: none; }
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
 
-.dim-strip { display: none; border-top: 1px solid var(--border); }
-.dim-strip.on { display: flex; }
-.dim-box { flex: 1; padding: 12px 8px; text-align: center; border-right: 1px solid var(--border); }
-.dim-box:last-child { border-right: none; }
-.dim-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px; }
-.dim-val { font-size: 14px; font-weight: 500; }
-.dim-unit { font-size: 10px; color: var(--muted); }
+.product-card {
+  text-decoration: none;
+  color: var(--black);
+  display: block;
+  transition: transform .2s;
+}
+.product-card:hover { transform: translateY(-4px); }
+.product-card-img {
+  aspect-ratio: 3/4;
+  background: var(--bg);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 14px;
+  position: relative;
+}
+.product-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .4s;
+}
+.product-card:hover .product-card-img img { transform: scale(1.04); }
+.product-card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+  color: var(--muted);
+  font-size: 13px;
+}
+.product-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: var(--black);
+  color: var(--white);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 50px;
+}
+.product-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+.product-sub { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.product-price { font-size: 15px; font-weight: 400; }
+.product-price-from { font-size: 12px; color: var(--muted); margin-right: 4px; }
 
-/* DROITE */
-.right { border-left: 1px solid var(--border); padding: 40px 36px 60px; position: sticky; top: 72px; max-height: calc(100vh - 72px); overflow-y: auto; }
-@media(max-width:900px){ .right { position: static; max-height: none; border-left: none; border-top: 1px solid var(--border); } }
+/* ─── BANNER DEVIS ─── */
+.devis-banner {
+  background: var(--black);
+  color: var(--white);
+  padding: 80px 32px;
+  text-align: center;
+  margin: 40px 0 0;
+}
+.devis-banner h2 { font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 400; margin-bottom: 14px; letter-spacing: -.01em; }
+.devis-banner p { font-size: 15px; color: rgba(255,255,255,.6); margin-bottom: 32px; line-height: 1.7; max-width: 520px; margin-left: auto; margin-right: auto; }
+.btn-white { display: inline-block; padding: 14px 32px; background: var(--white); color: var(--black); border-radius: var(--r); text-decoration: none; font-size: 14px; font-weight: 500; transition: opacity .2s; }
+.btn-white:hover { opacity: .88; }
 
-.prod-name { font-size: 28px; font-weight: 400; margin-bottom: 10px; }
-.prod-price { font-size: 22px; font-weight: 400; margin-bottom: 24px; min-height: 32px; }
-.prod-price-na { font-size: 14px; color: var(--muted); font-style: italic; }
-.hr { height: 1px; background: var(--border); margin: 20px 0; }
+/* ─── VALEURS ─── */
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+}
+.value-card {
+  text-align: center;
+  padding: 32px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color .2s;
+}
+.value-card:hover { border-color: var(--black); }
+.value-icon { font-size: 2rem; margin-bottom: 16px; }
+.value-title { font-size: 15px; font-weight: 500; margin-bottom: 8px; }
+.value-desc { font-size: 13px; color: var(--soft); line-height: 1.7; }
 
-/* Options */
-.opt-block { margin-bottom: 20px; }
-.opt-title { font-size: 13px; color: var(--text); margin-bottom: 10px; }
-.opt-title span { color: var(--muted); margin-left: 4px; }
+/* ─── SECTION GRISE ─── */
+.section-gray { background: var(--bg); }
+.section-gray .section { }
 
-/* Chips arrondies */
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { padding: 8px 18px; border: 1.5px solid var(--border); border-radius: var(--r); font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; transition: all .15s; color: var(--soft); background: var(--white); }
-.chip:hover { border-color: #999; color: var(--text); }
-.chip.on { border-color: #111; background: #111; color: #fff; }
-
-/* Color chips */
-.color-chip { display: flex; align-items: center; gap: 7px; padding: 7px 14px 7px 10px; border: 1.5px solid var(--border); border-radius: var(--r); cursor: pointer; transition: all .15s; font-size: 13px; color: var(--soft); }
-.color-chip:hover { border-color: #999; }
-.color-chip.on { border-color: #111; background: #111; color: #fff; }
-.color-chip.on .dot { box-shadow: 0 0 0 2px #111, 0 0 0 3px #fff; }
-.dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,.12); flex-shrink: 0; }
-
-/* Warning box */
-.warning-box { display: none; background: #fff8ed; border: 1px solid #f5c842; border-radius: 8px; padding: 10px 13px; font-size: 12px; color: #7a5c00; line-height: 1.6; margin-top: 10px; }
-.warning-box.show { display: block; }
-.warning-box strong { color: #5a3e00; }
-
-/* Qty */
-.qty-wrap { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: var(--r); width: fit-content; overflow: hidden; }
-.qty-btn { width: 40px; height: 40px; border: none; background: var(--white); font-size: 20px; cursor: pointer; color: var(--text); display: flex; align-items: center; justify-content: center; transition: background .15s; font-weight: 300; }
-.qty-btn:hover { background: var(--bg); }
-.qty-num { width: 48px; text-align: center; border: none; border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border); font-family: 'Inter', sans-serif; font-size: 14px; height: 40px; outline: none; -moz-appearance: textfield; }
-.qty-num::-webkit-inner-spin-button, .qty-num::-webkit-outer-spin-button { display: none; }
-
-/* Breakdown */
-.bk { background: var(--bg); border-radius: 8px; padding: 14px 16px; margin: 16px 0; display: none; }
-.bk-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 12.5px; color: var(--soft); border-bottom: 1px solid rgba(0,0,0,.05); }
-.bk-row:last-child { border-bottom: none; font-weight: 500; color: var(--text); font-size: 13px; padding-top: 10px; border-top: 1px solid var(--border); margin-top: 4px; }
-
-/* Buttons */
-.btn-primary { width: 100%; padding: 14px; background: #111; color: #fff; border: none; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; border-radius: var(--r); cursor: pointer; transition: opacity .2s; margin-bottom: 10px; }
-.btn-primary:hover:not(:disabled) { opacity: .85; }
-.btn-primary:disabled { opacity: .3; cursor: not-allowed; }
-.btn-secondary { width: 100%; padding: 13px; background: var(--white); color: var(--text); border: 1.5px solid var(--border); font-family: 'Inter', sans-serif; font-size: 13px; border-radius: var(--r); cursor: pointer; transition: border-color .2s; }
-.btn-secondary:hover { border-color: var(--text); }
-.note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.5; }
-
-/* Desc */
-.desc-title { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
-.desc-body { font-size: 13px; color: var(--soft); line-height: 1.8; }
-.desc-body ul { list-style: none; }
-.desc-body ul li::before { content: '✓  '; font-weight: 600; color: #111; }
-
-/* MODAL */
-.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 500; align-items: center; justify-content: center; }
-.overlay.on { display: flex; }
-.modal { background: var(--white); width: 92%; max-width: 480px; padding: 36px; border-radius: 12px; position: relative; animation: up .25s ease; }
-@keyframes up { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
-.modal-x { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1; }
-.modal h2 { font-size: 20px; font-weight: 500; margin-bottom: 6px; }
-.modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
-.modal-sum { background: var(--bg); padding: 12px 16px; font-size: 13px; color: var(--soft); line-height: 1.9; margin-bottom: 18px; border-radius: 8px; border-left: 3px solid #111; }
-.modal-sum strong { color: #111; }
-.field { margin-bottom: 13px; }
-.field label { display: block; font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-.field input, .field textarea { width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text); border-radius: 8px; outline: none; transition: border-color .2s; resize: vertical; }
-.field input:focus, .field textarea:focus { border-color: var(--text); }
-.pay-info { background: #f9f9f9; border: 1px solid var(--border); border-radius: 8px; padding: 13px 15px; font-size: 12px; color: #555; line-height: 1.7; margin: 12px 0; }
-.success { text-align: center; padding: 16px 0; }
-.success .ck { font-size: 2.5rem; margin-bottom: 14px; }
-.success h3 { font-size: 18px; font-weight: 500; margin-bottom: 10px; }
-.success p { font-size: 13px; color: var(--muted); line-height: 1.7; }
-.success a { display: inline-block; margin-top: 14px; padding: 13px 32px; background: #111; color: #fff; border-radius: 50px; font-size: 13px; text-decoration: none; font-weight: 500; }
-.pay-icons { font-size: 11px; color: #aaa; text-align: center; margin-top: 10px; }
+/* ─── FOOTER ─── */
+#footer { background: #111; color: rgba(255,255,255,.7); margin-top: 0; }
+.footer-inner { max-width: var(--max); margin: 0 auto; padding: 60px 32px 40px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
+@media(max-width:900px){ .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; } }
+@media(max-width:600px){ .footer-inner { grid-template-columns: 1fr; gap: 28px; padding: 40px 20px 28px; } }
+.footer-logo svg { height: 38px; width: auto; color: #fff; margin-bottom: 16px; display: block; }
+.footer-brand p { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,.55); margin-bottom: 4px; }
+.footer-tagline { font-size: 12px; margin-top: 12px !important; color: rgba(255,255,255,.3) !important; }
+.footer-col-title { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: 14px; font-weight: 500; }
+.footer-col { display: flex; flex-direction: column; gap: 2px; }
+.footer-col a { text-decoration: none; color: rgba(255,255,255,.55); font-size: 13px; padding: 5px 0; transition: color .15s; }
+.footer-col a:hover { color: #fff; }
+.footer-social { display: flex; gap: 10px; margin-top: 12px; }
+.footer-social a { width: 36px; height: 36px; border: 1px solid rgba(255,255,255,.15); border-radius: 50%; display: flex !important; align-items: center; justify-content: center; transition: border-color .15s !important; }
+.footer-social a:hover { border-color: rgba(255,255,255,.5) !important; }
+.footer-social svg { width: 16px; height: 16px; }
+.footer-bottom { max-width: var(--max); margin: 0 auto; padding: 20px 32px; border-top: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,.3); flex-wrap: wrap; gap: 12px; }
+.footer-pay { display: flex; gap: 6px; align-items: center; }
+@media(max-width:600px){ .footer-bottom { padding: 16px 20px; } }
 </style>
 </head>
-<body>
+<body data-page="home">
 
-<header>
-  <a href="https://payhip.com/tbt3d">
-    <svg class="logo-svg" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="6" width="28" height="5" fill="#111"/>
-      <rect x="13" y="6" width="5" height="34" fill="#111"/>
-      <rect x="32" y="6" width="5" height="34" fill="#111"/>
-      <path d="M37 6h14c4 0 7 3 7 6.5S55 19 51 19H37V6z" fill="#111"/>
-      <path d="M37 19h15c4.5 0 8 3 8 7s-3.5 7-8 7H37V19z" fill="#111"/>
-      <text x="43" y="50" font-family="Inter,sans-serif" font-size="9" font-weight="600" fill="#111">3D</text>
-    </svg>
-  </a>
-  <a href="https://payhip.com/tbt3d" style="font-size:13px;color:#888;text-decoration:none;display:flex;align-items:center;gap:6px;transition:color .2s" onmouseover="this.style.color='#111'" onmouseout="this.style.color='#888'">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    Retour à la boutique
-  </a>
+<!-- ─── NAVBAR ─── -->
+<header id="navbar">
+  <div class="nav-inner">
+    <a href="/index.html" class="nav-logo">
+      <svg viewBox="0 0 200 90" fill="none">
+        <rect x="4" y="8" width="46" height="8" fill="currentColor"/>
+        <rect x="21" y="8" width="9" height="56" fill="currentColor"/>
+        <rect x="56" y="8" width="9" height="56" fill="currentColor"/>
+        <path d="M65 8h22c7 0 12 5 12 11s-5 11-12 11H65V8z" fill="currentColor"/>
+        <path d="M65 30h24c8 0 14 5 14 12s-6 12-14 12H65V30z" fill="currentColor"/>
+        <text x="72" y="80" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="currentColor">3D</text>
+      </svg>
+    </a>
+    <nav class="nav-links">
+      <a href="/index.html" data-page="home">Home</a>
+      <a href="/boutique.html" data-page="boutique">Boutique</a>
+      <a href="/devis.html" data-page="devis">Devis STL</a>
+      <a href="/a-propos.html" data-page="apropos">À propos</a>
+      <a href="/contact.html" data-page="contact">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="nav-icon" onclick="toggleSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>
+      <a href="/dashboard.html" class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+      <button class="nav-icon nav-burger" onclick="toggleMobileNav()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="search-bar" id="searchBar">
+    <div class="search-inner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" placeholder="Rechercher une lampe..." id="searchInput" onkeydown="if(event.key==='Escape')toggleSearch()">
+      <button onclick="toggleSearch()">×</button>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="/index.html">Home</a>
+    <a href="/boutique.html">Boutique</a>
+    <a href="/devis.html">Devis STL</a>
+    <a href="/a-propos.html">À propos</a>
+    <a href="/contact.html">Contact</a>
+  </div>
 </header>
 
-<div class="page">
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-bg-img"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Made in France · Lille</div>
+    <h1 class="hero-title">La lumière<br><strong>réinventée</strong></h1>
+    <p class="hero-sub">Lampes modernes, modulables et imprimées en 3D.<br>Pensées et fabriquées à Lille avec passion.</p>
+    <a href="/boutique.html" class="btn-hero">Découvrir la boutique</a>
+    <a href="/devis.html" class="btn-hero outline">Devis sur mesure</a>
+  </div>
+  <div class="hero-scroll">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
 
-  <!-- GAUCHE : viewer -->
-  <div class="left">
-    <div class="thumbs">
-      <div class="thumb-stl" id="thumbStl" onclick="document.getElementById('fileInput').click()">
-        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2L2 7v8l9 5 9-5V7L11 2z" stroke="currentColor" stroke-width="1.4"/></svg>
-        STL
+<!-- ─── PRODUITS VEDETTES ─── -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-eyebrow">La collection</div>
+    <h2 class="section-title">Nos créations</h2>
+    <p class="section-sub">Chaque lampe est unique, imprimée à la demande dans notre atelier lillois.</p>
+  </div>
+
+  <div class="products-grid" id="productsGrid">
+    <!-- Lampe ETA -->
+    <a href="/boutique.html#eta" class="product-card">
+      <div class="product-card-img">
+        <div class="product-card-img-placeholder">📷 Photo ETA à venir</div>
+        <div class="product-badge">Bestseller</div>
       </div>
-    </div>
+      <div class="product-name">ETA</div>
+      <div class="product-sub">Abat-jour moderne · PLA</div>
+      <div class="product-price"><span class="product-price-from">À partir de</span>69,90 €</div>
+    </a>
 
-    <div class="viewer-wrap">
-      <div class="viewer" id="viewer">
-        <div class="drop-zone" id="dropZone">
-          <input type="file" id="fileInput" accept=".stl">
-          <div class="drop-icon">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <path d="M14 2L2 8v12l12 6 12-6V8L14 2z" stroke="#999" stroke-width="1.5"/>
-              <path d="M14 2v22M2 8l12 7M26 8l-12 7" stroke="#999" stroke-width="1" opacity=".4"/>
-            </svg>
-          </div>
-          <div class="drop-title">Déposez votre fichier STL ici</div>
-          <div class="drop-sub">Format .STL uniquement · Max 50 Mo</div>
-          <button class="drop-cta" onclick="document.getElementById('fileInput').click()">Choisir un fichier</button>
+    <!-- Lampe NOVA -->
+    <a href="/boutique.html#nova" class="product-card">
+      <div class="product-card-img">
+        <div class="product-card-img-placeholder">📷 Photo NOVA à venir</div>
+      </div>
+      <div class="product-name">NOVA</div>
+      <div class="product-sub">Design épuré · PLA</div>
+      <div class="product-price"><span class="product-price-from">À partir de</span>64,90 €</div>
+    </a>
+
+    <!-- Lampe KARMA -->
+    <a href="/boutique.html#karma" class="product-card">
+      <div class="product-card-img">
+        <div class="product-card-img-placeholder">📷 Photo KARMA à venir</div>
+      </div>
+      <div class="product-name">KARMA</div>
+      <div class="product-sub">Élégance organique · PLA</div>
+      <div class="product-price"><span class="product-price-from">À partir de</span>64,90 €</div>
+    </a>
+
+    <!-- Impression sur mesure -->
+    <a href="/devis.html" class="product-card">
+      <div class="product-card-img" style="background:#111">
+        <div class="product-card-img-placeholder" style="background:#111;color:rgba(255,255,255,.3);flex-direction:column;gap:10px">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 4L4 12v16l16 8 16-8V12L20 4z" stroke="currentColor" stroke-width="1.5"/></svg>
+          Votre STL
         </div>
-        <canvas id="preview-canvas"></canvas>
+        <div class="product-badge" style="background:#fff;color:#111">Sur mesure</div>
       </div>
-
-      <div class="dim-strip" id="dimStrip">
-        <div class="dim-box"><div class="dim-lbl">Longueur</div><div class="dim-val" id="dX">—</div><span class="dim-unit">mm</span></div>
-        <div class="dim-box"><div class="dim-lbl">Largeur</div><div class="dim-val" id="dY">—</div><span class="dim-unit">mm</span></div>
-        <div class="dim-box"><div class="dim-lbl">Hauteur</div><div class="dim-val" id="dZ">—</div><span class="dim-unit">mm</span></div>
-        <div class="dim-box"><div class="dim-lbl">Volume</div><div class="dim-val" id="dVol">—</div><span class="dim-unit">cm³</span></div>
-        <div class="dim-box"><div class="dim-lbl">Masse</div><div class="dim-val" id="dMass">—</div><span class="dim-unit">g</span></div>
-      </div>
-    </div>
+      <div class="product-name">Impression sur mesure</div>
+      <div class="product-sub">Votre fichier STL · FDM ou résine</div>
+      <div class="product-price">Prix calculé en ligne</div>
+    </a>
   </div>
+</div>
 
-  <!-- DROITE : panel -->
-  <div class="right">
-    <h1 class="prod-name">Impression sur mesure</h1>
-
-    <div class="prod-price" id="priceDisplay">
-      <span class="prod-price-na">Importez votre fichier STL</span>
+<!-- ─── VALEURS ─── -->
+<div class="section-gray">
+  <div class="section" style="padding-top:80px;padding-bottom:80px">
+    <div class="section-header">
+      <div class="section-eyebrow">Pourquoi TBT3D</div>
+      <h2 class="section-title">Notre engagement</h2>
     </div>
-
-    <!-- Technologie -->
-    <div class="opt-block">
-      <div class="opt-title">Technologie <span id="techVal">FDM — Filament</span></div>
-      <div class="chips" id="techChips">
-        <div class="chip on" data-v="fdm">FDM — Filament</div>
-        <div class="chip" data-v="sla">SLA — Résine</div>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">🇫🇷</div>
+        <div class="value-title">Made in France</div>
+        <div class="value-desc">Chaque pièce est imprimée à Lille dans notre atelier. Zéro intermédiaire, production locale et responsable.</div>
       </div>
-    </div>
-
-    <!-- Matériau -->
-    <div class="opt-block">
-      <div class="opt-title">Matériau <span id="matVal">PLA</span></div>
-      <div class="chips" id="matChips"></div>
-      <div class="warning-box" id="matWarning"></div>
-    </div>
-
-    <!-- Alerte taille max SLA -->
-    <div id="slaMaxWarn" style="display:none;background:#fff0f0;border:1px solid #f5a0a0;border-radius:8px;padding:10px 13px;font-size:12px;color:#8b0000;line-height:1.6;margin-bottom:14px"></div>
-
-    <!-- Remplissage (FDM uniquement) -->
-    <div class="opt-block" id="fillBlock">
-      <div class="opt-title">Remplissage <span id="fillVal">20% — Recommandé</span></div>
-      <div class="chips">
-        <div class="chip fill-chip" data-v="10"  data-lbl="10% — Léger">10%</div>
-        <div class="chip fill-chip on" data-v="20" data-lbl="20% — Recommandé">20%</div>
-        <div class="chip fill-chip" data-v="50"  data-lbl="50% — Solide">50%</div>
-        <div class="chip fill-chip" data-v="70"  data-lbl="70% — Très solide">70%</div>
-        <div class="chip fill-chip" data-v="100" data-lbl="100% — Plein">100%</div>
+      <div class="value-card">
+        <div class="value-icon">♻️</div>
+        <div class="value-title">Éco-responsable</div>
+        <div class="value-desc">PLA biosourcé, impression à la demande pour éviter le gaspillage. Zéro stock, zéro surproduction.</div>
       </div>
-    </div>
-
-    <!-- Couleur -->
-    <div class="opt-block">
-      <div class="opt-title">Couleur <span id="colorVal">Noir</span></div>
-      <div class="chips" id="colorChips">
-        <div class="color-chip on" data-v="Noir"   data-hex="#1a1a1a"><div class="dot" style="background:#1a1a1a"></div>Noir</div>
-        <div class="color-chip" data-v="Blanc"  data-hex="#f0f0f0"><div class="dot" style="background:#f0f0f0;border-color:#ccc"></div>Blanc</div>
-        <div class="color-chip" data-v="Gris"   data-hex="#888"><div class="dot" style="background:#888"></div>Gris</div>
-        <div class="color-chip" data-v="Rouge"  data-hex="#d63a2f"><div class="dot" style="background:#d63a2f"></div>Rouge</div>
-        <div class="color-chip" data-v="Bleu"   data-hex="#2563eb"><div class="dot" style="background:#2563eb"></div>Bleu</div>
-        <div class="color-chip" data-v="Vert"   data-hex="#16a34a"><div class="dot" style="background:#16a34a"></div>Vert</div>
-        <div class="color-chip" data-v="Jaune"  data-hex="#eab308"><div class="dot" style="background:#eab308"></div>Jaune</div>
-        <div class="color-chip" data-v="Orange" data-hex="#ea580c"><div class="dot" style="background:#ea580c"></div>Orange</div>
-        <div class="color-chip" data-v="Bois"   data-hex="#c8956c"><div class="dot" style="background:linear-gradient(135deg,#c8956c,#a0714f)"></div>Bois</div>
+      <div class="value-card">
+        <div class="value-icon">✦</div>
+        <div class="value-title">Modulable</div>
+        <div class="value-desc">Couleurs, dimensions, finitions — chaque lampe peut être personnalisée selon vos envies.</div>
       </div>
-    </div>
-
-    <!-- Quantité -->
-    <div class="opt-block">
-      <div class="opt-title">Quantité</div>
-      <div class="qty-wrap">
-        <button class="qty-btn" id="qMinus">−</button>
-        <input type="number" class="qty-num" id="qNum" value="1" min="1" max="99" readonly>
-        <button class="qty-btn" id="qPlus">+</button>
+      <div class="value-card">
+        <div class="value-icon">🛠️</div>
+        <div class="value-title">Sur mesure</div>
+        <div class="value-desc">Vous avez un fichier STL ? On l'imprime. Devis instantané en ligne, livraison sous 7 à 30 jours.</div>
       </div>
-    </div>
-
-    <div class="hr"></div>
-
-    <!-- Breakdown -->
-    <div class="bk" id="bk">
-      <div class="bk-row" id="rFab"><span>Fabrication</span><span>—</span></div>
-      <div class="bk-row" id="rTVA"><span>TVA 20%</span><span>—</span></div>
-      <div class="bk-row" id="rPort"><span>Frais de port</span><span>—</span></div>
-      <div class="bk-row" id="rTot"><span>Total TTC</span><span>—</span></div>
-    </div>
-
-    <button class="btn-primary" id="btnOrder" disabled onclick="openModal()">Commander cette pièce</button>
-    <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">Changer de fichier STL</button>
-    <p class="note" id="note">Importez votre fichier STL pour obtenir une estimation instantanée.</p>
-
-    <div class="hr"></div>
-
-    <div class="desc-title">Impression 3D artisanale — Made in France</div>
-    <div class="desc-body">
-      <p style="margin-bottom:10px">Chaque pièce est imprimée avec soin à Lille.</p>
-      <ul>
-        <li>FDM filament ou SLA résine</li>
-        <li>Délai : 7 à 30 jours ouvrés</li>
-        <li>Livraison colis incluse</li>
-      </ul>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
-<div class="overlay" id="overlay">
-  <div class="modal">
-    <button class="modal-x" onclick="closeModal()">×</button>
-    <div id="modalInner">
-      <h2>Commander votre pièce</h2>
-      <p class="modal-sub">Vérifiez votre configuration et payez directement en ligne via Payhip.</p>
-      <div class="modal-sum" id="modalSum"></div>
-      <div class="field"><label>Prénom & Nom</label><input type="text" id="cName" placeholder="Marie Dupont"></div>
-      <div class="field"><label>Email</label><input type="email" id="cEmail" placeholder="marie@email.com"></div>
-      <div class="field"><label>Message (optionnel)</label><textarea id="cMsg" rows="2" placeholder="Couleur souhaitée, usage, précisions..."></textarea></div>
-      <div class="pay-info">ℹ️ En cliquant sur <strong>Payer maintenant</strong>, vous serez redirigé vers la page de paiement sécurisée Payhip. Thibault validera votre fichier avant de lancer l'impression.</div>
-      <button class="btn-primary" style="margin-top:4px" onclick="goToPayment()">Payer maintenant →</button>
-      <p class="pay-icons">Paiement sécurisé · CB · PayPal · Visa · Mastercard</p>
+<!-- ─── BANNER DEVIS ─── -->
+<div class="devis-banner">
+  <h2>Votre pièce,<br>imprimée par nos soins</h2>
+  <p>Importez votre fichier STL, obtenez un prix instantané et commandez directement en ligne.</p>
+  <a href="/devis.html" class="btn-white">Calculer mon devis →</a>
+</div>
+
+<!-- ─── FOOTER ─── -->
+<footer id="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="/index.html" class="footer-logo">
+        <svg viewBox="0 0 200 90" fill="none"><rect x="4" y="8" width="46" height="8" fill="currentColor"/><rect x="21" y="8" width="9" height="56" fill="currentColor"/><rect x="56" y="8" width="9" height="56" fill="currentColor"/><path d="M65 8h22c7 0 12 5 12 11s-5 11-12 11H65V8z" fill="currentColor"/><path d="M65 30h24c8 0 14 5 14 12s-6 12-14 12H65V30z" fill="currentColor"/><text x="72" y="80" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="currentColor">3D</text></svg>
+      </a>
+      <p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p>
+      <p class="footer-tagline">Made in France 🇫🇷</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Navigation</div>
+      <a href="/index.html">Home</a>
+      <a href="/boutique.html">Boutique</a>
+      <a href="/devis.html">Impression sur mesure</a>
+      <a href="/a-propos.html">À propos</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Légal</div>
+      <a href="/mentions-legales.html">Mentions légales</a>
+      <a href="/cgv.html">CGV</a>
+      <a href="/politique-confidentialite.html">Confidentialité</a>
+      <a href="/politique-retour.html">Retours</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Contact</div>
+      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/contact.html">Formulaire</a>
+      <a href="/devis.html">Devis STL</a>
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="#" aria-label="TikTok">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg>
+        </a>
+      </div>
     </div>
   </div>
-</div>
+  <div class="footer-bottom">
+    <span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span>
+    <span class="footer-pay">
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#003087"/><text x="19" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="white" font-family="sans-serif">PayPal</text></svg>
+    </span>
+  </div>
+</footer>
 
 <script>
-// ── TARIFS ─────────────────────────────────────────────────────────────────
-const TARIFS = {
-  fdm: { materiaux: {
-    pla: {
-      label: 'PLA', densite: 1.24, prixKg: 22,
-      warning: '<strong>PLA :</strong> Idéal pour la décoration, figurines et prototypes. Non recommandé pour les pièces fonctionnelles soumises à la chaleur (résistance jusqu\'à ~60°C) ou aux fortes contraintes mécaniques.'
-    },
-    asa: {
-      label: 'ASA/ABS', densite: 1.07, prixKg: 25,
-      warning: '<strong>ASA/ABS :</strong> Meilleure résistance thermique (~90°C) et aux UV, adapté à l\'extérieur. Convient pour des pièces semi-fonctionnelles — déconseillé pour des charges ou contraintes élevées.'
-    },
-  }},
-  sla: { materiaux: {
-    resine: {
-      label: 'Résine standard', densite: 1.1, prixLitre: 30,
-      warning: '<strong>Résine SLA :</strong> Excellente précision et niveau de détail. <strong>Usage décoratif uniquement</strong> — figurines, bijoux, maquettes. Non adaptée aux pièces fonctionnelles (fragile aux chocs, sensible à la chaleur).'
-    }
-  }}
-};
-const MARGE = 3;
-// Anycubic Photon Mono X max build volume
-const SLA_MAX = { x: 192, y: 120, z: 245 };
-const FX = { miseEnRoute: 2.50, pw: 180, elec: 0.2516, usure: 0.10, embal: 1.20, portLight: 4.50, portHeavy: 10.00, tva: 0.20 };
+document.getElementById('footerYear').textContent = new Date().getFullYear();
 
-// ── STATE ──────────────────────────────────────────────────────────────────
-const S = { tech: 'fdm', mat: 'pla', fill: 20, color: 'Noir', qty: 1, vol: null, _volFull: null, dims: null, file: null, _slaBlocked: false };
-
-// ── BUILD MAT CHIPS ────────────────────────────────────────────────────────
-function buildMat() {
-  const c = document.getElementById('matChips');
-  c.innerHTML = '';
-  const mats = TARIFS[S.tech].materiaux;
-  const keys = Object.keys(mats);
-  S.mat = keys[0];
-  document.getElementById('matVal').textContent = mats[S.mat].label;
-  keys.forEach((k, i) => {
-    const d = document.createElement('div');
-    d.className = 'chip' + (i === 0 ? ' on' : '');
-    d.dataset.v = k;
-    d.textContent = mats[k].label;
-    d.onclick = () => {
-      S.mat = k;
-      document.querySelectorAll('#matChips .chip').forEach(x => x.classList.toggle('on', x.dataset.v === k));
-      document.getElementById('matVal').textContent = mats[k].label;
-      showWarning(mats[k].warning);
-      calcVol(); price();
-    };
-    c.appendChild(d);
-  });
-  showWarning(mats[S.mat].warning);
-}
-
-function showWarning(txt) {
-  const w = document.getElementById('matWarning');
-  if (txt) { w.innerHTML = txt; w.classList.add('show'); }
-  else { w.classList.remove('show'); }
-}
-
-// ── TECH CHIPS ─────────────────────────────────────────────────────────────
-document.querySelectorAll('#techChips .chip').forEach(ch => {
-  ch.onclick = () => {
-    S.tech = ch.dataset.v;
-    document.querySelectorAll('#techChips .chip').forEach(x => x.classList.remove('on'));
-    ch.classList.add('on');
-    document.getElementById('techVal').textContent = ch.textContent;
-    // Cacher le remplissage pour SLA
-    document.getElementById('fillBlock').style.display = S.tech === 'sla' ? 'none' : '';
-    buildMat(); calcVol();
-    if (S.dims) checkSlaSize(parseFloat(S.dims.x), parseFloat(S.dims.y), parseFloat(S.dims.z));
-    price();
-  };
+// Active nav
+document.querySelectorAll('.nav-links a').forEach(a => {
+  if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
 });
 
-// ── FILL CHIPS ─────────────────────────────────────────────────────────────
-document.querySelectorAll('.fill-chip').forEach(ch => {
-  ch.onclick = () => {
-    S.fill = parseInt(ch.dataset.v);
-    document.querySelectorAll('.fill-chip').forEach(x => x.classList.remove('on'));
-    ch.classList.add('on');
-    document.getElementById('fillVal').textContent = ch.dataset.lbl;
-    calcVol(); price();
-  };
+// Scroll shadow
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
 });
 
-// ── COLOR CHIPS ────────────────────────────────────────────────────────────
-document.querySelectorAll('.color-chip').forEach(ch => {
-  ch.onclick = () => {
-    S.color = ch.dataset.v;
-    document.querySelectorAll('.color-chip').forEach(x => x.classList.remove('on'));
-    ch.classList.add('on');
-    document.getElementById('colorVal').textContent = ch.dataset.v;
-    if (window._mesh) window._mesh.material.color.set(ch.dataset.hex);
-  };
+function toggleSearch() {
+  const b = document.getElementById('searchBar');
+  b.classList.toggle('open');
+  if (b.classList.contains('open')) setTimeout(() => document.getElementById('searchInput').focus(), 50);
+}
+
+function toggleMobileNav() {
+  document.getElementById('mobileNav').classList.toggle('open');
+}
+
+// Fade in on scroll
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'none'; } });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.product-card, .value-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(16px)';
+  el.style.transition = 'opacity .5s ease, transform .5s ease';
+  observer.observe(el);
 });
-
-// ── QTY ────────────────────────────────────────────────────────────────────
-document.getElementById('qMinus').onclick = () => { if (S.qty > 1) { S.qty--; document.getElementById('qNum').value = S.qty; price(); } };
-document.getElementById('qPlus').onclick  = () => { if (S.qty < 99) { S.qty++; document.getElementById('qNum').value = S.qty; price(); } };
-
-buildMat();
-
-// ── FILE DROP ──────────────────────────────────────────────────────────────
-const dropZone = document.getElementById('dropZone');
-const viewer   = document.getElementById('viewer');
-const fi       = document.getElementById('fileInput');
-
-dropZone.onclick = () => fi.click();
-viewer.ondragover  = e => { e.preventDefault(); dropZone.classList.add('over'); };
-viewer.ondragleave = () => dropZone.classList.remove('over');
-viewer.ondrop = e => {
-  e.preventDefault(); dropZone.classList.remove('over');
-  const f = e.dataTransfer.files[0];
-  if (f && f.name.toLowerCase().endsWith('.stl')) loadFile(f);
-};
-fi.onchange = e => { if (e.target.files[0]) loadFile(e.target.files[0]); };
-
-function loadFile(f) {
-  S.file = f;
-  dropZone.querySelector('.drop-title').textContent = '✓ ' + f.name;
-  dropZone.querySelector('.drop-sub').textContent = (f.size / 1024).toFixed(0) + ' Ko';
-  const ts = document.getElementById('thumbStl');
-  ts.classList.add('loaded');
-  ts.querySelector('svg').style.strokeWidth = '2';
-  const r = new FileReader();
-  r.onload = e => parseSTL(e.target.result);
-  r.readAsArrayBuffer(f);
-}
-
-// ── STL PARSE ──────────────────────────────────────────────────────────────
-function parseSTL(buf) {
-  let geo;
-  try { geo = parseBinary(buf); } catch(e) { geo = parseASCII(buf); }
-  if (!geo || !geo.attributes.position || geo.attributes.position.count === 0) geo = parseASCII(buf);
-
-  geo.computeBoundingBox();
-  const b = geo.boundingBox;
-  const sx = b.max.x - b.min.x;
-  const sy = b.max.y - b.min.y;
-  const sz = b.max.z - b.min.z;
-
-  document.getElementById('dX').textContent = sx.toFixed(1);
-  document.getElementById('dY').textContent = sy.toFixed(1);
-  document.getElementById('dZ').textContent = sz.toFixed(1);
-  document.getElementById('dimStrip').classList.add('on');
-
-  S._volFull = (sx * sy * sz) / 1000; // cm³ bounding box
-  S.dims = { x: sx.toFixed(1), y: sy.toFixed(1), z: sz.toFixed(1) };
-
-  // Vérification taille max SLA (Anycubic Photon Mono X)
-  checkSlaSize(sx, sy, sz);
-
-  calcVol();
-  price();
-  render3D(geo);
-}
-
-function parseBinary(buf) {
-  const dv = new DataView(buf);
-  const n = dv.getUint32(80, true);
-  const p = new Float32Array(n * 9);
-  let o = 84;
-  for (let i = 0; i < n; i++) {
-    o += 12;
-    for (let j = 0; j < 9; j++) { p[i * 9 + j] = dv.getFloat32(o, true); o += 4; }
-    o += 2;
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(p, 3));
-  g.computeVertexNormals();
-  return g;
-}
-
-function parseASCII(buf) {
-  const t = new TextDecoder().decode(buf);
-  const pts = [];
-  const re = /vertex\s+([\d.e+\-]+)\s+([\d.e+\-]+)\s+([\d.e+\-]+)/gi;
-  let m;
-  while ((m = re.exec(t))) pts.push(+m[1], +m[2], +m[3]);
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pts), 3));
-  g.computeVertexNormals();
-  return g;
-}
-
-// ── 3D RENDER ──────────────────────────────────────────────────────────────
-let _renderer, _animId;
-
-function render3D(geo) {
-  const cnt = document.getElementById('viewer');
-  const cv  = document.getElementById('preview-canvas');
-  dropZone.style.display = 'none';
-  cv.style.display = 'block';
-
-  if (_renderer) { _renderer.dispose(); cancelAnimationFrame(_animId); }
-
-  _renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true });
-  _renderer.setSize(cnt.clientWidth, cnt.clientHeight);
-  _renderer.setPixelRatio(window.devicePixelRatio);
-  _renderer.setClearColor(0xf9f9f9, 1);
-
-  const sc  = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(40, cnt.clientWidth / cnt.clientHeight, 0.1, 999999);
-
-  geo.center();
-  const selectedHex = document.querySelector('.color-chip.on')?.dataset.hex || '#1a1a1a';
-  const mat  = new THREE.MeshStandardMaterial({ color: selectedHex, metalness: 0.05, roughness: 0.65 });
-  const mesh = new THREE.Mesh(geo, mat);
-  window._mesh = mesh;
-  sc.add(mesh);
-
-  const sz = new THREE.Box3().setFromObject(mesh).getSize(new THREE.Vector3()).length();
-  cam.position.set(0, sz * 0.4, sz * 1.6);
-  cam.lookAt(0, 0, 0);
-
-  sc.add(new THREE.AmbientLight(0xffffff, 0.7));
-  const dl = new THREE.DirectionalLight(0xffffff, 1.2); dl.position.set(3, 4, 3); sc.add(dl);
-  const dl2 = new THREE.DirectionalLight(0xffffff, 0.3); dl2.position.set(-2, -1, -2); sc.add(dl2);
-
-  let a = 0;
-  (function loop() {
-    _animId = requestAnimationFrame(loop);
-    a += 0.006;
-    mesh.rotation.y = a;
-    _renderer.render(sc, cam);
-  })();
-}
-
-// ── SLA SIZE CHECK ─────────────────────────────────────────────────────────
-function checkSlaSize(sx, sy, sz) {
-  const warn = document.getElementById('slaMaxWarn');
-  if (!warn) return;
-  if (S.tech === 'sla') {
-    if (sx > SLA_MAX.x || sy > SLA_MAX.y || sz > SLA_MAX.z) {
-      warn.style.display = 'block';
-      warn.innerHTML = '⚠️ <strong>Pièce trop grande pour la résine.</strong> La Anycubic Photon Mono X accepte max ' +
-        SLA_MAX.x + ' × ' + SLA_MAX.y + ' × ' + SLA_MAX.z + ' mm. Votre pièce fait ' +
-        sx.toFixed(0) + ' × ' + sy.toFixed(0) + ' × ' + sz.toFixed(0) + ' mm. Passez en FDM ou réduisez la pièce.';
-      S._slaBlocked = true;
-      document.getElementById('btnOrder').disabled = true;
-    } else {
-      warn.style.display = 'none';
-      S._slaBlocked = false;
-    }
-  } else {
-    warn.style.display = 'none';
-    S._slaBlocked = false;
-  }
-}
-
-// ── VOLUME ─────────────────────────────────────────────────────────────────
-function calcVol() {
-  if (!S._volFull) return;
-  if (S.tech === 'sla') {
-    // Résine : évidage automatique avec paroi de 5mm
-    // Volume coque = V_total - V_intérieur
-    // V_intérieur = (L-10)(l-10)(h-10)/1000 si chaque dim > 10mm
-    const sx = parseFloat(S.dims.x), sy = parseFloat(S.dims.y), sz = parseFloat(S.dims.z);
-    const wall = 5; // mm de paroi
-    const ix = Math.max(0, sx - 2*wall);
-    const iy = Math.max(0, sy - 2*wall);
-    const iz = Math.max(0, sz - 2*wall);
-    const volInner = (ix * iy * iz) / 1000;
-    S.vol = Math.max(0.1, S._volFull - volInner);
-    S._isHollowed = volInner > 0;
-  } else {
-    // FDM : parois fixes ~15% + intérieur selon remplissage
-    const walls = S._volFull * 0.15;
-    const inner = (S._volFull - walls) * (S.fill / 100);
-    S.vol = Math.max(0.1, walls + inner);
-  }
-  document.getElementById('dVol').textContent = S.vol.toFixed(2);
-}
-
-// ── PRICE ──────────────────────────────────────────────────────────────────
-function price() {
-  if (!S.vol) return;
-
-  const m   = TARIFS[S.tech].materiaux[S.mat];
-  const vol = S.vol;
-  const qty = S.qty;
-
-  // Masse affichée : toujours basée sur densité PLA (1.24) pour cohérence visuelle
-  // Le coût matière lui utilise la vraie densité + prix du matériau choisi
-  const massAffichee = vol * 1.24; // référence PLA pour affichage
-  let cMat;
-  if (S.tech === 'fdm') {
-    const massReelle = vol * m.densite;
-    cMat = massReelle * (m.prixKg / 1000);
-  } else {
-    cMat = vol * (m.prixLitre / 1000);
-  }
-  document.getElementById('dMass').textContent = massAffichee.toFixed(1);
-
-  const h      = Math.max(0.3, vol / 5);
-  const cElec  = h * (FX.pw / 1000) * FX.elec;
-  const cUsure = h * FX.usure;
-  const rev    = cMat + cElec + cUsure + FX.embal + FX.miseEnRoute;
-  const prixHT = rev * MARGE; // prix de vente unitaire HT
-  const totHT  = prixHT * qty;
-  const tva    = totHT * FX.tva;
-  const port   = (massAffichee * qty) > 500 ? FX.portHeavy : FX.portLight;
-  const ttc    = totHT + tva + port;
-
-  document.getElementById('priceDisplay').innerHTML = '<span style="font-size:22px;font-weight:400">' + ttc.toFixed(2) + ' €</span>';
-
-  // Breakdown simplifié : le client voit Fabrication, TVA, Port, Total
-  const fabLabel = S.tech === 'fdm'
-    ? m.label + ' · ' + S.fill + '% de remplissage'
-    : m.label + (S._isHollowed ? ' · paroi 5mm' : '');
-  document.getElementById('bk').style.display = 'block';
-  R('rFab',  'Fabrication (' + fabLabel + ')', (totHT).toFixed(2) + ' € HT');
-  R('rTVA',  'TVA 20%', tva.toFixed(2) + ' €');
-  R('rPort', 'Frais de port' + ((massAffichee * qty) > 500 ? ' · colis' : ' · relais'), port.toFixed(2) + ' €');
-  R('rTot',  'Total TTC' + (qty > 1 ? ' (×' + qty + ')' : ''), ttc.toFixed(2) + ' €');
-
-  document.getElementById('note').textContent = 'Estimation indicative — prix confirmé avant tout lancement d'impression.';
-  if (!S._slaBlocked) document.getElementById('btnOrder').disabled = false;
-}
-
-function R(id, l, v) {
-  document.getElementById(id).innerHTML = '<span>' + l + '</span><span>' + v + '</span>';
-}
-
-// ── MODAL ──────────────────────────────────────────────────────────────────
-function openModal() {
-  const m   = TARIFS[S.tech].materiaux[S.mat];
-  const ttc = document.getElementById('priceDisplay').textContent.trim();
-  document.getElementById('modalSum').innerHTML =
-    '<strong>Fichier :</strong> ' + (S.file ? S.file.name : '—') + '<br>' +
-    '<strong>Dimensions :</strong> ' + (S.dims ? S.dims.x + ' × ' + S.dims.y + ' × ' + S.dims.z + ' mm' : '—') + '<br>' +
-    '<strong>Technologie :</strong> ' + S.tech.toUpperCase() + ' · ' + m.label + '<br>' +
-    (S.tech === 'fdm' ? '<strong>Remplissage :</strong> ' + S.fill + '%<br>' : '') +
-    '<strong>Couleur :</strong> ' + S.color + '<br>' +
-    '<strong>Quantité :</strong> ' + S.qty + '<br>' +
-    '<strong>Estimation :</strong> ' + ttc + ' TTC';
-  document.getElementById('overlay').classList.add('on');
-}
-
-function closeModal() {
-  document.getElementById('overlay').classList.remove('on');
-}
-
-function goToPayment() {
-  const n = document.getElementById('cName').value.trim();
-  const e = document.getElementById('cEmail').value.trim();
-  if (!n || !e) { alert('Merci de renseigner votre nom et email.'); return; }
-
-  const m   = TARIFS[S.tech].materiaux[S.mat];
-  const ttc = parseFloat(document.getElementById('priceDisplay').textContent.replace(/[^0-9.]/g, ''));
-
-  // ⚠️ Remplacez VOTRE_ID par l'ID de votre produit Payhip "Impression sur mesure" (type pay-what-you-want)
-  // Ex : si votre produit est sur payhip.com/b/abc12, mettez 'abc12'
-  const PAYHIP_ID = 'F5CXh';
-
-  const note = encodeURIComponent(
-    'Client: ' + n + ' (' + e + ') | ' +
-    'Fichier: ' + (S.file ? S.file.name : '?') + ' | ' +
-    'Dims: ' + (S.dims ? S.dims.x + 'x' + S.dims.y + 'x' + S.dims.z + 'mm' : '?') + ' | ' +
-    S.tech.toUpperCase() + ' ' + m.label +
-    (S.tech === 'fdm' ? ' ' + S.fill + '%' : '') +
-    ' | Couleur: ' + S.color + ' | Qté: ' + S.qty + ' | ' +
-    (document.getElementById('cMsg').value ? 'Note: ' + document.getElementById('cMsg').value : '')
-  );
-
-  const url = 'https://payhip.com/b/' + PAYHIP_ID + '?suggested_price=' + ttc.toFixed(2) + '&note=' + note;
-
-  document.getElementById('modalInner').innerHTML =
-    '<div class="success">' +
-    '<div class="ck">↗</div>' +
-    '<h3>Redirection en cours…</h3>' +
-    '<p>' + m.label + (S.tech === 'fdm' ? ' · ' + S.fill + '%' : '') + ' · ' + S.color + ' · x' + S.qty + '<br>' +
-    '<strong>' + ttc.toFixed(2) + ' € TTC</strong></p>' +
-    '<a href="' + url + '" target="_blank">Aller au paiement →</a>' +
-    '</div>';
-
-  setTimeout(() => window.open(url, '_blank'), 1800);
-}
 </script>
 </body>
 </html>
