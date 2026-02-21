@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TBT3D — Dashboard Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c0c;--bg2:#141414;--bg3:#1c1c1c;
+  --border:#252525;--border2:#303030;
+  --text:#efefef;--muted:#555;--soft:#888;
+  --accent:#d4ff4f;
+  --red:#ff4d6d;--green:#3bce78;--orange:#f5a623;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+  --sidebar:220px;--r:7px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;font-size:14px;line-height:1.5}
+
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto}
+.sb-logo{padding:20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sb-badge{font-size:9px;font-family:var(--mono);background:var(--accent);color:#000;padding:2px 7px;border-radius:3px;font-weight:600}
+.sb-section{padding:18px 14px 6px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r);cursor:pointer;color:var(--soft);font-size:13px;transition:all .15s;border:none;background:none;font-family:var(--font);width:100%;text-align:left;text-decoration:none;margin-bottom:1px}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.5;transition:opacity .15s}
+.nav-item:hover,.nav-item.active{background:var(--bg3);color:var(--text)}
+.nav-item:hover svg,.nav-item.active svg{opacity:1}
+.nav-item.active{font-weight:500}
+.nb{margin-left:auto;background:var(--accent);color:#000;font-size:10px;padding:1px 6px;border-radius:50px;font-weight:700;font-family:var(--mono)}
+.sb-bot{margin-top:auto;padding:14px;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--r);background:var(--bg3)}
+.sb-avatar{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#000;flex-shrink:0}
+.sb-name{font-size:12px;font-weight:500;line-height:1.2}
+.sb-role{font-size:10px;color:var(--muted)}
+
+.main{flex:1;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--bg);flex-shrink:0}
+.topbar-title{font-size:14px;font-weight:500}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.date-badge{font-size:11px;color:var(--muted);font-family:var(--mono)}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;border:none;transition:all .15s;text-decoration:none}
+.btn svg{width:13px;height:13px}
+.btn-accent{background:var(--accent);color:#000}
+.btn-accent:hover{filter:brightness(1.1)}
+.btn-ghost{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--soft)}
+
+.page{display:none;flex:1;overflow-y:auto;flex-direction:column}
+.page.active{display:flex}
+.page-scroll{padding:24px 28px}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.scard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.scard-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:500;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.scard-ico{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.scard-ico svg{width:13px;height:13px}
+.scard-val{font-size:36px;font-weight:300;font-family:var(--mono);letter-spacing:-.02em;margin-bottom:4px}
+.scard-sub{font-size:11px;color:var(--muted)}
+
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r)}
+.card-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:12px;font-weight:500}
+.card-body{padding:16px 18px}
+
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500;padding:0 0 10px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:10px 0;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+
+.notice{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px;text-align:center}
+.notice svg{width:28px;height:28px;opacity:.25;margin-bottom:12px}
+.notice-txt{font-size:12px;color:var(--muted);line-height:1.8}
+.notice-txt strong{color:var(--soft);display:block;margin-bottom:4px}
+
+/* EDITOR */
+.art-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
+.fsec{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.fsec-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.fsec-head svg{width:13px;height:13px;color:var(--accent);flex-shrink:0}
+.fsec-title{font-size:12px;font-weight:500}
+.fsec-body{padding:16px 18px}
+
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%;padding:9px 12px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none;transition:border-color .2s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+.field textarea{resize:vertical;min-height:100px;line-height:1.6}
+.field select option{background:var(--bg3)}
+.fhint{font-size:10px;color:var(--muted);margin-top:4px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* PHOTOS */
+.photos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+.photo-slot{aspect-ratio:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);position:relative;overflow:hidden}
+.photo-slot.main-slot{outline:2px solid var(--accent);outline-offset:-2px}
+.photo-slot img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-del{position:absolute;top:4px;right:4px;width:20px;height:20px;background:rgba(0,0,0,.85);border-radius:4px;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#fff;font-weight:700}
+.photo-slot:hover .ph-del{display:flex}
+.ph-badge{position:absolute;bottom:4px;left:4px;background:var(--accent);color:#000;font-size:8px;font-weight:700;padding:1px 5px;border-radius:3px;font-family:var(--mono);pointer-events:none}
+.photo-add{aspect-ratio:1;background:var(--bg3);border:1.5px dashed var(--border2);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:5px;color:var(--muted);font-size:10px;transition:all .2s}
+.photo-add:hover{border-color:var(--accent);color:var(--accent)}
+.photo-add svg{width:16px;height:16px}
+#photoInput{display:none}
+
+/* CARAC */
+.carac-list{display:flex;flex-direction:column;gap:6px}
+.crow{display:grid;grid-template-columns:1fr 1fr 22px;gap:6px;align-items:center}
+.crow input{padding:7px 10px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;border-radius:var(--r);outline:none;transition:border-color .2s;width:100%}
+.crow input:focus{border-color:var(--accent)}
+.row-del{width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--border2);border-radius:4px;cursor:pointer;color:var(--muted);font-size:14px;transition:all .15s}
+.row-del:hover{border-color:var(--red);color:var(--red)}
+.btn-add-row{width:100%;padding:7px;background:none;border:1.5px dashed var(--border2);color:var(--muted);font-family:var(--font);font-size:11px;border-radius:var(--r);cursor:pointer;transition:all .15s;margin-top:8px}
+.btn-add-row:hover{border-color:var(--accent);color:var(--accent)}
+
+/* VARIANTES */
+.vg{border:1px solid var(--border2);border-radius:var(--r);padding:12px;margin-bottom:10px;background:rgba(255,255,255,.01)}
+.vg-head{display:flex;gap:8px;margin-bottom:10px}
+.vg-name{flex:1;padding:7px 10px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;font-weight:500;border-radius:var(--r);outline:none;transition:border-color .2s}
+.vg-name:focus{border-color:var(--accent)}
+.vg-del{padding:7px 10px;background:none;border:1px solid var(--border2);border-radius:var(--r);color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.vg-del:hover{border-color:var(--red);color:var(--red)}
+.vchips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;min-height:24px}
+.vchip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;background:var(--bg3);border:1px solid var(--border2);border-radius:50px;font-size:11px;color:var(--soft)}
+.vdot{width:9px;height:9px;border-radius:50%;border:1px solid rgba(255,255,255,.15);flex-shrink:0}
+.vrm{opacity:.3;cursor:pointer;font-size:13px;line-height:1;margin-left:1px;transition:opacity .15s}
+.vrm:hover{opacity:1;color:var(--red)}
+.vadd{display:flex;gap:6px}
+.vadd input[type=color]{width:32px;height:30px;padding:2px 3px;border:1.5px solid var(--border2);border-radius:var(--r);background:var(--bg3);cursor:pointer;flex-shrink:0}
+.vadd input[type=text]{flex:1;padding:7px 10px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;border-radius:var(--r);outline:none;transition:border-color .2s}
+.vadd input:focus{border-color:var(--accent)}
+.vadd button{padding:7px 11px;background:var(--accent);color:#000;border:none;border-radius:var(--r);font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.vadd button:hover{filter:brightness(1.1)}
+.vempty{font-size:10px;color:var(--muted);padding:2px 0}
+
+/* ART LIST */
+.art-list{display:flex;flex-direction:column;gap:7px}
+.art-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;gap:10px;align-items:center;transition:border-color .2s}
+.art-item:hover{border-color:var(--border2)}
+.art-thumb{width:38px;height:38px;border-radius:5px;object-fit:cover;border:1px solid var(--border2);flex-shrink:0}
+.art-ph{width:38px;height:38px;border-radius:5px;background:var(--bg3);border:1px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px}
+.art-info{flex:1;min-width:0}
+.art-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.art-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.art-price{font-size:12px;font-family:var(--mono);color:var(--accent);white-space:nowrap;margin-right:6px}
+.art-btns{display:flex;gap:4px}
+.ib{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--bg3);border:1px solid var(--border2);border-radius:5px;cursor:pointer;color:var(--soft);transition:all .15s}
+.ib:hover{border-color:var(--soft);color:var(--text)}
+.ib.del:hover{border-color:var(--red);color:var(--red);background:rgba(255,77,109,.08)}
+.ib svg{width:12px;height:12px}
+
+.empty-state{padding:32px 16px;text-align:center}
+.empty-state .ei{font-size:26px;opacity:.25;margin-bottom:10px}
+.empty-state .et{font-size:11px;color:var(--muted);line-height:1.7}
+
+.toast{position:fixed;bottom:20px;right:20px;z-index:9999;background:var(--bg3);border:1px solid var(--border2);padding:11px 16px;border-radius:var(--r);font-size:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:flex;align-items:center;gap:8px;transform:translateY(70px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+.toast.show{transform:none;opacity:1}
+.tdot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sb-logo">
+    <svg viewBox="0 0 130 44" fill="none">
+      <rect x="2" y="3" width="30" height="5" fill="#efefef"/>
+      <rect x="13" y="3" width="6" height="35" fill="#efefef"/>
+      <rect x="36" y="3" width="6" height="35" fill="#efefef"/>
+      <path d="M42 3h15c4.5 0 7.5 3 7.5 7.5S61.5 18 57 18H42V3z" fill="#efefef"/>
+      <path d="M42 18h16c5 0 8.5 3.2 8.5 8s-3.5 8-8.5 8H42V18z" fill="#efefef"/>
+      <text x="76" y="34" font-family="DM Mono" font-size="11" fill="#d4ff4f" font-weight="500">3D</text>
+    </svg>
+    <span class="sb-badge">ADMIN</span>
+  </div>
+
+  <div class="sb-section">Principal</div>
+  <button class="nav-item active" onclick="goPage('overview',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    Vue d'ensemble
+  </button>
+  <button class="nav-item" onclick="goPage('articles',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+    Articles
+    <span class="nb" id="artBadge">0</span>
+  </button>
+
+  <div class="sb-section">Site</div>
+  <a href="index.html" target="_blank" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    Voir le site
+  </a>
+  <a href="boutique.html" target="_blank" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+    Voir la boutique
+  </a>
+
+  <div class="sb-bot">
+    <div class="sb-user">
+      <div class="sb-avatar">T</div>
+      <div><div class="sb-name">Thibault</div><div class="sb-role">Administrateur</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+
+  <!-- ══ OVERVIEW ══ -->
+  <div class="page active" id="page-overview">
+    <div class="topbar">
+      <div class="topbar-title">Vue d'ensemble</div>
+      <div class="topbar-right"><span class="date-badge" id="dateLbl"></span></div>
+    </div>
+    <div class="page-scroll">
+
+      <div class="stats-row">
+        <div class="scard">
+          <div class="scard-lbl">Articles publiés
+            <div class="scard-ico" style="background:rgba(212,255,79,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#d4ff4f" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
+          </div>
+          <div class="scard-val" id="ovPublished">0</div>
+          <div class="scard-sub">visibles dans la boutique</div>
+        </div>
+        <div class="scard">
+          <div class="scard-lbl">Brouillons
+            <div class="scard-ico" style="background:rgba(245,166,35,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+          </div>
+          <div class="scard-val" id="ovDraft">0</div>
+          <div class="scard-sub">non publiés</div>
+        </div>
+        <div class="scard">
+          <div class="scard-lbl">Synchronisation
+            <div class="scard-ico" style="background:rgba(59,206,120,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#3bce78" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>
+          <div class="scard-val" style="font-size:14px;padding-top:10px" id="ovSync">—</div>
+          <div class="scard-sub">dernière mise à jour boutique</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-head">
+          <div class="card-title">Articles dans la boutique</div>
+          <button class="btn btn-ghost" style="font-size:10px;padding:4px 9px" onclick="goPage('articles',document.querySelectorAll('.nav-item')[1])">Gérer →</button>
+        </div>
+        <div class="card-body" style="padding:4px 18px">
+          <table>
+            <thead><tr><th>Produit</th><th>Prix</th><th>Options</th><th>Statut</th><th>Date</th></tr></thead>
+            <tbody id="ovTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+          <div class="notice-txt"><strong>Commandes</strong>Les commandes transitent par Payhip.<br>Consultez votre tableau de bord Payhip pour les voir et les gérer.</div>
+          <a href="https://payhip.com" target="_blank" class="btn btn-ghost" style="margin-top:14px;font-size:11px">Ouvrir Payhip →</a>
+        </div>
+        <div class="notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div class="notice-txt"><strong>Clients & Paiements</strong>Les données clients et les paiements sont gérés directement par Payhip.<br>Tu recevras les notifications par email.</div>
+          <a href="mailto:tbt203.contact@gmail.com" class="btn btn-ghost" style="margin-top:14px;font-size:11px">Voir ma boîte mail →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ARTICLES ══ -->
+  <div class="page" id="page-articles">
+    <div class="topbar">
+      <div class="topbar-title" id="artPageTitle">Créer un article</div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost" id="btnCancel" onclick="resetForm()" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Annuler
+        </button>
+        <button class="btn btn-accent" onclick="submitArticle()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="btnLbl">Publier dans la boutique</span>
+        </button>
+      </div>
+    </div>
+    <div class="page-scroll">
+      <div class="art-layout">
+
+        <!-- FORM -->
+        <div>
+
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              <span class="fsec-title">Informations générales</span>
+            </div>
+            <div class="fsec-body">
+              <div class="field"><label>Nom du produit *</label><input type="text" id="aName" placeholder="ex : Lampe KARMA"></div>
+              <div class="frow">
+                <div class="field"><label>Prix (€) *</label><input type="number" id="aPrice" placeholder="64.90" step="0.01" min="0"></div>
+                <div class="field"><label>Prix barré (€)</label><input type="number" id="aOldPrice" placeholder="89.90" step="0.01"></div>
+              </div>
+              <div class="frow">
+                <div class="field"><label>Badge</label><select id="aBadge"><option value="">Aucun</option><option value="Nouveau">Nouveau</option><option value="Bestseller">Bestseller</option><option value="Promo">Promo</option></select></div>
+                <div class="field"><label>Statut</label><select id="aStatus"><option value="published">Publié ✓</option><option value="draft">Brouillon</option></select></div>
+              </div>
+              <div class="field"><label>Accroche courte</label><input type="text" id="aTagline" placeholder="ex : Un design rond et harmonieux, une lumière douce"></div>
+              <div class="field"><label>Lien Payhip (bouton Acheter)</label><input type="text" id="aPayhip" placeholder="https://payhip.com/b/XXXXX"></div>
+            </div>
+          </div>
+
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+              <span class="fsec-title">Photos produit</span>
+              <span style="margin-left:auto;font-size:10px;color:var(--muted)">8 max · 1ère = principale</span>
+            </div>
+            <div class="fsec-body">
+              <div class="photos-grid" id="photosGrid"></div>
+              <input type="file" id="photoInput" accept="image/*" multiple onchange="addPhotos(this.files)">
+              <div class="fhint">Cliquez sur + pour ajouter · La 1ère photo s'affiche dans la boutique</div>
+            </div>
+          </div>
+
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="13" y1="18" x2="3" y2="18"/></svg>
+              <span class="fsec-title">Description</span>
+            </div>
+            <div class="fsec-body">
+              <div class="field"><textarea id="aDesc" rows="6" placeholder="Décrivez votre produit : style, usage, matériaux, ambiance…&#10;&#10;Ce texte apparaîtra sur la fiche produit dans la boutique."></textarea></div>
+            </div>
+          </div>
+
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              <span class="fsec-title">Caractéristiques techniques</span>
+            </div>
+            <div class="fsec-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr 22px;gap:6px;margin-bottom:8px">
+                <span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Propriété</span>
+                <span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Valeur</span>
+                <span></span>
+              </div>
+              <div class="carac-list" id="caracList"></div>
+              <button class="btn-add-row" onclick="addCarac()">+ Ajouter une ligne</button>
+            </div>
+          </div>
+
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+              <span class="fsec-title">Options & Variantes</span>
+              <span style="margin-left:auto;font-size:10px;color:var(--muted)">ex : couleur, taille, modèle…</span>
+            </div>
+            <div class="fsec-body">
+              <div id="variantsContainer"></div>
+              <button class="btn-add-row" onclick="addVariantGroup()" style="margin-top:0">+ Ajouter une option</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- LISTE -->
+        <div style="position:sticky;top:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <span style="font-size:12px;font-weight:500">Mes articles <span style="color:var(--muted)" id="artCount">(0)</span></span>
+            <button class="btn btn-ghost" style="font-size:10px;padding:4px 9px" onclick="resetForm()">+ Nouveau</button>
+          </div>
+          <div id="artList">
+            <div class="empty-state"><div class="ei">📦</div><div class="et">Aucun article.<br>Créez votre premier produit →</div></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"><div class="tdot"></div><span id="toastTxt"></span></div>
+
+<script>
+const lsGet=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const esc=(s)=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+let arts=lsGet('tbt3d_arts',[]);
+let photos=[], caracs=[], variants=[], editId=null;
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('dateLbl').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+  renderOverview(); renderArts(); updateBadge();
+  renderPhotoSlots(); renderCaracs(); renderVariants();
+});
+
+function goPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+
+// ── OVERVIEW ──────────────────────────────────────────────────────────
+function renderOverview(){
+  document.getElementById('ovPublished').textContent=arts.filter(a=>a.status==='published').length;
+  document.getElementById('ovDraft').textContent=arts.filter(a=>a.status!=='published').length;
+  const b=lsGet('tbt3d_boutique',null);
+  document.getElementById('ovSync').textContent=b?.updatedAt
+    ? new Date(b.updatedAt).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
+    : 'Jamais synchronisé';
+  const tbody=document.getElementById('ovTableBody');
+  if(!arts.length){
+    tbody.innerHTML=`<tr><td colspan="5" style="color:var(--muted);padding:20px 0;font-size:11px;text-align:center">Aucun article. Créez votre premier produit dans l'onglet Articles.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=arts.map(a=>`<tr>
+    <td style="font-weight:500">${esc(a.name)}</td>
+    <td style="font-family:var(--mono);color:var(--accent)">${parseFloat(a.price).toFixed(2)} €${a.oldPrice?` <span style="color:var(--muted);text-decoration:line-through;font-size:10px">${parseFloat(a.oldPrice).toFixed(2)} €</span>`:''}</td>
+    <td style="color:var(--muted);font-size:11px">${a.variants?.length?a.variants.length+' opt.':'—'}</td>
+    <td><span style="font-size:11px;color:${a.status==='published'?'var(--green)':'var(--orange)'}">${a.status==='published'?'● Publié':'○ Brouillon'}</span></td>
+    <td style="color:var(--muted);font-size:11px">${new Date(a.createdAt).toLocaleDateString('fr-FR')}</td>
+  </tr>`).join('');
+}
+
+// ── PHOTOS ────────────────────────────────────────────────────────────
+function renderPhotoSlots(){
+  const g=document.getElementById('photosGrid');
+  g.innerHTML='';
+  photos.forEach((src,i)=>{
+    const s=document.createElement('div');
+    s.className='photo-slot'+(i===0?' main-slot':'');
+    s.innerHTML=`<img src="${src}"><div class="ph-del" onclick="removePhoto(${i})">×</div>${i===0?'<div class="ph-badge">PRINCIPALE</div>':''}`;
+    g.appendChild(s);
+  });
+  if(photos.length<8){
+    const a=document.createElement('div');
+    a.className='photo-add';
+    a.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Ajouter</span>`;
+    a.onclick=()=>document.getElementById('photoInput').click();
+    g.appendChild(a);
+  }
+}
+function addPhotos(files){
+  const n=Math.min(files.length,8-photos.length);
+  let done=0;
+  Array.from(files).slice(0,n).forEach(f=>{
+    const r=new FileReader();
+    r.onload=e=>{photos.push(e.target.result);done++;if(done===n)renderPhotoSlots();};
+    r.readAsDataURL(f);
+  });
+  document.getElementById('photoInput').value='';
+}
+function removePhoto(i){photos.splice(i,1);renderPhotoSlots();}
+
+// ── CARACS ────────────────────────────────────────────────────────────
+function renderCaracs(){
+  document.getElementById('caracList').innerHTML=caracs.map((c,i)=>`
+    <div class="crow">
+      <input type="text" placeholder="Fabrication" value="${esc(c.key)}" oninput="caracs[${i}].key=this.value">
+      <input type="text" placeholder="PLA biosourcé" value="${esc(c.val)}" oninput="caracs[${i}].val=this.value">
+      <button class="row-del" onclick="removeCarac(${i})">×</button>
+    </div>`).join('');
+}
+function addCarac(k='',v=''){caracs.push({key:k,val:v});renderCaracs();}
+function removeCarac(i){caracs.splice(i,1);renderCaracs();}
+
+// ── VARIANTES ─────────────────────────────────────────────────────────
+function renderVariants(){
+  const ct=document.getElementById('variantsContainer');
+  ct.innerHTML='';
+  variants.forEach((vg,gi)=>{
+    const d=document.createElement('div');
+    d.className='vg';
+    d.innerHTML=`
+      <div class="vg-head">
+        <input class="vg-name" type="text" value="${esc(vg.name)}" placeholder="Nom de l'option (ex : Couleur Abat-Jour)" oninput="variants[${gi}].name=this.value">
+        <button class="vg-del" onclick="removeVG(${gi})">Supprimer</button>
+      </div>
+      <div class="vchips" id="vc${gi}"></div>
+      <div class="vadd">
+        <input type="color" id="vco${gi}" value="#888888">
+        <input type="text" id="vt${gi}" placeholder="ex : Blanc" onkeydown="if(event.key==='Enter')addOpt(${gi})">
+        <button onclick="addOpt(${gi})">+ Ajouter</button>
+      </div>`;
+    ct.appendChild(d);
+    renderChips(gi);
+  });
+}
+function renderChips(gi){
+  const el=document.getElementById('vc'+gi);
+  if(!el) return;
+  const opts=variants[gi].options;
+  el.innerHTML=opts.length
+    ?opts.map((o,oi)=>`<div class="vchip">${o.color?`<span class="vdot" style="background:${o.color}"></span>`:''}<span>${esc(o.label)}</span><span class="vrm" onclick="removeOpt(${gi},${oi})">×</span></div>`).join('')
+    :`<span class="vempty">Aucune option ajoutée…</span>`;
+}
+function addOpt(gi){
+  const t=document.getElementById('vt'+gi).value.trim();
+  if(!t) return;
+  const c=document.getElementById('vco'+gi).value;
+  variants[gi].options.push({label:t,color:c==='#888888'?'':c});
+  renderChips(gi);
+  document.getElementById('vt'+gi).value='';
+  document.getElementById('vco'+gi).value='#888888';
+}
+function removeOpt(gi,oi){variants[gi].options.splice(oi,1);renderChips(gi);}
+function addVariantGroup(){
+  variants.push({name:'',options:[]});
+  renderVariants();
+  setTimeout(()=>{const ins=document.querySelectorAll('.vg-name');ins[ins.length-1]?.focus();},50);
+}
+function removeVG(gi){variants.splice(gi,1);renderVariants();}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────
+function submitArticle(){
+  const name=document.getElementById('aName').value.trim();
+  const price=document.getElementById('aPrice').value;
+  if(!name){toast('⚠ Nom requis');return;}
+  if(!price){toast('⚠ Prix requis');return;}
+  const art={
+    id:editId||Date.now(),
+    name,price:parseFloat(price),
+    oldPrice:document.getElementById('aOldPrice').value||null,
+    badge:document.getElementById('aBadge').value,
+    status:document.getElementById('aStatus').value,
+    tagline:document.getElementById('aTagline').value.trim(),
+    payhip:document.getElementById('aPayhip').value.trim(),
+    desc:document.getElementById('aDesc').value.trim(),
+    photos:[...photos],
+    caracs:caracs.filter(c=>c.key.trim()),
+    variants:variants.filter(v=>v.name&&v.options.length),
+    createdAt:editId?(arts.find(a=>a.id===editId)?.createdAt||new Date().toISOString()):new Date().toISOString(),
+    updatedAt:new Date().toISOString(),
+  };
+  if(editId){const i=arts.findIndex(a=>a.id===editId);arts[i]=art;}
+  else arts.unshift(art);
+  editId=null;
+  lsSet('tbt3d_arts',arts);
+  lsSet('tbt3d_boutique',{articles:arts,updatedAt:new Date().toISOString()});
+  renderArts();renderOverview();updateBadge();
+  resetForm();
+  toast('"'+name+'" '+(art.status==='published'?'publié dans la boutique ✓':'enregistré en brouillon ✓'));
+}
+
+function editArt(i){
+  const a=arts[i];editId=a.id;
+  document.getElementById('aName').value=a.name;
+  document.getElementById('aPrice').value=a.price;
+  document.getElementById('aOldPrice').value=a.oldPrice||'';
+  document.getElementById('aBadge').value=a.badge||'';
+  document.getElementById('aStatus').value=a.status;
+  document.getElementById('aTagline').value=a.tagline||'';
+  document.getElementById('aPayhip').value=a.payhip||'';
+  document.getElementById('aDesc').value=a.desc||'';
+  photos=[...(a.photos||[])];
+  caracs=(a.caracs||[]).map(c=>({...c}));
+  variants=(a.variants||[]).map(v=>({...v,options:[...v.options]}));
+  renderPhotoSlots();renderCaracs();renderVariants();
+  document.getElementById('artPageTitle').textContent='Modifier — '+a.name;
+  document.getElementById('btnLbl').textContent='Enregistrer les modifications';
+  document.getElementById('btnCancel').style.display='';
+  document.getElementById('page-articles').querySelector('.page-scroll').scrollTo({top:0,behavior:'smooth'});
+}
+function delArt(i){
+  if(!confirm('Supprimer "'+arts[i].name+'" ?')) return;
+  arts.splice(i,1);
+  lsSet('tbt3d_arts',arts);
+  lsSet('tbt3d_boutique',{articles:arts,updatedAt:new Date().toISOString()});
+  renderArts();renderOverview();updateBadge();
+  toast('Article supprimé');
+}
+function renderArts(){
+  document.getElementById('artCount').textContent='('+arts.length+')';
+  const list=document.getElementById('artList');
+  if(!arts.length){
+    list.innerHTML='<div class="empty-state"><div class="ei">📦</div><div class="et">Aucun article.<br>Créez votre premier produit →</div></div>';
+    return;
+  }
+  list.innerHTML='<div class="art-list">'+arts.map((a,i)=>`
+    <div class="art-item">
+      ${a.photos?.[0]?`<img class="art-thumb" src="${a.photos[0]}">`:`<div class="art-ph">🏮</div>`}
+      <div class="art-info">
+        <div class="art-name">${esc(a.name)}</div>
+        <div class="art-sub">${a.variants?.length?a.variants.length+' opt · ':''}<span style="color:${a.status==='published'?'var(--green)':'var(--orange)'}">${a.status==='published'?'Publié':'Brouillon'}</span></div>
+      </div>
+      <div class="art-price">${parseFloat(a.price).toFixed(2)} €</div>
+      <div class="art-btns">
+        <div class="ib" onclick="editArt(${i})" title="Modifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="ib del" onclick="delArt(${i})" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg></div>
+      </div>
+    </div>`).join('')+'</div>';
+}
+function updateBadge(){document.getElementById('artBadge').textContent=arts.length;}
+function resetForm(){
+  editId=null;
+  ['aName','aPrice','aOldPrice','aTagline','aPayhip','aDesc'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('aStatus').value='published';
+  document.getElementById('aBadge').value='';
+  photos=[];caracs=[];variants=[];
+  renderPhotoSlots();renderCaracs();renderVariants();
+  document.getElementById('artPageTitle').textContent='Créer un article';
+  document.getElementById('btnLbl').textContent='Publier dans la boutique';
+  document.getElementById('btnCancel').style.display='none';
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastTxt').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+</script>
+</body>
+</html>
