@@ -12,13 +12,14 @@
   --border:#252525;--border2:#303030;
   --text:#efefef;--muted:#555;--soft:#888;
   --accent:#d4ff4f;
-  --red:#ff4d6d;--green:#3bce78;--orange:#f5a623;
+  --red:#ff4d6d;--green:#3bce78;--orange:#f5a623;--blue:#4da6ff;
   --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
   --sidebar:220px;--r:7px;
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex;font-size:14px;line-height:1.5}
 
+/* ── SIDEBAR ── */
 .sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto}
 .sb-logo{padding:20px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .sb-badge{font-size:9px;font-family:var(--mono);background:var(--accent);color:#000;padding:2px 7px;border-radius:3px;font-weight:600}
@@ -35,6 +36,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 .sb-name{font-size:12px;font-weight:500;line-height:1.2}
 .sb-role{font-size:10px;color:var(--muted)}
 
+/* ── MAIN ── */
 .main{flex:1;height:100vh;overflow:hidden;display:flex;flex-direction:column}
 .topbar{height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--bg);flex-shrink:0}
 .topbar-title{font-size:14px;font-weight:500}
@@ -48,11 +50,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 .btn-ghost{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
 .btn-ghost:hover{border-color:var(--soft)}
 
+/* ── PAGES ── */
 .page{display:none;flex:1;overflow-y:auto;flex-direction:column}
 .page.active{display:flex}
 .page-scroll{padding:24px 28px}
 
-/* STATS */
+/* ── STATS ── */
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
 .scard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px}
 .scard-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:500;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
@@ -76,14 +79,13 @@ tr:last-child td{border-bottom:none}
 .notice-txt{font-size:12px;color:var(--muted);line-height:1.8}
 .notice-txt strong{color:var(--soft);display:block;margin-bottom:4px}
 
-/* EDITOR */
+/* ── ARTICLE EDITOR ── */
 .art-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
 .fsec{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
 .fsec-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 .fsec-head svg{width:13px;height:13px;color:var(--accent);flex-shrink:0}
 .fsec-title{font-size:12px;font-weight:500}
 .fsec-body{padding:16px 18px}
-
 .field{margin-bottom:12px}
 .field:last-child{margin-bottom:0}
 .field label{display:block;font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
@@ -94,7 +96,6 @@ tr:last-child td{border-bottom:none}
 .fhint{font-size:10px;color:var(--muted);margin-top:4px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
-/* PHOTOS */
 .photos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
 .photo-slot{aspect-ratio:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);position:relative;overflow:hidden}
 .photo-slot.main-slot{outline:2px solid var(--accent);outline-offset:-2px}
@@ -107,7 +108,6 @@ tr:last-child td{border-bottom:none}
 .photo-add svg{width:16px;height:16px}
 #photoInput{display:none}
 
-/* CARAC */
 .carac-list{display:flex;flex-direction:column;gap:6px}
 .crow{display:grid;grid-template-columns:1fr 1fr 22px;gap:6px;align-items:center}
 .crow input{padding:7px 10px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;border-radius:var(--r);outline:none;transition:border-color .2s;width:100%}
@@ -117,7 +117,6 @@ tr:last-child td{border-bottom:none}
 .btn-add-row{width:100%;padding:7px;background:none;border:1.5px dashed var(--border2);color:var(--muted);font-family:var(--font);font-size:11px;border-radius:var(--r);cursor:pointer;transition:all .15s;margin-top:8px}
 .btn-add-row:hover{border-color:var(--accent);color:var(--accent)}
 
-/* VARIANTES */
 .vg{border:1px solid var(--border2);border-radius:var(--r);padding:12px;margin-bottom:10px;background:rgba(255,255,255,.01)}
 .vg-head{display:flex;gap:8px;margin-bottom:10px}
 .vg-name{flex:1;padding:7px 10px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;font-weight:500;border-radius:var(--r);outline:none;transition:border-color .2s}
@@ -137,7 +136,6 @@ tr:last-child td{border-bottom:none}
 .vadd button:hover{filter:brightness(1.1)}
 .vempty{font-size:10px;color:var(--muted);padding:2px 0}
 
-/* ART LIST */
 .art-list{display:flex;flex-direction:column;gap:7px}
 .art-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;gap:10px;align-items:center;transition:border-color .2s}
 .art-item:hover{border-color:var(--border2)}
@@ -152,11 +150,69 @@ tr:last-child td{border-bottom:none}
 .ib:hover{border-color:var(--soft);color:var(--text)}
 .ib.del:hover{border-color:var(--red);color:var(--red);background:rgba(255,77,109,.08)}
 .ib svg{width:12px;height:12px}
-
 .empty-state{padding:32px 16px;text-align:center}
 .empty-state .ei{font-size:26px;opacity:.25;margin-bottom:10px}
 .empty-state .et{font-size:11px;color:var(--muted);line-height:1.7}
 
+/* ══════════════════════════════════════════
+   PAGE D'ACCUEIL — SECTION PRODUITS VEDETTES
+══════════════════════════════════════════ */
+.hp-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+
+/* Cartes drag & drop */
+.slots-container{display:flex;flex-direction:column;gap:10px}
+.slot-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s,opacity .2s;cursor:grab;user-select:none}
+.slot-card:active{cursor:grabbing}
+.slot-card.drag-over{border-color:var(--accent);background:rgba(212,255,79,.04)}
+.slot-card.dragging{opacity:.4;border-color:var(--accent)}
+.slot-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border)}
+.slot-num{width:22px;height:22px;border-radius:5px;background:var(--accent);color:#000;font-size:10px;font-weight:700;font-family:var(--mono);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.slot-drag{color:var(--muted);opacity:.4;margin-left:auto;flex-shrink:0}
+.slot-drag svg{width:14px;height:14px}
+.slot-body{padding:14px}
+.slot-body .field{margin-bottom:10px}
+.slot-body .field:last-child{margin-bottom:0}
+.slot-product-preview{display:flex;gap:10px;align-items:center;padding:8px 10px;background:var(--bg3);border-radius:var(--r);margin-bottom:10px;border:1px solid var(--border2)}
+.slot-thumb{width:42px;height:42px;border-radius:5px;object-fit:cover;flex-shrink:0;background:var(--bg);border:1px solid var(--border2)}
+.slot-thumb-ph{width:42px;height:42px;border-radius:5px;background:var(--bg);border:1px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px}
+.slot-pname{font-size:12px;font-weight:500}
+.slot-pprice{font-size:11px;color:var(--accent);font-family:var(--mono);margin-top:2px}
+
+/* Badge chips */
+.badge-chips{display:flex;gap:6px;flex-wrap:wrap}
+.badge-chip{padding:4px 10px;border:1.5px solid var(--border2);border-radius:50px;font-size:10px;font-weight:500;cursor:pointer;transition:all .15s;background:none;font-family:var(--font);color:var(--soft)}
+.badge-chip:hover{border-color:var(--soft);color:var(--text)}
+.badge-chip.selected{background:var(--accent);border-color:var(--accent);color:#000}
+
+/* Aperçu boutique */
+.hp-preview{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;position:sticky;top:0}
+.hp-preview-head{padding:12px 14px;border-bottom:1px solid var(--border);font-size:11px;font-weight:500;display:flex;align-items:center;gap:8px}
+.hp-preview-head svg{width:12px;height:12px;color:var(--accent)}
+.preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:12px}
+.prev-card{border-radius:5px;overflow:hidden;background:var(--bg3);border:1px solid var(--border)}
+.prev-img{aspect-ratio:3/4;position:relative;overflow:hidden}
+.prev-img img{width:100%;height:100%;object-fit:cover}
+.prev-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--bg)}
+.prev-badge{position:absolute;top:5px;left:5px;font-size:8px;font-weight:700;padding:2px 6px;border-radius:50px;font-family:var(--mono);text-transform:uppercase}
+.prev-badge.black{background:#efefef;color:#000}
+.prev-badge.white{background:#fff;color:#111}
+.prev-info{padding:6px 7px}
+.prev-name{font-size:10px;font-weight:600}
+.prev-sub{font-size:9px;color:var(--muted);margin:1px 0}
+.prev-price{font-size:10px;font-family:var(--mono)}
+.prev-from{font-size:8px;color:var(--muted)}
+.prev-old{font-size:8px;color:var(--muted);text-decoration:line-through;margin-right:3px}
+
+/* Custom product config */
+.custom-slot{border:1px solid var(--border2);border-radius:var(--r);padding:12px;margin-bottom:8px;background:rgba(255,255,255,.01)}
+.custom-slot-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500;margin-bottom:10px}
+
+/* Save banner */
+.save-banner{position:sticky;bottom:0;background:rgba(12,12,12,.95);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+.save-info{font-size:11px;color:var(--muted)}
+.save-info span{color:var(--orange);}
+
+/* ── TOAST ── */
 .toast{position:fixed;bottom:20px;right:20px;z-index:9999;background:var(--bg3);border:1px solid var(--border2);padding:11px 16px;border-radius:var(--r);font-size:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:flex;align-items:center;gap:8px;transform:translateY(70px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
 .toast.show{transform:none;opacity:1}
 .tdot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
@@ -171,8 +227,7 @@ tr:last-child td{border-bottom:none}
 <aside class="sidebar">
   <div class="sb-logo">
     <svg viewBox="0 0 130 44" fill="none">
-      <rect x="2" y="3" width="30" height="5" fill="#efefef"/>
-      <rect x="13" y="3" width="6" height="35" fill="#efefef"/>
+      <rect x="2" y="3" width="30" height="5" fill="#efefef"/><rect x="13" y="3" width="6" height="35" fill="#efefef"/>
       <rect x="36" y="3" width="6" height="35" fill="#efefef"/>
       <path d="M42 3h15c4.5 0 7.5 3 7.5 7.5S61.5 18 57 18H42V3z" fill="#efefef"/>
       <path d="M42 18h16c5 0 8.5 3.2 8.5 8s-3.5 8-8.5 8H42V18z" fill="#efefef"/>
@@ -185,6 +240,11 @@ tr:last-child td{border-bottom:none}
   <button class="nav-item active" onclick="goPage('overview',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
     Vue d'ensemble
+  </button>
+  <button class="nav-item" onclick="goPage('homepage',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    Page d'accueil
+    <span class="nb" id="hpBadge" style="background:var(--blue);color:#fff">●</span>
   </button>
   <button class="nav-item" onclick="goPage('articles',this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
@@ -219,7 +279,6 @@ tr:last-child td{border-bottom:none}
       <div class="topbar-right"><span class="date-badge" id="dateLbl"></span></div>
     </div>
     <div class="page-scroll">
-
       <div class="stats-row">
         <div class="scard">
           <div class="scard-lbl">Articles publiés
@@ -247,7 +306,7 @@ tr:last-child td{border-bottom:none}
       <div class="card" style="margin-bottom:16px">
         <div class="card-head">
           <div class="card-title">Articles dans la boutique</div>
-          <button class="btn btn-ghost" style="font-size:10px;padding:4px 9px" onclick="goPage('articles',document.querySelectorAll('.nav-item')[1])">Gérer →</button>
+          <button class="btn btn-ghost" style="font-size:10px;padding:4px 9px" onclick="goPage('articles',document.querySelectorAll('.nav-item')[2])">Gérer →</button>
         </div>
         <div class="card-body" style="padding:4px 18px">
           <table>
@@ -272,6 +331,66 @@ tr:last-child td{border-bottom:none}
     </div>
   </div>
 
+  <!-- ══ PAGE D'ACCUEIL ══ -->
+  <div class="page" id="page-homepage">
+    <div class="topbar">
+      <div class="topbar-title">Page d'accueil — Produits vedettes</div>
+      <div class="topbar-right">
+        <span style="font-size:11px;color:var(--muted)">4 emplacements · ordre par glisser-déposer</span>
+      </div>
+    </div>
+    <div class="page-scroll" style="flex:1">
+      <div style="background:rgba(77,166,255,.08);border:1px solid rgba(77,166,255,.2);border-radius:var(--r);padding:10px 14px;margin-bottom:20px;font-size:11px;color:rgba(77,166,255,.9);display:flex;align-items:center;gap:8px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Configurez les 4 produits à afficher sur la page d'accueil. Glissez-déposez les cartes pour changer leur ordre. Cliquez sur <strong style="color:#fff">Enregistrer</strong> pour appliquer les changements sur le site.
+      </div>
+
+      <div class="hp-layout">
+
+        <!-- SLOTS DRAG & DROP -->
+        <div>
+          <div class="slots-container" id="slotsContainer"></div>
+          <div style="margin-top:8px;font-size:10px;color:var(--muted)">☝ Glissez les cartes pour changer l'ordre d'affichage</div>
+        </div>
+
+        <!-- APERÇU + ACTIONS -->
+        <div>
+          <div class="hp-preview">
+            <div class="hp-preview-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+              Aperçu boutique (miniature)
+            </div>
+            <div class="preview-grid" id="previewGrid"></div>
+          </div>
+
+          <div style="margin-top:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px">
+            <div style="font-size:11px;font-weight:500;margin-bottom:12px;color:var(--soft)">Actions rapides</div>
+            <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-bottom:6px" onclick="resetToDefaults()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+              Réinitialiser par défaut
+            </button>
+            <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="goPage('articles',document.querySelectorAll('.nav-item')[2])">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Créer un nouvel article
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVE BANNER -->
+    <div class="save-banner">
+      <div class="save-info">Modifications <span id="hpDirty">non enregistrées</span></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="loadHomepageConfig()">Annuler</button>
+        <button class="btn btn-accent" onclick="saveHomepageConfig()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Enregistrer sur le site
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ══ ARTICLES ══ -->
   <div class="page" id="page-articles">
     <div class="topbar">
@@ -289,10 +408,7 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="page-scroll">
       <div class="art-layout">
-
-        <!-- FORM -->
         <div>
-
           <div class="fsec">
             <div class="fsec-head">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -332,7 +448,7 @@ tr:last-child td{border-bottom:none}
               <span class="fsec-title">Description</span>
             </div>
             <div class="fsec-body">
-              <div class="field"><textarea id="aDesc" rows="6" placeholder="Décrivez votre produit : style, usage, matériaux, ambiance…&#10;&#10;Ce texte apparaîtra sur la fiche produit dans la boutique."></textarea></div>
+              <div class="field"><textarea id="aDesc" rows="6" placeholder="Décrivez votre produit…"></textarea></div>
             </div>
           </div>
 
@@ -356,17 +472,14 @@ tr:last-child td{border-bottom:none}
             <div class="fsec-head">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
               <span class="fsec-title">Options & Variantes</span>
-              <span style="margin-left:auto;font-size:10px;color:var(--muted)">ex : couleur, taille, modèle…</span>
             </div>
             <div class="fsec-body">
               <div id="variantsContainer"></div>
               <button class="btn-add-row" onclick="addVariantGroup()" style="margin-top:0">+ Ajouter une option</button>
             </div>
           </div>
-
         </div>
 
-        <!-- LISTE -->
         <div style="position:sticky;top:0">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
             <span style="font-size:12px;font-weight:500">Mes articles <span style="color:var(--muted)" id="artCount">(0)</span></span>
@@ -376,7 +489,6 @@ tr:last-child td{border-bottom:none}
             <div class="empty-state"><div class="ei">📦</div><div class="et">Aucun article.<br>Créez votre premier produit →</div></div>
           </div>
         </div>
-
       </div>
     </div>
   </div>
@@ -390,36 +502,302 @@ const lsGet=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{retu
 const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
 const esc=(s)=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-let arts=lsGet('tbt3d_arts',[]);
+let arts = lsGet('tbt3d_arts', []);
 let photos=[], caracs=[], variants=[], editId=null;
 
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('dateLbl').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+// Homepage config — 4 slots
+// Each slot: { type: 'article'|'custom', articleId, customLabel, customSub, customPrice, customBadge, customBadgeStyle, customLink, overrideBadge, overrideBadgeStyle, overridePrice, overrideFrom, hidePrice }
+let hpSlots = [];
+let hpDirty = false;
+
+const DEFAULT_SLOTS = [
+  {type:'article', articleId:null, overrideBadge:'Bestseller', overrideBadgeStyle:'black', overridePrice:'', overrideFrom:true},
+  {type:'article', articleId:null, overrideBadge:'', overrideBadgeStyle:'black', overridePrice:'', overrideFrom:true},
+  {type:'article', articleId:null, overrideBadge:'', overrideBadgeStyle:'black', overridePrice:'', overrideFrom:true},
+  {type:'custom', customLabel:'Impression sur mesure', customSub:'Votre fichier STL · FDM ou résine', customPrice:'Prix calculé en ligne', customBadge:'Sur mesure', customBadgeStyle:'white', customLink:'/devis.html', customDark:true},
+];
+
+const BADGES = ['', 'Bestseller', 'Nouveau', 'Promo', 'Top vente', 'Exclusif', 'Sur mesure'];
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('dateLbl').textContent = new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+  loadHomepageConfig();
   renderOverview(); renderArts(); updateBadge();
   renderPhotoSlots(); renderCaracs(); renderVariants();
 });
 
-function goPage(id,btn){
+function goPage(id, btn) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if(btn) btn.classList.add('active');
+  if(id==='homepage') renderSlotsUI();
 }
 
-// ── OVERVIEW ──────────────────────────────────────────────────────────
-function renderOverview(){
-  document.getElementById('ovPublished').textContent=arts.filter(a=>a.status==='published').length;
-  document.getElementById('ovDraft').textContent=arts.filter(a=>a.status!=='published').length;
-  const b=lsGet('tbt3d_boutique',null);
-  document.getElementById('ovSync').textContent=b?.updatedAt
+// ═══════════════════════════════════════════════════════
+// PAGE D'ACCUEIL
+// ═══════════════════════════════════════════════════════
+
+function loadHomepageConfig() {
+  const saved = lsGet('tbt3d_homepage', null);
+  if(saved && saved.slots) {
+    hpSlots = saved.slots;
+  } else {
+    // Initialize with defaults
+    hpSlots = DEFAULT_SLOTS.map((d,i) => ({...d}));
+    // Try to assign published articles to first 3 slots
+    const pub = arts.filter(a=>a.status==='published');
+    for(let i=0;i<3&&i<pub.length;i++) hpSlots[i].articleId = pub[i].id;
+  }
+  hpDirty = false;
+  document.getElementById('hpDirty').textContent = 'enregistrées ✓';
+  document.getElementById('hpDirty').style.color = 'var(--green)';
+  renderSlotsUI();
+}
+
+function saveHomepageConfig() {
+  lsSet('tbt3d_homepage', {slots: hpSlots, updatedAt: new Date().toISOString()});
+  lsSet('tbt3d_boutique', {articles: arts, updatedAt: new Date().toISOString()});
+  hpDirty = false;
+  document.getElementById('hpDirty').textContent = 'enregistrées ✓';
+  document.getElementById('hpDirty').style.color = 'var(--green)';
+  toast('Page d\'accueil mise à jour ✓');
+  document.getElementById('hpBadge').style.background='var(--green)';
+}
+
+function markDirty() {
+  hpDirty = true;
+  document.getElementById('hpDirty').textContent = 'non enregistrées';
+  document.getElementById('hpDirty').style.color = 'var(--orange)';
+  renderPreview();
+}
+
+function resetToDefaults() {
+  if(!confirm('Réinitialiser la page d\'accueil avec les valeurs par défaut ?')) return;
+  hpSlots = DEFAULT_SLOTS.map(d=>({...d}));
+  const pub = arts.filter(a=>a.status==='published');
+  for(let i=0;i<3&&i<pub.length;i++) hpSlots[i].articleId = pub[i].id;
+  markDirty();
+  renderSlotsUI();
+}
+
+function renderSlotsUI() {
+  const ct = document.getElementById('slotsContainer');
+  ct.innerHTML = '';
+  hpSlots.forEach((slot, i) => renderSlotCard(ct, slot, i));
+  renderPreview();
+  initDragDrop();
+}
+
+function renderSlotCard(ct, slot, i) {
+  const art = slot.type === 'article' ? arts.find(a=>a.id===slot.articleId) : null;
+  const div = document.createElement('div');
+  div.className = 'slot-card';
+  div.dataset.idx = i;
+  div.draggable = true;
+
+  const pubArts = arts.filter(a=>a.status==='published');
+  const artOptions = pubArts.map(a=>`<option value="${a.id}" ${slot.articleId===a.id?'selected':''}>${esc(a.name)} — ${parseFloat(a.price).toFixed(2)} €</option>`).join('');
+
+  // Badge chip row
+  const badgeVal = slot.type==='custom' ? (slot.customBadge||'') : (slot.overrideBadge||'');
+  const badgeChips = BADGES.map(b=>`<button class="badge-chip ${badgeVal===b?'selected':''}" onclick="setBadge(${i},'${b}')">${b||'Aucun'}</button>`).join('');
+
+  let bodyHtml = '';
+
+  if(slot.type === 'article') {
+    const priceDisplay = slot.overridePrice || (art ? parseFloat(art.price).toFixed(2)+' €' : '');
+    bodyHtml = `
+      <div class="field">
+        <label>Produit affiché</label>
+        <select onchange="setSlotArt(${i},this.value)">
+          <option value="">— Choisir un article publié —</option>
+          ${artOptions}
+          <option value="__custom__">✦ Carte personnalisée (sur mesure…)</option>
+        </select>
+        ${pubArts.length===0?'<div class="fhint" style="color:var(--orange)">⚠ Aucun article publié. Créez des articles d\'abord.</div>':''}
+      </div>
+      ${art ? `<div class="slot-product-preview">
+        ${art.photos?.[0]?`<img class="slot-thumb" src="${art.photos[0]}">`:`<div class="slot-thumb-ph">🏮</div>`}
+        <div><div class="slot-pname">${esc(art.name)}</div><div class="slot-pprice">${parseFloat(art.price).toFixed(2)} €</div></div>
+      </div>` : ''}
+      <div class="field">
+        <label>Badge (remplace celui de l'article)</label>
+        <div class="badge-chips">${badgeChips}</div>
+      </div>
+      <div class="frow">
+        <div class="field">
+          <label>Prix affiché (override)</label>
+          <input type="text" value="${esc(slot.overridePrice||'')}" placeholder="ex : À partir de 69 €" oninput="setSlotField(${i},'overridePrice',this.value)">
+          <div class="fhint">Vide = prix de l'article</div>
+        </div>
+        <div class="field" style="display:flex;flex-direction:column;justify-content:flex-end">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12px;margin-bottom:0">
+            <input type="checkbox" ${slot.overrideFrom?'checked':''} onchange="setSlotField(${i},'overrideFrom',this.checked)" style="width:auto;accent-color:var(--accent)">
+            Afficher "À partir de"
+          </label>
+        </div>
+      </div>`;
+  } else {
+    // Custom card
+    bodyHtml = `
+      <div class="field">
+        <label>Type</label>
+        <select onchange="setSlotType(${i},this.value)">
+          <option value="custom" selected>✦ Carte personnalisée</option>
+          ${pubArts.length>0?`<option value="article">← Passer en article</option>`:''}
+        </select>
+      </div>
+      <div class="field">
+        <label>Titre de la carte</label>
+        <input type="text" value="${esc(slot.customLabel||'')}" placeholder="Impression sur mesure" oninput="setSlotField(${i},'customLabel',this.value)">
+      </div>
+      <div class="field">
+        <label>Sous-titre</label>
+        <input type="text" value="${esc(slot.customSub||'')}" placeholder="Votre fichier STL · FDM ou résine" oninput="setSlotField(${i},'customSub',this.value)">
+      </div>
+      <div class="field">
+        <label>Prix / texte prix</label>
+        <input type="text" value="${esc(slot.customPrice||'')}" placeholder="Prix calculé en ligne" oninput="setSlotField(${i},'customPrice',this.value)">
+      </div>
+      <div class="field">
+        <label>Lien (bouton)</label>
+        <input type="text" value="${esc(slot.customLink||'')}" placeholder="/devis.html" oninput="setSlotField(${i},'customLink',this.value)">
+      </div>
+      <div class="frow">
+        <div class="field">
+          <label>Badge</label>
+          <div class="badge-chips">${badgeChips}</div>
+        </div>
+        <div class="field" style="display:flex;flex-direction:column;justify-content:flex-end">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12px;margin-bottom:0">
+            <input type="checkbox" ${slot.customDark?'checked':''} onchange="setSlotField(${i},'customDark',this.checked)" style="width:auto;accent-color:var(--accent)">
+            Fond sombre
+          </label>
+        </div>
+      </div>`;
+  }
+
+  div.innerHTML = `
+    <div class="slot-header">
+      <div class="slot-num">${i+1}</div>
+      <span style="font-size:12px;font-weight:500;flex:1">${slot.type==='custom'?'Carte personnalisée':(art?esc(art.name):'— Choisir un article —')}</span>
+      <div class="slot-drag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="19" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="19" r="1" fill="currentColor" stroke="none"/></svg></div>
+    </div>
+    <div class="slot-body">${bodyHtml}</div>`;
+
+  ct.appendChild(div);
+}
+
+function setSlotArt(i, val) {
+  if(val === '__custom__') {
+    hpSlots[i] = {type:'custom', customLabel:'', customSub:'', customPrice:'', customBadge:'', customBadgeStyle:'black', customLink:'', customDark:false};
+  } else {
+    hpSlots[i].articleId = val ? parseInt(val) : null;
+  }
+  markDirty();
+  renderSlotsUI();
+}
+
+function setSlotType(i, val) {
+  if(val==='article') {
+    hpSlots[i] = {type:'article', articleId:null, overrideBadge:'', overrideBadgeStyle:'black', overridePrice:'', overrideFrom:true};
+  }
+  markDirty();
+  renderSlotsUI();
+}
+
+function setSlotField(i, field, val) {
+  hpSlots[i][field] = val;
+  markDirty();
+  renderPreview();
+}
+
+function setBadge(i, badge) {
+  const slot = hpSlots[i];
+  if(slot.type==='custom') slot.customBadge = badge;
+  else slot.overrideBadge = badge;
+  markDirty();
+  renderSlotsUI();
+}
+
+// ── DRAG & DROP ──
+let dragIdx = null;
+function initDragDrop() {
+  document.querySelectorAll('.slot-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+      dragIdx = parseInt(card.dataset.idx);
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      document.querySelectorAll('.slot-card').forEach(c=>c.classList.remove('drag-over'));
+    });
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      document.querySelectorAll('.slot-card').forEach(c=>c.classList.remove('drag-over'));
+      card.classList.add('drag-over');
+    });
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      const targetIdx = parseInt(card.dataset.idx);
+      if(dragIdx !== null && dragIdx !== targetIdx) {
+        const moved = hpSlots.splice(dragIdx, 1)[0];
+        hpSlots.splice(targetIdx, 0, moved);
+        markDirty();
+        renderSlotsUI();
+      }
+      dragIdx = null;
+    });
+  });
+}
+
+// ── PREVIEW ──
+function renderPreview() {
+  const grid = document.getElementById('previewGrid');
+  grid.innerHTML = hpSlots.map((slot,i) => {
+    const art = slot.type==='article' ? arts.find(a=>a.id===slot.articleId) : null;
+    const badge = slot.type==='custom' ? slot.customBadge : slot.overrideBadge;
+    const badgeStyle = slot.type==='custom' ? (slot.customBadgeStyle||'white') : (slot.overrideBadgeStyle||'black');
+    const name = slot.type==='custom' ? (slot.customLabel||'Carte personnalisée') : (art?.name||'—');
+    const sub = slot.type==='custom' ? (slot.customSub||'') : (art?.tagline||art?.name||'');
+    const price = slot.type==='custom' ? slot.customPrice : (slot.overridePrice || (art?parseFloat(art.price).toFixed(2)+' €':'—'));
+    const from = slot.type==='article' && slot.overrideFrom && !slot.overridePrice;
+    const dark = slot.type==='custom' && slot.customDark;
+    const img = art?.photos?.[0];
+    const oldPrice = slot.type==='article' && !slot.overridePrice && art?.oldPrice ? parseFloat(art.oldPrice).toFixed(2)+' €' : '';
+
+    return `<div class="prev-card" style="${dark?'background:#111;border-color:#333':''}">
+      <div class="prev-img" style="${dark?'background:#0a0a0a':''}">
+        ${img?`<img src="${img}">`:`<div class="prev-img-ph" style="${dark?'background:#111;color:rgba(255,255,255,.2)':''}">${dark?'⬡':'🏮'}</div>`}
+        ${badge?`<div class="prev-badge ${badgeStyle}" style="${badgeStyle==='white'?'background:#fff;color:#111':'background:#111;color:#fff'}">${esc(badge)}</div>`:''}
+      </div>
+      <div class="prev-info" style="${dark?'background:#111':''}">
+        <div class="prev-name" style="${dark?'color:#efefef':''}">${esc(name)}</div>
+        <div class="prev-sub">${esc(sub.substring(0,28)+(sub.length>28?'…':''))}</div>
+        <div class="prev-price" style="${dark?'color:#efefef':''}">${oldPrice?`<span class="prev-old">${oldPrice}</span>`:''}${from?`<span class="prev-from">À partir de </span>`:''}${esc(price)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// OVERVIEW
+// ═══════════════════════════════════════════════════════
+function renderOverview() {
+  document.getElementById('ovPublished').textContent = arts.filter(a=>a.status==='published').length;
+  document.getElementById('ovDraft').textContent = arts.filter(a=>a.status!=='published').length;
+  const b = lsGet('tbt3d_boutique', null);
+  document.getElementById('ovSync').textContent = b?.updatedAt
     ? new Date(b.updatedAt).toLocaleString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
     : 'Jamais synchronisé';
-  const tbody=document.getElementById('ovTableBody');
+  const tbody = document.getElementById('ovTableBody');
   if(!arts.length){
     tbody.innerHTML=`<tr><td colspan="5" style="color:var(--muted);padding:20px 0;font-size:11px;text-align:center">Aucun article. Créez votre premier produit dans l'onglet Articles.</td></tr>`;
     return;
   }
-  tbody.innerHTML=arts.map(a=>`<tr>
+  tbody.innerHTML = arts.map(a=>`<tr>
     <td style="font-weight:500">${esc(a.name)}</td>
     <td style="font-family:var(--mono);color:var(--accent)">${parseFloat(a.price).toFixed(2)} €${a.oldPrice?` <span style="color:var(--muted);text-decoration:line-through;font-size:10px">${parseFloat(a.oldPrice).toFixed(2)} €</span>`:''}</td>
     <td style="color:var(--muted);font-size:11px">${a.variants?.length?a.variants.length+' opt.':'—'}</td>
@@ -428,58 +806,64 @@ function renderOverview(){
   </tr>`).join('');
 }
 
-// ── PHOTOS ────────────────────────────────────────────────────────────
-function renderPhotoSlots(){
-  const g=document.getElementById('photosGrid');
-  g.innerHTML='';
-  photos.forEach((src,i)=>{
-    const s=document.createElement('div');
-    s.className='photo-slot'+(i===0?' main-slot':'');
-    s.innerHTML=`<img src="${src}"><div class="ph-del" onclick="removePhoto(${i})">×</div>${i===0?'<div class="ph-badge">PRINCIPALE</div>':''}`;
+// ═══════════════════════════════════════════════════════
+// PHOTOS (articles)
+// ═══════════════════════════════════════════════════════
+function renderPhotoSlots() {
+  const g = document.getElementById('photosGrid');
+  g.innerHTML = '';
+  photos.forEach((src,i) => {
+    const s = document.createElement('div');
+    s.className = 'photo-slot'+(i===0?' main-slot':'');
+    s.innerHTML = `<img src="${src}"><div class="ph-del" onclick="removePhoto(${i})">×</div>${i===0?'<div class="ph-badge">PRINCIPALE</div>':''}`;
     g.appendChild(s);
   });
-  if(photos.length<8){
-    const a=document.createElement('div');
-    a.className='photo-add';
-    a.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Ajouter</span>`;
-    a.onclick=()=>document.getElementById('photoInput').click();
+  if(photos.length<8) {
+    const a = document.createElement('div');
+    a.className = 'photo-add';
+    a.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Ajouter</span>`;
+    a.onclick = ()=>document.getElementById('photoInput').click();
     g.appendChild(a);
   }
 }
-function addPhotos(files){
-  const n=Math.min(files.length,8-photos.length);
-  let done=0;
-  Array.from(files).slice(0,n).forEach(f=>{
-    const r=new FileReader();
-    r.onload=e=>{photos.push(e.target.result);done++;if(done===n)renderPhotoSlots();};
+function addPhotos(files) {
+  const n = Math.min(files.length, 8-photos.length);
+  let done = 0;
+  Array.from(files).slice(0,n).forEach(f => {
+    const r = new FileReader();
+    r.onload = e => { photos.push(e.target.result); done++; if(done===n) renderPhotoSlots(); };
     r.readAsDataURL(f);
   });
-  document.getElementById('photoInput').value='';
+  document.getElementById('photoInput').value = '';
 }
-function removePhoto(i){photos.splice(i,1);renderPhotoSlots();}
+function removePhoto(i) { photos.splice(i,1); renderPhotoSlots(); }
 
-// ── CARACS ────────────────────────────────────────────────────────────
-function renderCaracs(){
-  document.getElementById('caracList').innerHTML=caracs.map((c,i)=>`
+// ═══════════════════════════════════════════════════════
+// CARACS
+// ═══════════════════════════════════════════════════════
+function renderCaracs() {
+  document.getElementById('caracList').innerHTML = caracs.map((c,i)=>`
     <div class="crow">
       <input type="text" placeholder="Fabrication" value="${esc(c.key)}" oninput="caracs[${i}].key=this.value">
       <input type="text" placeholder="PLA biosourcé" value="${esc(c.val)}" oninput="caracs[${i}].val=this.value">
       <button class="row-del" onclick="removeCarac(${i})">×</button>
     </div>`).join('');
 }
-function addCarac(k='',v=''){caracs.push({key:k,val:v});renderCaracs();}
-function removeCarac(i){caracs.splice(i,1);renderCaracs();}
+function addCarac(k='',v='') { caracs.push({key:k,val:v}); renderCaracs(); }
+function removeCarac(i) { caracs.splice(i,1); renderCaracs(); }
 
-// ── VARIANTES ─────────────────────────────────────────────────────────
-function renderVariants(){
-  const ct=document.getElementById('variantsContainer');
-  ct.innerHTML='';
-  variants.forEach((vg,gi)=>{
-    const d=document.createElement('div');
-    d.className='vg';
-    d.innerHTML=`
+// ═══════════════════════════════════════════════════════
+// VARIANTS
+// ═══════════════════════════════════════════════════════
+function renderVariants() {
+  const ct = document.getElementById('variantsContainer');
+  ct.innerHTML = '';
+  variants.forEach((vg,gi) => {
+    const d = document.createElement('div');
+    d.className = 'vg';
+    d.innerHTML = `
       <div class="vg-head">
-        <input class="vg-name" type="text" value="${esc(vg.name)}" placeholder="Nom de l'option (ex : Couleur Abat-Jour)" oninput="variants[${gi}].name=this.value">
+        <input class="vg-name" type="text" value="${esc(vg.name)}" placeholder="Nom de l'option (ex : Couleur)" oninput="variants[${gi}].name=this.value">
         <button class="vg-del" onclick="removeVG(${gi})">Supprimer</button>
       </div>
       <div class="vchips" id="vc${gi}"></div>
@@ -492,97 +876,110 @@ function renderVariants(){
     renderChips(gi);
   });
 }
-function renderChips(gi){
-  const el=document.getElementById('vc'+gi);
+function renderChips(gi) {
+  const el = document.getElementById('vc'+gi);
   if(!el) return;
-  const opts=variants[gi].options;
-  el.innerHTML=opts.length
-    ?opts.map((o,oi)=>`<div class="vchip">${o.color?`<span class="vdot" style="background:${o.color}"></span>`:''}<span>${esc(o.label)}</span><span class="vrm" onclick="removeOpt(${gi},${oi})">×</span></div>`).join('')
-    :`<span class="vempty">Aucune option ajoutée…</span>`;
+  const opts = variants[gi].options;
+  el.innerHTML = opts.length
+    ? opts.map((o,oi)=>`<div class="vchip">${o.color?`<span class="vdot" style="background:${o.color}"></span>`:''}<span>${esc(o.label)}</span><span class="vrm" onclick="removeOpt(${gi},${oi})">×</span></div>`).join('')
+    : `<span class="vempty">Aucune option ajoutée…</span>`;
 }
-function addOpt(gi){
-  const t=document.getElementById('vt'+gi).value.trim();
+function addOpt(gi) {
+  const t = document.getElementById('vt'+gi).value.trim();
   if(!t) return;
-  const c=document.getElementById('vco'+gi).value;
-  variants[gi].options.push({label:t,color:c==='#888888'?'':c});
+  const c = document.getElementById('vco'+gi).value;
+  variants[gi].options.push({label:t, color:c==='#888888'?'':c});
   renderChips(gi);
-  document.getElementById('vt'+gi).value='';
-  document.getElementById('vco'+gi).value='#888888';
+  document.getElementById('vt'+gi).value = '';
+  document.getElementById('vco'+gi).value = '#888888';
 }
-function removeOpt(gi,oi){variants[gi].options.splice(oi,1);renderChips(gi);}
-function addVariantGroup(){
+function removeOpt(gi,oi) { variants[gi].options.splice(oi,1); renderChips(gi); }
+function addVariantGroup() {
   variants.push({name:'',options:[]});
   renderVariants();
-  setTimeout(()=>{const ins=document.querySelectorAll('.vg-name');ins[ins.length-1]?.focus();},50);
+  setTimeout(()=>{ const ins=document.querySelectorAll('.vg-name'); ins[ins.length-1]?.focus(); },50);
 }
-function removeVG(gi){variants.splice(gi,1);renderVariants();}
+function removeVG(gi) { variants.splice(gi,1); renderVariants(); }
 
-// ── SUBMIT ────────────────────────────────────────────────────────────
-function submitArticle(){
-  const name=document.getElementById('aName').value.trim();
-  const price=document.getElementById('aPrice').value;
-  if(!name){toast('⚠ Nom requis');return;}
-  if(!price){toast('⚠ Prix requis');return;}
-  const art={
-    id:editId||Date.now(),
-    name,price:parseFloat(price),
-    oldPrice:document.getElementById('aOldPrice').value||null,
-    badge:document.getElementById('aBadge').value,
-    status:document.getElementById('aStatus').value,
-    tagline:document.getElementById('aTagline').value.trim(),
-    payhip:document.getElementById('aPayhip').value.trim(),
-    desc:document.getElementById('aDesc').value.trim(),
-    photos:[...photos],
-    caracs:caracs.filter(c=>c.key.trim()),
-    variants:variants.filter(v=>v.name&&v.options.length),
-    createdAt:editId?(arts.find(a=>a.id===editId)?.createdAt||new Date().toISOString()):new Date().toISOString(),
-    updatedAt:new Date().toISOString(),
+// ═══════════════════════════════════════════════════════
+// SUBMIT ARTICLE
+// ═══════════════════════════════════════════════════════
+function submitArticle() {
+  const name = document.getElementById('aName').value.trim();
+  const price = document.getElementById('aPrice').value;
+  if(!name){ toast('⚠ Nom requis'); return; }
+  if(!price){ toast('⚠ Prix requis'); return; }
+  const art = {
+    id: editId||Date.now(),
+    name, price: parseFloat(price),
+    oldPrice: document.getElementById('aOldPrice').value||null,
+    badge: document.getElementById('aBadge').value,
+    status: document.getElementById('aStatus').value,
+    tagline: document.getElementById('aTagline').value.trim(),
+    payhip: document.getElementById('aPayhip').value.trim(),
+    desc: document.getElementById('aDesc').value.trim(),
+    photos: [...photos],
+    caracs: caracs.filter(c=>c.key.trim()),
+    variants: variants.filter(v=>v.name&&v.options.length),
+    createdAt: editId?(arts.find(a=>a.id===editId)?.createdAt||new Date().toISOString()):new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
-  if(editId){const i=arts.findIndex(a=>a.id===editId);arts[i]=art;}
+  if(editId){ const i=arts.findIndex(a=>a.id===editId); arts[i]=art; }
   else arts.unshift(art);
-  editId=null;
-  lsSet('tbt3d_arts',arts);
-  lsSet('tbt3d_boutique',{articles:arts,updatedAt:new Date().toISOString()});
-  renderArts();renderOverview();updateBadge();
+  editId = null;
+  lsSet('tbt3d_arts', arts);
+  lsSet('tbt3d_boutique', {articles:arts, updatedAt:new Date().toISOString()});
+  renderArts(); renderOverview(); updateBadge();
+  // Auto-assign to homepage if slot is empty
+  const hpCfg = lsGet('tbt3d_homepage', null);
+  if(!hpCfg) { // first article — reload hp defaults
+    loadHomepageConfig();
+  }
   resetForm();
   toast('"'+name+'" '+(art.status==='published'?'publié dans la boutique ✓':'enregistré en brouillon ✓'));
 }
 
-function editArt(i){
-  const a=arts[i];editId=a.id;
-  document.getElementById('aName').value=a.name;
-  document.getElementById('aPrice').value=a.price;
-  document.getElementById('aOldPrice').value=a.oldPrice||'';
-  document.getElementById('aBadge').value=a.badge||'';
-  document.getElementById('aStatus').value=a.status;
-  document.getElementById('aTagline').value=a.tagline||'';
-  document.getElementById('aPayhip').value=a.payhip||'';
-  document.getElementById('aDesc').value=a.desc||'';
-  photos=[...(a.photos||[])];
-  caracs=(a.caracs||[]).map(c=>({...c}));
-  variants=(a.variants||[]).map(v=>({...v,options:[...v.options]}));
-  renderPhotoSlots();renderCaracs();renderVariants();
-  document.getElementById('artPageTitle').textContent='Modifier — '+a.name;
-  document.getElementById('btnLbl').textContent='Enregistrer les modifications';
-  document.getElementById('btnCancel').style.display='';
+function editArt(i) {
+  const a = arts[i]; editId = a.id;
+  document.getElementById('aName').value = a.name;
+  document.getElementById('aPrice').value = a.price;
+  document.getElementById('aOldPrice').value = a.oldPrice||'';
+  document.getElementById('aBadge').value = a.badge||'';
+  document.getElementById('aStatus').value = a.status;
+  document.getElementById('aTagline').value = a.tagline||'';
+  document.getElementById('aPayhip').value = a.payhip||'';
+  document.getElementById('aDesc').value = a.desc||'';
+  photos = [...(a.photos||[])];
+  caracs = (a.caracs||[]).map(c=>({...c}));
+  variants = (a.variants||[]).map(v=>({...v, options:[...v.options]}));
+  renderPhotoSlots(); renderCaracs(); renderVariants();
+  document.getElementById('artPageTitle').textContent = 'Modifier — '+a.name;
+  document.getElementById('btnLbl').textContent = 'Enregistrer les modifications';
+  document.getElementById('btnCancel').style.display = '';
   document.getElementById('page-articles').querySelector('.page-scroll').scrollTo({top:0,behavior:'smooth'});
 }
-function delArt(i){
+
+function delArt(i) {
   if(!confirm('Supprimer "'+arts[i].name+'" ?')) return;
+  const deletedId = arts[i].id;
   arts.splice(i,1);
-  lsSet('tbt3d_arts',arts);
-  lsSet('tbt3d_boutique',{articles:arts,updatedAt:new Date().toISOString()});
-  renderArts();renderOverview();updateBadge();
+  lsSet('tbt3d_arts', arts);
+  lsSet('tbt3d_boutique', {articles:arts, updatedAt:new Date().toISOString()});
+  // Remove from homepage slots
+  hpSlots.forEach(s=>{ if(s.articleId===deletedId) s.articleId=null; });
+  renderArts(); renderOverview(); updateBadge();
+  if(document.getElementById('page-homepage').classList.contains('active')) renderSlotsUI();
   toast('Article supprimé');
 }
-function renderArts(){
-  document.getElementById('artCount').textContent='('+arts.length+')';
-  const list=document.getElementById('artList');
+
+function renderArts() {
+  document.getElementById('artCount').textContent = '('+arts.length+')';
+  const list = document.getElementById('artList');
   if(!arts.length){
-    list.innerHTML='<div class="empty-state"><div class="ei">📦</div><div class="et">Aucun article.<br>Créez votre premier produit →</div></div>';
+    list.innerHTML = '<div class="empty-state"><div class="ei">📦</div><div class="et">Aucun article.<br>Créez votre premier produit →</div></div>';
     return;
   }
-  list.innerHTML='<div class="art-list">'+arts.map((a,i)=>`
+  list.innerHTML = '<div class="art-list">'+arts.map((a,i)=>`
     <div class="art-item">
       ${a.photos?.[0]?`<img class="art-thumb" src="${a.photos[0]}">`:`<div class="art-ph">🏮</div>`}
       <div class="art-info">
@@ -596,23 +993,26 @@ function renderArts(){
       </div>
     </div>`).join('')+'</div>';
 }
-function updateBadge(){document.getElementById('artBadge').textContent=arts.length;}
-function resetForm(){
-  editId=null;
+
+function updateBadge() { document.getElementById('artBadge').textContent = arts.length; }
+
+function resetForm() {
+  editId = null;
   ['aName','aPrice','aOldPrice','aTagline','aPayhip','aDesc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('aStatus').value='published';
-  document.getElementById('aBadge').value='';
-  photos=[];caracs=[];variants=[];
-  renderPhotoSlots();renderCaracs();renderVariants();
-  document.getElementById('artPageTitle').textContent='Créer un article';
-  document.getElementById('btnLbl').textContent='Publier dans la boutique';
-  document.getElementById('btnCancel').style.display='none';
+  document.getElementById('aStatus').value = 'published';
+  document.getElementById('aBadge').value = '';
+  photos=[]; caracs=[]; variants=[];
+  renderPhotoSlots(); renderCaracs(); renderVariants();
+  document.getElementById('artPageTitle').textContent = 'Créer un article';
+  document.getElementById('btnLbl').textContent = 'Publier dans la boutique';
+  document.getElementById('btnCancel').style.display = 'none';
 }
-function toast(msg){
-  const t=document.getElementById('toast');
-  document.getElementById('toastTxt').textContent=msg;
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastTxt').textContent = msg;
   t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3500);
+  setTimeout(()=>t.classList.remove('show'), 3500);
 }
 </script>
 </body>

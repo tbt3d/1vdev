@@ -61,204 +61,68 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
   align-items: center;
   justify-content: center;
 }
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  background: #1a1a1a;
-}
-/* Image de fond — sera remplacée par ta photo */
+.hero-bg { position: absolute; inset: 0; background: #1a1a1a; }
 .hero-bg-img {
-  position: absolute;
-  inset: 0;
-  background-image: url('images/hero.jpg');
+  position: absolute; inset: 0;
+  background-image: url('../1vdev-main/image/image_acc_eta.jpg');
   background-size: cover;
-  background-position: center;
+  background-position: center 65%;
   opacity: .55;
 }
-.hero-content {
-  position: relative;
-  text-align: center;
-  color: var(--white);
-  padding: 0 24px;
-  max-width: 680px;
-}
-.hero-eyebrow {
-  font-size: 12px;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.6);
-  margin-bottom: 20px;
-}
-.hero-title {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  font-weight: 300;
-  line-height: 1.1;
-  margin-bottom: 20px;
-  letter-spacing: -.02em;
-}
+.hero-content { position: relative; text-align: center; color: var(--white); padding: 0 24px; max-width: 680px; }
+.hero-eyebrow { font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.6); margin-bottom: 20px; }
+.hero-title { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 300; line-height: 1.1; margin-bottom: 20px; letter-spacing: -.02em; }
 .hero-title strong { font-weight: 600; }
-.hero-sub {
-  font-size: 16px;
-  color: rgba(255,255,255,.7);
-  line-height: 1.7;
-  margin-bottom: 36px;
-}
-.btn-hero {
-  display: inline-block;
-  padding: 15px 36px;
-  background: var(--white);
-  color: var(--black);
-  border-radius: var(--r);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: .04em;
-  transition: opacity .2s;
-  margin: 0 6px;
-}
+.hero-sub { font-size: 16px; color: rgba(255,255,255,.7); line-height: 1.7; margin-bottom: 36px; }
+.btn-hero { display: inline-block; padding: 15px 36px; background: var(--white); color: var(--black); border-radius: var(--r); text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: .04em; transition: opacity .2s; margin: 0 6px; }
 .btn-hero:hover { opacity: .88; }
-.btn-hero.outline {
-  background: transparent;
-  color: var(--white);
-  border: 1.5px solid rgba(255,255,255,.5);
-}
+.btn-hero.outline { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,.5); }
 .btn-hero.outline:hover { border-color: var(--white); }
-.hero-scroll {
-  position: absolute;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  color: rgba(255,255,255,.4);
-  font-size: 11px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  animation: bounce 2s infinite;
-}
+.hero-scroll { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; color: rgba(255,255,255,.4); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; animation: bounce 2s infinite; }
 .hero-scroll svg { width: 18px; height: 18px; }
 @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
 
 /* ─── SECTION HEADER ─── */
-.section-header {
-  text-align: center;
-  margin-bottom: 48px;
-}
-.section-eyebrow {
-  font-size: 11px;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-.section-title {
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
-  font-weight: 400;
-  letter-spacing: -.01em;
-}
-.section-sub {
-  font-size: 15px;
-  color: var(--soft);
-  margin-top: 12px;
-  line-height: 1.7;
-}
+.section-header { text-align: center; margin-bottom: 48px; }
+.section-eyebrow { font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.section-title { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; letter-spacing: -.01em; }
+.section-sub { font-size: 15px; color: var(--soft); margin-top: 12px; line-height: 1.7; }
 
-/* ─── PRODUITS VEDETTES ─── */
+/* ─── PRODUITS ─── */
 .section { padding: 80px 32px; max-width: var(--max); margin: 0 auto; }
 @media(max-width:600px){ .section { padding: 60px 20px; } }
+.products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
 
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-}
-
-.product-card {
-  text-decoration: none;
-  color: var(--black);
-  display: block;
-  transition: transform .2s;
-}
+.product-card { text-decoration: none; color: var(--black); display: block; transition: transform .2s; }
 .product-card:hover { transform: translateY(-4px); }
-.product-card-img {
-  aspect-ratio: 3/4;
-  background: var(--bg);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 14px;
-  position: relative;
-}
-.product-card-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform .4s;
-}
+.product-card-img { aspect-ratio: 3/4; background: var(--bg); border-radius: 8px; overflow: hidden; margin-bottom: 14px; position: relative; }
+.product-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
 .product-card:hover .product-card-img img { transform: scale(1.04); }
-.product-card-img-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
-  color: var(--muted);
-  font-size: 13px;
-}
-.product-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: var(--black);
-  color: var(--white);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  border-radius: 50px;
-}
+.product-card-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f0f0f0, #e0e0e0); color: var(--muted); font-size: 13px; }
+.product-badge { position: absolute; top: 12px; left: 12px; background: var(--black); color: var(--white); font-size: 10px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: 50px; }
+.product-badge.white { background: #fff; color: #111; }
 .product-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
 .product-sub { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
 .product-price { font-size: 15px; font-weight: 400; }
 .product-price-from { font-size: 12px; color: var(--muted); margin-right: 4px; }
+.product-price-old { font-size: 12px; color: var(--muted); text-decoration: line-through; margin-right: 6px; }
 
 /* ─── BANNER DEVIS ─── */
-.devis-banner {
-  background: var(--black);
-  color: var(--white);
-  padding: 80px 32px;
-  text-align: center;
-  margin: 40px 0 0;
-}
+.devis-banner { background: var(--black); color: var(--white); padding: 80px 32px; text-align: center; margin: 40px 0 0; }
 .devis-banner h2 { font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 400; margin-bottom: 14px; letter-spacing: -.01em; }
 .devis-banner p { font-size: 15px; color: rgba(255,255,255,.6); margin-bottom: 32px; line-height: 1.7; max-width: 520px; margin-left: auto; margin-right: auto; }
 .btn-white { display: inline-block; padding: 14px 32px; background: var(--white); color: var(--black); border-radius: var(--r); text-decoration: none; font-size: 14px; font-weight: 500; transition: opacity .2s; }
 .btn-white:hover { opacity: .88; }
 
 /* ─── VALEURS ─── */
-.values-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 32px;
-}
-.value-card {
-  text-align: center;
-  padding: 32px 20px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  transition: border-color .2s;
-}
+.values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; }
+.value-card { text-align: center; padding: 32px 20px; border: 1px solid var(--border); border-radius: 8px; transition: border-color .2s; }
 .value-card:hover { border-color: var(--black); }
 .value-icon { font-size: 2rem; margin-bottom: 16px; }
 .value-title { font-size: 15px; font-weight: 500; margin-bottom: 8px; }
 .value-desc { font-size: 13px; color: var(--soft); line-height: 1.7; }
 
-/* ─── SECTION GRISE ─── */
 .section-gray { background: var(--bg); }
-.section-gray .section { }
 
 /* ─── FOOTER ─── */
 #footer { background: #111; color: rgba(255,255,255,.7); margin-top: 0; }
@@ -287,7 +151,6 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
 <header id="navbar">
   <div class="nav-inner">
     <a href="/index.html"><img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D"></a>
-
     <nav class="nav-links">
       <a href="/index.html" data-page="home">Home</a>
       <a href="/boutique.html" data-page="boutique">Boutique</a>
@@ -319,9 +182,7 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
 
 <!-- ─── HERO ─── -->
 <section class="hero">
-  <div class="hero-bg">
-    <div class="hero-bg-img"></div>
-  </div>
+  <div class="hero-bg"><div class="hero-bg-img"></div></div>
   <div class="hero-content">
     <div class="hero-eyebrow">Made in France · Lille</div>
     <h1 class="hero-title">La lumière<br><strong>réinventée</strong></h1>
@@ -334,59 +195,15 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
   </div>
 </section>
 
-<!-- ─── PRODUITS VEDETTES ─── -->
+<!-- ─── PRODUITS VEDETTES (dynamique) ─── -->
 <div class="section">
   <div class="section-header">
     <div class="section-eyebrow">La collection</div>
     <h2 class="section-title">Nos créations</h2>
     <p class="section-sub">Chaque lampe est unique, imprimée à la demande dans notre atelier lillois.</p>
   </div>
-
   <div class="products-grid" id="productsGrid">
-    <!-- Lampe ETA -->
-    <a href="/boutique.html#eta" class="product-card">
-      <div class="product-card-img">
-        <div class="product-card-img-placeholder">📷 Photo ETA à venir</div>
-        <div class="product-badge">Bestseller</div>
-      </div>
-      <div class="product-name">ETA</div>
-      <div class="product-sub">Abat-jour moderne · PLA</div>
-      <div class="product-price"><span class="product-price-from">À partir de</span>69,90 €</div>
-    </a>
-
-    <!-- Lampe NOVA -->
-    <a href="/boutique.html#nova" class="product-card">
-      <div class="product-card-img">
-        <div class="product-card-img-placeholder">📷 Photo NOVA à venir</div>
-      </div>
-      <div class="product-name">NOVA</div>
-      <div class="product-sub">Design épuré · PLA</div>
-      <div class="product-price"><span class="product-price-from">À partir de</span>64,90 €</div>
-    </a>
-
-    <!-- Lampe KARMA -->
-    <a href="/boutique.html#karma" class="product-card">
-      <div class="product-card-img">
-        <div class="product-card-img-placeholder">📷 Photo KARMA à venir</div>
-      </div>
-      <div class="product-name">KARMA</div>
-      <div class="product-sub">Élégance organique · PLA</div>
-      <div class="product-price"><span class="product-price-from">À partir de</span>64,90 €</div>
-    </a>
-
-    <!-- Impression sur mesure -->
-    <a href="/devis.html" class="product-card">
-      <div class="product-card-img" style="background:#111">
-        <div class="product-card-img-placeholder" style="background:#111;color:rgba(255,255,255,.3);flex-direction:column;gap:10px">
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 4L4 12v16l16 8 16-8V12L20 4z" stroke="currentColor" stroke-width="1.5"/></svg>
-          Votre STL
-        </div>
-        <div class="product-badge" style="background:#fff;color:#111">Sur mesure</div>
-      </div>
-      <div class="product-name">Impression sur mesure</div>
-      <div class="product-sub">Votre fichier STL · FDM ou résine</div>
-      <div class="product-price">Prix calculé en ligne</div>
-    </a>
+    <!-- Rempli dynamiquement par JS depuis localStorage (dashboard) -->
   </div>
 </div>
 
@@ -398,26 +215,10 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
       <h2 class="section-title">Notre engagement</h2>
     </div>
     <div class="values-grid">
-      <div class="value-card">
-        <div class="value-icon">🇫🇷</div>
-        <div class="value-title">Made in France</div>
-        <div class="value-desc">Chaque pièce est imprimée à Lille dans notre atelier. Zéro intermédiaire, production locale et responsable.</div>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">♻️</div>
-        <div class="value-title">Éco-responsable</div>
-        <div class="value-desc">PLA biosourcé, impression à la demande pour éviter le gaspillage. Zéro stock, zéro surproduction.</div>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">✦</div>
-        <div class="value-title">Modulable</div>
-        <div class="value-desc">Couleurs, dimensions, finitions — chaque lampe peut être personnalisée selon vos envies.</div>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">🛠️</div>
-        <div class="value-title">Sur mesure</div>
-        <div class="value-desc">Vous avez un fichier STL ? On l'imprime. Devis instantané en ligne, livraison sous 7 à 30 jours.</div>
-      </div>
+      <div class="value-card"><div class="value-icon">🇫🇷</div><div class="value-title">Made in France</div><div class="value-desc">Chaque pièce est imprimée à Lille dans notre atelier. Zéro intermédiaire, production locale et responsable.</div></div>
+      <div class="value-card"><div class="value-icon">♻️</div><div class="value-title">Éco-responsable</div><div class="value-desc">PLA biosourcé, impression à la demande pour éviter le gaspillage. Zéro stock, zéro surproduction.</div></div>
+      <div class="value-card"><div class="value-icon">✦</div><div class="value-title">Modulable</div><div class="value-desc">Couleurs, dimensions, finitions — chaque lampe peut être personnalisée selon vos envies.</div></div>
+      <div class="value-card"><div class="value-icon">🛠️</div><div class="value-title">Sur mesure</div><div class="value-desc">Vous avez un fichier STL ? On l'imprime. Devis instantané en ligne, livraison sous 7 à 30 jours.</div></div>
     </div>
   </div>
 </div>
@@ -433,26 +234,17 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
 <footer id="footer">
   <div class="footer-inner">
     <div class="footer-brand">
-      <a href="/index.html" class="footer-logo">
-        <svg viewBox="0 0 200 90" fill="none"><rect x="4" y="8" width="46" height="8" fill="currentColor"/><rect x="21" y="8" width="9" height="56" fill="currentColor"/><rect x="56" y="8" width="9" height="56" fill="currentColor"/><path d="M65 8h22c7 0 12 5 12 11s-5 11-12 11H65V8z" fill="currentColor"/><path d="M65 30h24c8 0 14 5 14 12s-6 12-14 12H65V30z" fill="currentColor"/><text x="72" y="80" font-family="Inter,sans-serif" font-size="14" font-weight="700" fill="currentColor">3D</text></svg>
-      </a>
+      <a href="/index.html"><img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D"></a>
       <p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p>
       <p class="footer-tagline">Made in France 🇫🇷</p>
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Navigation</div>
-      <a href="/index.html">Home</a>
-      <a href="/boutique.html">Boutique</a>
-      <a href="/devis.html">Impression sur mesure</a>
-      <a href="/a-propos.html">À propos</a>
-      <a href="/contact.html">Contact</a>
+      <a href="/index.html">Home</a><a href="/boutique.html">Boutique</a><a href="/devis.html">Impression sur mesure</a><a href="/a-propos.html">À propos</a><a href="/contact.html">Contact</a>
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Légal</div>
-      <a href="/mentions-legales.html">Mentions légales</a>
-      <a href="/cgv.html">CGV</a>
-      <a href="/politique-confidentialite.html">Confidentialité</a>
-      <a href="/politique-retour.html">Retours</a>
+      <a href="/mentions-legales.html">Mentions légales</a><a href="/cgv.html">CGV</a><a href="/politique-confidentialite.html">Confidentialité</a><a href="/politique-retour.html">Retours</a>
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
@@ -460,12 +252,8 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
-        <a href="#" aria-label="Instagram">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-        </a>
-        <a href="#" aria-label="TikTok">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg>
-        </a>
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a>
       </div>
     </div>
   </div>
@@ -484,7 +272,7 @@ document.getElementById('footerYear').textContent = new Date().getFullYear();
 
 // Active nav
 document.querySelectorAll('.nav-links a').forEach(a => {
-  if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
+  if(a.dataset.page === document.body.dataset.page) a.classList.add('active');
 });
 
 // Scroll shadow
@@ -495,16 +283,133 @@ window.addEventListener('scroll', () => {
 function toggleSearch() {
   const b = document.getElementById('searchBar');
   b.classList.toggle('open');
-  if (b.classList.contains('open')) setTimeout(() => document.getElementById('searchInput').focus(), 50);
+  if(b.classList.contains('open')) setTimeout(()=>document.getElementById('searchInput').focus(),50);
 }
-
 function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('open');
 }
 
+// ══════════════════════════════════════════════════════
+// PRODUITS DYNAMIQUES depuis le dashboard
+// ══════════════════════════════════════════════════════
+function lsGet(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch { return d; } }
+
+function buildProductsGrid() {
+  const grid = document.getElementById('productsGrid');
+  const hpCfg  = lsGet('tbt3d_homepage', null);
+  const arts    = lsGet('tbt3d_arts', []);
+
+  // ── Si le dashboard a configuré la page d'accueil ──
+  if(hpCfg && hpCfg.slots && hpCfg.slots.length) {
+    grid.innerHTML = hpCfg.slots.map(slot => {
+      if(slot.type === 'article') {
+        const art = arts.find(a => a.id === slot.articleId);
+        if(!art) return ''; // slot vide, on skip
+
+        const badge    = slot.overrideBadge !== undefined ? slot.overrideBadge : art.badge;
+        const rawPrice = slot.overridePrice || null;
+        const from     = slot.overrideFrom && !slot.overridePrice;
+        const oldPrice = !slot.overridePrice && art.oldPrice ? parseFloat(art.oldPrice).toFixed(2) + ' €' : '';
+        const price    = rawPrice || (parseFloat(art.price).toFixed(2) + ' €');
+        const link     = art.payhip || '/boutique.html#' + encodeURIComponent(art.name.toLowerCase());
+        const img      = art.photos?.[0];
+        const sub      = art.tagline || '';
+
+        return `<a href="${link}" class="product-card">
+          <div class="product-card-img">
+            ${img
+              ? `<img src="${img}" alt="${art.name}">`
+              : `<div class="product-card-img-placeholder">📷 Photo à venir</div>`}
+            ${badge ? `<div class="product-badge">${badge}</div>` : ''}
+          </div>
+          <div class="product-name">${art.name}</div>
+          ${sub ? `<div class="product-sub">${sub}</div>` : ''}
+          <div class="product-price">
+            ${oldPrice ? `<span class="product-price-old">${oldPrice}</span>` : ''}
+            ${from ? `<span class="product-price-from">À partir de</span>` : ''}
+            ${price}
+          </div>
+        </a>`;
+
+      } else {
+        // Carte personnalisée (ex : impression sur mesure)
+        const dark  = slot.customDark;
+        const badge = slot.customBadge;
+        const bStyle = slot.customBadgeStyle || 'white';
+        const link  = slot.customLink || '/devis.html';
+
+        return `<a href="${link}" class="product-card">
+          <div class="product-card-img" style="${dark?'background:#111':''}">
+            <div class="product-card-img-placeholder" style="${dark?'background:#111;color:rgba(255,255,255,.3);flex-direction:column;gap:10px':''}">
+              ${dark ? `<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 4L4 12v16l16 8 16-8V12L20 4z" stroke="currentColor" stroke-width="1.5"/></svg>` : ''}
+              ${slot.customLabel || ''}
+            </div>
+            ${badge ? `<div class="product-badge ${bStyle==='white'?'white':''}" style="${bStyle==='white'?'background:#fff;color:#111':'background:#111;color:#fff'}">${badge}</div>` : ''}
+          </div>
+          <div class="product-name">${slot.customLabel || ''}</div>
+          ${slot.customSub ? `<div class="product-sub">${slot.customSub}</div>` : ''}
+          <div class="product-price">${slot.customPrice || ''}</div>
+        </a>`;
+      }
+    }).join('');
+    return;
+  }
+
+  // ── Fallback : articles publiés récents (si aucune config dashboard) ──
+  const published = arts.filter(a => a.status === 'published').slice(0, 4);
+  if(published.length) {
+    grid.innerHTML = published.map(art => {
+      const img = art.photos?.[0];
+      return `<a href="${art.payhip||'/boutique.html'}" class="product-card">
+        <div class="product-card-img">
+          ${img?`<img src="${img}" alt="${art.name}">`:`<div class="product-card-img-placeholder">📷 Photo à venir</div>`}
+          ${art.badge?`<div class="product-badge">${art.badge}</div>`:''}
+        </div>
+        <div class="product-name">${art.name}</div>
+        ${art.tagline?`<div class="product-sub">${art.tagline}</div>`:''}
+        <div class="product-price"><span class="product-price-from">À partir de</span>${parseFloat(art.price).toFixed(2)} €</div>
+      </a>`;
+    }).join('');
+    return;
+  }
+
+  // ── Fallback statique (aucun article créé du tout) ──
+  grid.innerHTML = `
+    <a href="/boutique.html#eta" class="product-card">
+      <div class="product-card-img"><div class="product-card-img-placeholder">📷 Photo ETA à venir</div><div class="product-badge">Bestseller</div></div>
+      <div class="product-name">ETA</div><div class="product-sub">Abat-jour moderne · PLA</div>
+      <div class="product-price"><span class="product-price-from">À partir de</span>69,90 €</div>
+    </a>
+    <a href="/boutique.html#nova" class="product-card">
+      <div class="product-card-img"><div class="product-card-img-placeholder">📷 Photo NOVA à venir</div></div>
+      <div class="product-name">NOVA</div><div class="product-sub">Design épuré · PLA</div>
+      <div class="product-price"><span class="product-price-from">À partir de</span>64,90 €</div>
+    </a>
+    <a href="/boutique.html#karma" class="product-card">
+      <div class="product-card-img"><div class="product-card-img-placeholder">📷 Photo KARMA à venir</div></div>
+      <div class="product-name">KARMA</div><div class="product-sub">Élégance organique · PLA</div>
+      <div class="product-price"><span class="product-price-from">À partir de</span>64,90 €</div>
+    </a>
+    <a href="/devis.html" class="product-card">
+      <div class="product-card-img" style="background:#111">
+        <div class="product-card-img-placeholder" style="background:#111;color:rgba(255,255,255,.3);flex-direction:column;gap:10px">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 4L4 12v16l16 8 16-8V12L20 4z" stroke="currentColor" stroke-width="1.5"/></svg>Votre STL
+        </div>
+        <div class="product-badge" style="background:#fff;color:#111">Sur mesure</div>
+      </div>
+      <div class="product-name">Impression sur mesure</div>
+      <div class="product-sub">Votre fichier STL · FDM ou résine</div>
+      <div class="product-price">Prix calculé en ligne</div>
+    </a>`;
+}
+
+buildProductsGrid();
+
 // Fade in on scroll
 const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'none'; } });
+  entries.forEach(e => {
+    if(e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='none'; }
+  });
 }, { threshold: 0.1 });
 
 document.querySelectorAll('.product-card, .value-card').forEach(el => {
