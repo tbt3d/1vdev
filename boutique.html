@@ -9,19 +9,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --white:#fff;--black:#111;--bg:#f9f9f9;--border:#e8e8e8;
-  --muted:#888;--soft:#555;
-  --font:'Inter',system-ui,sans-serif;--nav-h:70px;--r:50px;
-}
+:root{--white:#fff;--black:#111;--bg:#f9f9f9;--border:#e8e8e8;--muted:#888;--soft:#555;--font:'Inter',system-ui,sans-serif;--nav-h:70px;--r:50px;}
 html{scroll-behavior:smooth}
 body{font-family:var(--font);color:var(--black);background:var(--white);padding-top:var(--nav-h)}
-
-/* NAV */
 #navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--white);border-bottom:1px solid var(--border);transition:box-shadow .2s}
 #navbar.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.06)}
 .nav-inner{max-width:1280px;margin:0 auto;height:var(--nav-h);padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:32px}
-.nav-logo svg{height:42px;width:auto;color:var(--black);display:block}
 .nav-links{display:flex;align-items:center}
 .nav-links a{text-decoration:none;color:var(--soft);font-size:14px;padding:8px 16px;border-radius:6px;transition:color .15s;white-space:nowrap}
 .nav-links a:hover,.nav-links a.active{color:var(--black)}
@@ -42,51 +35,39 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 .mobile-nav a{text-decoration:none;color:var(--black);font-size:15px;padding:10px 12px;border-radius:6px;transition:background .15s}
 .mobile-nav a:hover{background:var(--bg)}
 @media(max-width:768px){.nav-links{display:none}.nav-burger{display:flex}.nav-inner{padding:0 20px}}
-
-/* HERO */
 .boutique-hero{background:var(--bg);padding:56px 0 48px;border-bottom:1px solid var(--border);margin-bottom:56px}
 .container{max-width:1280px;margin:0 auto;padding:0 32px}
 .section-eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
 .boutique-hero h1{font-size:clamp(2rem,4vw,3rem);font-weight:400;letter-spacing:-.02em;margin-bottom:10px}
 .boutique-hero p{font-size:15px;color:var(--soft)}
-
-/* FILTRES */
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:40px}
 .filter-btn{padding:8px 18px;border:1.5px solid var(--border);border-radius:50px;background:var(--white);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .15s;color:var(--soft)}
 .filter-btn:hover,.filter-btn.active{border-color:var(--black);background:var(--black);color:var(--white)}
-
-/* GRILLE */
 .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:28px}
-
-/* CARD */
 .product-card{text-decoration:none;color:var(--black);display:block;transition:transform .2s;cursor:pointer}
 .product-card:hover{transform:translateY(-4px)}
-
 .product-img{aspect-ratio:3/4;background:var(--bg);border-radius:10px;overflow:hidden;margin-bottom:14px;position:relative}
 .product-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
 .product-card:hover .product-img img{transform:scale(1.04)}
 .product-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;opacity:.3}
 .product-badge{position:absolute;top:12px;left:12px;background:var(--black);color:var(--white);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:50px}
+.product-badge.white-badge{background:#fff;color:#111}
 .product-name{font-size:16px;font-weight:500;margin-bottom:4px}
 .product-tagline{font-size:13px;color:var(--muted);margin-bottom:8px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .product-price{font-size:15px;font-weight:400;display:flex;align-items:baseline;gap:8px}
 .price-old{font-size:12px;color:var(--muted);text-decoration:line-through}
-
-/* ACTIONS sur hover */
+.price-from{font-size:12px;color:var(--muted);margin-right:2px}
 .product-actions{display:flex;gap:8px;margin-top:12px;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
 .product-card:hover .product-actions{opacity:1;transform:none}
 .btn-buy{flex:1;text-align:center;padding:10px 16px;background:var(--black);color:var(--white);border-radius:50px;text-decoration:none;font-size:12px;font-weight:500;transition:opacity .2s;border:none;cursor:pointer;font-family:var(--font)}
 .btn-buy:hover{opacity:.8}
 .btn-details{flex:1;text-align:center;padding:10px 16px;background:var(--white);color:var(--black);border-radius:50px;text-decoration:none;font-size:12px;font-weight:500;border:1.5px solid var(--border);transition:border-color .2s;cursor:pointer;font-family:var(--font)}
 .btn-details:hover{border-color:var(--black)}
-
-/* VIDE */
 .empty-boutique{text-align:center;padding:80px 20px;color:var(--muted)}
 .empty-boutique svg{width:48px;height:48px;opacity:.2;margin-bottom:16px}
 .empty-boutique h3{font-size:18px;font-weight:400;margin-bottom:8px;color:var(--soft)}
 .empty-boutique p{font-size:14px;line-height:1.7}
-
-/* MODAL FICHE PRODUIT */
+/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;align-items:flex-end;justify-content:center;padding:0}
 .modal-overlay.open{display:flex}
 @media(min-width:768px){.modal-overlay{align-items:center;padding:20px}}
@@ -94,16 +75,12 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 @media(min-width:768px){.modal{border-radius:16px}}
 .modal-inner{display:grid;grid-template-columns:1fr 1fr;min-height:0}
 @media(max-width:640px){.modal-inner{grid-template-columns:1fr}}
-
-/* GALERIE MODALE */
 .modal-gallery{position:relative;background:var(--bg)}
 .modal-main-img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
 .modal-main-ph{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:64px;opacity:.2}
 .modal-thumbs{display:flex;gap:6px;padding:10px 12px;overflow-x:auto}
 .modal-thumb{width:48px;height:48px;border-radius:6px;object-fit:cover;cursor:pointer;border:2px solid transparent;transition:border-color .15s;flex-shrink:0}
 .modal-thumb.active{border-color:var(--black)}
-
-/* INFOS MODALE */
 .modal-info{padding:28px 28px 32px;overflow-y:auto}
 .modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;background:var(--white);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;z-index:10;transition:background .15s}
 .modal-close:hover{background:var(--bg)}
@@ -113,8 +90,6 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 .modal-price{font-size:22px;font-weight:400;margin-bottom:20px;display:flex;align-items:baseline;gap:10px}
 .modal-price-old{font-size:14px;color:var(--muted);text-decoration:line-through}
 .modal-hr{height:1px;background:var(--border);margin:16px 0}
-
-/* OPTIONS DANS MODALE */
 .opt-group{margin-bottom:16px}
 .opt-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;display:flex;gap:6px;align-items:center}
 .opt-label span{color:var(--black);font-size:12px;text-transform:none;letter-spacing:0}
@@ -124,34 +99,25 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 .opt-chip.selected{border-color:var(--black);background:var(--black);color:var(--white)}
 .opt-chip.selected .cdot{box-shadow:0 0 0 2px #111,0 0 0 3px #fff}
 .cdot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex-shrink:0}
-
-/* CARACS MODALE */
 .carac-table{width:100%;border-collapse:collapse;margin-top:8px}
 .carac-table tr{border-bottom:1px solid var(--border)}
 .carac-table tr:last-child{border-bottom:none}
 .carac-table td{padding:7px 0;font-size:12px;line-height:1.4}
 .carac-table td:first-child{color:var(--muted);width:45%;padding-right:12px}
-
 .modal-desc{font-size:13px;color:var(--soft);line-height:1.8;white-space:pre-line}
-
 .btn-modal-buy{display:block;width:100%;padding:14px;background:var(--black);color:var(--white);border:none;border-radius:50px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;text-align:center;text-decoration:none;transition:opacity .2s;margin-top:16px}
 .btn-modal-buy:hover{opacity:.85}
 .btn-wishlist{display:block;width:100%;padding:13px;background:var(--white);color:var(--black);border:1.5px solid var(--border);border-radius:50px;font-family:var(--font);font-size:13px;cursor:pointer;text-align:center;transition:border-color .2s;margin-top:8px}
 .btn-wishlist:hover{border-color:var(--black)}
-
-/* BANNER */
 .banner-dark{background:#111;color:#fff;padding:80px 32px;text-align:center}
 .banner-dark h2{font-size:clamp(1.8rem,3vw,2.8rem);font-weight:400;margin-bottom:14px;letter-spacing:-.01em}
 .banner-dark p{font-size:15px;color:rgba(255,255,255,.6);margin-bottom:32px;line-height:1.7;max-width:520px;margin-left:auto;margin-right:auto}
 .btn-white{display:inline-block;padding:14px 32px;background:#fff;color:#111;border-radius:50px;text-decoration:none;font-size:14px;font-weight:500;transition:opacity .2s}
 .btn-white:hover{opacity:.88}
-
-/* FOOTER */
 #footer{background:#111;color:rgba(255,255,255,.7)}
 .footer-inner{max-width:1280px;margin:0 auto;padding:60px 32px 40px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px}
 @media(max-width:900px){.footer-inner{grid-template-columns:1fr 1fr;gap:32px}}
 @media(max-width:600px){.footer-inner{grid-template-columns:1fr;gap:28px;padding:40px 20px 28px}}
-.footer-logo svg{height:38px;width:auto;color:#fff;margin-bottom:16px;display:block}
 .footer-brand p{font-size:13px;line-height:1.7;color:rgba(255,255,255,.55);margin-bottom:4px}
 .footer-tagline{font-size:12px;margin-top:12px!important;color:rgba(255,255,255,.3)!important}
 .footer-col-title{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:14px;font-weight:500}
@@ -171,7 +137,6 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 <header id="navbar">
   <div class="nav-inner">
     <a href="/index.html"><img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D"></a>
-
     <nav class="nav-links">
       <a href="/index.html">Home</a>
       <a href="/boutique.html" class="active">Boutique</a>
@@ -181,6 +146,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
     </nav>
     <div class="nav-actions">
       <button class="nav-icon" onclick="toggleSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>
+      <a href="/dashboard.html" class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
       <button class="nav-icon nav-burger" onclick="toggleMobileNav()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     </div>
   </div>
@@ -220,7 +186,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 <footer id="footer">
   <div class="footer-inner">
     <div class="footer-brand">
-    <a href="/index.html"><img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D"></a>
+      <a href="/index.html"><img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D"></a>
       <p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p>
       <p class="footer-tagline">Made in France 🇫🇷</p>
     </div>
@@ -248,259 +214,135 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
   <div class="modal" id="modalBox">
     <button class="modal-close" onclick="closeModal()">×</button>
     <div class="modal-inner">
-      <!-- galerie -->
       <div class="modal-gallery" id="modalGallery"></div>
-      <!-- infos -->
       <div class="modal-info" id="modalInfo"></div>
     </div>
   </div>
 </div>
 
 <script>
-document.getElementById('footerYear').textContent = new Date().getFullYear();
+document.getElementById('footerYear').textContent=new Date().getFullYear();
+window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>10));
+function toggleSearch(){const b=document.getElementById('searchBar');b.classList.toggle('open');if(b.classList.contains('open'))setTimeout(()=>document.getElementById('searchInput').focus(),50);}
+function toggleMobileNav(){document.getElementById('mobileNav').classList.toggle('open');}
 
-window.addEventListener('scroll', () => {
-  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
-});
-function toggleSearch() {
-  const b = document.getElementById('searchBar');
-  b.classList.toggle('open');
-  if(b.classList.contains('open')) setTimeout(()=>document.getElementById('searchInput').focus(),50);
-}
-function toggleMobileNav() { document.getElementById('mobileNav').classList.toggle('open'); }
+const lsGet=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}};
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-// ── CHARGER LES ARTICLES ──────────────────────────────────────────────
-const lsGet = (k,d) => { try{return JSON.parse(localStorage.getItem(k))||d}catch{return d} };
-
-// Essaie d'abord tbt3d_boutique, sinon tbt3d_arts
-function loadArticles() {
-  const b = lsGet('tbt3d_boutique', null);
-  if(b && b.articles && b.articles.length) return b.articles;
-  return lsGet('tbt3d_arts', []);
-}
-
-let allArticles = loadArticles().filter(a => a.status === 'published');
-let activeFilter = 'all';
-
-// ── FILTRES DYNAMIQUES ────────────────────────────────────────────────
-function buildFilters() {
-  const bar = document.getElementById('filterBar');
-  // Collecte toutes les catégories (badges) uniques
-  const badges = [...new Set(allArticles.map(a=>a.badge).filter(Boolean))];
-  // Vider sauf "Tout"
-  bar.innerHTML = `<button class="filter-btn active" data-filter="all" onclick="setFilter(this)">Tout</button>`;
-  badges.forEach(b => {
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn';
-    btn.dataset.filter = b.toLowerCase();
-    btn.textContent = b;
-    btn.onclick = () => setFilter(btn);
-    bar.appendChild(btn);
+// ══════════════════════════════════════════════════
+// CHARGEMENT DES ARTICLES — ordre depuis dashboard
+// ══════════════════════════════════════════════════
+function loadArticles(){
+  const arts=lsGet('tbt3d_arts',[]).filter(a=>a.status==='published');
+  const cfg=lsGet('tbt3d_boutique_config',null);
+  if(!cfg||!cfg.slots||!cfg.slots.length) return arts;
+  // Appliquer l'ordre et les overrides du dashboard
+  const result=[];
+  cfg.slots.forEach(slot=>{
+    if(slot.hidden) return; // masqué
+    if(slot.type==='article'){
+      const art=arts.find(a=>a.id===slot.articleId);
+      if(!art) return;
+      // Cloner l'article avec les overrides dashboard appliqués
+      const a={...art};
+      if(slot.overrideBadge!==undefined&&slot.overrideBadge!=='') a.badge=slot.overrideBadge;
+      else if(slot.overrideBadge==='') a.badge=''; // badge forcé à vide
+      if(slot.overridePrice) a._displayPrice=slot.overridePrice;
+      a._from=slot.overrideFrom&&!slot.overridePrice;
+      result.push(a);
+    }
+    // Les cartes custom ne vont pas dans allArticles, elles sont affichées séparément
   });
-  // Bouton fixe "Sur mesure"
-  const mesure = document.createElement('button');
-  mesure.className = 'filter-btn';
-  mesure.dataset.filter = 'mesure';
-  mesure.textContent = 'Sur mesure';
-  mesure.onclick = () => setFilter(mesure);
-  bar.appendChild(mesure);
-}
-function setFilter(btn) {
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  activeFilter = btn.dataset.filter;
-  renderGrid();
-}
-function filterCards() {
-  const q = document.getElementById('searchInput').value.toLowerCase().trim();
-  document.querySelectorAll('.product-card[data-id]').forEach(card => {
-    const name = card.dataset.name?.toLowerCase() || '';
-    card.style.display = (!q || name.includes(q)) ? '' : 'none';
-  });
+  // Ajouter les articles publiés non présents dans la config (nouveaux)
+  arts.forEach(a=>{if(!result.find(r=>r.id===a.id))result.push(a);});
+  return result;
 }
 
-// ── RENDU DE LA GRILLE ────────────────────────────────────────────────
-function renderGrid() {
-  const grid = document.getElementById('productGrid');
+let allArticles=loadArticles();
+let allArtsRaw=lsGet('tbt3d_arts',[]).filter(a=>a.status==='published');
+let activeFilter='all';
 
-  let filtered = allArticles;
-  if(activeFilter !== 'all' && activeFilter !== 'mesure') {
-    filtered = allArticles.filter(a => a.badge && a.badge.toLowerCase() === activeFilter);
+// Filtres dynamiques
+function buildFilters(){
+  const bar=document.getElementById('filterBar');
+  const badges=[...new Set(allArtsRaw.map(a=>a.badge).filter(Boolean))];
+  bar.innerHTML=`<button class="filter-btn active" data-filter="all" onclick="setFilter(this)">Tout</button>`;
+  badges.forEach(b=>{const btn=document.createElement('button');btn.className='filter-btn';btn.dataset.filter=b.toLowerCase();btn.textContent=b;btn.onclick=()=>setFilter(btn);bar.appendChild(btn);});
+  const m=document.createElement('button');m.className='filter-btn';m.dataset.filter='mesure';m.textContent='Sur mesure';m.onclick=()=>setFilter(m);bar.appendChild(m);
+}
+function setFilter(btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeFilter=btn.dataset.filter;renderGrid();}
+function filterCards(){const q=document.getElementById('searchInput').value.toLowerCase().trim();document.querySelectorAll('.product-card[data-id]').forEach(card=>{const name=card.dataset.name?.toLowerCase()||'';card.style.display=(!q||name.includes(q))?'':'none';});}
+
+// ══════════════════════════════════════════════════
+// RENDU DE LA GRILLE
+// ══════════════════════════════════════════════════
+function renderGrid(){
+  const grid=document.getElementById('productGrid');
+  let filtered=allArticles;
+  if(activeFilter==='mesure'){grid.innerHTML='';addMesureCard(grid);return;}
+  if(activeFilter!=='all'){filtered=allArticles.filter(a=>a.badge&&a.badge.toLowerCase()===activeFilter);}
+  if(!allArtsRaw.length){
+    grid.innerHTML=`<div class="empty-boutique" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><h3>La boutique arrive bientôt</h3><p>Les articles sont en cours de création.<br>Revenez très vite !</p></div>`;
+    addMesureCard(grid);return;
   }
-
-  if(!allArticles.length) {
-    grid.innerHTML = `
-      <div class="empty-boutique" style="grid-column:1/-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
-        <h3>La boutique arrive bientôt</h3>
-        <p>Les articles sont en cours de création.<br>Revenez très vite !</p>
-      </div>`;
-    // Garder le bouton Sur mesure en dur
-    addMesureCard(grid);
-    return;
-  }
-
-  grid.innerHTML = '';
-
-  // Articles depuis le dashboard
-  filtered.forEach(a => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.dataset.id = a.id;
-    card.dataset.name = a.name;
-    card.onclick = () => openModal(a);
-
-    const imgHtml = a.photos?.[0]
-      ? `<img src="${a.photos[0]}" alt="${esc(a.name)}" loading="lazy">`
-      : `<div class="product-img-placeholder">🏮</div>`;
-
-    const oldPrice = a.oldPrice ? `<span class="price-old">${parseFloat(a.oldPrice).toFixed(2)} €</span>` : '';
-    const badge = a.badge ? `<div class="product-badge">${esc(a.badge)}</div>` : '';
-    const buyBtn = a.payhip
-      ? `<a href="${esc(a.payhip)}" target="_blank" class="btn-buy" onclick="event.stopPropagation()">Acheter</a>`
-      : `<button class="btn-buy" onclick="event.stopPropagation();openModal(arts[${allArticles.indexOf(a)}])">Voir les détails</button>`;
-
-    card.innerHTML = `
-      <div class="product-img">${imgHtml}${badge}</div>
-      <div class="product-name">${esc(a.name)}</div>
-      <div class="product-tagline">${esc(a.tagline||'Lampe imprimée 3D · Made in France')}</div>
-      <div class="product-price">${parseFloat(a.price).toFixed(2).replace('.',',')} €${oldPrice}</div>
-      <div class="product-actions">
-        ${buyBtn}
-        <button class="btn-details" onclick="event.stopPropagation();openModal(allArticles.find(x=>x.id==${a.id}))">Détails</button>
-      </div>`;
-
-    // Animation d'entrée
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(16px)';
-    card.style.transition = 'opacity .4s ease, transform .4s ease';
+  grid.innerHTML='';
+  filtered.forEach(a=>{
+    const card=document.createElement('div');
+    card.className='product-card';card.dataset.id=a.id;card.dataset.name=a.name;
+    card.onclick=()=>openModal(a);
+    const imgHtml=a.photos?.[0]?`<img src="${a.photos[0]}" alt="${esc(a.name)}" loading="lazy">`:`<div class="product-img-placeholder">🏮</div>`;
+    const badge=a.badge?`<div class="product-badge">${esc(a.badge)}</div>`:'';
+    const oldPrice=a.oldPrice?`<span class="price-old">${parseFloat(a.oldPrice).toFixed(2).replace('.',',')} €</span>`:'';
+    const priceDisplay=a._displayPrice||parseFloat(a.price).toFixed(2).replace('.',',')+' €';
+    const fromSpan=a._from?`<span class="price-from">À partir de</span>`:'';
+    const buyBtn=a.payhip?`<a href="${esc(a.payhip)}" target="_blank" class="btn-buy" onclick="event.stopPropagation()">Acheter</a>`:`<button class="btn-buy" onclick="event.stopPropagation();openModal(allArticles[${allArticles.indexOf(a)}])">Voir les détails</button>`;
+    card.innerHTML=`<div class="product-img">${imgHtml}${badge}</div><div class="product-name">${esc(a.name)}</div><div class="product-tagline">${esc(a.tagline||'Lampe imprimée 3D · Made in France')}</div><div class="product-price">${oldPrice}${fromSpan}${priceDisplay}</div><div class="product-actions">${buyBtn}<button class="btn-details" onclick="event.stopPropagation();openModal(allArticles[${allArticles.indexOf(a)}])">Détails</button></div>`;
+    card.style.opacity='0';card.style.transform='translateY(16px)';card.style.transition='opacity .4s ease, transform .4s ease';
     grid.appendChild(card);
-    requestAnimationFrame(() => { card.style.opacity='1'; card.style.transform='none'; });
+    requestAnimationFrame(()=>{card.style.opacity='1';card.style.transform='none';});
   });
-
-  // Toujours ajouter la carte "Sur mesure" si filtre all ou mesure
-  if(activeFilter === 'all' || activeFilter === 'mesure') {
-    addMesureCard(grid);
-  }
+  if(activeFilter==='all') addMesureCard(grid);
 }
 
-function addMesureCard(grid) {
-  const card = document.createElement('a');
-  card.href = '/devis.html';
-  card.className = 'product-card';
-  card.innerHTML = `
-    <div class="product-img" style="background:#111">
-      <div class="product-img-placeholder" style="background:#111;color:rgba(255,255,255,.2);flex-direction:column;gap:12px">
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 3L3 11v18l17 8 17-8V11L20 3z" stroke="currentColor" stroke-width="1.4"/><path d="M20 3v26M3 11l17 8M37 11l-17 8" stroke="currentColor" stroke-width="1" opacity=".4"/></svg>
-        <span style="font-size:13px">Votre STL</span>
-      </div>
-      <div class="product-badge" style="background:#fff;color:#111">Sur mesure</div>
-    </div>
-    <div class="product-name">Impression sur mesure</div>
-    <div class="product-tagline">Votre fichier STL · FDM ou résine · Prix instantané</div>
-    <div class="product-price">Prix calculé en ligne</div>`;
+function addMesureCard(grid){
+  const card=document.createElement('a');card.href='/devis.html';card.className='product-card';
+  card.innerHTML=`<div class="product-img" style="background:#111"><div class="product-img-placeholder" style="background:#111;color:rgba(255,255,255,.2);flex-direction:column;gap:12px"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 3L3 11v18l17 8 17-8V11L20 3z" stroke="currentColor" stroke-width="1.4"/><path d="M20 3v26M3 11l17 8M37 11l-17 8" stroke="currentColor" stroke-width="1" opacity=".4"/></svg><span style="font-size:13px">Votre STL</span></div><div class="product-badge white-badge">Sur mesure</div></div><div class="product-name">Impression sur mesure</div><div class="product-tagline">Votre fichier STL · FDM ou résine · Prix instantané</div><div class="product-price">Prix calculé en ligne</div>`;
   grid.appendChild(card);
 }
 
-// ── MODALE FICHE PRODUIT ──────────────────────────────────────────────
-let selectedOpts = {};
-
-function openModal(art) {
-  if(!art) return;
-  selectedOpts = {};
-  if(art.variants) art.variants.forEach(v => { selectedOpts[v.name] = v.options[0]?.label || ''; });
-
-  // Galerie
-  const gal = document.getElementById('modalGallery');
-  if(art.photos && art.photos.length) {
-    gal.innerHTML = `
-      <img class="modal-main-img" id="modalMainImg" src="${art.photos[0]}" alt="${esc(art.name)}">
-      ${art.photos.length > 1 ? `<div class="modal-thumbs">${art.photos.map((src,i)=>`<img class="modal-thumb${i===0?' active':''}" src="${src}" onclick="switchPhoto(this,'${src}')">`).join('')}</div>` : ''}`;
-  } else {
-    gal.innerHTML = `<div class="modal-main-ph">🏮</div>`;
+// ══════════════════════════════════════════════════
+// MODALE FICHE PRODUIT
+// ══════════════════════════════════════════════════
+let selectedOpts={};
+function openModal(art){
+  if(!art)return;
+  selectedOpts={};
+  if(art.variants)art.variants.forEach(v=>{selectedOpts[v.name]=v.options[0]?.label||'';});
+  const gal=document.getElementById('modalGallery');
+  if(art.photos&&art.photos.length){
+    gal.innerHTML=`<img class="modal-main-img" id="modalMainImg" src="${art.photos[0]}" alt="${esc(art.name)}">${art.photos.length>1?`<div class="modal-thumbs">${art.photos.map((src,i)=>`<img class="modal-thumb${i===0?' active':''}" src="${src}" onclick="switchPhoto(this,'${src}')">`).join('')}</div>`:''}`;
+  }else{gal.innerHTML=`<div class="modal-main-ph">🏮</div>`;}
+  const info=document.getElementById('modalInfo');
+  const badgeHtml=art.badge?`<div class="modal-badge">${esc(art.badge)}</div>`:'';
+  const oldP=art.oldPrice?`<span class="modal-price-old">${parseFloat(art.oldPrice).toFixed(2).replace('.',',')} €</span>`:'';
+  const priceDisplay=art._displayPrice||parseFloat(art.price).toFixed(2).replace('.',',')+' €';
+  let varHtml='';
+  if(art.variants&&art.variants.length){
+    varHtml=art.variants.map((vg,gi)=>`<div class="opt-group"><div class="opt-label">${esc(vg.name)} <span id="optsel-${gi}">${esc(vg.options[0]?.label||'')}</span></div><div class="opt-chips">${vg.options.map((opt,oi)=>`<div class="opt-chip${oi===0?' selected':''}" onclick="selectOpt(this,${gi},'${esc(vg.name)}','${esc(opt.label)}')" data-gi="${gi}">${opt.color?`<span class="cdot" style="background:${opt.color}"></span>`:''} ${esc(opt.label)}</div>`).join('')}</div></div>`).join('');
   }
-
-  // Infos
-  const info = document.getElementById('modalInfo');
-  const badgeHtml = art.badge ? `<div class="modal-badge">${esc(art.badge)}</div>` : '';
-  const oldPriceHtml = art.oldPrice ? `<span class="modal-price-old">${parseFloat(art.oldPrice).toFixed(2).replace('.',',')} €</span>` : '';
-
-  // Options/variantes
-  let variantsHtml = '';
-  if(art.variants && art.variants.length) {
-    variantsHtml = art.variants.map((vg,gi) => `
-      <div class="opt-group">
-        <div class="opt-label">${esc(vg.name)} <span id="optsel-${gi}">${esc(vg.options[0]?.label||'')}</span></div>
-        <div class="opt-chips">
-          ${vg.options.map((opt,oi) => `
-            <div class="opt-chip${oi===0?' selected':''}" onclick="selectOpt(this,${gi},'${esc(vg.name)}','${esc(opt.label)}')"
-              data-gi="${gi}">
-              ${opt.color?`<span class="cdot" style="background:${opt.color}"></span>`:''}
-              ${esc(opt.label)}
-            </div>`).join('')}
-        </div>
-      </div>`).join('');
-  }
-
-  // Caractéristiques
-  let caracHtml = '';
-  if(art.caracs && art.caracs.length) {
-    caracHtml = `
-      <div class="modal-hr"></div>
-      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;font-weight:500">Caractéristiques</div>
-      <table class="carac-table">
-        ${art.caracs.filter(c=>c.key).map(c=>`<tr><td>${esc(c.key)}</td><td>${esc(c.val)}</td></tr>`).join('')}
-      </table>`;
-  }
-
-  // Description
-  let descHtml = '';
-  if(art.desc) {
-    descHtml = `<div class="modal-hr"></div><div class="modal-desc">${esc(art.desc)}</div>`;
-  }
-
-  const buyBtn = art.payhip
-    ? `<a href="${esc(art.payhip)}" target="_blank" class="btn-modal-buy">Ajouter au panier →</a>`
-    : `<a href="mailto:tbt203.contact@gmail.com?subject=Commande — ${esc(art.name)}" class="btn-modal-buy">Me contacter pour commander →</a>`;
-
-  info.innerHTML = `
-    ${badgeHtml}
-    <div class="modal-name">${esc(art.name)}</div>
-    <div class="modal-tagline">${esc(art.tagline||'')}</div>
-    <div class="modal-price">${parseFloat(art.price).toFixed(2).replace('.',',')} €${oldPriceHtml}</div>
-    ${variantsHtml}
-    ${caracHtml}
-    ${descHtml}
-    ${buyBtn}
-    <button class="btn-wishlist">♡ Ajouter à la liste de souhaits</button>`;
-
+  let caracHtml='';
+  if(art.caracs&&art.caracs.length){caracHtml=`<div class="modal-hr"></div><div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;font-weight:500">Caractéristiques</div><table class="carac-table">${art.caracs.filter(c=>c.key).map(c=>`<tr><td>${esc(c.key)}</td><td>${esc(c.val)}</td></tr>`).join('')}</table>`;}
+  let descHtml=art.desc?`<div class="modal-hr"></div><div class="modal-desc">${esc(art.desc)}</div>`:'';
+  const buyBtn=art.payhip?`<a href="${esc(art.payhip)}" target="_blank" class="btn-modal-buy">Acheter →</a>`:`<a href="mailto:tbt203.contact@gmail.com?subject=Commande — ${esc(art.name)}" class="btn-modal-buy">Me contacter pour commander →</a>`;
+  info.innerHTML=`${badgeHtml}<div class="modal-name">${esc(art.name)}</div><div class="modal-tagline">${esc(art.tagline||'')}</div><div class="modal-price">${priceDisplay}${oldP}</div>${varHtml}${caracHtml}${descHtml}${buyBtn}<button class="btn-wishlist">♡ Ajouter à la liste de souhaits</button>`;
   document.getElementById('modalOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
 }
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';}
+function switchPhoto(thumb,src){document.getElementById('modalMainImg').src=src;document.querySelectorAll('.modal-thumb').forEach(t=>t.classList.remove('active'));thumb.classList.add('active');}
+function selectOpt(chip,gi,name,label){document.querySelectorAll(`.opt-chip[data-gi="${gi}"]`).forEach(c=>c.classList.remove('selected'));chip.classList.add('selected');selectedOpts[name]=label;const lbl=document.getElementById('optsel-'+gi);if(lbl)lbl.textContent=label;}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-function switchPhoto(thumb, src) {
-  document.getElementById('modalMainImg').src = src;
-  document.querySelectorAll('.modal-thumb').forEach(t=>t.classList.remove('active'));
-  thumb.classList.add('active');
-}
-function selectOpt(chip, gi, name, label) {
-  document.querySelectorAll(`.opt-chip[data-gi="${gi}"]`).forEach(c=>c.classList.remove('selected'));
-  chip.classList.add('selected');
-  selectedOpts[name] = label;
-  const lbl = document.getElementById('optsel-'+gi);
-  if(lbl) lbl.textContent = label;
-}
-
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// Fermer avec Escape
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
-
-// ── INIT ──────────────────────────────────────────────────────────────
 buildFilters();
 renderGrid();
 </script>
