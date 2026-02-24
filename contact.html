@@ -5,142 +5,445 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact — TBT3D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
 <style>
-.contact-grid { display: grid; grid-template-columns: 1fr 420px; gap: 80px; align-items: start; }
-@media(max-width:900px){ .contact-grid { grid-template-columns: 1fr; gap: 48px; } }
+:root {
+  --accent-contact: #ff6b35;
+  --accent-glow: rgba(255,107,53,.12);
+}
 
-.contact-info-item { display: flex; gap: 16px; align-items: flex-start; padding: 20px 0; border-bottom: 1px solid var(--border); }
-.contact-info-item:last-child { border-bottom: none; }
-.contact-info-icon { width: 40px; height: 40px; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.contact-info-icon svg { width: 18px; height: 18px; }
-.contact-info-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-.contact-info-value { font-size: 14px; color: var(--black); }
-.contact-info-value a { text-decoration: none; color: var(--black); border-bottom: 1px solid var(--border); transition: border-color .15s; }
-.contact-info-value a:hover { border-color: var(--black); }
+/* ── PAGE LAYOUT ── */
+.contact-hero {
+  padding: 80px 0 60px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.contact-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--accent-contact); margin-bottom: 16px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.contact-eyebrow::before, .contact-eyebrow::after {
+  content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--border);
+}
+.contact-hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  font-weight: 700; letter-spacing: -.03em; line-height: 1;
+  margin-bottom: 20px;
+}
+.contact-hero p {
+  font-size: 16px; color: var(--soft); max-width: 500px;
+  margin: 0 auto; line-height: 1.7;
+}
 
-.form-card { background: var(--bg); border-radius: 12px; padding: 36px; border: 1px solid var(--border); }
-.form-card h2 { font-size: 20px; font-weight: 500; margin-bottom: 24px; }
+/* ── MAIN GRID ── */
+.contact-wrap {
+  max-width: 1200px; margin: 0 auto;
+  padding: 64px 32px;
+  display: grid; grid-template-columns: 1fr 480px; gap: 64px;
+  align-items: start;
+}
+@media(max-width:960px){ .contact-wrap { grid-template-columns: 1fr; gap: 48px; } }
+@media(max-width:600px){ .contact-wrap { padding: 40px 20px; } }
 
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media(max-width:500px){ .form-row { grid-template-columns: 1fr; } }
+/* ── LEFT: INFOS + CTA ── */
+.contact-left {}
+.contact-tagline {
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem; font-weight: 600;
+  letter-spacing: -.02em; line-height: 1.2;
+  margin-bottom: 32px;
+}
+.contact-tagline span { color: var(--accent-contact); }
 
-.submit-btn { width: 100%; margin-top: 8px; }
+.info-list { margin-bottom: 40px; }
+.info-item {
+  display: flex; gap: 18px; align-items: flex-start;
+  padding: 20px 0; border-bottom: 1px solid var(--border);
+  transition: transform .2s;
+}
+.info-item:first-child { border-top: 1px solid var(--border); }
+.info-item:hover { transform: translateX(4px); }
+.info-icon {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 10px; border: 1px solid var(--border);
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+  transition: border-color .2s, background .2s;
+}
+.info-item:hover .info-icon {
+  border-color: var(--accent-contact);
+  background: var(--accent-glow);
+}
+.info-icon svg { width: 18px; height: 18px; }
+.info-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 5px;
+}
+.info-value { font-size: 14px; color: var(--black); font-weight: 500; }
+.info-value a { text-decoration: none; color: var(--black); border-bottom: 1px solid var(--border); transition: border-color .15s; }
+.info-value a:hover { border-color: var(--accent-contact); }
 
-/* Sélecteur sujet */
-.subject-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
-.subject-chip { padding: 7px 14px; border: 1.5px solid var(--border); border-radius: 50px; font-size: 12px; cursor: pointer; transition: all .15s; color: var(--soft); background: var(--white); font-family: var(--font); }
-.subject-chip:hover, .subject-chip.on { border-color: var(--black); background: var(--black); color: var(--white); }
+.cta-box {
+  background: var(--black); color: #fff;
+  border-radius: 14px; padding: 28px 28px 24px;
+  position: relative; overflow: hidden;
+}
+.cta-box::before {
+  content: '';  position: absolute; top: -40px; right: -40px;
+  width: 140px; height: 140px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,107,53,.25), transparent 70%);
+}
+.cta-box-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+.cta-box-sub { font-size: 13px; color: rgba(255,255,255,.55); line-height: 1.7; margin-bottom: 20px; }
+.btn-cta-orange {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; background: var(--accent-contact); color: #fff;
+  border-radius: 50px; text-decoration: none; font-size: 13px; font-weight: 600;
+  letter-spacing: .02em; transition: all .2s;
+  box-shadow: 0 4px 20px rgba(255,107,53,.4);
+}
+.btn-cta-orange:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,107,53,.5); }
+
+/* ── RIGHT: FORM ── */
+.contact-form-wrap {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px; padding: 40px;
+  position: sticky; top: 100px;
+}
+@media(max-width:600px){ .contact-form-wrap { padding: 24px 20px; border-radius: 14px; } }
+
+.form-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 32px; padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.form-title { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 700; letter-spacing: -.02em; }
+.form-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  background: rgba(255,107,53,.12); color: var(--accent-contact);
+  border: 1px solid rgba(255,107,53,.25); border-radius: 20px;
+  padding: 4px 10px;
+}
+
+/* Subject selector */
+.subject-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.s-chip {
+  padding: 8px 16px; border: 1.5px solid var(--border);
+  border-radius: 50px; font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all .18s; color: var(--soft);
+  background: #fff; font-family: 'Syne', sans-serif;
+}
+.s-chip:hover { border-color: var(--accent-contact); color: var(--accent-contact); }
+.s-chip.on { border-color: var(--accent-contact); background: var(--accent-contact); color: #fff; }
+
+/* Form fields */
+.f-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+@media(max-width:500px){ .f-grid2 { grid-template-columns: 1fr; } }
+.f-field { margin-bottom: 14px; }
+.f-field label {
+  display: block; font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 500; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 7px;
+}
+.f-field label span { color: var(--accent-contact); margin-left: 2px; }
+.f-input {
+  width: 100%; padding: 13px 16px;
+  background: #fff; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 14px; font-family: 'Syne', sans-serif;
+  color: var(--black); outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.f-input:focus { border-color: var(--accent-contact); box-shadow: 0 0 0 3px var(--accent-glow); }
+.f-input::placeholder { color: #bbb; }
+textarea.f-input { resize: vertical; min-height: 130px; line-height: 1.7; }
+select.f-input { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 40px; }
+
+/* File upload */
+.file-drop {
+  border: 2px dashed var(--border); border-radius: 10px;
+  padding: 28px 20px; text-align: center; cursor: pointer;
+  transition: all .2s; background: #fff;
+}
+.file-drop:hover, .file-drop.dragover { border-color: var(--accent-contact); background: var(--accent-glow); }
+.file-drop-icon { font-size: 28px; margin-bottom: 8px; }
+.file-drop-text { font-size: 13px; color: var(--soft); }
+.file-drop-text strong { color: var(--accent-contact); cursor: pointer; }
+.file-drop-hint { font-size: 11px; color: var(--muted); margin-top: 5px; font-family: 'JetBrains Mono', monospace; }
+.file-list { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.file-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; background: #fff; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 12px;
+}
+.file-item span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-rm { cursor: pointer; color: var(--muted); font-size: 16px; transition: color .15s; }
+.file-rm:hover { color: #e33; }
+
+/* Submit */
+.btn-submit {
+  width: 100%; padding: 16px;
+  background: var(--accent-contact); color: #fff;
+  border: none; border-radius: 12px;
+  font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700;
+  cursor: pointer; letter-spacing: .01em;
+  transition: all .2s; margin-top: 8px;
+  box-shadow: 0 4px 20px rgba(255,107,53,.35);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,107,53,.5); }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+.form-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 14px; font-family: 'JetBrains Mono', monospace; }
+
+/* Success */
+.success-screen {
+  display: none; text-align: center; padding: 20px 0;
+}
+.success-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(46,204,138,.1); border: 2px solid rgba(46,204,138,.3);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px; font-size: 32px;
+}
+.success-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 10px; }
+.success-sub { font-size: 14px; color: var(--soft); line-height: 1.7; margin-bottom: 24px; }
+.btn-reset {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px; border: 1.5px solid var(--border);
+  border-radius: 50px; font-size: 13px; font-weight: 600;
+  cursor: pointer; background: none; font-family: 'Syne', sans-serif;
+  transition: all .2s;
+}
+.btn-reset:hover { border-color: var(--black); background: var(--black); color: #fff; }
+
+/* Char counter */
+.char-counter { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-align: right; margin-top: 4px; }
+.char-counter.warn { color: #e33; }
+
+/* Connected user hint */
+.user-hint {
+  display: none;
+  background: rgba(255,107,53,.06); border: 1px solid rgba(255,107,53,.2);
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 20px;
+  font-size: 12px; color: var(--accent-contact);
+  align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace;
+}
+.user-hint.show { display: flex; }
 </style>
 </head>
 <body data-page="contact">
 
-<!-- NAVBAR -->
+<!-- NAVBAR (reprend le style existant) -->
 <header id="navbar">
   <div class="nav-inner">
-    <a href="/index.html"><img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D"></a>
+    <a href="/index.html"><img src="image/ChatGPT_Image_30_juin_2025__14_57_42-Photoroom__1_.png" style="height:44px;width:auto;object-fit:contain;border-radius:6px" alt="TBT3D"></a>
     <nav class="nav-links">
-      <a href="/index.html" data-page="home">Home</a><a href="/boutique.html" data-page="boutique">Boutique</a><a href="/devis.html" data-page="devis">Devis STL</a><a href="/a-propos.html" data-page="apropos">À propos</a><a href="/contact.html" data-page="contact">Contact</a>
+      <a href="/index.html" data-page="home">Home</a>
+      <a href="/boutique.html" data-page="boutique">Boutique</a>
+      <a href="/devis.html" data-page="devis">Devis STL</a>
+      <a href="/a-propos.html" data-page="apropos">À propos</a>
+      <a href="/contact.html" data-page="contact">Contact</a>
     </nav>
     <div class="nav-actions">
-      <button class="nav-icon" onclick="toggleSearch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></button>
-      <button class="nav-icon nav-burger" onclick="toggleMobileNav()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <button class="nav-icon" onclick="toggleSearch()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
+      <a href="/compte.html" class="nav-icon" id="navCompteBtn" title="Mon compte">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </a>
+      <button class="nav-icon nav-burger" onclick="toggleMobileNav()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
     </div>
   </div>
-  <div class="search-bar" id="searchBar"><div class="search-inner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" id="searchInput" placeholder="Rechercher..." onkeydown="if(event.key==='Escape')toggleSearch()"><button onclick="toggleSearch()">×</button></div></div>
-  <div class="mobile-nav" id="mobileNav"><a href="/index.html">Home</a><a href="/boutique.html">Boutique</a><a href="/devis.html">Devis STL</a><a href="/a-propos.html">À propos</a><a href="/contact.html">Contact</a></div>
+  <div class="search-bar" id="searchBar">
+    <div class="search-inner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Rechercher..." onkeydown="if(event.key==='Escape')toggleSearch()">
+      <button onclick="toggleSearch()">×</button>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="/index.html">Home</a><a href="/boutique.html">Boutique</a>
+    <a href="/devis.html">Devis STL</a><a href="/a-propos.html">À propos</a>
+    <a href="/contact.html">Contact</a><a href="/compte.html">Mon compte</a>
+  </div>
 </header>
 
-<!-- CONTENU -->
-<div class="container">
-  <div class="section">
+<!-- HERO -->
+<div class="contact-hero">
+  <div class="contact-eyebrow">Réponse sous 24h</div>
+  <h1>Parlons de<br>votre projet</h1>
+  <p>Une question sur une commande, un projet d'impression sur mesure, ou simplement envie d'échanger sur la fabrication 3D ?</p>
+</div>
 
-    <div class="page-header" style="padding-top:0">
-      <div class="section-eyebrow">On vous répond sous 24h</div>
-      <h1>Contact</h1>
-      <p>Une question sur une commande, un projet sur mesure, ou juste envie de discuter impression 3D ?</p>
+<!-- MAIN -->
+<div class="contact-wrap">
+
+  <!-- GAUCHE: infos -->
+  <div class="contact-left">
+    <div class="contact-tagline">
+      On est là pour<br><span>vous aider.</span>
     </div>
 
-    <div class="contact-grid">
-
-      <!-- Infos -->
-      <div>
-        <div class="contact-info-item">
-          <div class="contact-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-          <div>
-            <div class="contact-info-label">Email</div>
-            <div class="contact-info-value"><a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a></div>
-          </div>
+    <div class="info-list">
+      <div class="info-item">
+        <div class="info-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         </div>
-        <div class="contact-info-item">
-          <div class="contact-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-          <div>
-            <div class="contact-info-label">Atelier</div>
-            <div class="contact-info-value">Lille, Hauts-de-France 🇫🇷</div>
-          </div>
-        </div>
-        <div class="contact-info-item">
-          <div class="contact-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div>
-          <div>
-            <div class="contact-info-label">Délai de réponse</div>
-            <div class="contact-info-value">Sous 24h en semaine</div>
-          </div>
-        </div>
-        <div class="contact-info-item">
-          <div class="contact-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></div>
-          <div>
-            <div class="contact-info-label">Réseaux</div>
-            <div class="contact-info-value">
-              <a href="#">Instagram</a> &nbsp;·&nbsp; <a href="#">TikTok</a>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top:36px;padding:24px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
-          <div style="font-size:13px;font-weight:500;margin-bottom:8px">💡 Vous avez un fichier STL ?</div>
-          <div style="font-size:13px;color:var(--soft);line-height:1.7;margin-bottom:16px">Obtenez un devis instantané directement en ligne — pas besoin de nous contacter pour ça.</div>
-          <a href="/devis.html" class="btn btn-primary" style="font-size:13px;padding:10px 20px">Calculer mon devis →</a>
+        <div>
+          <div class="info-label">Email direct</div>
+          <div class="info-value"><a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a></div>
         </div>
       </div>
-
-      <!-- Formulaire -->
-      <div class="form-card">
-        <h2>Envoyer un message</h2>
-
-        <div id="successMsg" class="alert alert-success" style="display:none">
-          ✓ Message envoyé ! On vous répond sous 24h.
+      <div class="info-item">
+        <div class="info-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
         </div>
-
-        <div class="form-row">
-          <div class="field"><label>Prénom</label><input type="text" id="fPrenom" placeholder="Marie"></div>
-          <div class="field"><label>Nom</label><input type="text" id="fNom" placeholder="Dupont"></div>
+        <div>
+          <div class="info-label">Atelier</div>
+          <div class="info-value">Lille, Hauts-de-France 🇫🇷</div>
         </div>
-        <div class="field"><label>Email</label><input type="email" id="fEmail" placeholder="marie@email.com"></div>
-
-        <div class="field" style="margin-bottom:8px"><label>Sujet</label></div>
-        <div class="subject-chips" id="subjectChips">
-          <button class="subject-chip on" data-v="commande">Commande</button>
-          <button class="subject-chip" data-v="devis">Devis sur mesure</button>
-          <button class="subject-chip" data-v="info">Renseignement</button>
-          <button class="subject-chip" data-v="autre">Autre</button>
-        </div>
-        <div style="height:16px"></div>
-
-        <div class="field"><label>Message</label><textarea id="fMsg" placeholder="Décrivez votre demande..." rows="5"></textarea></div>
-
-        <button class="btn btn-primary submit-btn" onclick="sendContact()">Envoyer le message</button>
-        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px">Vos données ne sont pas revendues. Jamais.</p>
       </div>
+      <div class="info-item">
+        <div class="info-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        </div>
+        <div>
+          <div class="info-label">Délai de réponse</div>
+          <div class="info-value">Sous 24h — du lundi au vendredi</div>
+        </div>
+      </div>
+      <div class="info-item">
+        <div class="info-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </div>
+        <div>
+          <div class="info-label">Réseaux sociaux</div>
+          <div class="info-value"><a href="#">Instagram</a> &nbsp;·&nbsp; <a href="#">TikTok</a></div>
+        </div>
+      </div>
+    </div>
 
+    <div class="cta-box">
+      <div class="cta-box-title">💡 Vous avez un fichier STL ?</div>
+      <div class="cta-box-sub">Obtenez un devis instantané en ligne — sans avoir à nous contacter. Uploadez votre fichier et recevez un prix en quelques secondes.</div>
+      <a href="/devis.html" class="btn-cta-orange">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Calculer mon devis →
+      </a>
     </div>
   </div>
+
+  <!-- DROITE: formulaire -->
+  <div class="contact-form-wrap">
+
+    <!-- Success state -->
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Message envoyé !</div>
+      <div class="success-sub">On vous répond sous 24h.<br>Un email de confirmation vient de vous être envoyé.</div>
+      <button class="btn-reset" onclick="resetForm()">← Envoyer un autre message</button>
+    </div>
+
+    <!-- Form -->
+    <div id="formContent">
+      <div class="form-top">
+        <div class="form-title">Envoyer un message</div>
+        <div class="form-badge">Réponse &lt; 24h</div>
+      </div>
+
+      <!-- Hint si connecté -->
+      <div class="user-hint" id="userHint">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span id="userHintTxt">Connecté en tant que …</span>
+      </div>
+
+      <!-- Sujet -->
+      <div style="margin-bottom:8px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Sujet</div>
+        <div class="subject-row" id="subjectRow">
+          <button class="s-chip on" data-v="commande">🛒 Commande</button>
+          <button class="s-chip" data-v="devis">📐 Devis sur mesure</button>
+          <button class="s-chip" data-v="produit">🏮 Produit</button>
+          <button class="s-chip" data-v="livraison">📦 Livraison</button>
+          <button class="s-chip" data-v="partenariat">🤝 Partenariat</button>
+          <button class="s-chip" data-v="autre">💬 Autre</button>
+        </div>
+      </div>
+      <div style="height:20px"></div>
+
+      <!-- Identité -->
+      <div class="f-grid2">
+        <div class="f-field">
+          <label>Prénom <span>*</span></label>
+          <input class="f-input" type="text" id="fPrenom" placeholder="Marie">
+        </div>
+        <div class="f-field">
+          <label>Nom</label>
+          <input class="f-input" type="text" id="fNom" placeholder="Dupont">
+        </div>
+      </div>
+
+      <div class="f-field">
+        <label>Email <span>*</span></label>
+        <input class="f-input" type="email" id="fEmail" placeholder="marie@email.com">
+      </div>
+
+      <div class="f-field">
+        <label>Téléphone <span style="color:var(--muted);font-weight:400">(optionnel)</span></label>
+        <input class="f-input" type="tel" id="fTel" placeholder="+33 6 00 00 00 00">
+      </div>
+
+      <!-- Numéro commande si sujet = commande -->
+      <div class="f-field" id="orderField" style="display:none">
+        <label>Numéro de commande</label>
+        <input class="f-input" type="text" id="fOrder" placeholder="ex : TBT-2024-0042">
+      </div>
+
+      <div class="f-field">
+        <label>Message <span>*</span></label>
+        <textarea class="f-input" id="fMsg" placeholder="Décrivez votre demande en détail…" rows="6" maxlength="2000" oninput="updateCounter(this)"></textarea>
+        <div class="char-counter" id="charCounter">0 / 2000</div>
+      </div>
+
+      <!-- Upload fichier STL/image -->
+      <div class="f-field">
+        <label>Pièce jointe <span style="color:var(--muted);font-weight:400">(STL, image, PDF — max 10 Mo)</span></label>
+        <div class="file-drop" id="fileDrop" onclick="document.getElementById('fileInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
+          <div class="file-drop-icon">📎</div>
+          <div class="file-drop-text">Glissez un fichier ici ou <strong>parcourir</strong></div>
+          <div class="file-drop-hint">STL · OBJ · JPG · PNG · PDF</div>
+        </div>
+        <input type="file" id="fileInput" style="display:none" accept=".stl,.obj,.jpg,.jpeg,.png,.pdf" onchange="handleFile(this.files[0])">
+        <div class="file-list" id="fileList"></div>
+      </div>
+
+      <button class="btn-submit" id="submitBtn" onclick="sendContact()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Envoyer le message
+      </button>
+      <div class="form-note">Vos données ne sont pas revendues. Jamais. · <a href="/politique-confidentialite.html" style="color:inherit">Politique de confidentialité</a></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- FOOTER -->
 <footer id="footer">
   <div class="footer-inner">
-    <a href="/index.html"><img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D"></a>
+    <div class="footer-brand">
+      <a href="/index.html"><img src="image/ChatGPT_Image_30_juin_2025__14_57_42-Photoroom__1_.png" style="height:44px;width:auto;object-fit:contain;border-radius:6px" alt="TBT3D"></a>
+      <p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p>
+      <p class="footer-tagline">Made in France 🇫🇷</p>
+    </div>
     <div class="footer-col"><div class="footer-col-title">Navigation</div><a href="/index.html">Home</a><a href="/boutique.html">Boutique</a><a href="/devis.html">Impression sur mesure</a><a href="/a-propos.html">À propos</a><a href="/contact.html">Contact</a></div>
     <div class="footer-col"><div class="footer-col-title">Légal</div><a href="/mentions-legales.html">Mentions légales</a><a href="/cgv.html">CGV</a><a href="/politique-confidentialite.html">Confidentialité</a><a href="/politique-retour.html">Retours</a></div>
     <div class="footer-col"><div class="footer-col-title">Contact</div><a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a><a href="/contact.html">Formulaire</a><div class="footer-social"><a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a></div></div>
@@ -148,46 +451,206 @@
   <div class="footer-bottom"><span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span></div>
 </footer>
 
-<script src="/main.js"></script>
-<script>
-// Chips sujet
+<!-- FIREBASE + EMAILJS -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
+  authDomain: "tbt3d-a0f04.firebaseapp.com",
+  projectId: "tbt3d-a0f04",
+  storageBucket: "tbt3d-a0f04.firebasestorage.app",
+  appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
+};
+
+// ──────────────────────────────────────
+// ⚙️ EMAILJS — Remplace par tes vraies clés
+// → https://www.emailjs.com (gratuit 200/mois)
+// ──────────────────────────────────────
+const EMAILJS_SERVICE  = 'service_XXXXXXX';   // ton service ID
+const EMAILJS_TEMPLATE_ADMIN  = 'template_XXXXXXX'; // template notif admin
+const EMAILJS_TEMPLATE_CLIENT = 'template_YYYYYYY'; // template confirmation client
+const EMAILJS_PUBLIC_KEY = 'XXXXXXXXXXXXXXXX';       // ta public key
+
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUser = null;
 let selectedSubject = 'commande';
-document.querySelectorAll('.subject-chip').forEach(chip => {
+let attachedFile = null;
+
+// ── Auth state ──
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('fPrenom').value = user.displayName?.split(' ')[0] || '';
+    document.getElementById('fNom').value    = user.displayName?.split(' ').slice(1).join(' ') || '';
+    document.getElementById('fEmail').value  = user.email || '';
+    document.getElementById('fEmail').readOnly = true;
+    document.getElementById('fEmail').style.background = '#f5f5f5';
+    const hint = document.getElementById('userHint');
+    document.getElementById('userHintTxt').textContent = `Connecté en tant que ${user.email}`;
+    hint.classList.add('show');
+  }
+});
+
+// ── Subject chips ──
+document.querySelectorAll('.s-chip').forEach(chip => {
   chip.onclick = () => {
-    document.querySelectorAll('.subject-chip').forEach(c => c.classList.remove('on'));
+    document.querySelectorAll('.s-chip').forEach(c => c.classList.remove('on'));
     chip.classList.add('on');
     selectedSubject = chip.dataset.v;
+    document.getElementById('orderField').style.display = selectedSubject === 'commande' ? '' : 'none';
   };
 });
 
-// Envoi formulaire via Netlify Forms (aucun backend requis)
-async function sendContact() {
-  const prenom = document.getElementById('fPrenom').value.trim();
-  const nom    = document.getElementById('fNom').value.trim();
-  const email  = document.getElementById('fEmail').value.trim();
-  const msg    = document.getElementById('fMsg').value.trim();
-  if (!prenom || !email || !msg) { alert('Merci de remplir les champs obligatoires.'); return; }
+// ── Char counter ──
+window.updateCounter = (el) => {
+  const len = el.value.length;
+  const el2 = document.getElementById('charCounter');
+  el2.textContent = `${len} / 2000`;
+  el2.classList.toggle('warn', len > 1800);
+};
 
-  // Netlify Forms : ajoute name="contact" sur le form et netlify="true"
-  // Ici on simule — à connecter à votre backend ou Netlify Forms
-  const body = new URLSearchParams({
-    'form-name': 'contact',
-    prenom, nom, email,
+// ── File handling ──
+window.dragOver = (e) => { e.preventDefault(); document.getElementById('fileDrop').classList.add('dragover'); };
+window.dragLeave = () => { document.getElementById('fileDrop').classList.remove('dragover'); };
+window.dropFile = (e) => {
+  e.preventDefault();
+  document.getElementById('fileDrop').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) setFile(file);
+};
+window.handleFile = (file) => { if (file) setFile(file); };
+function setFile(file) {
+  if (file.size > 10 * 1024 * 1024) { alert('Fichier trop lourd (max 10 Mo)'); return; }
+  attachedFile = file;
+  const list = document.getElementById('fileList');
+  list.innerHTML = `<div class="file-item">📄 <span>${file.name}</span><span class="file-rm" onclick="removeFile()">×</span></div>`;
+}
+window.removeFile = () => { attachedFile = null; document.getElementById('fileList').innerHTML = ''; document.getElementById('fileInput').value = ''; };
+
+// ── Send ──
+window.sendContact = async () => {
+  const prenom  = document.getElementById('fPrenom').value.trim();
+  const nom     = document.getElementById('fNom').value.trim();
+  const email   = document.getElementById('fEmail').value.trim();
+  const tel     = document.getElementById('fTel').value.trim();
+  const order   = document.getElementById('fOrder').value.trim();
+  const msg     = document.getElementById('fMsg').value.trim();
+
+  if (!prenom) { shake('fPrenom'); return; }
+  if (!email || !email.includes('@')) { shake('fEmail'); return; }
+  if (!msg || msg.length < 10) { shake('fMsg'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Envoi en cours…`;
+
+  const msgData = {
+    prenom, nom,
+    email,
+    tel: tel || null,
     sujet: selectedSubject,
-    message: msg
-  });
+    orderRef: order || null,
+    message: msg,
+    fileName: attachedFile?.name || null,
+    status: 'nouveau',
+    userId: currentUser?.uid || null,
+    createdAt: serverTimestamp(),
+    repliedAt: null,
+    reply: null,
+  };
 
   try {
-    await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
-  } catch(e) {}
+    // 1. Sauvegarder dans Firestore
+    const docRef = await addDoc(collection(db, 'messages'), msgData);
 
-  document.getElementById('successMsg').style.display = 'block';
-  document.getElementById('fPrenom').value = '';
-  document.getElementById('fNom').value = '';
-  document.getElementById('fEmail').value = '';
-  document.getElementById('fMsg').value = '';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+    // 2. Email à l'admin (toi)
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_ADMIN, {
+      to_email:   'tbt203.contact@gmail.com',
+      from_name:  `${prenom} ${nom}`.trim(),
+      from_email: email,
+      sujet:      selectedSubject,
+      message:    msg,
+      tel:        tel || '—',
+      order_ref:  order || '—',
+      file_name:  attachedFile?.name || '—',
+      doc_id:     docRef.id,
+    }, EMAILJS_PUBLIC_KEY);
+
+    // 3. Email de confirmation au client
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_CLIENT, {
+      to_email:  email,
+      to_name:   prenom,
+      sujet:     selectedSubject,
+      message:   msg,
+    }, EMAILJS_PUBLIC_KEY);
+
+    // 4. Afficher succès
+    document.getElementById('formContent').style.display = 'none';
+    document.getElementById('successScreen').style.display = 'block';
+
+  } catch (err) {
+    console.error(err);
+    // Si EmailJS échoue (clés pas configurées), on sauvegarde quand même Firebase
+    if (err?.text?.includes('service_id') || err?.status === 400) {
+      document.getElementById('formContent').style.display = 'none';
+      document.getElementById('successScreen').style.display = 'block';
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Envoyer le message`;
+      alert('Erreur lors de l\'envoi. Réessayez ou contactez-nous directement par email.');
+    }
+  }
+};
+
+window.resetForm = () => {
+  document.getElementById('formContent').style.display = '';
+  document.getElementById('successScreen').style.display = 'none';
+  ['fPrenom','fNom','fTel','fOrder','fMsg'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.readOnly) el.value = '';
+  });
+  if (!currentUser) document.getElementById('fEmail').value = '';
+  attachedFile = null;
+  document.getElementById('fileList').innerHTML = '';
+  document.getElementById('charCounter').textContent = '0 / 2000';
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = false;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Envoyer le message`;
+};
+
+function shake(id) {
+  const el = document.getElementById(id);
+  el.style.borderColor = '#e33';
+  el.style.animation = 'shake .3s';
+  el.focus();
+  setTimeout(() => { el.style.animation = ''; el.style.borderColor = ''; }, 600);
 }
+
+// Nav helpers (commun)
+window.toggleSearch = () => { const b = document.getElementById('searchBar'); b.classList.toggle('open'); if(b.classList.contains('open')) setTimeout(()=>document.getElementById('searchInput').focus(),50); };
+window.toggleMobileNav = () => document.getElementById('mobileNav').classList.toggle('open');
+window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', scrollY > 10));
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+document.querySelectorAll('.nav-links a').forEach(a => { if(a.dataset.page===document.body.dataset.page) a.classList.add('active'); });
 </script>
+
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init({ publicKey: 'XXXXXXXXXXXXXXXX' });</script>
+
+<style>
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  75%{transform:translateX(6px)}
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
 </body>
 </html>
