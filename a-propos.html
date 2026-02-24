@@ -4,42 +4,120 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>À propos — TBT3D</title>
+<meta name="description" content="L'histoire de TBT3D, atelier d'impression 3D lillois. Lampes fabriquées à la demande, Made in France.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css">
 <style>
-.about-hero { position: relative; background: var(--black); color: var(--white); padding: 100px 0 80px; overflow: hidden; }
-.about-hero-bg { position: absolute; inset: 0; background-image: url('/images/atelier.jpg'); background-size: cover; background-position: center; opacity: .25; }
-.about-hero-content { position: relative; max-width: 640px; }
-.about-hero h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 400; letter-spacing: -.02em; margin-bottom: 20px; line-height: 1.1; }
-.about-hero p { font-size: 16px; color: rgba(255,255,255,.7); line-height: 1.8; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#fff;--black:#111;--bg:#f9f9f9;--border:#e8e8e8;
+  --muted:#888;--soft:#555;--font:'Inter',system-ui,sans-serif;--nav-h:70px;--r:50px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);color:var(--black);background:var(--white);padding-top:var(--nav-h)}
 
-.story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
-@media(max-width:768px){ .story-grid { grid-template-columns: 1fr; gap: 40px; } }
-.story-img { aspect-ratio: 4/5; background: var(--bg); border-radius: 8px; overflow: hidden; }
-.story-img img { width: 100%; height: 100%; object-fit: cover; }
-.story-img-placeholder { display: none; width: 100%; height: 100%; align-items: center; justify-content: center; background: var(--bg); color: var(--muted); font-size: 13px; }
-.story-img img:not([src]), .story-img img[src=""] { display: none; }
-.story-img img:not([src]) + .story-img-placeholder,
-.story-img img[src=""] + .story-img-placeholder { display: flex; }
-.story-text h2 { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; margin-bottom: 20px; letter-spacing: -.01em; }
-.story-text p { font-size: 15px; color: var(--soft); line-height: 1.9; margin-bottom: 16px; }
-.story-text p:last-child { margin-bottom: 0; }
+/* NAVBAR */
+#navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--white);border-bottom:1px solid var(--border);transition:box-shadow .2s}
+#navbar.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.06)}
+.nav-inner{max-width:1280px;margin:0 auto;height:var(--nav-h);padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:32px}
+.nav-links{display:flex;align-items:center}
+.nav-links a{text-decoration:none;color:var(--soft);font-size:14px;padding:8px 16px;border-radius:6px;transition:color .15s;white-space:nowrap}
+.nav-links a:hover,.nav-links a.active{color:var(--black)}
+.nav-links a.active{font-weight:500}
+.nav-actions{display:flex;align-items:center;gap:4px}
+.nav-icon{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;border-radius:6px;color:var(--black);transition:background .15s;text-decoration:none}
+.nav-icon:hover{background:var(--bg)}
+.nav-icon svg{width:20px;height:20px}
+.nav-burger{display:none}
+.search-bar{display:none;border-top:1px solid var(--border);background:var(--white);padding:12px 32px}
+.search-bar.open{display:block}
+.search-inner{max-width:600px;margin:0 auto;display:flex;align-items:center;gap:12px;border:1.5px solid var(--border);border-radius:50px;padding:10px 18px;transition:border-color .2s}
+.search-inner:focus-within{border-color:var(--black)}
+.search-inner input{flex:1;border:none;outline:none;font-family:var(--font);font-size:14px;background:transparent}
+.search-inner button{background:none;border:none;cursor:pointer;font-size:20px;color:var(--muted)}
+.mobile-nav{display:none;flex-direction:column;padding:16px 24px 20px;border-top:1px solid var(--border);gap:4px}
+.mobile-nav.open{display:flex}
+.mobile-nav a{text-decoration:none;color:var(--black);font-size:15px;padding:10px 12px;border-radius:6px;transition:background .15s}
+.mobile-nav a:hover{background:var(--bg)}
+@media(max-width:768px){.nav-links{display:none}.nav-burger{display:flex}.nav-inner{padding:0 20px}}
 
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-@media(max-width:768px){ .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-@media(max-width:480px){ .stats-grid { grid-template-columns: 1fr 1fr; } }
-.stat-card { text-align: center; padding: 32px 16px; border: 1px solid var(--border); border-radius: 8px; }
-.stat-number { font-size: 2.5rem; font-weight: 300; letter-spacing: -.02em; margin-bottom: 6px; }
-.stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+/* LAYOUT */
+.container{max-width:1280px;margin:0 auto;padding:0 32px}
+@media(max-width:600px){.container{padding:0 20px}}
+.section{padding:80px 0}
+@media(max-width:768px){.section{padding:56px 0}}
+.section-header{margin-bottom:48px}
+.section-eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.section-title{font-size:clamp(1.8rem,3vw,2.6rem);font-weight:400;letter-spacing:-.02em;margin-bottom:14px}
+.section-sub{font-size:15px;color:var(--soft);line-height:1.7}
+.bg-gray{background:var(--bg)}
 
-.machine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-.machine-card { padding: 24px; border: 1px solid var(--border); border-radius: 8px; }
-.machine-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
-.machine-desc { font-size: 13px; color: var(--muted); }
-.machine-badge { display: inline-block; font-size: 10px; padding: 3px 8px; background: var(--bg); border-radius: 50px; color: var(--soft); margin-bottom: 10px; letter-spacing: .06em; text-transform: uppercase; }
+/* FADE IN */
+.fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:none}
 
-.signature { font-style: italic; font-size: 16px; color: var(--soft); border-left: 2px solid var(--black); padding-left: 20px; line-height: 1.8; margin: 32px 0; }
+/* BUTTONS */
+.btn{display:inline-block;padding:12px 28px;border-radius:var(--r);font-size:14px;font-weight:500;text-decoration:none;transition:all .2s;cursor:pointer;border:none;font-family:var(--font)}
+.btn-outline{background:transparent;border:1.5px solid var(--black);color:var(--black)}
+.btn-outline:hover{background:var(--black);color:var(--white)}
+.btn-white{background:var(--white);color:var(--black)}
+.btn-white:hover{opacity:.88}
+.btn-lg{padding:14px 36px;font-size:15px}
+
+/* HERO */
+.about-hero{position:relative;background:var(--black);color:var(--white);padding:100px 0 80px;overflow:hidden}
+.about-hero-bg{position:absolute;inset:0;background-image:url('image/a-propos-img-flsun.jpg');background-size:cover;background-position:center;opacity:.2}
+.about-hero-content{position:relative;max-width:640px}
+.about-hero h1{font-size:clamp(2.5rem,5vw,4rem);font-weight:400;letter-spacing:-.02em;margin-bottom:20px;line-height:1.1}
+.about-hero p{font-size:16px;color:rgba(255,255,255,.7);line-height:1.8}
+
+/* STORY */
+.story-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+@media(max-width:768px){.story-grid{grid-template-columns:1fr;gap:40px}}
+.story-img{aspect-ratio:4/5;background:var(--bg);border-radius:8px;overflow:hidden;position:relative}
+.story-img img{width:100%;height:100%;object-fit:cover;display:block}
+.story-img-placeholder{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:var(--bg);color:var(--muted);font-size:13px;text-align:center}
+.story-text h2{font-size:clamp(1.6rem,3vw,2.4rem);font-weight:400;margin-bottom:20px;letter-spacing:-.01em}
+.story-text p{font-size:15px;color:var(--soft);line-height:1.9;margin-bottom:16px}
+.signature{font-style:italic;font-size:16px;color:var(--soft);border-left:2px solid var(--black);padding-left:20px;line-height:1.8;margin:32px 0}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-card{text-align:center;padding:32px 16px;border:1px solid var(--border);border-radius:8px;background:var(--white)}
+.stat-number{font-size:2.5rem;font-weight:300;letter-spacing:-.02em;margin-bottom:6px}
+.stat-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+
+/* MACHINES */
+.machine-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px}
+.machine-card{padding:24px;border:1px solid var(--border);border-radius:8px;background:var(--white)}
+.machine-badge{display:inline-block;font-size:10px;padding:3px 8px;background:var(--bg);border-radius:50px;color:var(--soft);margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase}
+.machine-name{font-size:15px;font-weight:500;margin-bottom:4px}
+.machine-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* BANNER */
+.banner-dark{background:#111;color:#fff;padding:80px 32px;text-align:center}
+.banner-dark h2{font-size:clamp(1.8rem,3vw,2.8rem);font-weight:400;margin-bottom:14px;letter-spacing:-.01em}
+.banner-dark p{font-size:15px;color:rgba(255,255,255,.6);margin-bottom:32px;line-height:1.7;max-width:520px;margin-left:auto;margin-right:auto}
+
+/* FOOTER */
+#footer{background:#111;color:rgba(255,255,255,.7)}
+.footer-inner{max-width:1280px;margin:0 auto;padding:60px 32px 40px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px}
+@media(max-width:900px){.footer-inner{grid-template-columns:1fr 1fr;gap:32px}}
+@media(max-width:600px){.footer-inner{grid-template-columns:1fr;gap:28px;padding:40px 20px 28px}}
+.footer-brand p{font-size:13px;line-height:1.7;color:rgba(255,255,255,.55);margin-bottom:4px}
+.footer-tagline{font-size:12px;margin-top:12px!important;color:rgba(255,255,255,.3)!important}
+.footer-col-title{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:14px;font-weight:500}
+.footer-col{display:flex;flex-direction:column;gap:2px}
+.footer-col a{text-decoration:none;color:rgba(255,255,255,.55);font-size:13px;padding:5px 0;transition:color .15s}
+.footer-col a:hover{color:#fff}
+.footer-social{display:flex;gap:10px;margin-top:12px}
+.footer-social a{width:36px;height:36px;border:1px solid rgba(255,255,255,.15);border-radius:50%;display:flex!important;align-items:center;justify-content:center;transition:border-color .15s!important}
+.footer-social a:hover{border-color:rgba(255,255,255,.5)!important}
+.footer-social svg{width:16px;height:16px}
+.footer-bottom{max-width:1280px;margin:0 auto;padding:20px 32px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.3);flex-wrap:wrap;gap:12px}
+.footer-pay{display:flex;gap:6px;align-items:center}
+@media(max-width:600px){.footer-bottom{padding:16px 20px}}
 </style>
 </head>
 <body data-page="apropos">
@@ -101,8 +179,12 @@
   <div class="section">
     <div class="story-grid">
       <div class="story-img">
-        <img src="image/a-propos-img-flsun.jpg" alt="Thibault" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="story-img-placeholder">📷 Photo atelier / Thibault</div>
+        <img src="image/a-propos-img-flsun.jpg" alt="Thibault et son atelier"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="story-img-placeholder">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M16 2L2 9v14l14 7 14-7V9L16 2z" stroke="#999" stroke-width="1.4"/></svg>
+          📷 Photo atelier / Thibault
+        </div>
       </div>
       <div class="story-text fade-in">
         <div class="section-eyebrow">Qui sommes-nous</div>
@@ -173,7 +255,7 @@
   </div>
 </div>
 
-<!-- ─── FOOTER ─── -->
+<!-- FOOTER -->
 <footer id="footer">
   <div class="footer-inner">
     <div class="footer-brand">
@@ -212,7 +294,30 @@
   </div>
 </footer>
 
+<script>
+document.querySelectorAll('.nav-links a').forEach(a => {
+  if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
+});
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+});
+function toggleSearch() {
+  const b = document.getElementById('searchBar');
+  b.classList.toggle('open');
+  if (b.classList.contains('open')) setTimeout(() => document.getElementById('searchInput').focus(), 50);
+}
+function toggleMobileNav() {
+  document.getElementById('mobileNav').classList.toggle('open');
+}
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+// Fade-in au scroll
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+
 <script src="/search.js"></script>
-<script src="/script.js"></script>
 </body>
 </html>
