@@ -476,6 +476,33 @@ const EMAILJS_TEMPLATE_CLIENT = 'template_h2is8un'; // ⬅ Template 2 : confirma
 const EMAILJS_PUBLIC_KEY = 'Hz2TaEfDTVW8Usv6Q';   // ⬅ Account > General > Public Key
 emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
+// ──────────────────────────────────────
+// ☁️ CLOUDINARY — Upload fichiers contact
+// → Remplace par tes vraies valeurs Cloudinary
+// ──────────────────────────────────────
+const CLOUDINARY_CLOUD_NAME = 'dfcrqwbee'; // ✅ Cloud name Cloudinary
+const CLOUDINARY_UPLOAD_PRESET = 'tbt3d_contact';  // ⬅ Crée un "unsigned upload preset" dans Cloudinary Settings > Upload
+
+async function uploadToCloudinary(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  fd.append('folder', 'contact_attachments');
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, {
+    method: 'POST',
+    body: fd,
+  });
+  if (!res.ok) throw new Error('Cloudinary upload failed');
+  const data = await res.json();
+  return {
+    url: data.secure_url,
+    publicId: data.public_id,
+    format: data.format,
+    resourceType: data.resource_type,
+    bytes: data.bytes,
+  };
+}
+
 const app  = initializeApp(firebaseConfig);
 const db   = getFirestore(app);
 const auth = getAuth(app);
@@ -552,6 +579,18 @@ window.sendContact = async () => {
   btn.disabled = true;
   btn.innerHTML = `<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Envoi en cours…`;
 
+  // ── Upload fichier sur Cloudinary si présent ──
+  let fileData = null;
+  if (attachedFile) {
+    btn.innerHTML = `<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Upload fichier…`;
+    try {
+      fileData = await uploadToCloudinary(attachedFile);
+    } catch(uploadErr) {
+      console.warn('Cloudinary upload failed, continuing without file URL', uploadErr);
+      fileData = { url: null, publicId: null, format: null };
+    }
+  }
+
   const msgData = {
     prenom, nom,
     email,
@@ -560,12 +599,16 @@ window.sendContact = async () => {
     orderRef: order || null,
     message: msg,
     fileName: attachedFile?.name || null,
+    fileUrl: fileData?.url || null,
+    filePublicId: fileData?.publicId || null,
+    fileFormat: fileData?.format || null,
     status: 'nouveau',
     userId: currentUser?.uid || null,
     createdAt: serverTimestamp(),
     repliedAt: null,
     reply: null,
   };
+  btn.innerHTML = `<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Enregistrement…`;
 
   try {
     // 1. Sauvegarder dans Firestore
@@ -581,6 +624,7 @@ window.sendContact = async () => {
       tel:        tel || '—',
       order_ref:  order || '—',
       file_name:  attachedFile?.name || '—',
+      file_url:   fileData?.url || '—',
       doc_id:     docRef.id,
     }, EMAILJS_PUBLIC_KEY);
 

@@ -1045,7 +1045,19 @@ window.openMsg = async (id) => {
       <div class="msg-d-extras">
         ${m.tel ? `<div class="msg-d-extra"><strong>Téléphone</strong>${esc(m.tel)}</div>` : ''}
         ${m.orderRef ? `<div class="msg-d-extra"><strong>N° commande</strong>${esc(m.orderRef)}</div>` : ''}
-        ${m.fileName ? `<div class="msg-d-extra"><strong>Pièce jointe</strong>📎 ${esc(m.fileName)}</div>` : ''}
+        ${m.fileName ? `<div class="msg-d-extra"><strong>Pièce jointe</strong>
+          ${m.fileUrl
+            ? (m.fileFormat && ['jpg','jpeg','png','webp','gif'].includes(m.fileFormat)
+                ? `<a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;">
+                     <img src="${m.fileUrl}" alt="${esc(m.fileName)}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border2);flex-shrink:0;">
+                     <span style="font-size:11px;">${esc(m.fileName)}</span>
+                   </a>`
+                : `<a href="${m.fileUrl}" target="_blank" download="${esc(m.fileName)}" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;border:1px solid rgba(255,107,53,.3);padding:5px 10px;border-radius:7px;font-size:11px;background:rgba(255,107,53,.06);">
+                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                     ${esc(m.fileName)}
+                   </a>`)
+            : `📎 ${esc(m.fileName)}`
+          }</div>` : ''}
       </div>` : ''}
 
       <div class="msg-d-body">${esc(m.message||'')}</div>
