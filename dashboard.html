@@ -104,6 +104,9 @@ tr:last-child td{border-bottom:none}
 .photo-add:hover{border-color:var(--accent);color:var(--accent)}
 .photo-add svg{width:16px;height:16px}
 #photoInput{display:none}
+.photo-uploading{aspect-ratio:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--muted);font-size:10px}
+.upload-progress{width:60%;height:3px;background:var(--border2);border-radius:2px;overflow:hidden;margin-top:4px}
+.upload-progress-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
 .carac-list{display:flex;flex-direction:column;gap:6px}
 .crow{display:grid;grid-template-columns:1fr 1fr 22px;gap:6px;align-items:center}
 .crow input{padding:7px 10px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;border-radius:var(--r);outline:none;transition:border-color .2s;width:100%}
@@ -146,7 +149,7 @@ tr:last-child td{border-bottom:none}
 .empty-state .et{font-size:11px;color:var(--muted);line-height:1.7}
 
 /* CFG PAGES */
-.cfg-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+.cfg-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start}
 .slots-wrap{display:flex;flex-direction:column;gap:10px}
 .sl{background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:grab;user-select:none;transition:border-color .2s,opacity .2s}
 .sl:active{cursor:grabbing}
@@ -181,11 +184,16 @@ tr:last-child td{border-bottom:none}
 .save-bar{position:sticky;bottom:0;background:rgba(12,12,12,.95);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
 .save-info{font-size:11px;color:var(--muted)}
 .spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite}
+.spin-w{display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:20px;right:20px;z-index:9999;background:var(--bg3);border:1px solid var(--border2);padding:11px 16px;border-radius:var(--r);font-size:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:flex;align-items:center;gap:8px;transform:translateY(70px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
 .toast.show{transform:none;opacity:1}
 .tdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* UPLOAD BANNER */
+.upload-banner{background:rgba(212,255,79,.08);border:1px solid rgba(212,255,79,.2);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;font-size:11px;color:rgba(212,255,79,.9);display:flex;align-items:center;gap:8px;display:none}
+.upload-banner.show{display:flex}
 </style>
 </head>
 <body>
@@ -205,7 +213,7 @@ tr:last-child td{border-bottom:none}
 <!-- APP -->
 <aside class="sidebar" id="appSidebar" style="display:none">
   <div class="sb-logo">
-    <svg viewBox="0 0 130 44" fill="none"><rect x="2" y="3" width="30" height="5" fill="#efefef"/><rect x="13" y="3" width="6" height="35" fill="#efefef"/><rect x="36" y="3" width="6" height="35" fill="#efefef"/><path d="M42 3h15c4.5 0 7.5 3 7.5 7.5S61.5 18 57 18H42V3z" fill="#efefef"/><path d="M42 18h16c5 0 8.5 3.2 8.5 8s-3.5 8-8.5 8H42V18z" fill="#efefef"/><text x="76" y="34" font-family="DM Mono" font-size="11" fill="#d4ff4f" font-weight="500">3D</text></svg>
+    <svg viewBox="0 0 130 44" fill="none" style="height:28px;width:auto"><rect x="2" y="3" width="30" height="5" fill="#efefef"/><rect x="13" y="3" width="6" height="35" fill="#efefef"/><rect x="36" y="3" width="6" height="35" fill="#efefef"/><path d="M42 3h15c4.5 0 7.5 3 7.5 7.5S61.5 18 57 18H42V3z" fill="#efefef"/><path d="M42 18h16c5 0 8.5 3.2 8.5 8s-3.5 8-8.5 8H42V18z" fill="#efefef"/><text x="76" y="34" font-family="DM Mono" font-size="11" fill="#d4ff4f" font-weight="500">3D</text></svg>
     <span class="sb-badge">ADMIN</span>
   </div>
   <div class="sb-section">Principal</div>
@@ -289,8 +297,13 @@ tr:last-child td{border-bottom:none}
               <div class="field"><label>Lien de paiement (Stripe / PayPlug…)</label><input type="text" id="aPayhip" placeholder="https://buy.stripe.com/XXXXX"><div class="fhint">Colle ici le lien de paiement pour ce produit</div></div>
             </div>
           </div>
-          <div class="fsec"><div class="fsec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><span class="fsec-title">Photos produit</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">8 max</span></div>
-            <div class="fsec-body"><div class="photos-grid" id="photosGrid"></div><input type="file" id="photoInput" accept="image/*" multiple onchange="addPhotos(this.files)"><div class="fhint">1ère photo = principale · Stockées sur Firebase</div></div>
+          <div class="fsec"><div class="fsec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><span class="fsec-title">Photos produit</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">8 max — stockées sur Firebase Storage</span></div>
+            <div class="fsec-body">
+              <div class="upload-banner" id="uploadBanner"><div class="spin-w"></div><span id="uploadBannerTxt">Upload en cours…</span></div>
+              <div class="photos-grid" id="photosGrid"></div>
+              <input type="file" id="photoInput" accept="image/*" multiple onchange="addPhotos(this.files)">
+              <div class="fhint">1ère photo = principale · Les photos sont uploadées sur Firebase Storage (pas de limite de taille)</div>
+            </div>
           </div>
           <div class="fsec"><div class="fsec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="13" y1="18" x2="3" y2="18"/></svg><span class="fsec-title">Description</span></div>
             <div class="fsec-body"><div class="field"><textarea id="aDesc" rows="6" placeholder="Décrivez votre produit…"></textarea></div></div>
@@ -313,10 +326,11 @@ tr:last-child td{border-bottom:none}
 </div>
 <div class="toast" id="toast"><div class="tdot" id="tdot"></div><span id="toastTxt"></span></div>
 
-<!-- FIREBASE SDK (CDN — pas besoin de npm !) -->
+<!-- FIREBASE SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
 // ═══════════════════════════════════════
 // 🔥 CONFIGURATION FIREBASE
@@ -330,10 +344,10 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
+const storage = getStorage(fbApp);
 
 // ═══════════════════════════════════════
 // 🔐 MOT DE PASSE ADMIN
-// Change "tbt3d2024" par ce que tu veux !
 // ═══════════════════════════════════════
 const ADMIN_PW = "tbt3d2024";
 
@@ -357,7 +371,9 @@ window.checkLogin = () => {
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const BADGES = ['','Bestseller','Nouveau','Promo','Top vente','Exclusif','Sur mesure'];
 let arts = [], hpSlots = [], boutSlots = [];
+// photos = tableau d'URLs Firebase Storage (strings)
 let photos = [], caracs = [], variants = [], editId = null;
+let uploadInProgress = 0;
 
 // ═══════════════════════════════════════
 // FIREBASE — LECTURE / ÉCRITURE
@@ -372,6 +388,26 @@ async function fbSetArticle(art) { await setDoc(doc(db,'articles',String(art.id)
 async function fbDelArticle(id) { await deleteDoc(doc(db,'articles',String(id))); }
 async function fbGetConfig(key) { const d = await getDoc(doc(db,'config',key)); return d.exists()?d.data():null; }
 async function fbSetConfig(key,data) { await setDoc(doc(db,'config',key), data); }
+
+// ═══════════════════════════════════════
+// UPLOAD PHOTO → FIREBASE STORAGE
+// ═══════════════════════════════════════
+async function uploadPhoto(file) {
+  const ext = file.name.split('.').pop();
+  const path = `photos/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const ref = storageRef(storage, path);
+  const snap = await uploadBytes(ref, file);
+  return await getDownloadURL(snap.ref);
+}
+
+function showUploadBanner(text) {
+  const b = document.getElementById('uploadBanner');
+  document.getElementById('uploadBannerTxt').textContent = text;
+  b.classList.add('show');
+}
+function hideUploadBanner() {
+  document.getElementById('uploadBanner').classList.remove('show');
+}
 
 // ═══════════════════════════════════════
 // INITIALISATION
@@ -429,10 +465,10 @@ window.loadHp = async () => {
   dirty('hp',false);
 };
 window.saveHp = async () => {
-  setBtnLoading('btnSaveHp', true);
+  setBtnLoading('btnSaveHp', true, false);
   try { await fbSetConfig('homepage',{slots:hpSlots,updatedAt:new Date().toISOString()}); dirty('hp',false); toast('Page d\'accueil sauvegardée ✓'); }
   catch(e) { toast('Erreur : '+e.message, true); }
-  setBtnLoading('btnSaveHp', false);
+  setBtnLoading('btnSaveHp', false, false);
 };
 window.resetHp = () => { if(!confirm('Réinitialiser ?'))return; hpSlots=HP_DEF.map(d=>({...d})); const pub=arts.filter(a=>a.status==='published'); for(let i=0;i<3&&i<pub.length;i++)hpSlots[i].articleId=pub[i].id; dirty('hp',true); renderHpUI(); };
 
@@ -450,10 +486,10 @@ window.loadBout = async () => {
   syncBoutSlots(); dirty('bout',false);
 };
 window.saveBout = async () => {
-  setBtnLoading('btnSaveBout', true);
+  setBtnLoading('btnSaveBout', true, true);
   try { syncBoutSlots(); await fbSetConfig('boutique',{slots:boutSlots,updatedAt:new Date().toISOString()}); dirty('bout',false); toast('Boutique sauvegardée ✓'); }
   catch(e) { toast('Erreur : '+e.message, true); }
-  setBtnLoading('btnSaveBout', false);
+  setBtnLoading('btnSaveBout', false, true);
 };
 window.resetBout = () => { boutSlots=[]; syncBoutSlots(); dirty('bout',true); renderBoutUI(); };
 
@@ -465,10 +501,14 @@ function dirty(which, d) {
   el.textContent = d ? 'non enregistrées' : 'enregistrées ✓';
   el.style.color = d ? 'var(--orange)' : 'var(--green)';
 }
-function setBtnLoading(id, loading) {
+function setBtnLoading(id, loading, purple=false) {
   const btn = document.getElementById(id); if(!btn) return;
   btn.disabled = loading;
-  btn.innerHTML = loading ? `<div class="spin"></div> Sauvegarde…` : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Enregistrer`;
+  if(loading) {
+    btn.innerHTML = `<div class="${purple?'spin-w':'spin'}"></div> Sauvegarde…`;
+  } else {
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Enregistrer`;
+  }
 }
 
 // ═══════════════════════════════════════
@@ -543,18 +583,61 @@ function initDrag(cid,arr,cb){
 }
 
 // ═══════════════════════════════════════
-// PHOTOS
+// PHOTOS — UPLOAD VERS FIREBASE STORAGE
 // ═══════════════════════════════════════
 function renderPhotoSlots(){
   const g=document.getElementById('photosGrid');g.innerHTML='';
-  photos.forEach((src,i)=>{const s=document.createElement('div');s.className='photo-slot'+(i===0?' main-slot':'');s.innerHTML=`<img src="${src}"><div class="ph-del" onclick="removePhoto(${i})">×</div>${i===0?'<div class="ph-badge">PRINCIPALE</div>':''}`;g.appendChild(s);});
-  if(photos.length<8){const a=document.createElement('div');a.className='photo-add';a.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Ajouter</span>`;a.onclick=()=>document.getElementById('photoInput').click();g.appendChild(a);}
+  photos.forEach((src,i)=>{
+    const s=document.createElement('div');
+    s.className='photo-slot'+(i===0?' main-slot':'');
+    s.innerHTML=`<img src="${src}"><div class="ph-del" onclick="removePhoto(${i})">×</div>${i===0?'<div class="ph-badge">PRINCIPALE</div>':''}`;
+    g.appendChild(s);
+  });
+  if(photos.length<8){
+    const a=document.createElement('div');
+    a.className='photo-add';
+    a.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Ajouter</span>`;
+    a.onclick=()=>document.getElementById('photoInput').click();
+    g.appendChild(a);
+  }
 }
-window.addPhotos = files => {
-  const n=Math.min(files.length,8-photos.length);let done=0;
-  Array.from(files).slice(0,n).forEach(f=>{const r=new FileReader();r.onload=e=>{photos.push(e.target.result);done++;if(done===n)renderPhotoSlots();};r.readAsDataURL(f);});
-  document.getElementById('photoInput').value='';
+
+window.addPhotos = async (files) => {
+  const toUpload = Array.from(files).slice(0, 8 - photos.length);
+  if(!toUpload.length) return;
+  document.getElementById('photoInput').value = '';
+
+  uploadInProgress += toUpload.length;
+  showUploadBanner(`Upload de ${toUpload.length} photo${toUpload.length>1?'s':''} en cours…`);
+
+  // Ajoute des placeholders
+  const startIdx = photos.length;
+  toUpload.forEach(()=>photos.push(null));
+  renderPhotoSlots();
+
+  let done = 0;
+  const promises = toUpload.map(async (file, i) => {
+    try {
+      const url = await uploadPhoto(file);
+      photos[startIdx + i] = url;
+      done++;
+      document.getElementById('uploadBannerTxt').textContent = `Upload ${done}/${toUpload.length} photo${toUpload.length>1?'s':''} — patienter…`;
+      renderPhotoSlots();
+    } catch(e) {
+      photos.splice(startIdx + i, 1);
+      toast('Erreur upload photo : ' + e.message, true);
+    }
+  });
+
+  await Promise.all(promises);
+  // Nettoie les nulls éventuels
+  photos = photos.filter(p => p !== null);
+  uploadInProgress -= toUpload.length;
+  if(uploadInProgress <= 0) hideUploadBanner();
+  renderPhotoSlots();
+  toast(`${done} photo${done>1?'s':''} uploadée${done>1?'s':''} ✓`);
 };
+
 window.removePhoto = i=>{photos.splice(i,1);renderPhotoSlots();};
 
 // ═══════════════════════════════════════
@@ -578,6 +661,7 @@ window.removeVG = gi=>{variants.splice(gi,1);renderVariants();};
 // SOUMETTRE UN ARTICLE → FIREBASE
 // ═══════════════════════════════════════
 window.submitArticle = async () => {
+  if(uploadInProgress > 0) { toast('⏳ Upload de photos en cours, patientez…', true); return; }
   const name = document.getElementById('aName').value.trim();
   const price = document.getElementById('aPrice').value;
   if(!name){toast('⚠ Nom requis', true);return;}
@@ -593,7 +677,7 @@ window.submitArticle = async () => {
     tagline: document.getElementById('aTagline').value.trim(),
     payhip: document.getElementById('aPayhip').value.trim(),
     desc: document.getElementById('aDesc').value.trim(),
-    photos: [...photos],
+    photos: [...photos],   // URLs Firebase Storage
     caracs: caracs.filter(c=>c.key.trim()),
     variants: variants.filter(v=>v.name&&v.options.length),
     createdAt: editId?(arts.find(a=>a.id===editId)?.createdAt||new Date().toISOString()):new Date().toISOString(),
