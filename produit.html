@@ -10,17 +10,10 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --white: #fff;
-  --black: #111;
-  --bg: #f9f9f9;
-  --border: #e8e8e8;
-  --text: #111;
-  --muted: #888;
-  --soft: #555;
+  --white: #fff; --black: #111; --bg: #f9f9f9; --border: #e8e8e8;
+  --text: #111; --muted: #888; --soft: #555;
   --font: 'Inter', system-ui, sans-serif;
-  --nav-h: 70px;
-  --max: 1280px;
-  --r: 50px;
+  --nav-h: 70px; --max: 1280px; --r: 50px;
 }
 html { scroll-behavior: smooth; }
 body { font-family: var(--font); color: var(--text); background: var(--white); padding-top: var(--nav-h); font-size: 14px; line-height: 1.5; }
@@ -54,7 +47,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .breadcrumb { max-width: var(--max); margin: 0 auto; padding: 16px 32px 0; display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); }
 .breadcrumb a { color: var(--muted); text-decoration: none; transition: color .15s; }
 .breadcrumb a:hover { color: var(--black); }
-.breadcrumb span { opacity: .4; }
+.breadcrumb .sep { opacity: .4; }
 @media(max-width:768px) { .breadcrumb { padding: 12px 20px 0; } }
 
 /* ─── LOADING ─── */
@@ -68,82 +61,87 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 #notFound p { color: var(--muted); font-size: 14px; }
 #notFound a { margin-top: 8px; padding: 12px 28px; background: var(--black); color: var(--white); text-decoration: none; border-radius: var(--r); font-size: 13px; font-weight: 500; }
 
-/* ─── PRODUCT LAYOUT ─── */
+/* ─── LAYOUT PRODUIT ─── */
 #productWrap { display: none; }
-.product-inner { max-width: var(--max); margin: 0 auto; padding: 28px 32px 80px; display: grid; grid-template-columns: 1fr 480px; gap: 60px; align-items: start; }
+.product-inner { max-width: var(--max); margin: 0 auto; padding: 28px 32px 80px; display: grid; grid-template-columns: 1fr 460px; gap: 64px; align-items: start; }
 @media(max-width:960px) { .product-inner { grid-template-columns: 1fr; gap: 36px; padding: 20px 20px 60px; } }
 
-/* ─── LEFT : GALERIE ─── */
-.gallery { display: flex; gap: 14px; position: sticky; top: calc(var(--nav-h) + 20px); }
+/* ─── GALERIE GAUCHE ─── */
+.gallery { display: flex; gap: 12px; position: sticky; top: calc(var(--nav-h) + 20px); }
 @media(max-width:960px) { .gallery { position: static; } }
 .gallery-thumbs { display: flex; flex-direction: column; gap: 8px; width: 72px; flex-shrink: 0; }
-.gallery-thumbs img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1.5px solid var(--border); cursor: pointer; transition: border-color .15s, opacity .15s; opacity: .65; }
+.gallery-thumbs img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1.5px solid var(--border); cursor: pointer; transition: border-color .15s, opacity .15s; opacity: .55; }
 .gallery-thumbs img.active { border-color: var(--black); opacity: 1; }
-.gallery-main { flex: 1; position: relative; }
-.gallery-main-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; background: var(--bg); display: block; }
+.gallery-main { flex: 1; position: relative; border-radius: 10px; overflow: hidden; background: var(--bg); }
+.gallery-main-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+.gallery-placeholder { width: 100%; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; font-size: 56px; background: var(--bg); }
 .gallery-nav { position: absolute; bottom: 14px; right: 14px; display: flex; gap: 6px; }
-.gallery-btn { width: 32px; height: 32px; background: rgba(255,255,255,.9); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; }
+.gallery-btn { width: 34px; height: 34px; background: rgba(255,255,255,.92); border: 1px solid rgba(0,0,0,.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
 .gallery-btn:hover { background: var(--white); }
 .gallery-btn svg { width: 14px; height: 14px; }
-.gallery-placeholder { width: 100%; aspect-ratio: 3/4; background: var(--bg); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 48px; }
-@media(max-width:600px) { .gallery { flex-direction: column-reverse; } .gallery-thumbs { flex-direction: row; width: 100%; overflow-x: auto; } .gallery-thumbs img { width: 60px; height: 60px; flex-shrink: 0; } }
+@media(max-width:600px) { .gallery { flex-direction: column-reverse; } .gallery-thumbs { flex-direction: row; width: 100%; overflow-x: auto; padding-bottom: 4px; } .gallery-thumbs img { width: 60px; height: 60px; flex-shrink: 0; } }
 
-/* ─── RIGHT : DETAILS ─── */
-.prod-detail { display: flex; flex-direction: column; gap: 0; }
-
+/* ─── DETAIL DROITE ─── */
+.prod-detail { display: flex; flex-direction: column; }
 .prod-badges { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-.prod-badge { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; letter-spacing: .04em; text-transform: uppercase; }
-.prod-badge-dark { background: var(--black); color: var(--white); }
-.prod-badge-light { background: var(--white); color: var(--black); border: 1.5px solid var(--border); }
-
+.prod-badge { font-size: 10px; font-weight: 600; padding: 4px 12px; border-radius: 20px; letter-spacing: .06em; text-transform: uppercase; background: var(--black); color: var(--white); }
 .prod-name { font-size: 30px; font-weight: 400; letter-spacing: -.02em; margin-bottom: 8px; line-height: 1.15; }
-.prod-tagline { font-size: 14px; color: var(--soft); margin-bottom: 20px; }
-
-.prod-price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px; }
-.prod-price { font-size: 26px; font-weight: 400; }
+.prod-tagline { font-size: 14px; color: var(--soft); margin-bottom: 20px; line-height: 1.6; }
+.prod-price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.prod-price { font-size: 28px; font-weight: 400; }
 .prod-old-price { font-size: 16px; color: var(--muted); text-decoration: line-through; }
-.prod-save { font-size: 12px; color: #16a34a; font-weight: 500; background: #f0fdf4; padding: 3px 8px; border-radius: 4px; }
-
+.prod-save { font-size: 11px; color: #16a34a; font-weight: 600; background: #f0fdf4; padding: 3px 9px; border-radius: 4px; }
 .hr { height: 1px; background: var(--border); margin: 20px 0; }
 
-/* Options/variantes */
-.opt-block { margin-bottom: 20px; }
-.opt-label { font-size: 12px; color: var(--text); margin-bottom: 10px; }
+/* Variantes */
+.opt-block { margin-bottom: 18px; }
+.opt-label { font-size: 12px; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
 .opt-label strong { font-weight: 500; }
-.opt-label .opt-val { color: var(--muted); margin-left: 4px; }
-
+.opt-val { color: var(--muted); }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { padding: 8px 18px; border: 1.5px solid var(--border); border-radius: var(--r); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .15s; color: var(--soft); background: var(--white); }
+.chip { padding: 8px 18px; border: 1.5px solid var(--border); border-radius: var(--r); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .15s; color: var(--soft); background: var(--white); user-select: none; }
 .chip:hover { border-color: #999; color: var(--text); }
 .chip.on { border-color: var(--black); background: var(--black); color: var(--white); }
-.color-chip { display: flex; align-items: center; gap: 7px; padding: 7px 14px 7px 10px; border: 1.5px solid var(--border); border-radius: var(--r); cursor: pointer; transition: all .15s; font-size: 13px; color: var(--soft); background: var(--white); }
+.color-chip { display: flex; align-items: center; gap: 7px; padding: 7px 14px 7px 10px; border: 1.5px solid var(--border); border-radius: var(--r); cursor: pointer; transition: all .15s; font-size: 13px; color: var(--soft); background: var(--white); user-select: none; }
 .color-chip:hover { border-color: #999; }
 .color-chip.on { border-color: var(--black); background: var(--black); color: var(--white); }
-.color-chip.on .cdot { box-shadow: 0 0 0 2px var(--black), 0 0 0 3px var(--white); }
+.color-chip.on .cdot { box-shadow: 0 0 0 2px var(--black), 0 0 0 3.5px var(--white); }
 .cdot { width: 13px; height: 13px; border-radius: 50%; border: 1px solid rgba(0,0,0,.12); flex-shrink: 0; }
 
-/* Qty */
-.qty-row { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
-.qty-label { font-size: 12px; color: var(--text); font-weight: 500; min-width: 70px; }
-.qty-wrap { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: var(--r); overflow: hidden; }
-.qty-btn { width: 40px; height: 40px; border: none; background: var(--white); font-size: 20px; cursor: pointer; color: var(--text); font-weight: 300; transition: background .15s; }
+/* Quantité */
+.qty-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.qty-label { font-size: 12px; font-weight: 500; min-width: 70px; }
+.qty-wrap { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: var(--r); overflow: hidden; width: fit-content; }
+.qty-btn { width: 42px; height: 42px; border: none; background: var(--white); font-size: 22px; cursor: pointer; color: var(--text); font-weight: 300; transition: background .15s; }
 .qty-btn:hover { background: var(--bg); }
-.qty-num { width: 48px; text-align: center; border: none; border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border); font-family: var(--font); font-size: 14px; height: 40px; outline: none; -moz-appearance: textfield; }
+.qty-num { width: 52px; text-align: center; border: none; border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border); font-family: var(--font); font-size: 14px; height: 42px; outline: none; -moz-appearance: textfield; background: var(--white); }
 .qty-num::-webkit-inner-spin-button, .qty-num::-webkit-outer-spin-button { display: none; }
 
-/* CTA */
-.btn-primary { width: 100%; padding: 15px; background: var(--black); color: var(--white); border: none; font-family: var(--font); font-size: 14px; font-weight: 500; border-radius: var(--r); cursor: pointer; transition: opacity .2s; margin-bottom: 10px; text-decoration: none; display: block; text-align: center; }
-.btn-primary:hover { opacity: .85; }
-.btn-secondary { width: 100%; padding: 13px; background: var(--white); color: var(--text); border: 1.5px solid var(--border); font-family: var(--font); font-size: 13px; border-radius: var(--r); cursor: pointer; transition: border-color .2s; text-decoration: none; display: block; text-align: center; }
-.btn-secondary:hover { border-color: var(--text); }
-.trust-row { display: flex; gap: 20px; margin-top: 16px; flex-wrap: wrap; }
+/* Bouton achat */
+.btn-buy {
+  width: 100%; padding: 16px 24px;
+  background: var(--black); color: var(--white);
+  border: none; font-family: var(--font); font-size: 15px; font-weight: 500;
+  border-radius: var(--r); cursor: pointer;
+  transition: opacity .2s, transform .15s;
+  margin-bottom: 8px; text-decoration: none;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-buy:hover { opacity: .86; transform: translateY(-1px); }
+.btn-buy svg { width: 17px; height: 17px; flex-shrink: 0; }
+.stripe-note { display: none; align-items: center; justify-content: center; gap: 5px; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.stripe-note svg { width: 12px; height: 12px; }
+.btn-contact { width: 100%; padding: 13px 20px; background: var(--white); color: var(--text); border: 1.5px solid var(--border); font-family: var(--font); font-size: 13px; border-radius: var(--r); cursor: pointer; transition: border-color .2s; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-contact:hover { border-color: var(--text); }
+.btn-contact svg { width: 15px; height: 15px; }
+.trust-row { display: flex; gap: 16px; margin-top: 18px; flex-wrap: wrap; }
 .trust-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
-.trust-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+.trust-item svg { width: 13px; height: 13px; flex-shrink: 0; }
 
-/* ─── DESCRIPTION & SPECS ─── */
-.prod-tabs { margin-top: 48px; max-width: var(--max); margin-left: auto; margin-right: auto; padding: 0 32px 80px; }
+/* ─── TABS ─── */
+.prod-tabs { max-width: var(--max); margin: 0 auto; padding: 0 32px 80px; }
 @media(max-width:768px) { .prod-tabs { padding: 0 20px 60px; } }
-.tab-nav { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 32px; gap: 0; }
+.tab-nav { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
 .tab-btn { padding: 12px 20px; font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all .15s; margin-bottom: -1px; }
 .tab-btn.on { color: var(--black); border-bottom-color: var(--black); }
 .tab-pane { display: none; }
@@ -154,7 +152,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .specs-table tr:last-child { border-bottom: none; }
 .specs-table td { padding: 12px 0; font-size: 13px; }
 .specs-table td:first-child { color: var(--muted); width: 45%; }
-.specs-table td:last-child { font-weight: 500; color: var(--text); }
+.specs-table td:last-child { font-weight: 500; }
 
 /* ─── FOOTER ─── */
 #footer { background: #111; color: rgba(255,255,255,.7); }
@@ -173,6 +171,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .footer-social svg { width: 16px; height: 16px; }
 .footer-bottom { max-width: var(--max); margin: 0 auto; padding: 20px 32px; border-top: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,.3); flex-wrap: wrap; gap: 12px; }
 .footer-pay { display: flex; gap: 6px; align-items: center; }
+@media(max-width:600px) { .footer-bottom { padding: 16px 20px; } }
 </style>
 </head>
 <body data-page="boutique">
@@ -180,7 +179,9 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 <!-- ─── NAVBAR ─── -->
 <header id="navbar">
   <div class="nav-inner">
-    <a href="/index.html"><img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" style="height:44px;width:auto;object-fit:contain;border-radius:6px" alt="TBT3D"></a>
+    <a href="/index.html">
+      <img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" style="height:44px;width:auto;object-fit:contain;border-radius:6px" alt="TBT3D">
+    </a>
     <nav class="nav-links">
       <a href="/index.html" data-page="home">Home</a>
       <a href="/boutique.html" data-page="boutique">Boutique</a>
@@ -192,7 +193,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
       <button class="nav-icon" onclick="toggleSearch()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
       </button>
-      <a href="/compte.html" class="nav-icon" id="navCompteBtn" title="Mon compte">
+      <a href="/compte.html" class="nav-icon" title="Mon compte">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </a>
       <button class="nav-icon nav-burger" onclick="toggleMobileNav()">
@@ -203,7 +204,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
   <div class="search-bar" id="searchBar">
     <div class="search-inner">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input type="text" id="searchInput" placeholder="Rechercher..." onkeydown="if(event.key==='Escape')toggleSearch()">
+      <input type="text" id="searchInput" placeholder="Rechercher..." oninput="searchLive()" onkeydown="searchKeydown(event)">
       <button onclick="toggleSearch()">×</button>
     </div>
   </div>
@@ -220,9 +221,9 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 <!-- ─── BREADCRUMB ─── -->
 <nav class="breadcrumb" id="breadcrumb" style="display:none">
   <a href="/index.html">Home</a>
-  <span>›</span>
+  <span class="sep">›</span>
   <a href="/boutique.html">Boutique</a>
-  <span>›</span>
+  <span class="sep">›</span>
   <span id="bcName">Produit</span>
 </nav>
 
@@ -239,43 +240,44 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
   <a href="/boutique.html">← Retour à la boutique</a>
 </div>
 
-<!-- ─── PRODUCT ─── -->
+<!-- ─── PRODUIT ─── -->
 <div id="productWrap">
+
   <div class="product-inner">
 
-    <!-- GAUCHE : Galerie -->
-    <div class="gallery" id="gallery">
+    <!-- GAUCHE : galerie images -->
+    <div class="gallery">
       <div class="gallery-thumbs" id="galleryThumbs"></div>
       <div class="gallery-main">
         <img id="mainImg" class="gallery-main-img" src="" alt="" style="display:none">
         <div id="mainPlaceholder" class="gallery-placeholder">🏮</div>
         <div class="gallery-nav" id="galleryNav" style="display:none">
-          <button class="gallery-btn" onclick="prevImg()" title="Précédent">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+          <button class="gallery-btn" onclick="prevImg()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
-          <button class="gallery-btn" onclick="nextImg()" title="Suivant">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
+          <button class="gallery-btn" onclick="nextImg()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- DROITE : Détails -->
+    <!-- DROITE : détails + achat -->
     <div class="prod-detail">
 
       <div class="prod-badges" id="prodBadges"></div>
-      <h1 class="prod-name" id="prodName">—</h1>
+      <h1 class="prod-name" id="prodName"></h1>
       <p class="prod-tagline" id="prodTagline"></p>
 
       <div class="prod-price-row">
-        <span class="prod-price" id="prodPrice">—</span>
+        <span class="prod-price" id="prodPrice"></span>
         <span class="prod-old-price" id="prodOldPrice" style="display:none"></span>
         <span class="prod-save" id="prodSave" style="display:none"></span>
       </div>
 
       <div class="hr"></div>
 
-      <!-- Variantes dynamiques -->
+      <!-- Variantes générées dynamiquement -->
       <div id="variantsWrap"></div>
 
       <!-- Quantité -->
@@ -290,10 +292,25 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
       <div class="hr"></div>
 
-      <!-- CTA -->
-      <a href="#" class="btn-primary" id="btnBuy">Acheter maintenant →</a>
-      <a href="/contact.html" class="btn-secondary">Une question ? Contactez-nous</a>
+      <!-- Bouton achat Stripe -->
+      <a href="#" class="btn-buy" id="btnBuy" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Acheter
+      </a>
 
+      <!-- Note sécurité Stripe -->
+      <p class="stripe-note" id="stripeNote">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Paiement 100% sécurisé via Stripe
+      </p>
+
+      <!-- Bouton contact secondaire -->
+      <a href="/contact.html" class="btn-contact">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Une question ? Contactez-nous
+      </a>
+
+      <!-- Badges de confiance -->
       <div class="trust-row">
         <div class="trust-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -304,33 +321,37 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
           Made in Lille
         </div>
         <div class="trust-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          7–30 jours ouvrés
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          Livraison 7–30 jours
         </div>
       </div>
+
     </div>
   </div>
 
-  <!-- TABS : Description & Caractéristiques -->
+  <!-- ─── TABS description / caractéristiques ─── -->
   <div class="prod-tabs">
     <div class="tab-nav">
       <button class="tab-btn on" onclick="switchTab('desc', this)">Description</button>
-      <button class="tab-btn" onclick="switchTab('specs', this)" id="tabSpecsBtn">Caractéristiques</button>
+      <button class="tab-btn" onclick="switchTab('specs', this)" id="tabSpecsBtn" style="display:none">Caractéristiques</button>
     </div>
     <div class="tab-pane on" id="tab-desc">
-      <p class="desc-text" id="prodDesc">—</p>
+      <p class="desc-text" id="prodDesc"></p>
     </div>
     <div class="tab-pane" id="tab-specs">
       <table class="specs-table" id="specsTable"></table>
     </div>
   </div>
-</div>
+
+</div><!-- #productWrap -->
 
 <!-- ─── FOOTER ─── -->
 <footer id="footer">
   <div class="footer-inner">
     <div class="footer-brand">
-      <a href="/index.html"><img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D"></a>
+      <a href="/index.html">
+        <img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D">
+      </a>
       <p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p>
       <p class="footer-tagline">Made in France 🇫🇷</p>
     </div>
@@ -351,7 +372,6 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
@@ -374,7 +394,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
   </div>
 </footer>
 
-<!-- FIREBASE SDK -->
+<!-- ─── FIREBASE + LOGIQUE PRODUIT ─── -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -386,13 +406,12 @@ const firebaseConfig = {
   storageBucket: "tbt3d-a0f04.firebasestorage.app",
   appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
 };
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
 
-// ── Récupération du slug depuis l'URL ──────────────────────────────────────
-const params = new URLSearchParams(window.location.search);
-const slug   = params.get('id');
+const db = getFirestore(initializeApp(firebaseConfig));
+const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
+// ── Récupération du slug dans l'URL ──
+const slug = new URLSearchParams(window.location.search).get('id');
 if (!slug) {
   showNotFound();
 } else {
@@ -401,20 +420,24 @@ if (!slug) {
 
 async function loadProduct(slug) {
   try {
-    const q    = query(collection(db, 'articles'), where('slug', '==', slug));
-    const snap = await getDocs(q);
-
+    // 1. Cherche par slug
+    let snap = await getDocs(query(collection(db, 'articles'), where('slug', '==', slug)));
+    // 2. Fallback : cherche par id (articles créés avant l'ajout du slug)
     if (snap.empty) {
-      // fallback : try by id (legacy articles without slug)
-      const q2 = query(collection(db, 'articles'), where('id', '==', slug));
-      const snap2 = await getDocs(q2);
-      if (snap2.empty) { showNotFound(); return; }
-      renderProduct({ id: snap2.docs[0].id, ...snap2.docs[0].data() });
-    } else {
-      renderProduct({ id: snap.docs[0].id, ...snap.docs[0].data() });
+      snap = await getDocs(query(collection(db, 'articles'), where('id', '==', slug)));
     }
-  } catch(e) {
-    console.error(e);
+    if (snap.empty) {
+      showNotFound();
+      return;
+    }
+    const art = { id: snap.docs[0].id, ...snap.docs[0].data() };
+    if (art.status !== 'published') {
+      showNotFound();
+      return;
+    }
+    renderProduct(art);
+  } catch (e) {
+    console.error('Erreur Firebase:', e);
     showNotFound();
   }
 }
@@ -424,42 +447,43 @@ function showNotFound() {
   document.getElementById('notFound').style.display = 'flex';
 }
 
-function esc(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── État galerie ───────────────────────────────────────────────────────────
+// ── État galerie ──
 let _photos = [];
-let _imgIdx  = 0;
+let _idx = 0;
 
-window.goToImg = (i) => {
-  _imgIdx = i;
-  const main = document.getElementById('mainImg');
-  main.src = _photos[i];
-  document.querySelectorAll('.gallery-thumbs img').forEach((el, idx) => {
-    el.classList.toggle('active', idx === i);
+window.goToImg = function(i) {
+  _idx = i;
+  document.getElementById('mainImg').src = _photos[i];
+  document.querySelectorAll('#galleryThumbs img').forEach((el, j) => {
+    el.classList.toggle('active', j === i);
   });
 };
-window.prevImg = () => goToImg((_imgIdx - 1 + _photos.length) % _photos.length);
-window.nextImg = () => goToImg((_imgIdx + 1) % _photos.length);
+window.prevImg = function() { goToImg((_idx - 1 + _photos.length) % _photos.length); };
+window.nextImg = function() { goToImg((_idx + 1) % _photos.length); };
 
-// ── Rendu du produit ───────────────────────────────────────────────────────
+// ── Sélection variante ──
+window.pickVariant = function(el, gi) {
+  el.closest('.chips').querySelectorAll('.chip, .color-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  const lbl = document.getElementById('vv' + gi);
+  if (lbl) lbl.textContent = el.dataset.val;
+};
+
+// ── Rendu du produit ──
 function renderProduct(art) {
-  // Masquer loading
   document.getElementById('loadingState').style.display = 'none';
 
-  // SEO / meta
+  // SEO
   document.title = art.name + ' — TBT3D';
-  document.getElementById('metaDesc').content = art.tagline || art.name + ' — Lampe imprimée en 3D, TBT3D';
+  document.getElementById('metaDesc').setAttribute('content', art.tagline || art.name + ' — TBT3D');
 
   // Breadcrumb
   document.getElementById('bcName').textContent = art.name;
   document.getElementById('breadcrumb').style.display = '';
 
   // Badge
-  const badgesEl = document.getElementById('prodBadges');
   if (art.badge) {
-    badgesEl.innerHTML = `<span class="prod-badge prod-badge-dark">${esc(art.badge)}</span>`;
+    document.getElementById('prodBadges').innerHTML = `<span class="prod-badge">${esc(art.badge)}</span>`;
   }
 
   // Nom & tagline
@@ -469,52 +493,49 @@ function renderProduct(art) {
   // Prix
   document.getElementById('prodPrice').textContent = parseFloat(art.price).toFixed(2) + ' €';
   if (art.oldPrice) {
-    const oldEl  = document.getElementById('prodOldPrice');
-    const saveEl = document.getElementById('prodSave');
-    oldEl.textContent  = parseFloat(art.oldPrice).toFixed(2) + ' €';
-    oldEl.style.display = '';
     const pct = Math.round((1 - art.price / art.oldPrice) * 100);
-    saveEl.textContent  = '−' + pct + '%';
+    const oldEl = document.getElementById('prodOldPrice');
+    const saveEl = document.getElementById('prodSave');
+    oldEl.textContent = parseFloat(art.oldPrice).toFixed(2) + ' €';
+    oldEl.style.display = '';
+    saveEl.textContent = '−' + pct + '%';
     saveEl.style.display = '';
   }
 
   // Galerie
   _photos = art.photos || [];
-  const mainImg   = document.getElementById('mainImg');
-  const mainPh    = document.getElementById('mainPlaceholder');
-  const thumbsEl  = document.getElementById('galleryThumbs');
-  const navEl     = document.getElementById('galleryNav');
-
   if (_photos.length > 0) {
+    const mainImg = document.getElementById('mainImg');
     mainImg.src = _photos[0];
     mainImg.alt = art.name;
     mainImg.style.display = 'block';
-    mainPh.style.display  = 'none';
-
+    document.getElementById('mainPlaceholder').style.display = 'none';
     if (_photos.length > 1) {
-      thumbsEl.innerHTML = _photos.map((src, i) =>
-        `<img src="${src}" alt="${esc(art.name)} ${i+1}" class="${i===0?'active':''}" onclick="goToImg(${i})">`
+      document.getElementById('galleryThumbs').innerHTML = _photos.map((src, i) =>
+        `<img src="${src}" alt="${esc(art.name)} ${i + 1}" class="${i === 0 ? 'active' : ''}" onclick="goToImg(${i})">`
       ).join('');
-      navEl.style.display = 'flex';
+      document.getElementById('galleryNav').style.display = 'flex';
     }
   }
 
   // Variantes
-  const varWrap = document.getElementById('variantsWrap');
   if (art.variants && art.variants.length > 0) {
-    varWrap.innerHTML = art.variants.map((vg, gi) => {
+    document.getElementById('variantsWrap').innerHTML = art.variants.map((vg, gi) => {
       const isColor = vg.options.some(o => o.color);
       const chips = vg.options.map((opt, oi) => {
         if (isColor) {
-          return `<div class="color-chip${oi===0?' on':''}" onclick="pickVariant(this, ${gi})" data-val="${esc(opt.label)}">
-            <span class="cdot" style="background:${opt.color||'#888'}"></span>${esc(opt.label)}
+          return `<div class="color-chip${oi === 0 ? ' on' : ''}" onclick="pickVariant(this,${gi})" data-val="${esc(opt.label)}">
+            <span class="cdot" style="background:${opt.color || '#888'}"></span>${esc(opt.label)}
           </div>`;
         }
-        return `<div class="chip${oi===0?' on':''}" onclick="pickVariant(this, ${gi})" data-val="${esc(opt.label)}">${esc(opt.label)}</div>`;
+        return `<div class="chip${oi === 0 ? ' on' : ''}" onclick="pickVariant(this,${gi})" data-val="${esc(opt.label)}">${esc(opt.label)}</div>`;
       }).join('');
       return `<div class="opt-block">
-        <div class="opt-label"><strong>${esc(vg.name)}</strong><span class="opt-val" id="vv${gi}">${esc(vg.options[0]?.label||'')}</span></div>
-        <div class="chips" data-vg="${gi}">${chips}</div>
+        <div class="opt-label">
+          <strong>${esc(vg.name)}</strong>
+          <span class="opt-val" id="vv${gi}">${esc(vg.options[0]?.label || '')}</span>
+        </div>
+        <div class="chips">${chips}</div>
       </div>`;
     }).join('');
   }
@@ -523,73 +544,93 @@ function renderProduct(art) {
   document.getElementById('prodDesc').textContent = art.desc || 'Aucune description disponible.';
 
   // Caractéristiques
-  const specsEl = document.getElementById('specsTable');
-  if (art.caracs && art.caracs.length > 0) {
-    specsEl.innerHTML = art.caracs.map(c =>
-      `<tr><td>${esc(c.key)}</td><td>${esc(c.val)}</td></tr>`
-    ).join('');
+  if (art.caracs && art.caracs.filter(c => c.key).length > 0) {
+    document.getElementById('specsTable').innerHTML = art.caracs
+      .filter(c => c.key)
+      .map(c => `<tr><td>${esc(c.key)}</td><td>${esc(c.val)}</td></tr>`)
+      .join('');
     document.getElementById('tabSpecsBtn').style.display = '';
-  } else {
-    document.getElementById('tabSpecsBtn').style.display = 'none';
   }
 
-  // Lien d'achat
+  // Bouton achat
   const btnBuy = document.getElementById('btnBuy');
+  const priceStr = parseFloat(art.price).toFixed(2) + ' €';
   if (art.payhip) {
     btnBuy.href = art.payhip;
-    btnBuy.target = '_blank';
-    btnBuy.rel = 'noopener';
+    btnBuy.setAttribute('target', '_blank');
+    btnBuy.setAttribute('rel', 'noopener noreferrer');
+    btnBuy.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
+        <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+      </svg>
+      Acheter — ${priceStr}`;
+    document.getElementById('stripeNote').style.display = 'flex';
   } else {
     btnBuy.href = '/contact.html';
-    btnBuy.textContent = 'Commander — Nous contacter →';
+    btnBuy.removeAttribute('target');
+    btnBuy.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      </svg>
+      Commander — nous contacter`;
   }
 
   // Quantité
-  document.getElementById('qMinus').onclick = () => {
+  document.getElementById('qMinus').onclick = function() {
     const n = document.getElementById('qNum');
-    if (parseInt(n.value) > 1) n.value = parseInt(n.value) - 1;
+    if (+n.value > 1) n.value = +n.value - 1;
   };
-  document.getElementById('qPlus').onclick = () => {
+  document.getElementById('qPlus').onclick = function() {
     const n = document.getElementById('qNum');
-    if (parseInt(n.value) < 99) n.value = parseInt(n.value) + 1;
+    if (+n.value < 99) n.value = +n.value + 1;
   };
 
   // Afficher le produit
   document.getElementById('productWrap').style.display = 'block';
 }
-
-// Sélection de variante
-window.pickVariant = (el, gi) => {
-  el.closest('.chips').querySelectorAll('.chip, .color-chip').forEach(c => c.classList.remove('on'));
-  el.classList.add('on');
-  const lbl = document.getElementById('vv' + gi);
-  if (lbl) lbl.textContent = el.dataset.val;
-};
 </script>
 
+<!-- ─── NAVBAR UTILS ─── -->
 <script>
-// ── Navbar & utils ─────────────────────────────────────────────────────────
-document.querySelectorAll('.nav-links a').forEach(a => {
+// Année footer
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+// Lien actif navbar
+document.querySelectorAll('.nav-links a').forEach(function(a) {
   if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
 });
-window.addEventListener('scroll', () => {
+
+// Scroll shadow navbar
+window.addEventListener('scroll', function() {
   document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
 });
+
+// Recherche
 function toggleSearch() {
-  const b = document.getElementById('searchBar');
+  var b = document.getElementById('searchBar');
   b.classList.toggle('open');
-  if (b.classList.contains('open')) setTimeout(() => document.getElementById('searchInput').focus(), 50);
+  if (b.classList.contains('open')) {
+    setTimeout(function() { document.getElementById('searchInput').focus(); }, 50);
+  }
 }
+
 function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('open');
 }
+
+// Tabs
 function switchTab(id, btn) {
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('on'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('on'); });
   document.getElementById('tab-' + id).classList.add('on');
   btn.classList.add('on');
 }
-document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+// Search live (nécessite search.js)
+function searchLive() {}
+function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
 </script>
+
+<script src="/search.js"></script>
 </body>
 </html>

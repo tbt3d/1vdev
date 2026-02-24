@@ -408,7 +408,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#215543551311120f424e4f5540425561464c40484d0f424e4c"><span class="__cf_email__" data-cfemail="1f6b7d6b2d2f2c317c70716b7e7c6b5f78727e7673317c7072">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
@@ -449,7 +449,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── Active nav link ────────────────────────────────────────────────────────
 document.querySelectorAll('.nav-links a').forEach(a => {
   if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
@@ -857,13 +857,19 @@ function goToPayment() {
     '<div class="success">' +
     '<div class="ck">↗</div>' +
     '<h3>Redirection en cours…</h3>' +
-    '<p>' + m.label + (S.tech === 'fdm' ? ' · ' + S.fill + '%' : '') + ' · ' + S.color + ' · x' + S.qty + '<br>' +
-    '<strong>' + ttc.toFixed(2) + ' € TTC</strong></p>' +
-    '<a href="' + url + '" target="_blank">Aller au paiement →</a>' +
+    '<p>' + m.label + (S.tech === 'fdm' ? ' · ' + S.fill + '%' : '') + ' · ' + S.color + ' · ' + S.qty + ' ex.</p>' +
+    '<a href="' + url + '" target="_blank" rel="noopener" onclick="setTimeout(closeModal,1200)">Payer ' + ttc.toFixed(2) + ' € →</a>' +
     '</div>';
 
-  setTimeout(() => window.open(url, '_blank'), 1800);
+  window.open(url, '_blank');
 }
+
+// ── OVERLAY CLICK ──────────────────────────────────────────────────────────
+document.getElementById('overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
 </script>
+
+<script src="/search.js"></script>
 </body>
 </html>

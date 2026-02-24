@@ -9,9 +9,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--white:#fff;--black:#111;--bg:#f9f9f9;--border:#e8e8e8;--muted:#888;--soft:#555;--font:'Inter',system-ui,sans-serif;--nav-h:70px}
+:root{
+  --white:#fff;--black:#111;--bg:#f9f9f9;--border:#e8e8e8;
+  --muted:#888;--soft:#555;--font:'Inter',system-ui,sans-serif;--nav-h:70px;--r:50px;
+}
 html{scroll-behavior:smooth}
 body{font-family:var(--font);color:var(--black);background:var(--white);padding-top:var(--nav-h)}
+
+/* ─── NAVBAR ─── */
 #navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--white);border-bottom:1px solid var(--border);transition:box-shadow .2s}
 #navbar.scrolled{box-shadow:0 2px 20px rgba(0,0,0,.06)}
 .nav-inner{max-width:1280px;margin:0 auto;height:var(--nav-h);padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:32px}
@@ -35,22 +40,29 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 .mobile-nav a{text-decoration:none;color:var(--black);font-size:15px;padding:10px 12px;border-radius:6px;transition:background .15s}
 .mobile-nav a:hover{background:var(--bg)}
 @media(max-width:768px){.nav-links{display:none}.nav-burger{display:flex}.nav-inner{padding:0 20px}}
+
+/* ─── HERO ─── */
 .boutique-hero{background:var(--bg);padding:56px 0 48px;border-bottom:1px solid var(--border);margin-bottom:56px}
 .container{max-width:1280px;margin:0 auto;padding:0 32px}
+@media(max-width:600px){.container{padding:0 20px}}
 .section-eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
 .boutique-hero h1{font-size:clamp(2rem,4vw,3rem);font-weight:400;letter-spacing:-.02em;margin-bottom:10px}
 .boutique-hero p{font-size:15px;color:var(--soft)}
+
+/* ─── FILTRES ─── */
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:40px}
-.filter-btn{padding:8px 18px;border:1.5px solid var(--border);border-radius:50px;background:var(--white);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .15s;color:var(--soft)}
+.filter-btn{padding:8px 18px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--white);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .15s;color:var(--soft)}
 .filter-btn:hover,.filter-btn.active{border-color:var(--black);background:var(--black);color:var(--white)}
+
+/* ─── GRILLE PRODUITS ─── */
 .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:28px}
-.product-card{text-decoration:none;color:var(--black);display:block;transition:transform .2s;cursor:pointer}
+.product-card{text-decoration:none;color:var(--black);display:block;transition:transform .2s}
 .product-card:hover{transform:translateY(-4px)}
 .product-img{aspect-ratio:3/4;background:var(--bg);border-radius:10px;overflow:hidden;margin-bottom:14px;position:relative}
 .product-img img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
 .product-card:hover .product-img img{transform:scale(1.04)}
 .product-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;opacity:.3}
-.product-badge{position:absolute;top:12px;left:12px;background:var(--black);color:var(--white);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:50px}
+.product-badge{position:absolute;top:12px;left:12px;background:var(--black);color:var(--white);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:var(--r)}
 .product-badge.white-badge{background:#fff;color:#111}
 .product-name{font-size:16px;font-weight:500;margin-bottom:4px}
 .product-tagline{font-size:13px;color:var(--muted);margin-bottom:8px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -59,67 +71,32 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 .price-from{font-size:12px;color:var(--muted)}
 .product-actions{display:flex;gap:8px;margin-top:12px;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
 .product-card:hover .product-actions{opacity:1;transform:none}
-.btn-buy{flex:1;text-align:center;padding:10px 16px;background:var(--black);color:var(--white);border-radius:50px;text-decoration:none;font-size:12px;font-weight:500;transition:opacity .2s;border:none;cursor:pointer;font-family:var(--font)}
+.btn-buy{flex:1;text-align:center;padding:10px 16px;background:var(--black);color:var(--white);border-radius:var(--r);text-decoration:none;font-size:12px;font-weight:500;transition:opacity .2s;border:none;cursor:pointer;font-family:var(--font)}
 .btn-buy:hover{opacity:.8}
-.btn-details{flex:1;text-align:center;padding:10px 16px;background:var(--white);color:var(--black);border-radius:50px;text-decoration:none;font-size:12px;font-weight:500;border:1.5px solid var(--border);transition:border-color .2s;cursor:pointer;font-family:var(--font)}
+.btn-details{flex:1;text-align:center;padding:10px 16px;background:var(--white);color:var(--black);border-radius:var(--r);text-decoration:none;font-size:12px;font-weight:500;border:1.5px solid var(--border);transition:border-color .2s;cursor:pointer;font-family:var(--font)}
 .btn-details:hover{border-color:var(--black)}
-/* LOADING SKELETON */
+
+/* ─── SKELETONS ─── */
 .skeleton{animation:shimmer 1.5s infinite;background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;border-radius:10px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .skel-card{display:flex;flex-direction:column;gap:10px}
 .skel-img{aspect-ratio:3/4;border-radius:10px}
 .skel-line{height:14px;border-radius:4px}
-/* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;align-items:flex-end;justify-content:center}
-.modal-overlay.open{display:flex}
-@media(min-width:768px){.modal-overlay{align-items:center;padding:20px}}
-.modal{background:var(--white);width:100%;max-width:880px;max-height:90vh;overflow-y:auto;border-radius:16px 16px 0 0}
-@media(min-width:768px){.modal{border-radius:16px}}
-.modal-inner{display:grid;grid-template-columns:1fr 1fr}
-@media(max-width:640px){.modal-inner{grid-template-columns:1fr}}
-.modal-gallery{position:relative;background:var(--bg)}
-.modal-main-img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block}
-.modal-main-ph{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:64px;opacity:.2}
-.modal-thumbs{display:flex;gap:6px;padding:10px 12px;overflow-x:auto}
-.modal-thumb{width:48px;height:48px;border-radius:6px;object-fit:cover;cursor:pointer;border:2px solid transparent;transition:border-color .15s;flex-shrink:0}
-.modal-thumb.active{border-color:var(--black)}
-.modal-info{padding:28px 28px 32px;overflow-y:auto}
-.modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;background:var(--white);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;z-index:10}
-.modal-close:hover{background:var(--bg)}
-.modal-badge{display:inline-block;background:var(--black);color:var(--white);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:50px;margin-bottom:12px}
-.modal-name{font-size:24px;font-weight:400;margin-bottom:6px;letter-spacing:-.01em}
-.modal-tagline{font-size:14px;color:var(--muted);margin-bottom:16px;line-height:1.5}
-.modal-price{font-size:22px;font-weight:400;margin-bottom:20px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.modal-price-old{font-size:14px;color:var(--muted);text-decoration:line-through}
-.modal-hr{height:1px;background:var(--border);margin:16px 0}
-.opt-group{margin-bottom:16px}
-.opt-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;display:flex;gap:6px;align-items:center}
-.opt-label span{color:var(--black);font-size:12px;text-transform:none;letter-spacing:0}
-.opt-chips{display:flex;flex-wrap:wrap;gap:7px}
-.opt-chip{padding:7px 14px;border:1.5px solid var(--border);border-radius:50px;font-size:12px;cursor:pointer;transition:all .15s;color:var(--soft);display:flex;align-items:center;gap:6px;background:var(--white)}
-.opt-chip:hover{border-color:#999;color:var(--black)}
-.opt-chip.selected{border-color:var(--black);background:var(--black);color:var(--white)}
-.cdot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex-shrink:0}
-.opt-chip.selected .cdot{box-shadow:0 0 0 2px #111,0 0 0 3px #fff}
-.carac-table{width:100%;border-collapse:collapse;margin-top:8px}
-.carac-table tr{border-bottom:1px solid var(--border)}
-.carac-table tr:last-child{border-bottom:none}
-.carac-table td{padding:7px 0;font-size:12px;line-height:1.4}
-.carac-table td:first-child{color:var(--muted);width:45%;padding-right:12px}
-.modal-desc{font-size:13px;color:var(--soft);line-height:1.8;white-space:pre-line}
-.btn-modal-buy{display:block;width:100%;padding:14px;background:var(--black);color:var(--white);border:none;border-radius:50px;font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;text-align:center;text-decoration:none;transition:opacity .2s;margin-top:16px}
-.btn-modal-buy:hover{opacity:.85}
-.btn-wishlist{display:block;width:100%;padding:13px;background:var(--white);color:var(--black);border:1.5px solid var(--border);border-radius:50px;font-family:var(--font);font-size:13px;cursor:pointer;text-align:center;transition:border-color .2s;margin-top:8px}
-.btn-wishlist:hover{border-color:var(--black)}
+
+/* ─── EMPTY STATE ─── */
 .empty-boutique{text-align:center;padding:80px 20px;color:var(--muted);grid-column:1/-1}
 .empty-boutique svg{width:48px;height:48px;opacity:.2;margin-bottom:16px}
 .empty-boutique h3{font-size:18px;font-weight:400;margin-bottom:8px;color:var(--soft)}
 .empty-boutique p{font-size:14px;line-height:1.7}
+
+/* ─── BANNER DEVIS ─── */
 .banner-dark{background:#111;color:#fff;padding:80px 32px;text-align:center}
 .banner-dark h2{font-size:clamp(1.8rem,3vw,2.8rem);font-weight:400;margin-bottom:14px;letter-spacing:-.01em}
 .banner-dark p{font-size:15px;color:rgba(255,255,255,.6);margin-bottom:32px;line-height:1.7;max-width:520px;margin-left:auto;margin-right:auto}
-.btn-white{display:inline-block;padding:14px 32px;background:#fff;color:#111;border-radius:50px;text-decoration:none;font-size:14px;font-weight:500;transition:opacity .2s}
+.btn-white{display:inline-block;padding:14px 32px;background:#fff;color:#111;border-radius:var(--r);text-decoration:none;font-size:14px;font-weight:500;transition:opacity .2s}
 .btn-white:hover{opacity:.88}
+
+/* ─── FOOTER ─── */
 #footer{background:#111;color:rgba(255,255,255,.7)}
 .footer-inner{max-width:1280px;margin:0 auto;padding:60px 32px 40px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px}
 @media(max-width:900px){.footer-inner{grid-template-columns:1fr 1fr;gap:32px}}
@@ -136,11 +113,12 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 .footer-social svg{width:16px;height:16px}
 .footer-bottom{max-width:1280px;margin:0 auto;padding:20px 32px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.3);flex-wrap:wrap;gap:12px}
 .footer-pay{display:flex;gap:6px;align-items:center}
+@media(max-width:600px){.footer-bottom{padding:16px 20px}}
 </style>
 </head>
 <body data-page="boutique">
 
-<!-- NAVBAR (reprend le style existant) -->
+<!-- ─── NAVBAR ─── -->
 <header id="navbar">
   <div class="nav-inner">
     <a href="/index.html"><img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" style="height:44px;width:auto;object-fit:contain;border-radius:6px" alt="TBT3D"></a>
@@ -155,7 +133,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
       <button class="nav-icon" onclick="toggleSearch()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
       </button>
-      <a href="/compte.html" class="nav-icon" id="navCompteBtn" title="Mon compte">
+      <a href="/compte.html" class="nav-icon" title="Mon compte">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </a>
       <button class="nav-icon nav-burger" onclick="toggleMobileNav()">
@@ -166,18 +144,21 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
   <div class="search-bar" id="searchBar">
     <div class="search-inner">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input type="text" id="searchInput" placeholder="Rechercher..." onkeydown="if(event.key==='Escape')toggleSearch()">
+      <input type="text" id="searchInput" placeholder="Rechercher..." oninput="searchLive()" onkeydown="searchKeydown(event)">
       <button onclick="toggleSearch()">×</button>
     </div>
   </div>
   <div class="mobile-nav" id="mobileNav">
-    <a href="/index.html">Home</a><a href="/boutique.html">Boutique</a>
-    <a href="/devis.html">Devis STL</a><a href="/a-propos.html">À propos</a>
-    <a href="/contact.html">Contact</a><a href="/compte.html">Mon compte</a>
+    <a href="/index.html">Home</a>
+    <a href="/boutique.html">Boutique</a>
+    <a href="/devis.html">Devis STL</a>
+    <a href="/a-propos.html">À propos</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/compte.html">Mon compte</a>
   </div>
 </header>
 
-
+<!-- ─── HERO BOUTIQUE ─── -->
 <div class="boutique-hero">
   <div class="container">
     <div class="section-eyebrow">Collection</div>
@@ -186,22 +167,28 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
   </div>
 </div>
 
+<!-- ─── GRILLE ─── -->
 <div class="container" style="padding-bottom:80px">
   <div class="filters" id="filterBar">
     <button class="filter-btn active" data-filter="all" onclick="setFilter(this)">Tout</button>
   </div>
   <div class="product-grid" id="productGrid">
-    <!-- Skeletons de chargement -->
-    ${[1,2,3,4].map(()=>`<div class="skel-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line" style="width:70%"></div><div class="skeleton skel-line" style="width:40%"></div></div>`).join('')}
+    <!-- Skeletons affichés en attendant Firebase -->
+    <div class="skel-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line" style="width:70%"></div><div class="skeleton skel-line" style="width:40%"></div></div>
+    <div class="skel-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line" style="width:60%"></div><div class="skeleton skel-line" style="width:35%"></div></div>
+    <div class="skel-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line" style="width:75%"></div><div class="skeleton skel-line" style="width:45%"></div></div>
+    <div class="skel-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line" style="width:55%"></div><div class="skeleton skel-line" style="width:30%"></div></div>
   </div>
 </div>
 
+<!-- ─── BANNER DEVIS ─── -->
 <div class="banner-dark">
   <h2>Vous avez un fichier STL ?</h2>
   <p>Obtenez un devis instantané et commandez directement en ligne.</p>
   <a href="/devis.html" class="btn-white">Calculer mon devis →</a>
 </div>
 
+<!-- ─── FOOTER ─── -->
 <footer id="footer">
   <div class="footer-inner">
     <div class="footer-brand">
@@ -209,9 +196,21 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
       <p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p>
       <p class="footer-tagline">Made in France 🇫🇷</p>
     </div>
-    <div class="footer-col"><div class="footer-col-title">Navigation</div><a href="/index.html">Home</a><a href="/boutique.html">Boutique</a><a href="/devis.html">Impression sur mesure</a><a href="/a-propos.html">À propos</a><a href="/contact.html">Contact</a></div>
-    <div class="footer-col"><div class="footer-col-title">Légal</div><a href="/mentions-legales.html">Mentions légales</a><a href="/cgv.html">CGV</a><a href="/politique-confidentialite.html">Confidentialité</a><a href="/politique-retour.html">Retours</a></div>
-    <div class="footer-col"><div class="footer-col-title">Contact</div><a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a><a href="/contact.html">Formulaire</a><a href="/devis.html">Devis STL</a>
+    <div class="footer-col">
+      <div class="footer-col-title">Navigation</div>
+      <a href="/index.html">Home</a><a href="/boutique.html">Boutique</a>
+      <a href="/devis.html">Impression sur mesure</a><a href="/a-propos.html">À propos</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Légal</div>
+      <a href="/mentions-legales.html">Mentions légales</a><a href="/cgv.html">CGV</a>
+      <a href="/politique-confidentialite.html">Confidentialité</a><a href="/politique-retour.html">Retours</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Contact</div>
+      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/contact.html">Formulaire</a><a href="/devis.html">Devis STL</a>
       <div class="footer-social">
         <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
         <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a>
@@ -228,17 +227,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
   </div>
 </footer>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal"><button class="modal-close" onclick="closeModal()">×</button>
-    <div class="modal-inner">
-      <div class="modal-gallery" id="modalGallery"></div>
-      <div class="modal-info" id="modalInfo"></div>
-    </div>
-  </div>
-</div>
-
-<!-- FIREBASE SDK -->
+<!-- ─── FIREBASE + LOGIQUE ─── -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, doc, getDocs, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -251,50 +240,37 @@ const firebaseConfig = {
   appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
 };
 const db = getFirestore(initializeApp(firebaseConfig));
-
-document.getElementById('footerYear').textContent = new Date().getFullYear();
-window.addEventListener('scroll',()=>document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>10));
-window.toggleSearch = ()=>{const b=document.getElementById('searchBar');b.classList.toggle('open');if(b.classList.contains('open'))setTimeout(()=>document.getElementById('searchInput').focus(),50);};
-window.toggleMobileNav = ()=>document.getElementById('mobileNav').classList.toggle('open');
-
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 let allArticles = [];
 let activeFilter = 'all';
-let selectedOpts = {};
 
-// ═══════════════════════════════════════
-// CHARGEMENT FIREBASE
-// ═══════════════════════════════════════
+// ─── CHARGEMENT FIREBASE ───────────────────────────────────────────────────
 async function loadData() {
-  // 1. Charger tous les articles publiés
   const snap = await getDocs(collection(db, 'articles'));
   const arts = [];
-  snap.forEach(d => arts.push({...d.data(), id: d.id}));
+  snap.forEach(d => arts.push({ ...d.data(), id: d.id }));
 
-  // 2. Charger la config boutique (ordre)
   const cfgDoc = await getDoc(doc(db, 'config', 'boutique'));
   const cfg = cfgDoc.exists() ? cfgDoc.data() : null;
 
-  // 3. Construire la liste ordonnée
   const pubArts = arts.filter(a => a.status === 'published');
+
   if (cfg && cfg.slots && cfg.slots.length) {
     allArticles = [];
     cfg.slots.forEach(slot => {
       if (slot.hidden) return;
       const art = pubArts.find(a => a.id === slot.articleId);
       if (!art) return;
-      const a = {...art};
-      // Appliquer les overrides du dashboard
+      const a = { ...art };
       if (slot.overrideBadge !== undefined) a.badge = slot.overrideBadge;
       if (slot.overridePrice) a._displayPrice = slot.overridePrice;
       a._from = slot.overrideFrom && !slot.overridePrice;
       allArticles.push(a);
     });
-    // Ajouter les nouveaux articles non encore dans la config
     pubArts.forEach(a => { if (!allArticles.find(r => r.id === a.id)) allArticles.push(a); });
   } else {
-    allArticles = pubArts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    allArticles = pubArts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
 
   buildFilters();
@@ -303,99 +279,134 @@ async function loadData() {
 
 loadData().catch(e => {
   console.error('Erreur Firebase:', e);
-  document.getElementById('productGrid').innerHTML = `<div class="empty-boutique"><h3>Chargement impossible</h3><p>Vérifiez votre connexion internet.</p></div>`;
+  document.getElementById('productGrid').innerHTML = '<div class="empty-boutique"><h3>Chargement impossible</h3><p>Vérifiez votre connexion internet.</p></div>';
 });
 
-// ═══════════════════════════════════════
-// FILTRES
-// ═══════════════════════════════════════
+// ─── FILTRES ───────────────────────────────────────────────────────────────
 function buildFilters() {
   const bar = document.getElementById('filterBar');
-  const badges = [...new Set(allArticles.map(a=>a.badge).filter(Boolean))];
-  bar.innerHTML = `<button class="filter-btn active" data-filter="all" onclick="setFilter(this)">Tout</button>`;
+  const badges = [...new Set(allArticles.map(a => a.badge).filter(Boolean))];
+  bar.innerHTML = '<button class="filter-btn active" data-filter="all" onclick="setFilter(this)">Tout</button>';
   badges.forEach(b => {
     const btn = document.createElement('button');
-    btn.className='filter-btn'; btn.dataset.filter=b.toLowerCase(); btn.textContent=b;
-    btn.onclick=()=>setFilter(btn); bar.appendChild(btn);
+    btn.className = 'filter-btn';
+    btn.dataset.filter = b.toLowerCase();
+    btn.textContent = b;
+    btn.onclick = () => setFilter(btn);
+    bar.appendChild(btn);
   });
   const m = document.createElement('button');
-  m.className='filter-btn'; m.dataset.filter='mesure'; m.textContent='Sur mesure';
-  m.onclick=()=>setFilter(m); bar.appendChild(m);
+  m.className = 'filter-btn'; m.dataset.filter = 'mesure'; m.textContent = 'Sur mesure';
+  m.onclick = () => setFilter(m);
+  bar.appendChild(m);
 }
-window.setFilter = btn => {
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active'); activeFilter=btn.dataset.filter; renderGrid();
-};
-window.filterCards = () => {
-  const q = document.getElementById('searchInput').value.toLowerCase().trim();
-  document.querySelectorAll('.product-card[data-id]').forEach(c => {
-    c.style.display = (!q || c.dataset.name?.toLowerCase().includes(q)) ? '' : 'none';
-  });
+
+window.setFilter = function(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilter = btn.dataset.filter;
+  renderGrid();
 };
 
-// ═══════════════════════════════════════
-// RENDU GRILLE
-// ═══════════════════════════════════════
+// ─── RENDU GRILLE ──────────────────────────────────────────────────────────
 function renderGrid() {
   const grid = document.getElementById('productGrid');
-  if(activeFilter==='mesure'){grid.innerHTML='';addMesureCard(grid);return;}
-  let filtered = activeFilter==='all' ? allArticles : allArticles.filter(a=>a.badge&&a.badge.toLowerCase()===activeFilter);
-  grid.innerHTML='';
-  if(!allArticles.length){
-    grid.innerHTML=`<div class="empty-boutique"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><h3>La boutique arrive bientôt</h3><p>Les articles sont en cours de création.</p></div>`;
-    addMesureCard(grid); return;
+  if (activeFilter === 'mesure') { grid.innerHTML = ''; addMesureCard(grid); return; }
+
+  const filtered = activeFilter === 'all'
+    ? allArticles
+    : allArticles.filter(a => a.badge && a.badge.toLowerCase() === activeFilter);
+
+  grid.innerHTML = '';
+
+  if (!allArticles.length) {
+    grid.innerHTML = '<div class="empty-boutique"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><h3>La boutique arrive bientôt</h3><p>Les articles sont en cours de création.</p></div>';
+    addMesureCard(grid);
+    return;
   }
+
   filtered.forEach(a => {
-    const card = document.createElement('div');
-    card.className='product-card'; card.dataset.id=a.id; card.dataset.name=a.name;
-    card.onclick=()=>openModal(a);
-    const img = a.photos?.[0] ? `<img src="${a.photos[0]}" alt="${esc(a.name)}" loading="lazy">` : `<div class="product-img-placeholder">🏮</div>`;
-    const badge = a.badge ? `<div class="product-badge">${esc(a.badge)}</div>` : '';
-    const oldP = a.oldPrice ? `<span class="price-old">${parseFloat(a.oldPrice).toFixed(2).replace('.',',')} €</span>` : '';
-    const priceDisplay = a._displayPrice || (parseFloat(a.price).toFixed(2).replace('.',',') + ' €');
-    const fromSpan = a._from ? `<span class="price-from">À partir de</span>` : '';
+    const slug = a.slug || a.id;
+    const prodUrl = '/produit.html?id=' + encodeURIComponent(slug);
+
+    const card = document.createElement('a');
+    card.className = 'product-card';
+    card.href = prodUrl;
+    card.dataset.id = a.id;
+    card.dataset.name = a.name;
+    card.dataset.tagline = a.tagline || '';
+    card.dataset.badge = a.badge || '';
+
+    const img = a.photos && a.photos[0]
+      ? '<img src="' + a.photos[0] + '" alt="' + esc(a.name) + '" loading="lazy">'
+      : '<div class="product-img-placeholder">🏮</div>';
+    const badge = a.badge ? '<div class="product-badge">' + esc(a.badge) + '</div>' : '';
+    const oldP = a.oldPrice
+      ? '<span class="price-old">' + parseFloat(a.oldPrice).toFixed(2).replace('.', ',') + ' €</span>'
+      : '';
+    const priceDisplay = a._displayPrice || (parseFloat(a.price).toFixed(2).replace('.', ',') + ' €');
+    const fromSpan = a._from ? '<span class="price-from">À partir de</span>' : '';
+
     const buyBtn = a.payhip
-      ? `<a href="${esc(a.payhip)}" target="_blank" class="btn-buy" onclick="event.stopPropagation()">Acheter</a>`
-      : `<button class="btn-buy" onclick="event.stopPropagation();openModal(allArticles.find(x=>x.id==='${a.id}'))">Voir les détails</button>`;
-    card.innerHTML=`<div class="product-img">${img}${badge}</div><div class="product-name">${esc(a.name)}</div><div class="product-tagline">${esc(a.tagline||'Lampe imprimée 3D · Made in France')}</div><div class="product-price">${oldP}${fromSpan}${priceDisplay}</div><div class="product-actions">${buyBtn}<button class="btn-details" onclick="event.stopPropagation();openModal(allArticles.find(x=>x.id==='${a.id}'))">Détails</button></div>`;
-    card.style.opacity='0'; card.style.transform='translateY(16px)'; card.style.transition='opacity .4s ease, transform .4s ease';
+      ? '<a href="' + esc(a.payhip) + '" target="_blank" rel="noopener" class="btn-buy" onclick="event.stopPropagation()">Acheter</a>'
+      : '<a href="' + prodUrl + '" class="btn-buy" onclick="event.stopPropagation()">Voir le produit</a>';
+    const detailBtn = '<a href="' + prodUrl + '" class="btn-details" onclick="event.stopPropagation()">Détails</a>';
+
+    card.innerHTML =
+      '<div class="product-img">' + img + badge + '</div>' +
+      '<div class="product-name">' + esc(a.name) + '</div>' +
+      '<div class="product-tagline">' + esc(a.tagline || 'Lampe imprimée 3D · Made in France') + '</div>' +
+      '<div class="product-price">' + oldP + fromSpan + priceDisplay + '</div>' +
+      '<div class="product-actions">' + buyBtn + detailBtn + '</div>';
+
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(16px)';
+    card.style.transition = 'opacity .4s ease, transform .4s ease';
     grid.appendChild(card);
-    requestAnimationFrame(()=>{card.style.opacity='1';card.style.transform='none';});
+    requestAnimationFrame(() => { card.style.opacity = '1'; card.style.transform = 'none'; });
   });
-  if(activeFilter==='all') addMesureCard(grid);
+
+  if (activeFilter === 'all') addMesureCard(grid);
 }
 
-function addMesureCard(grid){
-  const card=document.createElement('a'); card.href='/devis.html'; card.className='product-card';
-  card.innerHTML=`<div class="product-img" style="background:#111"><div class="product-img-placeholder" style="background:#111;color:rgba(255,255,255,.2);flex-direction:column;gap:12px"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 3L3 11v18l17 8 17-8V11L20 3z" stroke="currentColor" stroke-width="1.4"/><path d="M20 3v26M3 11l17 8M37 11l-17 8" stroke="currentColor" stroke-width="1" opacity=".4"/></svg><span style="font-size:13px">Votre STL</span></div><div class="product-badge white-badge">Sur mesure</div></div><div class="product-name">Impression sur mesure</div><div class="product-tagline">Votre fichier STL · FDM ou résine · Prix instantané</div><div class="product-price">Prix calculé en ligne</div>`;
+function addMesureCard(grid) {
+  const card = document.createElement('a');
+  card.href = '/devis.html';
+  card.className = 'product-card';
+  card.innerHTML =
+    '<div class="product-img" style="background:#111">' +
+      '<div class="product-img-placeholder" style="background:#111;color:rgba(255,255,255,.2);flex-direction:column;gap:12px">' +
+        '<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 3L3 11v18l17 8 17-8V11L20 3z" stroke="currentColor" stroke-width="1.4"/><path d="M20 3v26M3 11l17 8M37 11l-17 8" stroke="currentColor" stroke-width="1" opacity=".4"/></svg>' +
+        '<span style="font-size:13px">Votre STL</span>' +
+      '</div>' +
+      '<div class="product-badge white-badge">Sur mesure</div>' +
+    '</div>' +
+    '<div class="product-name">Impression sur mesure</div>' +
+    '<div class="product-tagline">Votre fichier STL · FDM ou résine · Prix instantané</div>' +
+    '<div class="product-price">Prix calculé en ligne</div>';
   grid.appendChild(card);
 }
-
-// ═══════════════════════════════════════
-// MODALE
-// ═══════════════════════════════════════
-window.openModal = art => {
-  if(!art) return;
-  selectedOpts={};
-  if(art.variants) art.variants.forEach(v=>{selectedOpts[v.name]=v.options[0]?.label||'';});
-  const gal=document.getElementById('modalGallery');
-  gal.innerHTML = art.photos?.length
-    ? `<img class="modal-main-img" id="modalMainImg" src="${art.photos[0]}" alt="${esc(art.name)}">${art.photos.length>1?`<div class="modal-thumbs">${art.photos.map((s,i)=>`<img class="modal-thumb${i===0?' active':''}" src="${s}" onclick="switchPhoto(this,'${s}')">`).join('')}</div>`:''}`
-    : `<div class="modal-main-ph">🏮</div>`;
-  const priceDisplay=art._displayPrice||(parseFloat(art.price).toFixed(2).replace('.',',')+' €');
-  const oldP=art.oldPrice?`<span class="modal-price-old">${parseFloat(art.oldPrice).toFixed(2).replace('.',',')} €</span>`:'';
-  const varHtml=art.variants?.length?art.variants.map((vg,gi)=>`<div class="opt-group"><div class="opt-label">${esc(vg.name)} <span id="optsel-${gi}">${esc(vg.options[0]?.label||'')}</span></div><div class="opt-chips">${vg.options.map((opt,oi)=>`<div class="opt-chip${oi===0?' selected':''}" onclick="selectOpt(this,${gi},'${esc(vg.name)}','${esc(opt.label)}')" data-gi="${gi}">${opt.color?`<span class="cdot" style="background:${opt.color}"></span>`:''} ${esc(opt.label)}</div>`).join('')}</div></div>`).join('') : '';
-  const caracHtml=art.caracs?.length?`<div class="modal-hr"></div><div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;font-weight:500">Caractéristiques</div><table class="carac-table">${art.caracs.filter(c=>c.key).map(c=>`<tr><td>${esc(c.key)}</td><td>${esc(c.val)}</td></tr>`).join('')}</table>`:'';
-  const descHtml=art.desc?`<div class="modal-hr"></div><div class="modal-desc">${esc(art.desc)}</div>`:'';
-  const buyBtn=art.payhip?`<a href="${esc(art.payhip)}" target="_blank" class="btn-modal-buy">Acheter →</a>`:`<a href="mailto:tbt203.contact@gmail.com?subject=Commande%20—%20${esc(art.name)}" class="btn-modal-buy">Me contacter pour commander →</a>`;
-  document.getElementById('modalInfo').innerHTML=`${art.badge?`<div class="modal-badge">${esc(art.badge)}</div>`:''}<div class="modal-name">${esc(art.name)}</div><div class="modal-tagline">${esc(art.tagline||'')}</div><div class="modal-price">${priceDisplay}${oldP}</div>${varHtml}${caracHtml}${descHtml}${buyBtn}<button class="btn-wishlist">♡ Ajouter à la liste de souhaits</button>`;
-  document.getElementById('modalOverlay').classList.add('open');
-  document.body.style.overflow='hidden';
-};
-window.closeModal=()=>{document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow='';};
-window.switchPhoto=(thumb,src)=>{document.getElementById('modalMainImg').src=src;document.querySelectorAll('.modal-thumb').forEach(t=>t.classList.remove('active'));thumb.classList.add('active');};
-window.selectOpt=(chip,gi,name,label)=>{document.querySelectorAll(`.opt-chip[data-gi="${gi}"]`).forEach(c=>c.classList.remove('selected'));chip.classList.add('selected');selectedOpts[name]=label;const l=document.getElementById('optsel-'+gi);if(l)l.textContent=label;};
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 </script>
+
+<!-- ─── NAVBAR UTILS ─── -->
+<script>
+document.querySelectorAll('.nav-links a').forEach(function(a) {
+  if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
+});
+window.addEventListener('scroll', function() {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+});
+function toggleSearch() {
+  var b = document.getElementById('searchBar');
+  b.classList.toggle('open');
+  if (b.classList.contains('open')) setTimeout(function() { document.getElementById('searchInput').focus(); }, 50);
+}
+function toggleMobileNav() {
+  document.getElementById('mobileNav').classList.toggle('open');
+}
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+</script>
+
+<script src="/search.js"></script>
 </body>
 </html>
