@@ -248,7 +248,7 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#394d5b4d0b090a175a56574d585a4d795e54585055175a5654"><span class="__cf_email__" data-cfemail="d6a2b4a2e4e6e5f8b5b9b8a2b7b5a296b1bbb7bfbaf8b5b9bb">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
@@ -267,7 +267,20 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, doc, getDocs, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
+  authDomain: "tbt3d-a0f04.firebaseapp.com",
+  projectId: "tbt3d-a0f04",
+  storageBucket: "tbt3d-a0f04.firebasestorage.app",
+  appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
+};
+const db = getFirestore(initializeApp(firebaseConfig));
+
 document.getElementById('footerYear').textContent = new Date().getFullYear();
 
 // Active nav
@@ -288,16 +301,22 @@ function toggleSearch() {
 function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('open');
 }
+window.toggleSearch = toggleSearch;
+window.toggleMobileNav = toggleMobileNav;
 
 // ══════════════════════════════════════════════════════
-// PRODUITS DYNAMIQUES depuis le dashboard
+// PRODUITS DYNAMIQUES depuis Firebase (dashboard)
 // ══════════════════════════════════════════════════════
-function lsGet(k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch { return d; } }
-
-function buildProductsGrid() {
+async function buildProductsGrid() {
   const grid = document.getElementById('productsGrid');
-  const hpCfg  = lsGet('tbt3d_homepage', null);
-  const arts    = lsGet('tbt3d_arts', []);
+
+  // Charger articles et config homepage depuis Firestore
+  const [artsSnap, hpDoc] = await Promise.all([
+    getDocs(collection(db, 'articles')),
+    getDoc(doc(db, 'config', 'homepage'))
+  ]);
+  const arts = artsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const hpCfg = hpDoc.exists() ? hpDoc.data() : null;
 
   // ── Si le dashboard a configuré la page d'accueil ──
   if(hpCfg && hpCfg.slots && hpCfg.slots.length) {
@@ -374,6 +393,7 @@ function buildProductsGrid() {
   }
 
   // ── Fallback statique (aucun article créé du tout) ──
+
   grid.innerHTML = `
     <a href="/boutique.html#eta" class="product-card">
       <div class="product-card-img"><div class="product-card-img-placeholder">📷 Photo ETA à venir</div><div class="product-badge">Bestseller</div></div>
@@ -401,23 +421,20 @@ function buildProductsGrid() {
       <div class="product-sub">Votre fichier STL · FDM ou résine</div>
       <div class="product-price">Prix calculé en ligne</div>
     </a>`;
+
+  // Fade in on scroll (appliqué après insertion des cartes)
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='none'; }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.product-card').forEach(c => {
+    c.style.opacity='0'; c.style.transform='translateY(16px)'; c.style.transition='opacity .4s, transform .4s';
+    observer.observe(c);
+  });
 }
 
 buildProductsGrid();
-
-// Fade in on scroll
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if(e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='none'; }
-  });
-}, { threshold: 0.1 });
-
-document.querySelectorAll('.product-card, .value-card').forEach(el => {
-  el.style.opacity = '0';
-  el.style.transform = 'translateY(16px)';
-  el.style.transition = 'opacity .5s ease, transform .5s ease';
-  observer.observe(el);
-});
 </script>
 </body>
 </html>
