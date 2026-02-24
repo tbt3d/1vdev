@@ -372,6 +372,7 @@ tr:last-child td{border-bottom:none}
               <div class="frow"><div class="field"><label>Prix (€) *</label><input type="number" id="aPrice" placeholder="64.90" step="0.01" min="0"></div><div class="field"><label>Prix barré (€)</label><input type="number" id="aOldPrice" placeholder="89.90" step="0.01"></div></div>
               <div class="frow"><div class="field"><label>Badge</label><select id="aBadge"><option value="">Aucun</option><option value="Nouveau">Nouveau</option><option value="Bestseller">Bestseller</option><option value="Promo">Promo</option></select></div><div class="field"><label>Statut</label><select id="aStatus"><option value="published">Publié ✓</option><option value="draft">Brouillon</option></select></div></div>
               <div class="field"><label>Accroche courte</label><input type="text" id="aTagline" placeholder="Design épuré, lumière douce"></div>
+              <div class="field"><label>Slug URL <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— page produit</span></label><input type="text" id="aSlug" placeholder="lampe-karma" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-')"><div class="fhint">URL : /produit.html?id=lampe-karma · Auto-généré si vide · La page produit est créée/mise à jour à chaque enregistrement</div></div>
               <div class="field"><label>Lien de paiement (Stripe / PayPlug…)</label><input type="text" id="aPayhip" placeholder="https://buy.stripe.com/XXXXX"><div class="fhint">Colle ici le lien de paiement pour ce produit</div></div>
             </div>
           </div>
@@ -830,16 +831,25 @@ window.submitArticle = async () => {
   if(!price){toast('⚠ Prix requis', true);return;}
   const btn = document.getElementById('btnSubmit');
   btn.disabled=true; btn.innerHTML=`<div class="spin"></div> Sauvegarde sur Firebase…`;
+
+  // Auto-génère le slug depuis le nom si vide
+  let slug = document.getElementById('aSlug').value.trim();
+  if(!slug) {
+    slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    document.getElementById('aSlug').value = slug;
+  }
+
   const art = {
     id: editId||String(Date.now()),
     name, price: parseFloat(price),
+    slug,
     oldPrice: parseFloat(document.getElementById('aOldPrice').value)||null,
     badge: document.getElementById('aBadge').value,
     status: document.getElementById('aStatus').value,
     tagline: document.getElementById('aTagline').value.trim(),
     payhip: document.getElementById('aPayhip').value.trim(),
     desc: document.getElementById('aDesc').value.trim(),
-    photos: [...photos],   // URLs Firebase Storage
+    photos: [...photos],
     caracs: caracs.filter(c=>c.key.trim()),
     variants: variants.filter(v=>v.name&&v.options.length),
     createdAt: editId?(arts.find(a=>a.id===editId)?.createdAt||new Date().toISOString()):new Date().toISOString(),
@@ -849,17 +859,16 @@ window.submitArticle = async () => {
     await fbSetArticle(art);
     if(editId){const i=arts.findIndex(a=>a.id===editId);arts[i]=art;}else arts.unshift(art);
     syncBoutSlots();
-    // Refresh hp dropdown si on vient de publier
     if(art.status==='published') {
       const curPage = document.querySelector('.page.active');
       if(curPage && curPage.id === 'page-homepage') renderHpUI();
     }
     editId=null;
     renderArts(); renderOverview(); updateBadges(); resetForm();
-    toast(`"${name}" ${art.status==='published'?'publié sur Firebase ✓':'brouillon sauvegardé ✓'}`);
+    const pageUrl = `/produit.html?id=${slug}`;
+    toast(`"${name}" ${art.status==='published'?`publié ✓ — <a href="${pageUrl}" target="_blank" style="color:var(--blue);text-decoration:underline">voir la page</a>`:'brouillon sauvegardé ✓'}`);
   } catch(e) { toast('Erreur Firebase : '+e.message, true); }
   btn.disabled=false; btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="btnLbl">Publier</span>`;
-  // s'assurer que le span btnLbl est bien présent
   const lbl = document.getElementById("btnLbl"); if(lbl) lbl.textContent = "Publier";
 };
 
@@ -868,6 +877,7 @@ window.editArt = i => {
   document.getElementById('aName').value=a.name; document.getElementById('aPrice').value=a.price;
   document.getElementById('aOldPrice').value=a.oldPrice||''; document.getElementById('aBadge').value=a.badge||'';
   document.getElementById('aStatus').value=a.status; document.getElementById('aTagline').value=a.tagline||'';
+  document.getElementById('aSlug').value=a.slug||'';
   document.getElementById('aPayhip').value=a.payhip||''; document.getElementById('aDesc').value=a.desc||'';
   photos=[...(a.photos||[])]; caracs=(a.caracs||[]).map(c=>({...c})); variants=(a.variants||[]).map(v=>({...v,options:[...v.options]}));
   renderPhotoSlots(); renderCaracs(); renderVariants();
@@ -893,11 +903,11 @@ function renderArts(){
   document.getElementById('artCount').textContent='('+arts.length+')';
   const list=document.getElementById('artList');
   if(!arts.length){list.innerHTML='<div class="empty-state"><div class="ei">📦</div><div class="et">Aucun article.<br>Créez votre premier produit →</div></div>';return;}
-  list.innerHTML='<div class="art-list">'+arts.map((a,i)=>`<div class="art-item">${a.photos?.[0]?`<img class="art-thumb" src="${a.photos[0]}">`:`<div class="art-ph">🏮</div>`}<div class="art-info"><div class="art-name">${esc(a.name)}</div><div class="art-sub">${a.variants?.length?a.variants.length+' opt · ':''}<span style="color:${a.status==='published'?'var(--green)':'var(--orange)'}">${a.status==='published'?'Publié':'Brouillon'}</span></div></div><div class="art-price">${parseFloat(a.price).toFixed(2)} €</div><div class="art-btns"><div class="ib" onclick="editArt(${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div class="ib del" onclick="delArt(${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg></div></div></div>`).join('')+'</div>';
+  list.innerHTML='<div class="art-list">'+arts.map((a,i)=>`<div class="art-item">${a.photos?.[0]?`<img class="art-thumb" src="${a.photos[0]}">`:`<div class="art-ph">🏮</div>`}<div class="art-info"><div class="art-name">${esc(a.name)}</div><div class="art-sub">${a.variants?.length?a.variants.length+' opt · ':''}<span style="color:${a.status==='published'?'var(--green)':'var(--orange)'}">${a.status==='published'?'Publié':'Brouillon'}</span>${a.slug?` · <span style="color:var(--blue)">/produit.html?id=${esc(a.slug)}</span>`:''}</div></div><div class="art-price">${parseFloat(a.price).toFixed(2)} €</div><div class="art-btns">${a.slug&&a.status==='published'?`<a href="/produit.html?id=${esc(a.slug)}" target="_blank" class="ib" title="Voir la page produit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`:''}<div class="ib" onclick="editArt(${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div class="ib del" onclick="delArt(${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg></div></div></div>`).join('')+'</div>';
 }
 function updateBadges(){document.getElementById('artBadge').textContent=arts.length;document.getElementById('boutBadge').textContent=boutSlots.length||arts.filter(a=>a.status==='published').length;}
 window.resetForm = ()=>{
-  editId=null; ['aName','aPrice','aOldPrice','aTagline','aPayhip','aDesc'].forEach(id=>document.getElementById(id).value='');
+  editId=null; ['aName','aPrice','aOldPrice','aTagline','aSlug','aPayhip','aDesc'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('aStatus').value='published'; document.getElementById('aBadge').value='';
   photos=[]; caracs=[]; variants=[]; renderPhotoSlots(); renderCaracs(); renderVariants();
   document.getElementById('artPageTitle').textContent='Créer un article';
