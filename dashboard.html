@@ -415,9 +415,19 @@ tr:last-child td{border-bottom:none}
         <input type="text" class="msg-search" placeholder="🔍  Rechercher…" id="msgSearch" oninput="filterMsgs(this.value)">
         <div class="msgs-filter-bar">
           <button class="mf-chip on" onclick="setMsgFilter('all',this)">Tous</button>
-          <button class="mf-chip" onclick="setMsgFilter('nouveau',this)">Nouveaux</button>
+          <button class="mf-chip" onclick="setMsgFilter('nouveau',this)">🔴 Nouveaux</button>
           <button class="mf-chip" onclick="setMsgFilter('lu',this)">Lus</button>
-          <button class="mf-chip" onclick="setMsgFilter('repondu',this)">Répondus</button>
+          <button class="mf-chip" onclick="setMsgFilter('repondu',this)">✓ Répondus</button>
+        </div>
+        <div class="msgs-filter-bar" style="border-top:none;padding-top:0;flex-wrap:wrap;gap:5px">
+          <span style="font-size:9px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;align-self:center">Sujet :</span>
+          <button class="mf-chip on" onclick="setSubjectFilter('all',this)" id="sfAll">Tous</button>
+          <button class="mf-chip" onclick="setSubjectFilter('commande',this)">🛒 Commande</button>
+          <button class="mf-chip" onclick="setSubjectFilter('devis',this)">📐 Devis</button>
+          <button class="mf-chip" onclick="setSubjectFilter('livraison',this)">📦 Livraison</button>
+          <button class="mf-chip" onclick="setSubjectFilter('produit',this)">🏮 Produit</button>
+          <button class="mf-chip" onclick="setSubjectFilter('partenariat',this)">🤝 Partenariat</button>
+          <button class="mf-chip" onclick="setSubjectFilter('autre',this)">💬 Autre</button>
         </div>
         <div id="msgListContainer">
           <div class="msg-empty-state">Chargement…</div>
@@ -439,11 +449,11 @@ tr:last-child td{border-bottom:none}
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 // ⚙️ EMAILJS — à configurer sur https://www.emailjs.com
-const EMAILJS_SERVICE          = 'service_XXXXXXX';   // ← ton service ID
-const EMAILJS_TPL_ADMIN        = 'template_admin_notif'; // ← template notif admin
-const EMAILJS_TPL_CLIENT_CONF  = 'template_client_conf'; // ← confirmation client
-const EMAILJS_TPL_REPLY        = 'template_reply';        // ← template réponse admin
-const EMAILJS_PUBLIC_KEY       = 'XXXXXXXXXXXXXXXX';      // ← ta public key
+const EMAILJS_SERVICE          = 'service_f73dvuk';           // ✅ TON SERVICE ID
+const EMAILJS_TPL_ADMIN        = 'template_8a89xmr';    // ⬅ Template 1 : notif admin
+const EMAILJS_TPL_CLIENT_CONF  = 'template_h2is8un';    // ⬅ Template 2 : confirmation client
+const EMAILJS_TPL_REPLY        = 'template_h2is8un';    // ⬅ Template 3 : réponse dashboard
+const EMAILJS_PUBLIC_KEY       = 'Hz2TaEfDTVW8Usv6Q'; // ⬅ Account > General > Public Key
 emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 </script>
 
@@ -911,6 +921,7 @@ window.toast = (msg, isErr=false) => {
 let allMsgs = [];
 let selectedMsgId = null;
 let msgFilter = 'all';
+let subjectFilter = 'all';
 let msgUnsubscribe = null;
 
 const SUBJ_LABELS = {commande:'🛒 Commande',devis:'📐 Devis',produit:'🏮 Produit',livraison:'📦 Livraison',partenariat:'🤝 Partenariat',autre:'💬 Autre'};
@@ -943,7 +954,14 @@ function updateMsgBadges() {
 
 window.setMsgFilter = (f, btn) => {
   msgFilter = f;
-  document.querySelectorAll('.mf-chip').forEach(c => c.classList.remove('on'));
+  btn.closest('.msgs-filter-bar').querySelectorAll('.mf-chip').forEach(c => c.classList.remove('on'));
+  btn.classList.add('on');
+  renderMsgList();
+};
+
+window.setSubjectFilter = (f, btn) => {
+  subjectFilter = f;
+  btn.closest('.msgs-filter-bar').querySelectorAll('.mf-chip').forEach(c => c.classList.remove('on'));
   btn.classList.add('on');
   renderMsgList();
 };
@@ -956,6 +974,7 @@ window.filterMsgs = (q) => {
 function renderMsgList(searchTerm = '') {
   let filtered = allMsgs.filter(m => {
     if (msgFilter !== 'all' && m.status !== msgFilter) return false;
+    if (subjectFilter !== 'all' && m.sujet !== subjectFilter) return false;
     if (searchTerm) {
       const hay = `${m.prenom} ${m.nom} ${m.email} ${m.message} ${m.sujet}`.toLowerCase();
       if (!hay.includes(searchTerm)) return false;

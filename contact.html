@@ -30,8 +30,8 @@
 }
 .contact-hero h1 {
   font-family: 'Syne', sans-serif;
-  font-size: clamp(2.8rem, 6vw, 5rem);
-  font-weight: 700; letter-spacing: -.03em; line-height: 1;
+  font-size: clamp(1.9rem, 3.5vw, 2.8rem);
+  font-weight: 700; letter-spacing: -.025em; line-height: 1.15;
   margin-bottom: 20px;
 }
 .contact-hero p {
@@ -280,7 +280,7 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
 <!-- HERO -->
 <div class="contact-hero">
   <div class="contact-eyebrow">Réponse sous 24h</div>
-  <h1>Parlons de<br>votre projet</h1>
+  <h1>Discutons de votre projet</h1>
   <p>Une question sur une commande, un projet d'impression sur mesure, ou simplement envie d'échanger sur la fabrication 3D ?</p>
 </div>
 
@@ -300,7 +300,7 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
         </div>
         <div>
           <div class="info-label">Email direct</div>
-          <div class="info-value"><a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a></div>
+          <div class="info-value"><a href="/cdn-cgi/l/email-protection#2b5f495f191b18054844455f4a485f6b4c464a424705484446"><span class="__cf_email__" data-cfemail="8df9eff9bfbdbea3eee2e3f9eceef9cdeae0ece4e1a3eee2e0">[email&#160;protected]</span></a></div>
         </div>
       </div>
       <div class="info-item">
@@ -446,13 +446,14 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
     </div>
     <div class="footer-col"><div class="footer-col-title">Navigation</div><a href="/index.html">Home</a><a href="/boutique.html">Boutique</a><a href="/devis.html">Impression sur mesure</a><a href="/a-propos.html">À propos</a><a href="/contact.html">Contact</a></div>
     <div class="footer-col"><div class="footer-col-title">Légal</div><a href="/mentions-legales.html">Mentions légales</a><a href="/cgv.html">CGV</a><a href="/politique-confidentialite.html">Confidentialité</a><a href="/politique-retour.html">Retours</a></div>
-    <div class="footer-col"><div class="footer-col-title">Contact</div><a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a><a href="/contact.html">Formulaire</a><div class="footer-social"><a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a></div></div>
+    <div class="footer-col"><div class="footer-col-title">Contact</div><a href="/cdn-cgi/l/email-protection#2d594f591f1d1e034e4243594c4e596d4a404c4441034e4240"><span class="__cf_email__" data-cfemail="c4b0a6b0f6f4f7eaa7abaab0a5a7b084a3a9a5ada8eaa7aba9">[email&#160;protected]</span></a><a href="/contact.html">Formulaire</a><div class="footer-social"><a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a><a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a></div></div>
   </div>
   <div class="footer-bottom"><span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span></div>
 </footer>
 
 <!-- FIREBASE + EMAILJS -->
-<script type="module">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -469,10 +470,11 @@ const firebaseConfig = {
 // ⚙️ EMAILJS — Remplace par tes vraies clés
 // → https://www.emailjs.com (gratuit 200/mois)
 // ──────────────────────────────────────
-const EMAILJS_SERVICE  = 'service_XXXXXXX';   // ton service ID
-const EMAILJS_TEMPLATE_ADMIN  = 'template_XXXXXXX'; // template notif admin
-const EMAILJS_TEMPLATE_CLIENT = 'template_YYYYYYY'; // template confirmation client
-const EMAILJS_PUBLIC_KEY = 'XXXXXXXXXXXXXXXX';       // ta public key
+const EMAILJS_SERVICE  = 'service_f73dvuk';          // ✅ TON SERVICE ID
+const EMAILJS_TEMPLATE_ADMIN  = 'template_8a89xmr'; // ⬅ Template 1 : notif admin
+const EMAILJS_TEMPLATE_CLIENT = 'template_h2is8un'; // ⬅ Template 2 : confirmation client
+const EMAILJS_PUBLIC_KEY = 'Hz2TaEfDTVW8Usv6Q';   // ⬅ Account > General > Public Key
+emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
 const app  = initializeApp(firebaseConfig);
 const db   = getFirestore(app);
@@ -639,18 +641,5 @@ window.addEventListener('scroll', () => document.getElementById('navbar').classL
 document.getElementById('footerYear').textContent = new Date().getFullYear();
 document.querySelectorAll('.nav-links a').forEach(a => { if(a.dataset.page===document.body.dataset.page) a.classList.add('active'); });
 </script>
-
-<!-- EmailJS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>emailjs.init({ publicKey: 'XXXXXXXXXXXXXXXX' });</script>
-
-<style>
-@keyframes shake {
-  0%,100%{transform:translateX(0)}
-  25%{transform:translateX(-6px)}
-  75%{transform:translateX(6px)}
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-</style>
 </body>
 </html>
