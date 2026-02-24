@@ -330,7 +330,7 @@ tr:last-child td{border-bottom:none}
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+// Cloudinary used for photo storage instead of Firebase Storage
 
 // ═══════════════════════════════════════
 // 🔥 CONFIGURATION FIREBASE
@@ -344,7 +344,9 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
-const storage = getStorage(fbApp);
+// Cloudinary config
+const CLOUDINARY_CLOUD = '938827721844831';
+const CLOUDINARY_PRESET = 'umjs9csb';
 
 // ═══════════════════════════════════════
 // 🔐 MOT DE PASSE ADMIN
@@ -625,29 +627,39 @@ window.addPhotos = async (files) => {
   document.getElementById('photoInput').value = '';
 
   uploadInProgress += toUpload.length;
-  showUploadBanner(`Upload de ${toUpload.length} photo${toUpload.length>1?'s':''} en cours…`);
+  showUploadBanner(`Compression + upload de ${toUpload.length} photo${toUpload.length>1?'s':''} en parallèle…`);
 
-  // Ajoute des placeholders
+  // Placeholders immédiats
   const startIdx = photos.length;
   toUpload.forEach(()=>photos.push(null));
   renderPhotoSlots();
 
+  // Compression en parallèle d'abord
+  const blobs = await Promise.all(toUpload.map(f => compressImage(f)));
+  document.getElementById('uploadBannerTxt').textContent = `Upload de ${toUpload.length} photo${toUpload.length>1?'s':''} en cours…`;
+
+  // Upload en parallèle
   let done = 0;
-  const promises = toUpload.map(async (file, i) => {
+  await Promise.all(blobs.map(async (blob, i) => {
     try {
-      const url = await uploadPhoto(file);
+      const fd = new FormData();
+      fd.append('file', blob, 'photo.jpg');
+      fd.append('upload_preset', CLOUDINARY_PRESET);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {method:'POST',body:fd});
+      if(!res.ok) throw new Error('Cloudinary ' + res.status);
+      const data = await res.json();
+      const url = data.secure_url;
       photos[startIdx + i] = url;
       done++;
-      document.getElementById('uploadBannerTxt').textContent = `Upload ${done}/${toUpload.length} photo${toUpload.length>1?'s':''} — patienter…`;
+      const bannerTxt = document.getElementById('uploadBannerTxt');
+      if(bannerTxt) bannerTxt.textContent = `${done}/${toUpload.length} photo${toUpload.length>1?'s':''} uploadée${done>1?'s':''}…`;
       renderPhotoSlots();
     } catch(e) {
-      photos.splice(startIdx + i, 1);
-      toast('Erreur upload photo : ' + e.message, true);
+      photos[startIdx + i] = null;
+      toast('Erreur upload : ' + e.message, true);
     }
-  });
+  }));
 
-  await Promise.all(promises);
-  // Nettoie les nulls éventuels
   photos = photos.filter(p => p !== null);
   uploadInProgress -= toUpload.length;
   if(uploadInProgress <= 0) hideUploadBanner();
