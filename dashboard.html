@@ -345,7 +345,7 @@ const firebaseConfig = {
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 // Cloudinary config
-const CLOUDINARY_CLOUD = '938827721844831';
+const CLOUDINARY_CLOUD = 'dfcrqwbee';
 const CLOUDINARY_PRESET = 'umjs9csb';
 
 // ═══════════════════════════════════════
@@ -646,8 +646,9 @@ window.addPhotos = async (files) => {
       fd.append('file', blob, 'photo.jpg');
       fd.append('upload_preset', CLOUDINARY_PRESET);
       const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {method:'POST',body:fd});
-      if(!res.ok) throw new Error('Cloudinary ' + res.status);
       const data = await res.json();
+      if(!res.ok || data.error) throw new Error(data.error?.message || 'HTTP ' + res.status);
+      if(!data.secure_url) throw new Error('Pas de secure_url dans la réponse');
       const url = data.secure_url;
       photos[startIdx + i] = url;
       done++;
@@ -656,6 +657,7 @@ window.addPhotos = async (files) => {
       renderPhotoSlots();
     } catch(e) {
       photos[startIdx + i] = null;
+      console.error('Upload error:', e);
       toast('Erreur upload : ' + e.message, true);
     }
   }));
