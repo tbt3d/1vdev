@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
+<head><script src="https://payhip.com/payhip.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Produit — TBT3D</title>
@@ -611,7 +611,16 @@ function updateBuyButton() {
   }
 
   if (url) {
+    
     btnBuy.href = url;
+    
+    // Add the payhip-buy-button class if the URL is a Payhip link (short or full)
+    if (url.includes('payhip.com/b/') || url.includes('payhip.com/buy?')) {
+      btnBuy.classList.add('payhip-buy-button');
+    } else {
+      btnBuy.classList.remove('payhip-buy-button');
+    }
+    
     btnBuy.setAttribute('target', '_blank');
     btnBuy.setAttribute('rel', 'noopener noreferrer');
     btnBuy.classList.remove('payhip-buy-button');
