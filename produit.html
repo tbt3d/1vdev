@@ -195,86 +195,6 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .lightbox-prev:hover, .lightbox-next:hover { background: rgba(255,255,255,.25); }
 .lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255,255,255,.5); font-family: var(--font); letter-spacing: .08em; }
 
-/* ─── BOUTON PAYHIP WRAPPER ─── */
-#payhipBtnWrapper {
-  margin-bottom: 10px;
-}
-
-/* ─── MODALE PAIEMENT PRO ─── */
-@keyframes phModalIn {
-  from { opacity: 0; transform: translateY(28px) scale(.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes phOverlayIn { from{opacity:0;} to{opacity:1;} }
-
-/* Overlay backdrop */
-#payhipModal {
-  position: fixed; inset: 0; z-index: 9000;
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-  opacity: 0; pointer-events: none;
-  transition: opacity .25s ease;
-}
-#payhipModal.open { opacity: 1; pointer-events: all; }
-#payhipModal.open #payhipBackdrop { animation: phOverlayIn .25s ease forwards; }
-#payhipModal.open #payhipBox    { animation: phModalIn .38s cubic-bezier(.22,1,.36,1) forwards; }
-
-#payhipBackdrop {
-  position: absolute; inset: 0;
-  background: rgba(8,8,8,.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* Boîte modale */
-#payhipBox {
-  position: relative; z-index: 1;
-  width: 100%; max-width: 900px; max-height: 90vh;
-  background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.07), 0 16px 40px rgba(0,0,0,.14), 0 48px 96px rgba(0,0,0,.22);
-  display: flex; flex-direction: column;
-  overflow: hidden;
-}
-
-/* Header */
-#payhipModalHeader {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 20px 16px;
-  border-bottom: 1px solid #f0f0f0;
-}
-#payhipModalMeta { display: flex; align-items: center; gap: 11px; }
-#payhipModalIcon {
-  width: 38px; height: 38px;
-  background: #111; border-radius: 11px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-#payhipModalIcon svg { width: 17px; height: 17px; color: #fff; }
-#payhipModalTitle { font-size: 14px; font-weight: 700; color: #111; letter-spacing: -.02em; }
-#payhipModalSub   { font-size: 11px; color: #bbb; margin-top: 2px; }
-#payhipCloseBtn {
-  width: 30px; height: 30px;
-  background: #f2f2f2; border: none; border-radius: 50%;
-  color: #888; font-size: 17px; line-height: 1;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all .18s;
-}
-#payhipCloseBtn:hover { background: #e5e5e5; color: #111; transform: rotate(90deg); }
-
-/* IFRAME Payhip */
-#payhipIframe {
-  width: 100%;
-  height: auto;
-  min-height: 600px;
-  border: none;
-  background: #fff;
-  flex: 1;
-}
-
-@media(max-width: 480px) {
-  #payhipBox { border-radius: 20px; }
-}
-
 /* ─── MORE SECTION ─── */
 .more-section { background: var(--white); padding: 100px 32px; text-align: center; }
 .more-inner { max-width: 640px; margin: 0 auto; }
@@ -289,7 +209,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .similar-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
 .similar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 860px; }
 .sim-card { text-decoration: none; color: var(--text); display: block; }
-.sim-img-wrap { aspect-ratio: 9/16; border-radius: 10px; overflow: hidden; background: var(--white); margin-bottom: 10px; }
+.sim-img-wrap { aspect-ratio: 3/4; border-radius: 10px; overflow: hidden; background: var(--white); margin-bottom: 10px; }
 .sim-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
 .sim-card:hover .sim-img-wrap img { transform: scale(1.04); }
 .sim-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 28px; background: var(--white); }
@@ -436,50 +356,17 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
       <div class="hr"></div>
 
-      <!-- Bouton achat — ouvre NOTRE modale, pas payhip.js -->
-      <div id="payhipBtnWrapper">
-        <button id="btnPayhip" class="btn-buy" style="display:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Acheter maintenant
-        </button>
-      </div>
-
-      <!-- Note sécurité -->
-      <p class="pay-secure-note" id="paySecureNote" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Paiement 100% sécurisé · Stripe &amp; PayPal
-      </p>
-
-      <!-- Fallback si pas de lien PayHip configuré -->
-      <a href="/contact.html" class="btn-buy" id="btnNoPayhip" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        Commander — nous contacter
+      <!-- Bouton achat Stripe -->
+      <a href="#" class="btn-buy" id="btnBuy" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Acheter
       </a>
 
-      <!-- ─── MODALE PAIEMENT PRO ─── -->
-      <div id="payhipModal" onclick="handleModalClick(event)">
-        <div id="payhipBackdrop"></div>
-        <div id="payhipBox">
-
-          <!-- Header -->
-          <div id="payhipModalHeader">
-            <div id="payhipModalMeta">
-              <div id="payhipModalIcon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              </div>
-              <div>
-                <div id="payhipModalTitle">Finaliser la commande</div>
-                <div id="payhipModalSub">Paiement sécurisé · TBT3D</div>
-              </div>
-            </div>
-            <button id="payhipCloseBtn" onclick="closePayhipModal()" title="Fermer">×</button>
-          </div>
-
-          <!-- IFRAME Payhip -->
-          <iframe id="payhipIframe" src=""></iframe>
-
-        </div>
-      </div>
+      <!-- Note sécurité Stripe -->
+      <p class="stripe-note" id="stripeNote">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Paiement 100% sécurisé
+      </p>
 
       <!-- Bouton contact secondaire -->
       <a href="/contact.html" class="btn-contact">
@@ -697,6 +584,7 @@ function _currentComboKey() {
 // ── Met à jour le bouton Acheter selon la combo sélectionnée ──
 function updateBuyButton() {
   if (!_art) return;
+  const btnBuy = document.getElementById('btnBuy');
   const comboKey = _currentComboKey();
   const combo = (_art.comboLinks || {})[comboKey];
 
@@ -722,64 +610,37 @@ function updateBuyButton() {
     saveEl.style.display = 'none';
   }
 
-  const btnPayhip   = document.getElementById('btnPayhip');
-  const btnNoPayhip = document.getElementById('btnNoPayhip');
-
-  if (url && (url.includes('payhip.com/b/') || url.includes('payhip.com/buy?'))) {
-    // Afficher le bouton PayHip
-    btnPayhip.style.display = '';
-    btnNoPayhip.style.display = 'none';
+  if (url) {
     
-    // 🔥 NOUVEAU : Clic sur le bouton = ouvre NOTRE modale
-    btnPayhip.onclick = function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      openPayhipModal(url, _art);
-      return false;
-    };
+    btnBuy.href = url;
+    
+    // Add the payhip-buy-button class if the URL is a Payhip link (short or full)
+    if (url.includes('payhip.com/b/') || url.includes('payhip.com/buy?')) {
+      btnBuy.classList.add('payhip-buy-button');
+    } else {
+      btnBuy.classList.remove('payhip-buy-button');
+    }
+    
+    btnBuy.setAttribute('target', '_blank');
+    btnBuy.setAttribute('rel', 'noopener noreferrer');
+    btnBuy.classList.remove('payhip-buy-button');
+    btnBuy.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
+        <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+      </svg>
+      Acheter — ${priceStr}`;
+    document.getElementById('stripeNote').style.display = 'flex';
   } else {
-    // Pas de lien PayHip → bouton contact
-    btnPayhip.style.display = 'none';
-    btnNoPayhip.style.display = '';
+    btnBuy.href = '/contact.html';
+    btnBuy.removeAttribute('target');
+    btnBuy.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      </svg>
+      Commander — nous contacter`;
+    document.getElementById('stripeNote').style.display = 'none';
   }
 }
-
-// ── Modale paiement pro ──
-window.openPayhipModal = function(url, artData) {
-  const modal   = document.getElementById('payhipModal');
-  const iframe  = document.getElementById('payhipIframe');
-
-  // Charger l'URL Payhip dans l'iframe
-  if (url) {
-    iframe.src = url;
-  }
-
-  // Ouvrir la modale
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-};
-
-window.closePayhipModal = function() {
-  document.getElementById('payhipModal').classList.remove('open');
-  document.body.style.overflow = '';
-};
-
-window.handleModalClick = function(e) {
-  if (e.target === document.getElementById('payhipModal') ||
-      e.target === document.getElementById('payhipBackdrop')) {
-    closePayhipModal();
-  }
-};
-
-// Alias
-window.openPayhipOverlay  = window.openPayhipModal;
-window.closePayhipOverlay = window.closePayhipModal;
-
-// Fermer avec Echap
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closePayhipModal();
-});
 
 // ── Sélection variante ──
 window.pickVariant = function(el, gi) {
@@ -1097,41 +958,6 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowRight') lightboxNav(1);
   if (e.key === 'ArrowLeft') lightboxNav(-1);
 });
-
-// ─── RÉCUPÉRER DONNÉES DU PANIER ───
-window.getCartData = function() {
-  const variants = [];
-  document.querySelectorAll('.opt-block').forEach((block) => {
-    const label = block.querySelector('.opt-label strong')?.textContent || '';
-    const selected = block.querySelector('.chip.on, .color-chip.on');
-    if (selected) {
-      variants.push({
-        groupName: label,
-        selectedValue: selected.dataset.val || selected.textContent.trim()
-      });
-    }
-  });
-
-  const qty = parseInt(document.getElementById('qNum').value) || 1;
-  const priceText = document.getElementById('prodPrice').textContent;
-  const price = parseFloat(priceText.replace('€', '').trim());
-  const subtotal = price * qty;
-  const shipping = 8.00;
-  const tax = (subtotal + shipping) * 0.2;
-
-  return {
-    product: {
-      name: document.getElementById('prodName').textContent,
-      price: price,
-      quantity: qty
-    },
-    variants: variants,
-    subtotal: subtotal,
-    shipping: shipping,
-    tax: tax,
-    total: subtotal + shipping + tax
-  };
-};
 
 // Lien actif navbar
 document.querySelectorAll('.nav-links a').forEach(function(a) {
