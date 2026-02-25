@@ -168,6 +168,26 @@ tr:hover td{background:rgba(255,255,255,.01)}
 .vchip-img-btn img{width:100%;height:100%;object-fit:cover;display:block}
 .vchip-img-btn svg{width:10px;height:10px;color:var(--muted)}
 .ph-var-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#fff;font-size:8px;text-align:center;padding:3px 4px;letter-spacing:.05em;pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── MOOD GRID ── */
+.mood-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.mood-slot{aspect-ratio:1;border-radius:8px;overflow:hidden;position:relative;background:var(--bg3);border:1px solid var(--border2)}
+.mood-slot img{width:100%;height:100%;object-fit:cover;display:block}
+.mood-del{position:absolute;top:4px;right:4px;width:20px;height:20px;background:rgba(0,0,0,.85);border-radius:4px;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#fff;font-weight:700;border:none;line-height:1}
+.mood-slot:hover .mood-del{display:flex}
+.mood-del:hover{background:var(--red)}
+
+/* ── SUGGESTIONS ── */
+.sugg-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);border:1.5px solid var(--border2);margin-bottom:6px;cursor:pointer;transition:all .15s;background:var(--bg3)}
+.sugg-item:hover{border-color:var(--accent)}
+.sugg-item.selected{border-color:var(--accent);background:rgba(255,107,53,.07)}
+.sugg-item.selected .sugg-check{background:var(--accent);border-color:var(--accent);color:#fff}
+.sugg-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s}
+.sugg-thumb{width:32px;height:32px;border-radius:5px;object-fit:cover;flex-shrink:0;border:1px solid var(--border2)}
+.sugg-ph{width:32px;height:32px;border-radius:5px;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px}
+.sugg-name{font-size:12px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sugg-price{font-size:11px;color:var(--accent);font-family:var(--mono);white-space:nowrap}
+.sugg-limit{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:4px}
 .photo-slot.is-variant{border-color:var(--blue)}
 .vadd{display:flex;gap:7px}
 .vadd input[type=color]{width:34px;height:34px;padding:2px 3px;border:1.5px solid var(--border2);border-radius:var(--r);background:var(--bg3);cursor:pointer;flex-shrink:0}
@@ -677,6 +697,32 @@ tr:hover td{background:rgba(255,255,255,.01)}
               <button class="btn-add-row" onclick="addVariantGroup()" style="margin-top:0">+ Ajouter une option</button>
             </div>
           </div>
+
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              <span class="fsec-title">Galerie d'ambiance</span>
+              <span style="margin-left:auto;font-size:10px;color:var(--muted)">photos lifestyle · moodboard</span>
+            </div>
+            <div class="fsec-body">
+              <div class="fhint" style="margin-bottom:12px">Ces photos forment une grille sur la fiche produit. Parfait pour montrer la lampe en situation.</div>
+              <div class="mood-grid" id="moodGrid"></div>
+              <input type="file" id="moodInput" accept="image/*" multiple style="display:none" onchange="addMoodPhotos(this.files)">
+              <button class="btn-add-row" onclick="document.getElementById('moodInput').click()">+ Ajouter des photos d'ambiance</button>
+            </div>
+          </div>
+
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+              <span class="fsec-title">Suggestions produits</span>
+              <span style="margin-left:auto;font-size:10px;color:var(--muted)">affiché en bas de fiche</span>
+            </div>
+            <div class="fsec-body">
+              <div class="fhint" style="margin-bottom:12px">Choisissez jusqu'à 4 articles à afficher dans "Autres créations" en bas de la fiche produit.</div>
+              <div id="suggestionsList"></div>
+            </div>
+          </div>
         </div>
 
         <div class="art-sidebar-sticky">
@@ -789,13 +835,13 @@ let arts = [], hpSlots = [], boutSlots = [];
 let photos = [], caracs = [], variants = [], editId = null;
 let variantImages = {};
 let uploadInProgress = 0;
-// CRITIQUE : script type="module" isole les variables du scope global.
-// Les handlers oninput HTML ne voient pas les variables locales du module.
-// Solution : on expose les tableaux sur window et on les utilise DIRECTEMENT.
-// Toute mutation doit passer par window.caracs / window.variants.
+let moodPhotos = [];       // galerie d'ambiance
+let selectedSuggestions = []; // ids des articles suggérés
 window.caracs = caracs;
 window.variants = variants;
 window.photos = photos;
+window.moodPhotos = moodPhotos;
+window.selectedSuggestions = selectedSuggestions;
 
 // ── FIREBASE CRUD ──
 async function fbGetArticles() {
@@ -840,6 +886,7 @@ async function initApp(){
     await loadBout();
     renderOverview(); renderArts(); updateBadges();
     renderPhotoSlots(); renderCaracs(); renderVariants();
+    renderMoodGrid(); renderSuggestions();
     startMsgsListener();
     toast('Firebase chargé ✓');
   }catch(e){
@@ -1206,6 +1253,69 @@ window.pickVariantImg=(gi,oi)=>{
   inp.click();
 };
 
+// ── MOOD GRID (galerie d'ambiance) ──
+function renderMoodGrid(){
+  const g = document.getElementById('moodGrid'); if(!g) return;
+  g.innerHTML = moodPhotos.map((url,i) => `
+    <div class="mood-slot">
+      <img src="${url}" alt="ambiance ${i+1}">
+      <button class="mood-del" onclick="removeMoodPhoto(${i})">×</button>
+    </div>`).join('');
+}
+window.removeMoodPhoto = i => {
+  moodPhotos.splice(i,1); window.moodPhotos=moodPhotos; renderMoodGrid();
+};
+window.addMoodPhotos = async files => {
+  if(!files||!files.length) return;
+  uploadInProgress++;
+  showUploadBanner(`Upload ambiance… 0/${files.length}`);
+  let done=0;
+  for(const file of Array.from(files)){
+    try{
+      const blob = await compressImage(file,1200,0.82);
+      const fd = new FormData(); fd.append('file',blob,'mood.jpg'); fd.append('upload_preset',CLOUDINARY_PRESET);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,{method:'POST',body:fd});
+      const data = await res.json();
+      if(!res.ok||data.error) throw new Error(data.error?.message||'HTTP '+res.status);
+      moodPhotos.push(data.secure_url);
+      done++;
+      showUploadBanner(`Upload ambiance… ${done}/${files.length}`);
+    }catch(e){ toast('Erreur upload ambiance : '+e.message, true); }
+  }
+  window.moodPhotos = moodPhotos;
+  hideUploadBanner(); renderMoodGrid();
+  uploadInProgress--;
+  const inp = document.getElementById('moodInput'); if(inp) inp.value='';
+};
+
+// ── SUGGESTIONS PRODUITS ──
+function renderSuggestions(){
+  const el = document.getElementById('suggestionsList'); if(!el) return;
+  const others = arts.filter(a => a.id !== editId);
+  if(!others.length){
+    el.innerHTML = `<div style="font-size:11px;color:var(--muted)">Aucun autre article disponible.</div>`;
+    return;
+  }
+  const count = selectedSuggestions.length;
+  el.innerHTML = others.map(a => {
+    const sel = selectedSuggestions.includes(a.id);
+    const disabled = !sel && count >= 4;
+    return `<div class="sugg-item${sel?' selected':''}" onclick="${disabled?'':'toggleSuggestion(\''+a.id+'\')'}" style="${disabled?'opacity:.4;cursor:not-allowed':''}">
+      <div class="sugg-check">${sel?'✓':''}</div>
+      ${a.photos?.[0]?`<img class="sugg-thumb" src="${a.photos[0]}">`:`<div class="sugg-ph">🏮</div>`}
+      <span class="sugg-name">${esc(a.name)}</span>
+      <span class="sugg-price">${parseFloat(a.price).toFixed(2)} €</span>
+    </div>`;
+  }).join('') + `<div class="sugg-limit">${count}/4 sélectionné${count>1?'s':''}</div>`;
+}
+window.toggleSuggestion = id => {
+  const idx = selectedSuggestions.indexOf(id);
+  if(idx >= 0) selectedSuggestions.splice(idx,1);
+  else if(selectedSuggestions.length < 4) selectedSuggestions.push(id);
+  window.selectedSuggestions = selectedSuggestions;
+  renderSuggestions();
+};
+
 // ── SUBMIT ARTICLE (CORRIGÉ) ──
 window.submitArticle = async () => {
   if(uploadInProgress>0){toast('⏳ Upload en cours, patientez…', true);return;}
@@ -1252,6 +1362,8 @@ window.submitArticle = async () => {
     photos: [...photos].filter(Boolean),
     caracs: window.caracs.filter(c=>c&&c.key&&c.key.trim()),
     variants: safeVariants,
+    moodPhotos: [...moodPhotos].filter(Boolean),
+    suggestions: [...selectedSuggestions],
     createdAt: editId?(arts.find(a=>a.id===editId)?.createdAt||new Date().toISOString()):new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -1332,9 +1444,17 @@ window.editArt=i=>{
     : [];
 
   window.variants = variants;
+  // Recharger moodPhotos
+  moodPhotos = Array.isArray(a.moodPhotos) ? a.moodPhotos.filter(Boolean) : [];
+  window.moodPhotos = moodPhotos;
+  // Recharger suggestions
+  selectedSuggestions = Array.isArray(a.suggestions) ? [...a.suggestions] : [];
+  window.selectedSuggestions = selectedSuggestions;
   renderPhotoSlots();
   renderCaracs();
   renderVariants();
+  renderMoodGrid();
+  renderSuggestions();
 
   document.getElementById('artPageTitle').textContent='Modifier — '+a.name;
   const btn=document.getElementById('btnSubmit');
@@ -1395,8 +1515,10 @@ window.resetForm=()=>{
   const statusEl=document.getElementById('aStatus'); if(statusEl) statusEl.value='published';
   const badgeEl=document.getElementById('aBadge'); if(badgeEl) badgeEl.value='';
   photos=[]; caracs=[]; variants=[]; variantImages={};
+  moodPhotos=[]; selectedSuggestions=[];
   window.caracs=caracs; window.variants=variants; window.photos=photos;
-  renderPhotoSlots(); renderCaracs(); renderVariants();
+  window.moodPhotos=moodPhotos; window.selectedSuggestions=selectedSuggestions;
+  renderPhotoSlots(); renderCaracs(); renderVariants(); renderMoodGrid(); renderSuggestions();
   document.getElementById('artPageTitle').textContent='Créer un article';
   document.getElementById('btnCancel').style.display='none';
   // Remettre le bouton submit proprement

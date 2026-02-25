@@ -172,11 +172,16 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .info-item-val { font-size: 12px; font-weight: 500; }
 @media(max-width:768px) { .info-section { padding: 48px 20px; } .info-grid { grid-template-columns: 1fr; } .info-block { border-right: none; border-bottom: 1px solid var(--border); } .info-block:last-child { border-bottom: none; } }
 
-/* ─── HERO STORY ─── */
-.hero-story { position: relative; max-height: 600px; overflow: hidden; }
-.hero-story-img { width: 100%; height: 600px; object-fit: cover; display: block; filter: brightness(.85); }
-.hero-story-caption { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.7); background: rgba(0,0,0,.35); padding: 8px 20px; border-radius: 20px; white-space: nowrap; }
-@media(max-width:768px) { .hero-story-img { height: 320px; } .hero-story-caption { font-size: 10px; bottom: 20px; } }
+/* ─── MOOD GRID (galerie d'ambiance) ─── */
+.mood-section { background: var(--white); padding: 0 32px 80px; }
+.mood-inner { max-width: var(--max); margin: 0 auto; }
+.mood-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+.mood-mosaic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mood-mosaic img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; display: block; transition: transform .4s ease, filter .3s ease; filter: brightness(.95); }
+.mood-mosaic img:hover { transform: scale(1.02); filter: brightness(1); }
+.mood-mosaic img:first-child:nth-last-child(1) { grid-column: span 3; aspect-ratio: 16/7; }
+.mood-mosaic img:first-child:nth-last-child(2), .mood-mosaic img:first-child:nth-last-child(2) ~ img { grid-column: span 1; }
+@media(max-width:600px) { .mood-section { padding: 0 20px 48px; } .mood-mosaic { grid-template-columns: repeat(2, 1fr); } }
 
 /* ─── MORE SECTION ─── */
 .more-section { background: var(--white); padding: 100px 32px; text-align: center; }
@@ -398,10 +403,12 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     </div>
   </div>
 
-  <!-- ─── GRANDE IMAGE STORYTELLING ─── -->
-  <div class="hero-story" id="heroStory" style="display:none">
-    <img id="heroStoryImg" src="" alt="" class="hero-story-img">
-    <div class="hero-story-caption" id="heroStoryCaption"></div>
+  <!-- ─── MOOD GRID ─── -->
+  <div class="mood-section" id="moodSection" style="display:none">
+    <div class="mood-inner">
+      <div class="mood-label">EN SITUATION.</div>
+      <div class="mood-mosaic" id="moodMosaic"></div>
+    </div>
   </div>
 
   <!-- ─── MORE THAN A DESIGN ─── -->
@@ -726,12 +733,12 @@ function renderProduct(art) {
     document.getElementById('infoSection').style.display = '';
   }
 
-  // Grande image storytelling = 2ème photo si dispo
-  if (_photos.length >= 2) {
-    document.getElementById('heroStoryImg').src = _photos[1];
-    document.getElementById('heroStoryImg').alt = art.name;
-    document.getElementById('heroStoryCaption').textContent = 'Fabriqué à Lille · Impression 3D · Made in France';
-    document.getElementById('heroStory').style.display = '';
+  // Galerie d'ambiance (moodboard)
+  if (art.moodPhotos && art.moodPhotos.length > 0) {
+    document.getElementById('moodMosaic').innerHTML = art.moodPhotos
+      .map((src, i) => `<img src="${esc(src)}" alt="ambiance ${i+1}" loading="lazy">`)
+      .join('');
+    document.getElementById('moodSection').style.display = '';
   }
 
   // Bouton achat
@@ -770,21 +777,28 @@ function renderProduct(art) {
   // Afficher le produit
   document.getElementById('productWrap').style.display = 'block';
 
-  // Charger les produits similaires (autres articles publiés)
-  loadSimilar(art.id, art.slug);
+  // Charger suggestions (fixes ou fallback auto)
+  loadSuggestions(art);
 }
 
-async function loadSimilar(currentId, currentSlug) {
+async function loadSuggestions(art) {
   try {
     const snap = await getDocs(query(collection(db, 'articles'), where('status', '==', 'published')));
-    const others = [];
-    snap.forEach(d => {
-      const a = { id: d.id, ...d.data() };
-      if (a.id !== currentId && a.slug !== currentSlug) others.push(a);
-    });
-    if (others.length === 0) return;
-    // Max 4 produits
-    const toShow = others.slice(0, 4);
+    const allArts = [];
+    snap.forEach(d => allArts.push({ id: d.id, ...d.data() }));
+
+    let toShow = [];
+    if (art.suggestions && art.suggestions.length > 0) {
+      art.suggestions.forEach(id => {
+        const found = allArts.find(a => a.id === id);
+        if (found) toShow.push(found);
+      });
+    }
+    if (toShow.length === 0) {
+      toShow = allArts.filter(a => a.id !== art.id && a.slug !== art.slug).slice(0, 4);
+    }
+    if (toShow.length === 0) return;
+
     document.getElementById('similarGrid').innerHTML = toShow.map(a => `
       <a href="/produit.html?id=${esc(a.slug || a.id)}" class="sim-card">
         <div class="sim-img-wrap">
@@ -796,7 +810,7 @@ async function loadSimilar(currentId, currentSlug) {
         <div class="sim-price">${parseFloat(a.price).toFixed(2)} €</div>
       </a>`).join('');
     document.getElementById('similarSection').style.display = '';
-  } catch(e) { console.warn('Similar products error:', e); }
+  } catch(e) { console.warn('Suggestions error:', e); }
 }
 </script>
 
