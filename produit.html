@@ -438,17 +438,16 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
       <div class="hr"></div>
 
-      <!-- Bouton achat Stripe -->
-      <a href="#" class="btn-buy" id="btnBuy" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Acheter
+      <!-- Bouton achat PayHip officiel -->
+      <div id="payhipBtnWrapper">
+        <!-- Généré dynamiquement par JS après chargement du produit -->
+        <a href="#" class="payhip-buy-button" data-theme="blue" data-product="" id="btnPayhip" style="display:none">Acheter</a>
+      </div>
+      <!-- Fallback si pas de lien PayHip configuré -->
+      <a href="/contact.html" class="btn-buy" id="btnNoPayhip" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Commander — nous contacter
       </a>
-
-      <!-- Note sécurité Stripe -->
-      <p class="stripe-note" id="stripeNote">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Paiement 100% sécurisé
-      </p>
 
       <!-- Bouton contact secondaire -->
       <a href="/contact.html" class="btn-contact">
@@ -514,16 +513,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     <div class="lightbox-counter" id="lightboxCounter"></div>
   </div>
 
-  <!-- PAYHIP POPUP MODAL -->
-  <div class="payhip-modal" id="payhipModal" onclick="closePayhipModal(event)">
-    <div class="payhip-modal-content">
-      <div class="payhip-modal-header">
-        <div class="payhip-modal-title">Paiement sécurisé</div>
-        <button class="payhip-modal-close" onclick="closePayhipModal()">×</button>
-      </div>
-      <iframe id="payhipIframe" src=""></iframe>
-    </div>
-  </div>
+  <!-- Bouton PayHip officiel - popup géré nativement par payhip.js -->
 
   <!-- ─── MORE THAN A DESIGN ─── -->
   <div class="more-section">
@@ -677,7 +667,6 @@ function _currentComboKey() {
 // ── Met à jour le bouton Acheter selon la combo sélectionnée ──
 function updateBuyButton() {
   if (!_art) return;
-  const btnBuy = document.getElementById('btnBuy');
   const comboKey = _currentComboKey();
   const combo = (_art.comboLinks || {})[comboKey];
 
@@ -703,45 +692,28 @@ function updateBuyButton() {
     saveEl.style.display = 'none';
   }
 
-  if (url) {
-    
-    btnBuy.href = url;
-    
-    // Check if it's a Payhip link (short or full)
-    const isPayhip = url.includes('payhip.com/b/') || url.includes('payhip.com/buy?');
-    
-    if (isPayhip) {
-      // Pour PayHip : ouvrir en modale popup centrée
-      btnBuy.classList.add('payhip-buy-button');
-      btnBuy.removeAttribute('target');
-      btnBuy.removeAttribute('rel');
-      btnBuy.onclick = function(e) {
-        e.preventDefault();
-        openPayhipModal(url);
-      };
-    } else {
-      // Pour les autres liens : ouvrir normalement dans nouvel onglet
-      btnBuy.classList.remove('payhip-buy-button');
-      btnBuy.setAttribute('target', '_blank');
-      btnBuy.setAttribute('rel', 'noopener noreferrer');
-      btnBuy.onclick = null;
+  const btnPayhip   = document.getElementById('btnPayhip');
+  const btnNoPayhip = document.getElementById('btnNoPayhip');
+
+  if (url && (url.includes('payhip.com/b/') || url.includes('payhip.com/buy?'))) {
+    // Extraire l'ID produit depuis l'URL (ex: payhip.com/b/s0I76 → s0I76)
+    const match = url.match(/payhip\.com\/b\/([A-Za-z0-9]+)/);
+    const productId = match ? match[1] : '';
+
+    // Mettre à jour le bouton officiel PayHip
+    btnPayhip.href = url;
+    btnPayhip.setAttribute('data-product', productId);
+    btnPayhip.style.display = '';
+    btnNoPayhip.style.display = 'none';
+
+    // Réinitialiser PayHip pour qu'il reconnaisse le nouveau bouton
+    if (window.Payhip && window.Payhip.Configure) {
+      window.Payhip.Configure({ action: 'buy' });
     }
-    
-    btnBuy.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
-        <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-      </svg>
-      Acheter — ${priceStr}`;
-    document.getElementById('stripeNote').style.display = 'flex';
   } else {
-    btnBuy.href = '/contact.html';
-    btnBuy.removeAttribute('target');
-    btnBuy.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
-        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-      </svg>
-      Commander — nous contacter`;
-    document.getElementById('stripeNote').style.display = 'none';
+    // Pas de lien PayHip → bouton contact
+    btnPayhip.style.display = 'none';
+    btnNoPayhip.style.display = '';
   }
 }
 
