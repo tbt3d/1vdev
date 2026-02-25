@@ -287,7 +287,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 /* Boîte modale */
 #payhipBox {
   position: relative; z-index: 1;
-  width: 100%; max-width: 420px;
+  width: 100%; max-width: 900px;
   background: #fff;
   border-radius: 24px;
   box-shadow: 0 0 0 1px rgba(0,0,0,.07), 0 16px 40px rgba(0,0,0,.14), 0 48px 96px rgba(0,0,0,.22);
@@ -408,6 +408,17 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 }
 .modal-trust { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #bbb; font-weight: 500; }
 .modal-trust svg { width: 10px; height: 10px; opacity: .7; }
+
+/* Conteneur pour Payhip */
+#payhipPayhipContainer {
+  flex: 1;
+  overflow: auto;
+  max-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
 
 @media(max-width: 480px) {
   #payhipBox { border-radius: 20px; }
@@ -611,63 +622,14 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
             <button id="payhipCloseBtn" onclick="closePayhipModal()" title="Fermer">×</button>
           </div>
 
-          <!-- Récap produit -->
-          <div id="payhipRecap">
-            <div id="payhipRecapImg"><span class="recap-ph">🏮</span></div>
-            <div id="payhipRecapInfo">
-              <div id="payhipRecapName">Produit</div>
-              <div id="payhipRecapSub"></div>
-            </div>
-            <div id="payhipRecapPrice">—</div>
-          </div>
-
-          <!-- Zone paiement -->
-          <div id="payhipPayZone">
-
-            <!-- Ce bouton est intercepté par payhip.js pour ouvrir leur popup -->
+          <!-- Conteneur Payhip -->
+          <div id="payhipPayhipContainer">
             <a id="payhipPayTrigger" href="#"
                class="payhip-buy-button" data-theme="blue" data-product=""
                style="display:none">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
               Payer maintenant
             </a>
-
-            <div class="ph-methods-sep">méthodes acceptées</div>
-
-            <div class="ph-logos">
-              <div class="ph-logo-pill">
-                <svg viewBox="0 0 38 24" width="26" height="16"><rect width="38" height="24" rx="3" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
-                Visa
-              </div>
-              <div class="ph-logo-pill">
-                <svg viewBox="0 0 38 24" width="26" height="16"><rect width="38" height="24" rx="3" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
-                Mastercard
-              </div>
-              <div class="ph-logo-pill">
-                <svg viewBox="0 0 38 24" width="26" height="16"><rect width="38" height="24" rx="3" fill="#003087"/><text x="19" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="white" font-family="sans-serif">PayPal</text></svg>
-                PayPal
-              </div>
-              <div class="ph-logo-pill">
-                <svg viewBox="0 0 20 20" width="14" height="14"><circle cx="10" cy="10" r="10" fill="#635bff"/><path d="M6 8.5c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5H6v-.5zm0 2h8v3a2 2 0 01-2 2H8a2 2 0 01-2-2v-3z" fill="white"/></svg>
-                Stripe
-              </div>
-            </div>
-          </div>
-
-          <!-- Footer confiance -->
-          <div id="payhipModalFooter">
-            <div class="modal-trust">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              SSL 256-bit
-            </div>
-            <div class="modal-trust">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Crypté &amp; sécurisé
-            </div>
-            <div class="modal-trust">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              Remboursé si problème
-            </div>
           </div>
 
         </div>
