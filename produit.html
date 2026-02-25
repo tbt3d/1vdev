@@ -1121,6 +1121,15 @@ window.closePayhipModal = function(e) {
   document.body.style.overflow = '';
 };
 
+// Vérifier si on revient de PayHip (redirection automatique de confirmation.html)
+window.addEventListener('load', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('payhip_success')) {
+    // PayHip a redirigé vers la confirmation
+    window.location.href = '/confirmation.html';
+  }
+});
+
 // Fermer la modale PayHip avec Échap
 document.addEventListener('keydown', function(e) {
   const modal = document.getElementById('payhipModal');
