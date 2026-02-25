@@ -614,16 +614,26 @@ function updateBuyButton() {
     
     btnBuy.href = url;
     
-    // Add the payhip-buy-button class if the URL is a Payhip link (short or full)
-    if (url.includes('payhip.com/b/') || url.includes('payhip.com/buy?')) {
+    // Check if it's a Payhip link (short or full)
+    const isPayhip = url.includes('payhip.com/b/') || url.includes('payhip.com/buy?');
+    
+    if (isPayhip) {
+      // Pour PayHip : ouvrir en popup via JavaScript au lieu de target="_blank"
       btnBuy.classList.add('payhip-buy-button');
+      btnBuy.removeAttribute('target');
+      btnBuy.removeAttribute('rel');
+      btnBuy.onclick = function(e) {
+        e.preventDefault();
+        window.open(url, 'PayHipCheckout', 'width=900,height=700,resizable=yes,scrollbars=yes');
+      };
     } else {
+      // Pour les autres liens : ouvrir normalement dans nouvel onglet
       btnBuy.classList.remove('payhip-buy-button');
+      btnBuy.setAttribute('target', '_blank');
+      btnBuy.setAttribute('rel', 'noopener noreferrer');
+      btnBuy.onclick = null;
     }
     
-    btnBuy.setAttribute('target', '_blank');
-    btnBuy.setAttribute('rel', 'noopener noreferrer');
-    btnBuy.classList.remove('payhip-buy-button');
     btnBuy.innerHTML = `
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
         <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
