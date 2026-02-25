@@ -1062,7 +1062,7 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowLeft') lightboxNav(-1);
 });
 
-// ─── FONCTION RÉCUPÉRER LES DONNÉES DU PANIER ───
+// ─── RÉCUPÉRER DONNÉES DU PANIER ───
 window.getCartData = function() {
   const variants = [];
   document.querySelectorAll('.opt-block').forEach((block) => {
@@ -1099,7 +1099,7 @@ window.getCartData = function() {
 
 // ─── PAYHIP MODAL ───
 window.openPayhipModal = function(url) {
-  // SAUVEGARDER LES DONNÉES DU PANIER AVANT PAYHIP
+  // Sauvegarder les données du panier AVANT PayHip
   try {
     const cartData = window.getCartData();
     sessionStorage.setItem('pendingOrder', JSON.stringify(cartData));
@@ -1108,7 +1108,7 @@ window.openPayhipModal = function(url) {
     console.warn('Erreur sauvegarde panier:', e);
   }
   
-  // Ouvrir PayHip
+  // Ouvrir PayHip comme avant
   document.getElementById('payhipIframe').src = url;
   document.getElementById('payhipModal').classList.add('open');
   document.body.style.overflow = 'hidden';
