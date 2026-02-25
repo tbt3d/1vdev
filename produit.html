@@ -193,75 +193,96 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .lightbox-prev:hover, .lightbox-next:hover { background: rgba(255,255,255,.25); }
 .lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255,255,255,.5); font-family: var(--font); letter-spacing: .08em; }
 
-/* ─── MODALE PAIEMENT PRO ─── */
-@keyframes phModalIn {
-  from { opacity: 0; transform: translateY(28px) scale(.96); }
+/* ─── OVERLAY REDIRECTION ─── */
+@keyframes redirectBoxIn {
+  from { opacity: 0; transform: translateY(32px) scale(.95); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-@keyframes phOverlayIn { from{opacity:0;} to{opacity:1;} }
 
-#payhipModal {
+#redirectOverlay {
   position: fixed; inset: 0; z-index: 9000;
   display: flex; align-items: center; justify-content: center;
   padding: 20px;
+  background: rgba(8,8,8,.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   opacity: 0; pointer-events: none;
   transition: opacity .25s ease;
 }
-#payhipModal.open { opacity: 1; pointer-events: all; }
-#payhipModal.open #payhipBackdrop { animation: phOverlayIn .25s ease forwards; }
-#payhipModal.open #payhipBox    { animation: phModalIn .38s cubic-bezier(.22,1,.36,1) forwards; }
+#redirectOverlay.open { opacity: 1; pointer-events: all; }
+#redirectOverlay.open #redirectBox { animation: redirectBoxIn .38s cubic-bezier(.22,1,.36,1) forwards; }
 
-#payhipBackdrop {
-  position: absolute; inset: 0;
-  background: rgba(8,8,8,.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-#payhipBox {
-  position: relative; z-index: 1;
-  width: 100%; max-width: 900px; max-height: 90vh;
+#redirectBox {
+  position: relative;
+  width: 100%; max-width: 440px;
   background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.07), 0 16px 40px rgba(0,0,0,.14), 0 48px 96px rgba(0,0,0,.22);
-  display: flex; flex-direction: column;
-  overflow: hidden;
+  border-radius: 28px;
+  padding: 48px 40px 40px;
+  text-align: center;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.06), 0 24px 60px rgba(0,0,0,.18), 0 60px 120px rgba(0,0,0,.12);
 }
 
-#payhipModalHeader {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 20px 16px;
-  border-bottom: 1px solid #f0f0f0;
-}
-#payhipModalMeta { display: flex; align-items: center; gap: 11px; }
-#payhipModalIcon {
-  width: 38px; height: 38px;
-  background: #111; border-radius: 11px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-#payhipModalIcon svg { width: 17px; height: 17px; color: #fff; }
-#payhipModalTitle { font-size: 14px; font-weight: 700; color: #111; letter-spacing: -.02em; }
-#payhipModalSub   { font-size: 11px; color: #bbb; margin-top: 2px; }
-#payhipCloseBtn {
-  width: 30px; height: 30px;
+#redirectCloseBtn {
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px;
   background: #f2f2f2; border: none; border-radius: 50%;
-  color: #888; font-size: 17px; line-height: 1;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: #888; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
   transition: all .18s;
 }
-#payhipCloseBtn:hover { background: #e5e5e5; color: #111; transform: rotate(90deg); }
+#redirectCloseBtn:hover { background: #e5e5e5; color: #111; transform: rotate(90deg); }
+#redirectCloseBtn svg { width: 14px; height: 14px; }
 
-#payhipIframe {
-  width: 100%;
-  height: auto;
-  min-height: 600px;
-  border: none;
-  background: #fff;
-  flex: 1;
+#redirectIcon {
+  width: 64px; height: 64px;
+  background: #f6f6f6;
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+#redirectIcon svg { width: 28px; height: 28px; color: #111; }
+
+#redirectLabel {
+  font-size: 11px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: #aaa; margin-bottom: 8px;
+}
+#redirectProductName {
+  font-size: 26px; font-weight: 400; letter-spacing: -.025em;
+  color: #111; margin-bottom: 6px; line-height: 1.2;
+}
+#redirectProductPrice {
+  font-size: 20px; color: #555; margin-bottom: 24px; font-weight: 300;
+}
+#redirectMsg {
+  font-size: 13px; color: #888; line-height: 1.7;
+  margin-bottom: 28px; max-width: 320px; margin-left: auto; margin-right: auto;
 }
 
+#redirectGoBtn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 16px 24px;
+  background: #111; color: #fff;
+  border-radius: 50px;
+  text-decoration: none;
+  font-family: var(--font); font-size: 15px; font-weight: 500;
+  transition: opacity .2s, transform .15s;
+  margin-bottom: 24px;
+}
+#redirectGoBtn:hover { opacity: .85; transform: translateY(-2px); }
+#redirectGoBtn svg { width: 17px; height: 17px; flex-shrink: 0; }
+
+#redirectTrust {
+  display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+}
+#redirectTrust span {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: #bbb;
+}
+#redirectTrust svg { width: 12px; height: 12px; }
+
 @media(max-width: 480px) {
-  #payhipBox { border-radius: 20px; }
+  #redirectBox { padding: 40px 24px 32px; border-radius: 22px; }
+  #redirectProductName { font-size: 22px; }
 }
 
 /* ─── MORE SECTION ─── */
@@ -439,28 +460,42 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
         Commander — nous contacter
       </a>
 
-      <!-- ─── MODALE PAIEMENT PRO ─── -->
-      <div id="payhipModal" onclick="handleModalClick(event)">
-        <div id="payhipBackdrop"></div>
-        <div id="payhipBox">
+      <!-- ─── OVERLAY REDIRECTION PAIEMENT ─── -->
+      <div id="redirectOverlay" onclick="if(event.target===this)closeRedirectOverlay()">
+        <div id="redirectBox">
+          <button id="redirectCloseBtn" onclick="closeRedirectOverlay()" title="Fermer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
 
-          <!-- Header -->
-          <div id="payhipModalHeader">
-            <div id="payhipModalMeta">
-              <div id="payhipModalIcon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              </div>
-              <div>
-                <div id="payhipModalTitle">Finaliser la commande</div>
-                <div id="payhipModalSub">Paiement sécurisé · TBT3D</div>
-              </div>
-            </div>
-            <button id="payhipCloseBtn" onclick="closePayhipModal()" title="Fermer">×</button>
+          <div id="redirectIcon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
 
-          <!-- IFRAME Payhip -->
-          <iframe id="payhipIframe" src=""></iframe>
+          <p id="redirectLabel">Vous commandez</p>
+          <h2 id="redirectProductName"></h2>
+          <p id="redirectProductPrice"></p>
 
+          <p id="redirectMsg">Vous allez être redirigé vers notre plateforme de paiement sécurisé pour finaliser votre commande.</p>
+
+          <a id="redirectGoBtn" href="#" target="_blank" rel="noopener" onclick="setTimeout(closeRedirectOverlay,400)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Procéder au paiement
+          </a>
+
+          <div id="redirectTrust">
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Paiement sécurisé
+            </span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              CB · PayPal
+            </span>
+            <span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              Made in Lille
+            </span>
+          </div>
         </div>
       </div>
 
@@ -705,9 +740,7 @@ function updateBuyButton() {
     
     btnPayhip.onclick = function(e) {
       e.preventDefault();
-      e.stopPropagation();
-      e.stopImmediatePropagation();
-      openPayhipModal(url, _art);
+      openPayhipRedirect(url, _art);
       return false;
     };
   } else {
@@ -716,32 +749,30 @@ function updateBuyButton() {
   }
 }
 
-window.openPayhipModal = function(url, artData) {
-  const modal   = document.getElementById('payhipModal');
-  const iframe  = document.getElementById('payhipIframe');
+window.openPayhipRedirect = function(url, artData) {
+  const overlay = document.getElementById('redirectOverlay');
+  const nameEl  = document.getElementById('redirectProductName');
+  const priceEl = document.getElementById('redirectProductPrice');
+  const goBtn   = document.getElementById('redirectGoBtn');
 
-  if (url) {
-    iframe.src = url;
+  if (artData) {
+    nameEl.textContent  = artData.name  || '';
+    priceEl.textContent = parseFloat(artData.price).toFixed(2) + ' €';
   }
 
-  modal.classList.add('open');
+  goBtn.href = url;
+
+  overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
 };
 
-window.closePayhipModal = function() {
-  document.getElementById('payhipModal').classList.remove('open');
+window.closeRedirectOverlay = function() {
+  document.getElementById('redirectOverlay').classList.remove('open');
   document.body.style.overflow = '';
 };
 
-window.handleModalClick = function(e) {
-  if (e.target === document.getElementById('payhipModal') ||
-      e.target === document.getElementById('payhipBackdrop')) {
-    closePayhipModal();
-  }
-};
-
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closePayhipModal();
+  if (e.key === 'Escape') closeRedirectOverlay();
 });
 
 window.pickVariant = function(el, gi) {
