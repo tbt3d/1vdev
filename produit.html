@@ -611,64 +611,8 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
             <button id="payhipCloseBtn" onclick="closePayhipModal()" title="Fermer">×</button>
           </div>
 
-          <!-- Récap produit -->
-          <div id="payhipRecap">
-            <div id="payhipRecapImg"><span class="recap-ph">🏮</span></div>
-            <div id="payhipRecapInfo">
-              <div id="payhipRecapName">Produit</div>
-              <div id="payhipRecapSub"></div>
-            </div>
-            <div id="payhipRecapPrice">—</div>
-          </div>
-
-          <!-- Zone paiement -->
-          <div id="payhipPayZone">
-
-            <!-- Ce bouton est intercepté par payhip.js pour ouvrir leur popup -->
-            <a id="payhipPayTrigger" href="#"
-               class="payhip-buy-button" data-theme="blue" data-product=""
-               style="display:none">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              Payer maintenant
-            </a>
-
-            <div class="ph-methods-sep">méthodes acceptées</div>
-
-            <div class="ph-logos">
-              <div class="ph-logo-pill">
-                <svg viewBox="0 0 38 24" width="26" height="16"><rect width="38" height="24" rx="3" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="9" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
-                Visa
-              </div>
-              <div class="ph-logo-pill">
-                <svg viewBox="0 0 38 24" width="26" height="16"><rect width="38" height="24" rx="3" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
-                Mastercard
-              </div>
-              <div class="ph-logo-pill">
-                <svg viewBox="0 0 38 24" width="26" height="16"><rect width="38" height="24" rx="3" fill="#003087"/><text x="19" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="white" font-family="sans-serif">PayPal</text></svg>
-                PayPal
-              </div>
-              <div class="ph-logo-pill">
-                <svg viewBox="0 0 20 20" width="14" height="14"><circle cx="10" cy="10" r="10" fill="#635bff"/><path d="M6 8.5c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v.5H6v-.5zm0 2h8v3a2 2 0 01-2 2H8a2 2 0 01-2-2v-3z" fill="white"/></svg>
-                Stripe
-              </div>
-            </div>
-          </div>
-
-          <!-- Footer confiance -->
-          <div id="payhipModalFooter">
-            <div class="modal-trust">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              SSL 256-bit
-            </div>
-            <div class="modal-trust">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Crypté &amp; sécurisé
-            </div>
-            <div class="modal-trust">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              Remboursé si problème
-            </div>
-          </div>
+          <!-- IFRAME Payhip affichée directement DEDANS le modal -->
+          <iframe id="payhipIframe" style="width:100%;height:700px;border:none;background:#fff;" src=""></iframe>
 
         </div>
       </div>
@@ -962,43 +906,16 @@ function updateBuyButton() {
 // ── Modale paiement pro ──
 window.openPayhipModal = function(url, artData) {
   const modal   = document.getElementById('payhipModal');
-  const trigger = document.getElementById('payhipPayTrigger');
+  const iframe  = document.getElementById('payhipIframe');
 
-  // Remplir le récap produit
-  if (artData) {
-    // Photo
-    const imgWrap = document.getElementById('payhipRecapImg');
-    if (artData.photo) {
-      imgWrap.innerHTML = '<img src="' + artData.photo + '" alt="">';
-    } else {
-      imgWrap.innerHTML = '<span class="recap-ph">🏮</span>';
-    }
-    // Nom + variantes
-    document.getElementById('payhipRecapName').textContent = artData.name || 'Produit';
-    document.getElementById('payhipRecapSub').textContent  = artData.variants || '';
-    // Prix
-    document.getElementById('payhipRecapPrice').textContent = artData.price || '';
-  }
-
-  // Configurer le bouton PayHip avec le bon product ID
+  // Charger directement l'URL Payhip dans l'iframe
   if (url) {
-    const match = url.match(/payhip\.com\/b\/([A-Za-z0-9]+)/);
-    const pid   = match ? match[1] : '';
-    trigger.setAttribute('data-product', pid);
-    trigger.style.display = '';
+    iframe.src = url;
   }
 
   // Ouvrir la modale
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
-
-  // Déclencher le popup PayHip natif (payhip.js intercepte le clic sur .payhip-buy-button)
-  setTimeout(() => {
-    const savedOnclick = trigger.onclick;
-    trigger.onclick = null;
-    trigger.click();
-    trigger.onclick = savedOnclick;
-  }, 220);
 };
 
 window.closePayhipModal = function() {
