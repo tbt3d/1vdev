@@ -158,6 +158,8 @@ tr:hover td{background:rgba(255,255,255,.01)}
 .vchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;min-height:26px}
 .vchip{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:20px;font-size:11px;color:var(--soft);transition:border-color .15s}
 .vchip:hover{border-color:var(--accent)}
+.vchip.vchip-has-img:hover{border-color:var(--blue)!important}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .vdot{width:9px;height:9px;border-radius:50%;border:1px solid rgba(255,255,255,.15);flex-shrink:0}
 .vrm{opacity:.3;cursor:pointer;font-size:14px;line-height:1;margin-left:2px;transition:opacity .15s}
 .vrm:hover{opacity:1;color:var(--red)}
@@ -1131,9 +1133,42 @@ function renderChips(gi){
   el.innerHTML=opts.length?opts.map((o,oi)=>{
     const imgUrl=o.image||'';
     const imgBtn=imgUrl?`<span class="vchip-img-btn" title="Changer l'image" onclick="pickVariantImg(${gi},${oi})"><img src="${imgUrl}"></span>`:`<span class="vchip-img-btn" title="Attacher une image" onclick="pickVariantImg(${gi},${oi})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>`;
-    return `<div class="vchip">${o.color?`<span class="vdot" style="background:${o.color}"></span>`:''}${imgBtn}<span>${esc(o.label)}</span><span class="vrm" onclick="removeOpt(${gi},${oi})">×</span></div>`;
+    const hasImg = !!imgUrl;
+    return `<div class="vchip${hasImg?' vchip-has-img':''}" title="${hasImg?'Cliquer pour prévisualiser l\'image':''}" ${hasImg?`onclick="previewVariantImg('${imgUrl}','${esc(o.label)}')"`:''} style="${hasImg?'cursor:pointer;border-color:var(--blue)':''}">
+      ${o.color?`<span class="vdot" style="background:${o.color}"></span>`:''}
+      ${imgBtn}
+      <span>${esc(o.label)}</span>
+      <span class="vrm" onclick="event.stopPropagation();removeOpt(${gi},${oi})">×</span>
+    </div>`;
   }).join(''):`<span style="font-size:10px;color:var(--muted)">Aucune option…</span>`;
 }
+
+// Preview image variante dans le formulaire
+window.previewVariantImg=(imgUrl, label)=>{
+  // Trouver l'index de cette image dans photos et scroller la grille dessus
+  const idx = window.photos.indexOf(imgUrl);
+  if(idx !== -1){
+    const slots = document.querySelectorAll('#photosGrid .photo-slot');
+    slots.forEach((s,i)=>{
+      s.style.boxShadow = i===idx ? '0 0 0 3px var(--blue)' : '';
+    });
+    slots[idx]?.scrollIntoView({behavior:'smooth', block:'nearest'});
+    // Reset highlight après 2s
+    setTimeout(()=>slots.forEach(s=>s.style.boxShadow=''), 2000);
+  }
+  // Afficher un mini tooltip/toast avec l'image
+  const existing = document.getElementById('varPreviewToast');
+  if(existing) existing.remove();
+  const t = document.createElement('div');
+  t.id = 'varPreviewToast';
+  t.style.cssText = `position:fixed;bottom:80px;right:24px;z-index:9999;background:var(--bg2);border:1px solid var(--blue);border-radius:12px;padding:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:6px;align-items:center;animation:fadeInUp .2s ease`;
+  t.innerHTML = `<img src="${imgUrl}" style="width:120px;height:120px;object-fit:cover;border-radius:8px;display:block">
+    <span style="font-size:10px;color:var(--blue);font-family:var(--mono)">${esc(label)}</span>
+    <span style="font-size:9px;color:var(--muted)">clic pour fermer</span>`;
+  t.onclick = ()=>t.remove();
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 3500);
+};
 window.addOpt=gi=>{
   const t=document.getElementById('vt'+gi); if(!t) return;
   const label=t.value.trim(); if(!label) return;

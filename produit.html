@@ -138,6 +138,16 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .trust-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
 .trust-item svg { width: 13px; height: 13px; flex-shrink: 0; }
 
+/* ─── SPECS INLINE (sous bouton achat) ─── */
+.specs-inline { margin-top: 20px; display: flex; flex-direction: column; gap: 0; border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; }
+.specs-inline-title { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 12px 16px 8px; }
+.spec-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--border); transition: background .15s; }
+.spec-row:hover { background: var(--bg); }
+.spec-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.spec-icon svg { width: 14px; height: 14px; color: var(--black); opacity: .6; }
+.spec-key { font-size: 12px; color: var(--muted); flex: 1; }
+.spec-val { font-size: 12px; font-weight: 500; color: var(--text); text-align: right; }
+
 /* ─── TABS ─── */
 .prod-tabs { max-width: var(--max); margin: 0 auto; padding: 0 32px 80px; }
 @media(max-width:768px) { .prod-tabs { padding: 0 20px 60px; } }
@@ -310,6 +320,9 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
         Une question ? Contactez-nous
       </a>
 
+      <!-- Caractéristiques inline (générées dynamiquement) -->
+      <div class="specs-inline" id="specsInline" style="display:none"></div>
+
       <!-- Badges de confiance -->
       <div class="trust-row">
         <div class="trust-item">
@@ -461,12 +474,29 @@ window.goToImg = function(i) {
 window.prevImg = function() { goToImg((_idx - 1 + _photos.length) % _photos.length); };
 window.nextImg = function() { goToImg((_idx + 1) % _photos.length); };
 
+// ── Variantes avec images stockées ──
+let _variantImages = {}; // { "gi_label": "url" }
+
 // ── Sélection variante ──
 window.pickVariant = function(el, gi) {
   el.closest('.chips').querySelectorAll('.chip, .color-chip').forEach(c => c.classList.remove('on'));
   el.classList.add('on');
   const lbl = document.getElementById('vv' + gi);
   if (lbl) lbl.textContent = el.dataset.val;
+  // Changer l'image si une image est associée à cette variante
+  const key = gi + '_' + el.dataset.val;
+  if (_variantImages[key]) {
+    const idx = _photos.indexOf(_variantImages[key]);
+    if (idx !== -1) {
+      goToImg(idx);
+    } else {
+      // Image de variante pas dans la galerie principale, l'afficher directement
+      document.getElementById('mainImg').src = _variantImages[key];
+      document.getElementById('mainImg').style.display = 'block';
+      document.getElementById('mainPlaceholder').style.display = 'none';
+      document.querySelectorAll('#galleryThumbs img').forEach(t => t.classList.remove('active'));
+    }
+  }
 };
 
 // ── Rendu du produit ──
@@ -520,6 +550,16 @@ function renderProduct(art) {
 
   // Variantes
   if (art.variants && art.variants.length > 0) {
+    // Construire la map des images de variantes
+    _variantImages = {};
+    art.variants.forEach((vg, gi) => {
+      vg.options.forEach(opt => {
+        if (opt.image) {
+          _variantImages[gi + '_' + opt.label] = opt.image;
+        }
+      });
+    });
+
     document.getElementById('variantsWrap').innerHTML = art.variants.map((vg, gi) => {
       const isColor = vg.options.some(o => o.color);
       const chips = vg.options.map((opt, oi) => {
@@ -538,15 +578,69 @@ function renderProduct(art) {
         <div class="chips">${chips}</div>
       </div>`;
     }).join('');
+
+    // Afficher l'image de la 1ère variante si elle en a une
+    const firstVg = art.variants[0];
+    if (firstVg?.options?.[0]?.image) {
+      const firstKey = '0_' + firstVg.options[0].label;
+      if (_variantImages[firstKey]) {
+        // Switcher vers cette image après chargement galerie
+        setTimeout(() => {
+          const idx = _photos.indexOf(_variantImages[firstKey]);
+          if (idx !== -1) goToImg(idx);
+        }, 50);
+      }
+    }
   }
 
   // Description
   document.getElementById('prodDesc').textContent = art.desc || 'Aucune description disponible.';
 
-  // Caractéristiques
+  // Caractéristiques — onglet (reste pour la section tabs)
   if (art.caracs && art.caracs.filter(c => c.key).length > 0) {
-    document.getElementById('specsTable').innerHTML = art.caracs
-      .filter(c => c.key)
+    const validCaracs = art.caracs.filter(c => c.key);
+
+    // Icônes intelligentes selon la clé
+    const SPEC_ICONS = {
+      default: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+      matiere: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
+      materiau: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
+      taille: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 3H3v18h18V3z"/><path d="M3 9h18M9 21V9"/></svg>`,
+      dimensions: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 3H3v18h18V3z"/><path d="M3 9h18M9 21V9"/></svg>`,
+      hauteur: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="20" x2="12" y2="4"/><polyline points="6 10 12 4 18 10"/></svg>`,
+      largeur: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></svg>`,
+      poids: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" transform="translate(0,4)"/><path d="M6.5 8a2 2 0 00-1.905 1.405L3 14l-.5 6h19l-.5-6-1.596-4.595A2 2 0 0017.5 8z"/></svg>`,
+      couleur: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>`,
+      finition: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+      impression: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`,
+      livraison: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
+      garantie: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+      technologie: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>`,
+      ampoule: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/></svg>`,
+      cable: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12H3M21 12h-2M12 3V1M12 23v-2"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>`,
+    };
+
+    function getIcon(key) {
+      const k = key.toLowerCase().trim();
+      for (const [pattern, icon] of Object.entries(SPEC_ICONS)) {
+        if (pattern !== 'default' && k.includes(pattern)) return icon;
+      }
+      return SPEC_ICONS.default;
+    }
+
+    // Specs inline sous le bouton achat
+    const specsInline = document.getElementById('specsInline');
+    specsInline.innerHTML = `<div class="specs-inline-title">Caractéristiques</div>` +
+      validCaracs.map(c => `
+        <div class="spec-row">
+          <div class="spec-icon">${getIcon(c.key)}</div>
+          <span class="spec-key">${esc(c.key)}</span>
+          <span class="spec-val">${esc(c.val)}</span>
+        </div>`).join('');
+    specsInline.style.display = '';
+
+    // Onglet specs (section tabs en bas)
+    document.getElementById('specsTable').innerHTML = validCaracs
       .map(c => `<tr><td>${esc(c.key)}</td><td>${esc(c.val)}</td></tr>`)
       .join('');
     document.getElementById('tabSpecsBtn').style.display = '';
