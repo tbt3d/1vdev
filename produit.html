@@ -194,98 +194,23 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .lightbox-prev:hover, .lightbox-next:hover { background: rgba(255,255,255,.25); }
 .lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255,255,255,.5); font-family: var(--font); letter-spacing: .08em; }
 
-/* ─── OVERLAY REDIRECTION ─── */
-@keyframes redirectBoxIn {
-  from { opacity: 0; transform: translateY(32px) scale(.95); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-#redirectOverlay {
-  position: fixed; inset: 0; z-index: 9000;
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-  background: rgba(8,8,8,.75);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  opacity: 0; pointer-events: none;
-  transition: opacity .25s ease;
-}
-#redirectOverlay.open { opacity: 1; pointer-events: all; }
-#redirectOverlay.open #redirectBox { animation: redirectBoxIn .38s cubic-bezier(.22,1,.36,1) forwards; }
-
-#redirectBox {
-  position: relative;
-  width: 100%; max-width: 440px;
-  background: #fff;
-  border-radius: 28px;
-  padding: 48px 40px 40px;
-  text-align: center;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.06), 0 24px 60px rgba(0,0,0,.18), 0 60px 120px rgba(0,0,0,.12);
-}
-
-#redirectCloseBtn {
-  position: absolute; top: 16px; right: 16px;
-  width: 32px; height: 32px;
-  background: #f2f2f2; border: none; border-radius: 50%;
-  color: #888; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all .18s;
-}
-#redirectCloseBtn:hover { background: #e5e5e5; color: #111; transform: rotate(90deg); }
-#redirectCloseBtn svg { width: 14px; height: 14px; }
-
-#redirectIcon {
-  width: 72px; height: 72px;
-  background: #f6f6f6;
-  border-radius: 20px;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 20px;
-  overflow: hidden;
-}
-#redirectIcon img { width: 56px; height: 56px; object-fit: contain; }
-
-#redirectLabel {
-  font-size: 11px; font-weight: 600; letter-spacing: .12em;
-  text-transform: uppercase; color: #aaa; margin-bottom: 8px;
-}
-#redirectProductName {
-  font-size: 26px; font-weight: 400; letter-spacing: -.025em;
-  color: #111; margin-bottom: 6px; line-height: 1.2;
-}
-#redirectProductPrice {
-  font-size: 20px; color: #555; margin-bottom: 24px; font-weight: 300;
-}
-#redirectMsg {
-  font-size: 13px; color: #888; line-height: 1.7;
-  margin-bottom: 28px; max-width: 320px; margin-left: auto; margin-right: auto;
-}
-
-#redirectGoBtn {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
+/* ─── BOUTON PAYHIP — override style natif ─── */
+/* Force le bouton Payhip injecté à prendre notre style .btn-buy */
+#payhipBtnWrapper a.payhip-buy-button,
+#payhipBtnWrapper a.btn-buy {
+  display: flex !important; align-items: center; justify-content: center; gap: 10px;
   width: 100%; padding: 16px 24px;
-  background: #111; color: #fff;
-  border-radius: 50px;
-  text-decoration: none;
-  font-family: var(--font); font-size: 15px; font-weight: 500;
+  background: var(--black) !important; color: var(--white) !important;
+  border: none !important; border-radius: var(--r) !important;
+  font-family: var(--font) !important; font-size: 15px !important; font-weight: 500 !important;
+  text-decoration: none !important; cursor: pointer;
   transition: opacity .2s, transform .15s;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
 }
-#redirectGoBtn:hover { opacity: .85; transform: translateY(-2px); }
-#redirectGoBtn svg { width: 17px; height: 17px; flex-shrink: 0; }
-
-#redirectTrust {
-  display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
-}
-#redirectTrust span {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 11px; color: #bbb;
-}
-#redirectTrust svg { width: 12px; height: 12px; }
-
-@media(max-width: 480px) {
-  #redirectBox { padding: 40px 24px 32px; border-radius: 22px; }
-  #redirectProductName { font-size: 22px; }
-}
+#payhipBtnWrapper a.payhip-buy-button:hover,
+#payhipBtnWrapper a.btn-buy:hover { opacity: .86 !important; transform: translateY(-1px); }
+#payhipBtnWrapper a svg { width: 17px; height: 17px; flex-shrink: 0; }
 
 /* ─── MORE SECTION ─── */
 .more-section { background: var(--white); padding: 100px 32px; text-align: center; }
@@ -452,12 +377,9 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
       <div class="hr"></div>
 
-      <!-- Bouton achat — ouvre NOTRE modale, pas payhip.js -->
-      <div id="payhipBtnWrapper">
-        <button id="btnPayhip" class="btn-buy" style="display:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Acheter maintenant
-        </button>
+      <!-- Bouton achat Payhip natif -->
+      <div id="payhipBtnWrapper" style="display:none">
+        <a id="btnPayhip" href="#" class="payhip-buy-button" data-theme="blue" data-product="">Acheter maintenant</a>
       </div>
 
       <!-- Fallback si pas de lien PayHip configuré -->
@@ -465,45 +387,6 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         Commander — nous contacter
       </a>
-
-      <!-- ─── OVERLAY REDIRECTION PAIEMENT ─── -->
-      <div id="redirectOverlay" onclick="if(event.target===this)closeRedirectOverlay()">
-        <div id="redirectBox">
-          <button id="redirectCloseBtn" onclick="closeRedirectOverlay()" title="Fermer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-
-          <div id="redirectIcon">
-            <img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" alt="TBT3D">
-          </div>
-
-          <p id="redirectLabel">Vous commandez</p>
-          <h2 id="redirectProductName"></h2>
-          <p id="redirectProductPrice"></p>
-
-          <p id="redirectMsg">Vous allez être redirigé vers notre plateforme de paiement sécurisé pour finaliser votre commande.</p>
-
-          <a id="redirectGoBtn" href="#" target="_blank" rel="noopener" onclick="setTimeout(closeRedirectOverlay,400)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Procéder au paiement
-          </a>
-
-          <div id="redirectTrust">
-            <span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Paiement sécurisé
-            </span>
-            <span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              CB · PayPal
-            </span>
-            <span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              Made in Lille
-            </span>
-          </div>
-        </div>
-      </div>
 
       <!-- Bouton contact secondaire -->
       <a href="/contact.html" class="btn-contact">
@@ -736,48 +619,30 @@ function updateBuyButton() {
     saveEl.style.display = 'none';
   }
 
+  const wrapper     = document.getElementById('payhipBtnWrapper');
   const btnPayhip   = document.getElementById('btnPayhip');
   const btnNoPayhip = document.getElementById('btnNoPayhip');
 
-  if (url && (url.includes('payhip.com/b/') || url.includes('payhip.com/buy?'))) {
-    btnPayhip.style.display = '';
+  if (url && url.includes('payhip.com')) {
+    // Extraire le code produit depuis l'URL (ex: payhip.com/b/s0I76 → s0I76)
+    let productCode = '';
+    const matchB = url.match(/payhip\.com\/b\/([^?#&/]+)/);
+    if (matchB) productCode = matchB[1];
+
+    // Mettre à jour le bouton statique déjà dans le DOM
+    btnPayhip.href             = url;
+    btnPayhip.dataset.product  = productCode;
+
+    wrapper.style.display     = '';
     btnNoPayhip.style.display = 'none';
-    
-    btnPayhip.onclick = function(e) {
-      e.preventDefault();
-      openPayhipRedirect(url, _art);
-      return false;
-    };
   } else {
-    btnPayhip.style.display = 'none';
+    wrapper.style.display     = 'none';
     btnNoPayhip.style.display = '';
   }
 }
 
-window.openPayhipRedirect = function(url, artData) {
-  const overlay = document.getElementById('redirectOverlay');
-  const nameEl  = document.getElementById('redirectProductName');
-  const priceEl = document.getElementById('redirectProductPrice');
-  const goBtn   = document.getElementById('redirectGoBtn');
-
-  if (artData) {
-    nameEl.textContent  = artData.name  || '';
-    priceEl.textContent = parseFloat(artData.price).toFixed(2) + ' €';
-  }
-
-  goBtn.href = url;
-
-  overlay.classList.add('open');
-  document.body.style.overflow = 'hidden';
-};
-
-window.closeRedirectOverlay = function() {
-  document.getElementById('redirectOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-};
-
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeRedirectOverlay();
+  if (e.key === 'Escape') {}  // géré nativement par Payhip
 });
 
 window.pickVariant = function(el, gi) {
