@@ -795,7 +795,11 @@ async function fbGetArticles() {
   snap.forEach(d => arts.push({...d.data(), id:d.id}));
   arts.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
 }
-async function fbSetArticle(art){ await setDoc(doc(db,'articles',String(art.id)), art); }
+async function fbSetArticle(art){
+  // Firestore rejette les valeurs undefined — on nettoie l'objet
+  const clean = JSON.parse(JSON.stringify(art, (k,v) => v === undefined ? null : v));
+  await setDoc(doc(db,'articles',String(clean.id)), clean);
+}
 async function fbDelArticle(id){ await deleteDoc(doc(db,'articles',String(id))); }
 async function fbGetConfig(key){ const d=await getDoc(doc(db,'config',key)); return d.exists()?d.data():null; }
 async function fbSetConfig(key,data){ await setDoc(doc(db,'config',key), data); }
@@ -1132,20 +1136,34 @@ window.pickVariantImg=(gi,oi)=>{
 // ── SUBMIT ARTICLE (CORRIGÉ) ──
 window.submitArticle = async () => {
   if(uploadInProgress>0){toast('⏳ Upload en cours, patientez…', true);return;}
-  const name=document.getElementById('aName').value.trim();
-  const price=document.getElementById('aPrice').value;
+  const nameEl=document.getElementById('aName');
+  const priceEl=document.getElementById('aPrice');
+  if(!nameEl||!priceEl) return;
+  const name=nameEl.value.trim();
+  const price=priceEl.value;
   if(!name){toast('⚠ Nom requis', true);return;}
   if(!price){toast('⚠ Prix requis', true);return;}
 
   const btn=document.getElementById('btnSubmit');
-  btn.disabled=true;
-  btn.innerHTML=`<div class="spin"></div> Sauvegarde sur Firebase…`;
+  if(btn){ btn.disabled=true; btn.innerHTML=`<div class="spin"></div> Sauvegarde…`; }
 
-  let slug=document.getElementById('aSlug').value.trim();
+  let slug=(document.getElementById('aSlug').value||'').trim();
   if(!slug){
     slug=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-    document.getElementById('aSlug').value=slug;
+    const slugEl=document.getElementById('aSlug'); if(slugEl) slugEl.value=slug;
   }
+
+  // Sécuriser les variantes : filtrer celles qui ont un nom ET au moins une option
+  const safeVariants = variants
+    .filter(v => v && v.name && v.name.trim() && Array.isArray(v.options) && v.options.length > 0)
+    .map(v => ({
+      name: v.name.trim(),
+      options: v.options.filter(o => o && o.label && o.label.trim()).map(o => ({
+        label: o.label.trim(),
+        color: o.color || '',
+        image: o.image || ''
+      }))
+    }));
 
   const art={
     id: editId||String(Date.now()),
@@ -1153,14 +1171,14 @@ window.submitArticle = async () => {
     price: parseFloat(price),
     slug,
     oldPrice: parseFloat(document.getElementById('aOldPrice').value)||null,
-    badge: document.getElementById('aBadge').value,
-    status: document.getElementById('aStatus').value,
-    tagline: document.getElementById('aTagline').value.trim(),
-    payhip: document.getElementById('aPayhip').value.trim(),
-    desc: document.getElementById('aDesc').value.trim(),
-    photos: [...photos],
-    caracs: caracs.filter(c=>c.key.trim()),
-    variants: variants.filter(v=>v.name&&v.options.length),
+    badge: document.getElementById('aBadge').value||'',
+    status: document.getElementById('aStatus').value||'published',
+    tagline: (document.getElementById('aTagline').value||'').trim(),
+    payhip: (document.getElementById('aPayhip').value||'').trim(),
+    desc: (document.getElementById('aDesc').value||'').trim(),
+    photos: [...photos].filter(Boolean),
+    caracs: caracs.filter(c=>c&&c.key&&c.key.trim()),
+    variants: safeVariants,
     createdAt: editId?(arts.find(a=>a.id===editId)?.createdAt||new Date().toISOString()):new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -1169,16 +1187,18 @@ window.submitArticle = async () => {
     await fbSetArticle(art);
     if(editId){
       const idx=arts.findIndex(a=>a.id===editId);
-      arts[idx]=art;
+      if(idx>=0) arts[idx]=art; else arts.unshift(art);
     } else {
       arts.unshift(art);
     }
     syncBoutSlots();
     editId=null;
 
-    // ✅ IMPORTANT : remettre le bouton en état AVANT resetForm
-    btn.disabled=false;
-    btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="btnLbl">Publier</span>`;
+    // Remettre le bouton AVANT resetForm pour éviter le crash null
+    if(btn){
+      btn.disabled=false;
+      btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="btnLbl">Publier</span>`;
+    }
 
     renderArts();
     renderOverview();
@@ -1188,10 +1208,12 @@ window.submitArticle = async () => {
     toast(`"${name}" ${art.status==='published'?'publié ✓':'brouillon sauvegardé ✓'}`);
 
   }catch(e){
-    // ✅ En cas d'erreur : remettre le bouton en état et stopper
+    console.error('Firebase error:', e);
     toast('Erreur Firebase : '+e.message, true);
-    btn.disabled=false;
-    btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="btnLbl">${editId?'Enregistrer':'Publier'}</span>`;
+    if(btn){
+      btn.disabled=false;
+      btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="btnLbl">${editId?'Enregistrer':'Publier'}</span>`;
+    }
   }
 };
 
@@ -1278,8 +1300,11 @@ window.resetForm=()=>{
 
 // ── TOAST ──
 window.toast=(msg,isErr=false)=>{
-  const t=document.getElementById('toast'),dot=document.getElementById('tdot');
-  document.getElementById('toastTxt').textContent=msg;
+  const t=document.getElementById('toast');
+  const dot=document.getElementById('tdot');
+  const txt=document.getElementById('toastTxt');
+  if(!t||!dot||!txt){ console.log('[toast]',msg); return; }
+  txt.textContent=msg;
   dot.style.background=isErr?'var(--red)':'var(--green)';
   t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3500);
 };
