@@ -24,7 +24,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 #loginScreen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999}
 #loginScreen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 60%,rgba(255,107,53,.07) 0%,transparent 70%);pointer-events:none}
 .login-box{position:relative;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:44px 40px;width:360px;text-align:center;box-shadow:0 0 0 1px rgba(255,107,53,.08),0 40px 80px rgba(0,0,0,.6)}
-.login-logo{height:72px;width:auto;margin-bottom:28px;border-radius:10px}
+.login-logo{height:72px;width:auto;margin-bottom:28px;border-radius:10px;object-fit:contain}
 .login-box h2{font-size:20px;font-weight:700;margin-bottom:6px;letter-spacing:-.02em}
 .login-box p{font-size:12px;color:var(--soft);margin-bottom:32px;letter-spacing:.02em}
 .login-box input{width:100%;padding:12px 16px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:14px;border-radius:var(--r);outline:none;margin-bottom:12px;transition:border-color .2s,box-shadow .2s}
@@ -36,8 +36,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 /* ── SIDEBAR ── */
 .sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;position:relative}
 .sidebar::after{content:'';position:absolute;top:0;right:0;bottom:0;width:1px;background:linear-gradient(to bottom,transparent,rgba(255,107,53,.2) 40%,rgba(255,107,53,.2) 60%,transparent);pointer-events:none}
-.sb-logo{padding:22px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.sb-badge{font-size:8px;font-family:var(--mono);background:var(--accent);color:#fff;padding:3px 8px;border-radius:20px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+.sb-logo{padding:20px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.sb-logo img{height:32px;width:auto;border-radius:7px;object-fit:contain;flex-shrink:0}
+.sb-badge{font-size:8px;font-family:var(--mono);background:var(--accent);color:#fff;padding:3px 8px;border-radius:20px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-left:auto;white-space:nowrap}
 .sb-section{padding:20px 16px 7px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:600;font-family:var(--mono)}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r);cursor:pointer;color:var(--soft);font-size:13px;font-weight:500;transition:all .18s;border:none;background:none;font-family:var(--font);width:100%;text-align:left;text-decoration:none;margin-bottom:2px;position:relative}
 .nav-item svg{width:15px;height:15px;flex-shrink:0;opacity:.4;transition:all .18s}
@@ -67,19 +68,34 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 .btn-g{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}.btn-g:hover{border-color:var(--soft);background:var(--bg4)}
 .btn-p{background:var(--purple);color:#fff;box-shadow:0 2px 12px rgba(155,114,255,.3)}.btn-p:hover{filter:brightness(1.15);transform:translateY(-1px)}
 .btn-r{background:var(--red);color:#fff}.btn-r:hover{filter:brightness(1.1)}
-.page{display:none;flex:1;overflow-y:auto;flex-direction:column}
+.page{display:none;flex:1;overflow-y:auto;flex-direction:column;min-height:0}
 .page.active{display:flex}
 .ps{padding:28px 32px}
 
 /* ── STATS ── */
-.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:22px}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.stats-row-2{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
 .sc{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:20px;transition:border-color .2s,transform .2s;position:relative;overflow:hidden}
+.sc:hover{border-color:var(--border);transform:translateY(-1px)}
 .sc::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;background:radial-gradient(circle at top right,rgba(255,107,53,.06),transparent 70%);pointer-events:none}
 .sc-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:var(--soft);font-weight:600;font-family:var(--mono);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
 .sc-ico{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center}
 .sc-ico svg{width:14px;height:14px}
-.sc-val{font-size:40px;font-weight:700;font-family:var(--mono);letter-spacing:-.04em;margin-bottom:4px}
+.sc-val{font-size:36px;font-weight:700;font-family:var(--mono);letter-spacing:-.04em;margin-bottom:4px}
 .sc-sub{font-size:11px;color:var(--soft)}
+.sc-trend{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:var(--mono);padding:2px 6px;border-radius:10px;margin-top:6px}
+.sc-trend.up{background:rgba(46,204,138,.1);color:var(--green)}
+.sc-trend.down{background:rgba(255,61,90,.1);color:var(--red)}
+.sc-trend.neutral{background:rgba(107,107,107,.1);color:var(--soft)}
+
+/* ── OVERVIEW QUICK ACTIONS ── */
+.ov-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:22px}
+.ov-action{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:20px;display:flex;flex-direction:column;gap:10px;transition:all .18s;text-decoration:none;cursor:pointer}
+.ov-action:hover{border-color:rgba(255,107,53,.3);background:linear-gradient(135deg,rgba(255,107,53,.04),var(--bg2))}
+.ov-action-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.ov-action-ico svg{width:16px;height:16px}
+.ov-action-label{font-size:12px;font-weight:600}
+.ov-action-sub{font-size:10px;color:var(--soft);font-family:var(--mono)}
 
 /* ── CARDS ── */
 .card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2)}
@@ -90,13 +106,16 @@ table{width:100%;border-collapse:collapse}
 th{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:600;font-family:var(--mono);padding:0 0 12px;text-align:left;border-bottom:1px solid var(--border)}
 td{padding:11px 0;border-bottom:1px solid var(--border);font-size:12px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.01)}
 .notice{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:28px;text-align:center}
 .notice svg{width:26px;height:26px;opacity:.2;margin-bottom:14px}
 .notice-txt{font-size:12px;color:var(--soft);line-height:1.9}
 .notice-txt strong{color:var(--text);display:block;margin-bottom:5px;font-size:13px;font-weight:600}
 
 /* ── EDITOR ── */
+/* FIX: La colonne droite doit être sticky dans un contexte overflow-y:auto correct */
 .art-layout{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start}
+.art-sidebar-sticky{position:sticky;top:0;max-height:calc(100vh - 116px);overflow-y:auto;display:flex;flex-direction:column;gap:12px}
 .fsec{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);margin-bottom:14px;overflow:hidden;transition:border-color .2s}
 .fsec:focus-within{border-color:rgba(255,107,53,.25)}
 .fsec-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;background:linear-gradient(to right,var(--bg3),var(--bg2))}
@@ -123,9 +142,6 @@ tr:last-child td{border-bottom:none}
 .photo-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
 .photo-add svg{width:18px;height:18px}
 #photoInput{display:none}
-.photo-uploading{aspect-ratio:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--soft);font-size:10px}
-.upload-progress{width:60%;height:2px;background:var(--border2);border-radius:2px;overflow:hidden;margin-top:5px}
-.upload-progress-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
 .carac-list{display:flex;flex-direction:column;gap:7px}
 .crow{display:grid;grid-template-columns:1fr 1fr 24px;gap:7px;align-items:center}
 .crow input{padding:8px 11px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;border-radius:var(--r);outline:none;transition:border-color .2s;width:100%}
@@ -146,15 +162,23 @@ tr:last-child td{border-bottom:none}
 .vdot{width:9px;height:9px;border-radius:50%;border:1px solid rgba(255,255,255,.15);flex-shrink:0}
 .vrm{opacity:.3;cursor:pointer;font-size:14px;line-height:1;margin-left:2px;transition:opacity .15s}
 .vrm:hover{opacity:1;color:var(--red)}
+.vchip-img-btn{width:20px;height:20px;border-radius:4px;border:1px dashed var(--border2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;overflow:hidden;background:var(--bg2)}
+.vchip-img-btn:hover{border-color:var(--accent)}
+.vchip-img-btn img{width:100%;height:100%;object-fit:cover;display:block}
+.vchip-img-btn svg{width:10px;height:10px;color:var(--muted)}
+.ph-var-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#fff;font-size:8px;text-align:center;padding:3px 4px;letter-spacing:.05em;pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.photo-slot.is-variant{border-color:var(--blue)}
 .vadd{display:flex;gap:7px}
 .vadd input[type=color]{width:34px;height:34px;padding:2px 3px;border:1.5px solid var(--border2);border-radius:var(--r);background:var(--bg3);cursor:pointer;flex-shrink:0}
 .vadd input[type=text]{flex:1;padding:8px 12px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;border-radius:var(--r);outline:none;transition:border-color .2s}
 .vadd input:focus{border-color:var(--accent)}
 .vadd button{padding:8px 13px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:var(--font);font-size:11px;font-weight:700;cursor:pointer;transition:all .18s}
 .vadd button:hover{background:var(--accent2)}
+
+/* ── ART LIST (sidebar articles) ── */
 .art-list{display:flex;flex-direction:column;gap:8px}
 .art-item{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:11px 14px;display:flex;gap:11px;align-items:center;transition:border-color .18s,transform .18s}
-.art-item:hover{transform:translateX(2px)}
+.art-item:hover{transform:translateX(2px);border-color:var(--border)}
 .art-thumb{width:40px;height:40px;border-radius:7px;object-fit:cover;border:1px solid var(--border2);flex-shrink:0}
 .art-ph{width:40px;height:40px;border-radius:7px;background:var(--bg3);border:1px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px}
 .art-info{flex:1;min-width:0}
@@ -170,8 +194,11 @@ tr:last-child td{border-bottom:none}
 .empty-state .ei{font-size:28px;opacity:.2;margin-bottom:12px}
 .empty-state .et{font-size:11px;color:var(--muted);line-height:1.9;font-family:var(--mono)}
 
-/* ── CFG PAGES ── */
+/* ── CFG PAGES (accueil / boutique) ── */
+/* FIX: cfg-layout doit avoir overflow visible pour que sticky fonctionne */
 .cfg-layout{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start}
+/* FIX: La colonne sticky aperçu */
+.cfg-sticky-col{position:sticky;top:0;display:flex;flex-direction:column;gap:12px}
 .slots-wrap{display:flex;flex-direction:column;gap:11px}
 .sl{background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--r2);overflow:hidden;cursor:grab;user-select:none;transition:border-color .2s,opacity .2s,transform .15s}
 .sl:hover{transform:translateY(-1px)}
@@ -193,7 +220,7 @@ tr:last-child td{border-bottom:none}
 .bc{padding:5px 11px;border:1.5px solid var(--border2);border-radius:20px;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;background:none;font-family:var(--font);color:var(--soft)}
 .bc:hover{border-color:var(--soft);color:var(--text)}
 .bc.sel{background:var(--accent);border-color:var(--accent);color:#fff}
-.cfg-pv{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden;position:sticky;top:0}
+.cfg-pv{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden}
 .cfg-pv-h{padding:13px 16px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;display:flex;align-items:center;gap:8px;background:linear-gradient(to right,var(--bg3),var(--bg2));letter-spacing:.02em}
 .pv-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:13px}
 .pv-card{border-radius:8px;overflow:hidden;background:var(--bg3);border:1px solid var(--border)}
@@ -204,6 +231,10 @@ tr:last-child td{border-bottom:none}
 .pv-info{padding:7px 8px}
 .pv-n{font-size:10px;font-weight:700;letter-spacing:-.01em}.pv-s{font-size:9px;color:var(--muted);margin:2px 0;font-family:var(--mono)}.pv-p{font-size:10px;font-family:var(--mono);color:var(--accent)}
 .pv-from{font-size:8px;color:var(--muted)}.pv-old{font-size:8px;color:var(--muted);text-decoration:line-through;margin-right:3px}
+
+/* ── BOUTIQUE FULL LIST ── */
+/* FIX: Pas de max-height limitée sur boutSlots — scroll de la page entière */
+#boutSlots{padding-right:4px}
 
 /* ── SAVE BAR ── */
 .save-bar{position:sticky;bottom:0;background:rgba(8,8,8,.97);backdrop-filter:blur(12px);border-top:1px solid var(--border2);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
@@ -240,7 +271,6 @@ tr:last-child td{border-bottom:none}
 .msb-repondu{background:rgba(46,204,138,.12);color:var(--green);border:1px solid rgba(46,204,138,.2)}
 .msg-search{width:100%;padding:11px 14px;background:var(--bg3);border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;outline:none}
 .msg-search::placeholder{color:var(--muted)}
-/* Detail */
 .msg-detail-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:12px}
 .msg-detail-empty svg{width:36px;height:36px;opacity:.2}
 .msg-detail-wrap{flex:1;padding:28px 32px;overflow-y:auto}
@@ -255,7 +285,6 @@ tr:last-child td{border-bottom:none}
 .msg-d-extras{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
 .msg-d-extra{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;font-size:11px;font-family:var(--mono);color:var(--soft)}
 .msg-d-extra strong{color:var(--text);display:block;margin-bottom:2px}
-/* Reply box */
 .reply-section{border-top:1px solid var(--border);padding:20px 32px;flex-shrink:0;background:var(--bg)}
 .reply-section-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);font-family:var(--mono);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .reply-to{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:10px}
@@ -264,11 +293,14 @@ tr:last-child td{border-bottom:none}
 .reply-actions{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
 .reply-send-row{display:flex;gap:8px;align-items:center}
 .reply-note{font-size:10px;color:var(--muted);font-family:var(--mono)}
-/* Previous reply shown */
 .prev-reply{background:rgba(46,204,138,.05);border:1px solid rgba(46,204,138,.18);border-radius:var(--r2);padding:16px 20px;margin-bottom:20px}
 .prev-reply-label{font-size:9px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .prev-reply-text{font-size:12px;color:var(--text);line-height:1.8;white-space:pre-wrap}
 .msg-empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--muted);gap:8px;font-size:12px;font-family:var(--mono)}
+
+/* ── OVERVIEW BARRE DE RÉPARTITION ── */
+.repartition-bar{height:6px;border-radius:3px;background:var(--border2);overflow:hidden;margin-top:8px;display:flex;gap:1px}
+.rep-seg{height:100%;border-radius:3px;transition:width .6s ease}
 </style>
 </head>
 <body>
@@ -276,7 +308,8 @@ tr:last-child td{border-bottom:none}
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
-    <img class="login-logo" src="image/ChatGPT_Image_30_juin_2025__14_57_42-Photoroom__1_.png" alt="TBT3D">
+    <img class="login-logo" src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png"
+         onerror="this.style.display='none'" alt="TBT3D">
     <h2>Accès Admin</h2>
     <p>Tableau de bord TBT3D</p>
     <input type="password" id="pwInput" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')checkLogin()">
@@ -288,127 +321,406 @@ tr:last-child td{border-bottom:none}
 <!-- APP -->
 <aside class="sidebar" id="appSidebar" style="display:none">
   <div class="sb-logo">
-    <img src="image/ChatGPT_Image_30_juin_2025__14_57_42-Photoroom__1_.png" alt="TBT3D" style="height:32px;width:auto;border-radius:7px">
+    <img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png"
+         onerror="this.style.background='var(--accent)'" alt="TBT3D">
     <span class="sb-badge">ADMIN</span>
   </div>
+
   <div class="sb-section">Principal</div>
-  <button class="nav-item active" onclick="goPage('overview',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Vue d'ensemble</button>
-  <button class="nav-item" onclick="goPage('homepage',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Page d'accueil<span class="nb nb-b" id="hpBadge">4</span></button>
-  <button class="nav-item" onclick="goPage('boutique-cfg',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>Boutique<span class="nb nb-p" id="boutBadge">0</span></button>
-  <button class="nav-item" onclick="goPage('articles',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>Articles<span class="nb nb-a" id="artBadge">0</span></button>
-  <button class="nav-item" onclick="goPage('messages',this)" id="navMessages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>Messages<span class="nb nb-r" id="msgBadge" style="display:none">0</span></button>
+  <button class="nav-item active" onclick="goPage('overview',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    Vue d'ensemble
+  </button>
+  <button class="nav-item" onclick="goPage('homepage',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    Page d'accueil<span class="nb nb-b" id="hpBadge">4</span>
+  </button>
+  <button class="nav-item" onclick="goPage('boutique-cfg',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+    Boutique<span class="nb nb-p" id="boutBadge">0</span>
+  </button>
+  <button class="nav-item" onclick="goPage('articles',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+    Articles<span class="nb nb-a" id="artBadge">0</span>
+  </button>
+  <button class="nav-item" onclick="goPage('messages',this)" id="navMessages">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    Messages<span class="nb nb-r" id="msgBadge" style="display:none">0</span>
+  </button>
+
+  <!-- SECTION SITE : toutes les pages -->
   <div class="sb-section">Site</div>
-  <a href="index.html" target="_blank" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Voir le site</a>
-  <a href="boutique.html" target="_blank" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>Voir la boutique</a>
+  <a href="index.html" target="_blank" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    Accueil
+  </a>
+  <a href="boutique.html" target="_blank" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+    Boutique
+  </a>
+  <a href="contact.html" target="_blank" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    Contact
+  </a>
+  <a href="a-propos.html" target="_blank" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    À propos
+  </a>
+  <a href="devis.html" target="_blank" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    Devis
+  </a>
+  <a href="produit.html" target="_blank" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+    Produit
+  </a>
+
+  <div class="sb-section">Outils</div>
+  <a href="https://dashboard.stripe.com" target="_blank" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    Stripe
+  </a>
+  <a href="https://console.firebase.google.com/project/tbt3d-a0f04" target="_blank" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 19h20L12 2z"/></svg>
+    Firebase
+  </a>
+  <a href="https://cloudinary.com/console" target="_blank" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+    Cloudinary
+  </a>
+
   <div class="sb-bot">
-    <div class="sb-user"><div class="sb-avatar">T</div><div><div class="sb-name">Thibault</div><div class="sb-role">Administrateur</div></div></div>
+    <div class="sb-user">
+      <div class="sb-avatar">T</div>
+      <div><div class="sb-name">Thibault</div><div class="sb-role">Administrateur</div></div>
+    </div>
   </div>
 </aside>
 
 <div class="main" id="appMain" style="display:none">
 
-  <!-- OVERVIEW -->
+  <!-- ═══ OVERVIEW ═══ -->
   <div class="page active" id="page-overview">
-    <div class="topbar"><div class="topbar-title">Vue d'ensemble</div><div class="topbar-right"><div class="sync-indicator"><div class="sync-dot"></div>Firebase connecté</div></div></div>
+    <div class="topbar">
+      <div class="topbar-title">Vue d'ensemble</div>
+      <div class="topbar-right">
+        <div class="sync-indicator"><div class="sync-dot"></div>Firebase connecté</div>
+        <button class="btn btn-a" onclick="goPage('articles',document.querySelectorAll('.nav-item')[3])" style="font-size:11px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nouvel article
+        </button>
+      </div>
+    </div>
     <div class="ps">
+
+      <!-- STATS ROW 1 -->
       <div class="stats-row">
-        <div class="sc"><div class="sc-lbl">Articles publiés<div class="sc-ico" style="background:rgba(255,107,53,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div></div><div class="sc-val" id="ovPublished">—</div><div class="sc-sub">visibles dans la boutique</div></div>
-        <div class="sc"><div class="sc-lbl">Brouillons<div class="sc-ico" style="background:rgba(245,166,35,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div></div><div class="sc-val" id="ovDraft">—</div><div class="sc-sub">non publiés</div></div>
-        <div class="sc" style="cursor:pointer" onclick="goPage('messages',document.getElementById('navMessages'))"><div class="sc-lbl">Messages non lus<div class="sc-ico" style="background:rgba(255,61,90,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div></div><div class="sc-val" id="ovMsgs">—</div><div class="sc-sub">à traiter</div></div>
-        <div class="sc" style="cursor:pointer" onclick="goPage('messages',document.getElementById('navMessages'))"><div class="sc-lbl">Total messages<div class="sc-ico" style="background:rgba(46,204,138,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div></div><div class="sc-val" id="ovMsgsTotal">—</div><div class="sc-sub">depuis le début</div></div>
+        <div class="sc">
+          <div class="sc-lbl">Articles publiés<div class="sc-ico" style="background:rgba(255,107,53,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div></div>
+          <div class="sc-val" id="ovPublished">—</div>
+          <div class="sc-sub">visibles dans la boutique</div>
+          <div class="repartition-bar"><div id="ovRepPub" class="rep-seg" style="background:var(--accent);width:0%"></div><div id="ovRepDraft" class="rep-seg" style="background:var(--orange);width:0%"></div></div>
+        </div>
+        <div class="sc">
+          <div class="sc-lbl">Brouillons<div class="sc-ico" style="background:rgba(245,166,35,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="#f5a623" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div></div>
+          <div class="sc-val" id="ovDraft">—</div>
+          <div class="sc-sub">non publiés</div>
+        </div>
+        <div class="sc" style="cursor:pointer" onclick="goPage('articles',document.querySelectorAll('.nav-item')[3])">
+          <div class="sc-lbl">Total articles<div class="sc-ico" style="background:rgba(77,166,255,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div></div>
+          <div class="sc-val" id="ovTotal">—</div>
+          <div class="sc-sub">dans la base</div>
+        </div>
       </div>
+
+      <!-- STATS ROW 2 -->
+      <div class="stats-row-2">
+        <div class="sc" style="cursor:pointer" onclick="goPage('messages',document.getElementById('navMessages'))">
+          <div class="sc-lbl">Messages non lus<div class="sc-ico" style="background:rgba(255,61,90,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div></div>
+          <div class="sc-val" id="ovMsgs">—</div>
+          <div class="sc-sub">à traiter</div>
+          <div class="sc-trend down" id="ovMsgsTrend" style="display:none">● Nouveaux</div>
+        </div>
+        <div class="sc" style="cursor:pointer" onclick="goPage('messages',document.getElementById('navMessages'))">
+          <div class="sc-lbl">Messages répondus<div class="sc-ico" style="background:rgba(46,204,138,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg></div></div>
+          <div class="sc-val" id="ovMsgsRep">—</div>
+          <div class="sc-sub">traités</div>
+        </div>
+        <div class="sc" style="cursor:pointer" onclick="goPage('messages',document.getElementById('navMessages'))">
+          <div class="sc-lbl">Total messages<div class="sc-ico" style="background:rgba(155,114,255,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div></div>
+          <div class="sc-val" id="ovMsgsTotal">—</div>
+          <div class="sc-sub">depuis le début</div>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="ov-row" style="margin-bottom:22px">
+        <div class="ov-action" onclick="goPage('homepage',document.querySelectorAll('.nav-item')[1])">
+          <div class="ov-action-ico" style="background:rgba(77,166,255,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" style="width:16px;height:16px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
+          <div class="ov-action-label">Page d'accueil</div>
+          <div class="ov-action-sub">Gérer les 4 slots vedettes</div>
+        </div>
+        <div class="ov-action" onclick="goPage('boutique-cfg',document.querySelectorAll('.nav-item')[2])">
+          <div class="ov-action-ico" style="background:rgba(155,114,255,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8" style="width:16px;height:16px"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg></div>
+          <div class="ov-action-label">Boutique</div>
+          <div class="ov-action-sub">Ordre et visibilité</div>
+        </div>
+        <div class="ov-action" onclick="goPage('messages',document.getElementById('navMessages'))">
+          <div class="ov-action-ico" style="background:rgba(255,107,53,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" style="width:16px;height:16px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+          <div class="ov-action-label">Messages clients</div>
+          <div class="ov-action-sub">Répondre aux demandes</div>
+        </div>
+      </div>
+
+      <!-- TABLE ARTICLES -->
       <div class="card" style="margin-bottom:16px">
-        <div class="card-head"><div class="card-title">Articles</div><button class="btn btn-g" style="font-size:10px;padding:4px 9px" onclick="goPage('articles',document.querySelectorAll('.nav-item')[3])">Gérer →</button></div>
-        <div class="card-body" style="padding:4px 18px"><table><thead><tr><th>Produit</th><th>Prix</th><th>Options</th><th>Statut</th></tr></thead><tbody id="ovTableBody"><tr><td colspan="4" style="color:var(--muted);padding:16px 0;text-align:center;font-size:11px">Chargement Firebase…</td></tr></tbody></table></div>
+        <div class="card-head">
+          <div class="card-title">Articles</div>
+          <button class="btn btn-g" style="font-size:10px;padding:4px 9px" onclick="goPage('articles',document.querySelectorAll('.nav-item')[3])">Gérer →</button>
+        </div>
+        <div class="card-body" style="padding:4px 18px">
+          <table>
+            <thead><tr><th>Produit</th><th>Prix</th><th>Slug</th><th>Options</th><th>Statut</th><th></th></tr></thead>
+            <tbody id="ovTableBody"><tr><td colspan="6" style="color:var(--muted);padding:16px 0;text-align:center;font-size:11px">Chargement Firebase…</td></tr></tbody>
+          </table>
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div class="notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg><div class="notice-txt"><strong>Commandes</strong>Gérez vos commandes depuis Stripe.</div><a href="https://dashboard.stripe.com" target="_blank" class="btn btn-g" style="margin-top:14px;font-size:11px">Ouvrir Stripe →</a></div>
-        <div class="notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="notice-txt"><strong>Firebase Console</strong>Visualisez vos données en temps réel.</div><a href="https://console.firebase.google.com/project/tbt3d-a0f04" target="_blank" class="btn btn-g" style="margin-top:14px;font-size:11px">Ouvrir Firebase →</a></div>
+
+      <!-- LIENS EXTERNES -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+        <div class="notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          <div class="notice-txt"><strong>Stripe</strong>Gérez vos commandes et paiements.</div>
+          <a href="https://dashboard.stripe.com" target="_blank" class="btn btn-g" style="margin-top:14px;font-size:11px">Ouvrir Stripe →</a>
+        </div>
+        <div class="notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 19h20L12 2z"/></svg>
+          <div class="notice-txt"><strong>Firebase Console</strong>Visualisez vos données en temps réel.</div>
+          <a href="https://console.firebase.google.com/project/tbt3d-a0f04" target="_blank" class="btn btn-g" style="margin-top:14px;font-size:11px">Ouvrir Firebase →</a>
+        </div>
+        <div class="notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+          <div class="notice-txt"><strong>Cloudinary</strong>Gérez les images uploadées.</div>
+          <a href="https://cloudinary.com/console" target="_blank" class="btn btn-g" style="margin-top:14px;font-size:11px">Ouvrir Cloudinary →</a>
+        </div>
       </div>
+
     </div>
   </div>
 
-  <!-- PAGE D'ACCUEIL -->
+  <!-- ═══ PAGE D'ACCUEIL ═══ -->
   <div class="page" id="page-homepage">
-    <div class="topbar"><div class="topbar-title">Page d'accueil — 4 produits vedettes</div><div class="topbar-right"><span style="font-size:11px;color:var(--muted)">Glisser pour réordonner</span></div></div>
+    <div class="topbar">
+      <div class="topbar-title">Page d'accueil — 4 produits vedettes</div>
+      <div class="topbar-right"><span style="font-size:11px;color:var(--muted)">Glisser pour réordonner</span></div>
+    </div>
     <div class="ps" style="flex:1">
-      <div style="background:rgba(77,166,255,.08);border:1px solid rgba(77,166,255,.2);border-radius:var(--r);padding:10px 14px;margin-bottom:20px;font-size:11px;color:rgba(77,166,255,.9);display:flex;align-items:center;gap:8px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Sauvegardé sur Firebase — visible sur tous tes appareils immédiatement.</div>
+      <div style="background:rgba(77,166,255,.08);border:1px solid rgba(77,166,255,.2);border-radius:var(--r);padding:10px 14px;margin-bottom:20px;font-size:11px;color:rgba(77,166,255,.9);display:flex;align-items:center;gap:8px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Sauvegardé sur Firebase — visible sur tous tes appareils immédiatement.
+      </div>
+      <!-- FIX: cfg-layout avec sticky col correcte -->
       <div class="cfg-layout">
-        <div><div class="slots-wrap" id="hpSlots"></div><div style="margin-top:6px;font-size:10px;color:var(--muted)">☝ Glissez pour changer l'ordre</div></div>
         <div>
-          <div class="cfg-pv"><div class="cfg-pv-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--accent)"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>Aperçu</div><div class="pv-grid" id="hpPrev"></div></div>
-          <div style="margin-top:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px"><div style="font-size:11px;font-weight:500;margin-bottom:10px;color:var(--soft)">Actions</div><button class="btn btn-g" style="width:100%;justify-content:center;margin-bottom:6px" onclick="resetHp()">↺ Réinitialiser</button><button class="btn btn-g" style="width:100%;justify-content:center" onclick="goPage('articles',document.querySelectorAll('.nav-item')[3])">+ Nouvel article</button></div>
+          <div class="slots-wrap" id="hpSlots"></div>
+          <div style="margin-top:6px;font-size:10px;color:var(--muted)">☝ Glissez pour changer l'ordre</div>
+        </div>
+        <div class="cfg-sticky-col">
+          <div class="cfg-pv">
+            <div class="cfg-pv-h">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--accent)"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              Aperçu
+            </div>
+            <div class="pv-grid" id="hpPrev"></div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px">
+            <div style="font-size:11px;font-weight:500;margin-bottom:10px;color:var(--soft)">Actions</div>
+            <button class="btn btn-g" style="width:100%;justify-content:center;margin-bottom:6px" onclick="resetHp()">↺ Réinitialiser</button>
+            <button class="btn btn-g" style="width:100%;justify-content:center" onclick="goPage('articles',document.querySelectorAll('.nav-item')[3])">+ Nouvel article</button>
+          </div>
         </div>
       </div>
     </div>
-    <div class="save-bar"><div class="save-info">Modifications <span id="hpDirty" style="color:var(--green)">enregistrées ✓</span></div><div style="display:flex;gap:8px"><button class="btn btn-g" onclick="loadHp()">Annuler</button><button class="btn btn-a" id="btnSaveHp" onclick="saveHp()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Enregistrer</button></div></div>
+    <div class="save-bar">
+      <div class="save-info">Modifications <span id="hpDirty" style="color:var(--green)">enregistrées ✓</span></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-g" onclick="loadHp()">Annuler</button>
+        <button class="btn btn-a" id="btnSaveHp" onclick="saveHp()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Enregistrer</button>
+      </div>
+    </div>
   </div>
 
-  <!-- BOUTIQUE -->
+  <!-- ═══ BOUTIQUE ═══ -->
   <div class="page" id="page-boutique-cfg">
-    <div class="topbar"><div class="topbar-title">Boutique — Ordre et affichage</div><div class="topbar-right"><span style="font-size:11px;color:var(--muted)">Tous les articles publiés</span></div></div>
+    <div class="topbar">
+      <div class="topbar-title">Boutique — Ordre et affichage</div>
+      <div class="topbar-right">
+        <span style="font-size:11px;color:var(--muted)" id="boutCount">Tous les articles publiés</span>
+      </div>
+    </div>
     <div class="ps" style="flex:1">
-      <div style="background:rgba(181,123,255,.08);border:1px solid rgba(181,123,255,.2);border-radius:var(--r);padding:10px 14px;margin-bottom:20px;font-size:11px;color:rgba(181,123,255,.9);display:flex;align-items:center;gap:8px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Réordonnez vos articles. Masquez un produit sans le supprimer.</div>
+      <div style="background:rgba(181,123,255,.08);border:1px solid rgba(181,123,255,.2);border-radius:var(--r);padding:10px 14px;margin-bottom:20px;font-size:11px;color:rgba(181,123,255,.9);display:flex;align-items:center;gap:8px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Réordonnez vos articles. Masquez un produit sans le supprimer. Faites défiler pour voir tous les articles.
+      </div>
+      <!-- FIX: cfg-layout sans max-height sur les slots — scroll naturel de la page -->
       <div class="cfg-layout">
-        <div><div class="slots-wrap" id="boutSlots" style="max-height:calc(100vh - 240px);overflow-y:auto;padding-right:4px"></div><div style="margin-top:6px;font-size:10px;color:var(--muted)">☝ Glissez pour changer l'ordre</div></div>
         <div>
-          <div class="cfg-pv"><div class="cfg-pv-h" style="color:var(--purple)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--purple)"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>Aperçu boutique</div><div class="pv-grid" id="boutPrev"></div><div style="padding:0 12px 10px;font-size:10px;color:var(--muted)">+ carte sur mesure automatique</div></div>
-          <div style="margin-top:12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px"><div style="font-size:11px;font-weight:500;margin-bottom:10px;color:var(--soft)">Actions</div><button class="btn btn-g" style="width:100%;justify-content:center;margin-bottom:6px" onclick="resetBout()">↺ Réinitialiser</button><button class="btn btn-g" style="width:100%;justify-content:center" onclick="goPage('articles',document.querySelectorAll('.nav-item')[3])">+ Nouvel article</button></div>
+          <div class="slots-wrap" id="boutSlots"></div>
+          <div style="margin-top:6px;font-size:10px;color:var(--muted)">☝ Glissez pour changer l'ordre</div>
+        </div>
+        <div class="cfg-sticky-col">
+          <div class="cfg-pv">
+            <div class="cfg-pv-h" style="color:var(--purple)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--purple)"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+              Aperçu boutique
+            </div>
+            <div class="pv-grid" id="boutPrev"></div>
+            <div style="padding:0 12px 10px;font-size:10px;color:var(--muted)">+ carte sur mesure automatique</div>
+          </div>
+          <!-- Récap articles -->
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);font-family:var(--mono);margin-bottom:10px">Récap</div>
+            <div style="display:flex;flex-direction:column;gap:6px" id="boutRecap"></div>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px">
+            <div style="font-size:11px;font-weight:500;margin-bottom:10px;color:var(--soft)">Actions</div>
+            <button class="btn btn-g" style="width:100%;justify-content:center;margin-bottom:6px" onclick="resetBout()">↺ Réinitialiser</button>
+            <button class="btn btn-g" style="width:100%;justify-content:center" onclick="goPage('articles',document.querySelectorAll('.nav-item')[3])">+ Nouvel article</button>
+          </div>
         </div>
       </div>
     </div>
-    <div class="save-bar"><div class="save-info">Modifications <span id="boutDirty" style="color:var(--green)">enregistrées ✓</span></div><div style="display:flex;gap:8px"><button class="btn btn-g" onclick="loadBout()">Annuler</button><button class="btn btn-p" id="btnSaveBout" onclick="saveBout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Enregistrer boutique</button></div></div>
+    <div class="save-bar">
+      <div class="save-info">Modifications <span id="boutDirty" style="color:var(--green)">enregistrées ✓</span></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-g" onclick="loadBout()">Annuler</button>
+        <button class="btn btn-p" id="btnSaveBout" onclick="saveBout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Enregistrer boutique</button>
+      </div>
+    </div>
   </div>
 
-  <!-- ARTICLES -->
+  <!-- ═══ ARTICLES ═══ -->
   <div class="page" id="page-articles">
-    <div class="topbar"><div class="topbar-title" id="artPageTitle">Créer un article</div><div class="topbar-right"><button class="btn btn-g" id="btnCancel" onclick="resetForm()" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Annuler</button><button class="btn btn-a" onclick="submitArticle()" id="btnSubmit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="btnLbl">Publier</span></button></div></div>
+    <div class="topbar">
+      <div class="topbar-title" id="artPageTitle">Créer un article</div>
+      <div class="topbar-right">
+        <button class="btn btn-g" id="btnCancel" onclick="resetForm()" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Annuler
+        </button>
+        <button class="btn btn-a" onclick="submitArticle()" id="btnSubmit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="btnLbl">Publier</span>
+        </button>
+      </div>
+    </div>
     <div class="ps">
       <div class="art-layout">
+        <!-- COLONNE GAUCHE : formulaire -->
         <div>
-          <div class="fsec"><div class="fsec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span class="fsec-title">Informations générales</span></div>
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              <span class="fsec-title">Informations générales</span>
+            </div>
             <div class="fsec-body">
               <div class="field"><label>Nom *</label><input type="text" id="aName" placeholder="ex : Lampe KARMA"></div>
-              <div class="frow"><div class="field"><label>Prix (€) *</label><input type="number" id="aPrice" placeholder="64.90" step="0.01" min="0"></div><div class="field"><label>Prix barré (€)</label><input type="number" id="aOldPrice" placeholder="89.90" step="0.01"></div></div>
-              <div class="frow"><div class="field"><label>Badge</label><select id="aBadge"><option value="">Aucun</option><option value="Nouveau">Nouveau</option><option value="Bestseller">Bestseller</option><option value="Promo">Promo</option></select></div><div class="field"><label>Statut</label><select id="aStatus"><option value="published">Publié ✓</option><option value="draft">Brouillon</option></select></div></div>
+              <div class="frow">
+                <div class="field"><label>Prix (€) *</label><input type="number" id="aPrice" placeholder="64.90" step="0.01" min="0"></div>
+                <div class="field"><label>Prix barré (€)</label><input type="number" id="aOldPrice" placeholder="89.90" step="0.01"></div>
+              </div>
+              <div class="frow">
+                <div class="field"><label>Badge</label><select id="aBadge"><option value="">Aucun</option><option value="Nouveau">Nouveau</option><option value="Bestseller">Bestseller</option><option value="Promo">Promo</option></select></div>
+                <div class="field"><label>Statut</label><select id="aStatus"><option value="published">Publié ✓</option><option value="draft">Brouillon</option></select></div>
+              </div>
               <div class="field"><label>Accroche courte</label><input type="text" id="aTagline" placeholder="Design épuré, lumière douce"></div>
-              <div class="field"><label>Slug URL <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— page produit</span></label><input type="text" id="aSlug" placeholder="lampe-karma" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-')"><div class="fhint">URL : /produit.html?id=lampe-karma · Auto-généré si vide · La page produit est créée/mise à jour à chaque enregistrement</div></div>
-              <div class="field"><label>Lien de paiement (Stripe / PayPlug…)</label><input type="text" id="aPayhip" placeholder="https://buy.stripe.com/XXXXX"><div class="fhint">Colle ici le lien de paiement pour ce produit</div></div>
+              <div class="field">
+                <label>Slug URL <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— page produit</span></label>
+                <input type="text" id="aSlug" placeholder="lampe-karma" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-')">
+                <div class="fhint">URL : /produit.html?id=lampe-karma · Auto-généré si vide</div>
+              </div>
+              <div class="field">
+                <label>Lien de paiement (Stripe / PayPlug…)</label>
+                <input type="text" id="aPayhip" placeholder="https://buy.stripe.com/XXXXX">
+              </div>
             </div>
           </div>
-          <div class="fsec"><div class="fsec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><span class="fsec-title">Photos produit</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">8 max — stockées sur Firebase Storage</span></div>
+
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+              <span class="fsec-title">Photos produit</span>
+              <span style="margin-left:auto;font-size:10px;color:var(--muted)">8 max</span>
+            </div>
             <div class="fsec-body">
               <div class="upload-banner" id="uploadBanner"><div class="spin-w"></div><span id="uploadBannerTxt">Upload en cours…</span></div>
               <div class="photos-grid" id="photosGrid"></div>
               <input type="file" id="photoInput" accept="image/*" multiple onchange="addPhotos(this.files)">
-              <div class="fhint">1ère photo = principale · Les photos sont uploadées sur Firebase Storage (pas de limite de taille)</div>
+              <div class="fhint">1ère photo = principale · Uploadées sur Cloudinary</div>
             </div>
           </div>
-          <div class="fsec"><div class="fsec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="13" y1="18" x2="3" y2="18"/></svg><span class="fsec-title">Description</span></div>
+
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="13" y1="18" x2="3" y2="18"/></svg>
+              <span class="fsec-title">Description</span>
+            </div>
             <div class="fsec-body"><div class="field"><textarea id="aDesc" rows="6" placeholder="Décrivez votre produit…"></textarea></div></div>
           </div>
-          <div class="fsec"><div class="fsec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span class="fsec-title">Caractéristiques</span></div>
-            <div class="fsec-body"><div style="display:grid;grid-template-columns:1fr 1fr 22px;gap:6px;margin-bottom:8px"><span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Propriété</span><span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Valeur</span><span></span></div><div class="carac-list" id="caracList"></div><button class="btn-add-row" onclick="addCarac()">+ Ajouter une ligne</button></div>
+
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              <span class="fsec-title">Caractéristiques</span>
+            </div>
+            <div class="fsec-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr 22px;gap:6px;margin-bottom:8px">
+                <span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Propriété</span>
+                <span style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Valeur</span>
+                <span></span>
+              </div>
+              <div class="carac-list" id="caracList"></div>
+              <button class="btn-add-row" onclick="addCarac()">+ Ajouter une ligne</button>
+            </div>
           </div>
-          <div class="fsec"><div class="fsec-head"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg><span class="fsec-title">Options & Variantes</span><span style="margin-left:auto;font-size:10px;color:var(--muted)">couleur, taille…</span></div>
-            <div class="fsec-body"><div id="variantsContainer"></div><button class="btn-add-row" onclick="addVariantGroup()" style="margin-top:0">+ Ajouter une option</button></div>
+
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+              <span class="fsec-title">Options & Variantes</span>
+              <span style="margin-left:auto;font-size:10px;color:var(--muted)">couleur, taille…</span>
+            </div>
+            <div class="fsec-body">
+              <div id="variantsContainer"></div>
+              <button class="btn-add-row" onclick="addVariantGroup()" style="margin-top:0">+ Ajouter une option</button>
+            </div>
           </div>
         </div>
-        <div style="position:sticky;top:0">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span style="font-size:12px;font-weight:500">Mes articles <span style="color:var(--muted)" id="artCount">(0)</span></span><button class="btn btn-g" style="font-size:10px;padding:4px 9px" onclick="resetForm()">+ Nouveau</button></div>
-          <div id="artList"><div class="empty-state"><div class="ei">⏳</div><div class="et">Chargement Firebase…</div></div></div>
+
+        <!-- COLONNE DROITE STICKY FIX -->
+        <div class="art-sidebar-sticky">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:12px;font-weight:500">Mes articles <span style="color:var(--muted)" id="artCount">(0)</span></span>
+            <button class="btn btn-g" style="font-size:10px;padding:4px 9px" onclick="resetForm()">+ Nouveau</button>
+          </div>
+          <div id="artList">
+            <div class="empty-state"><div class="ei">⏳</div><div class="et">Chargement Firebase…</div></div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MESSAGES -->
+  <!-- ═══ MESSAGES ═══ -->
   <div class="page" id="page-messages" style="overflow:hidden">
     <div class="topbar">
       <div class="topbar-title">Messages clients</div>
       <div class="topbar-right">
         <div class="sync-indicator"><div class="sync-dot"></div>Temps réel</div>
-        <button class="btn btn-g" onclick="loadMessages()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Actualiser</button>
+        <button class="btn btn-g" onclick="loadMessages()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Actualiser
+        </button>
       </div>
     </div>
     <div class="msgs-layout" style="flex:1">
@@ -422,7 +734,7 @@ tr:last-child td{border-bottom:none}
         </div>
         <div class="msgs-filter-bar" style="border-top:none;padding-top:0;flex-wrap:wrap;gap:5px">
           <span style="font-size:9px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;align-self:center">Sujet :</span>
-          <button class="mf-chip on" onclick="setSubjectFilter('all',this)" id="sfAll">Tous</button>
+          <button class="mf-chip on" onclick="setSubjectFilter('all',this)">Tous</button>
           <button class="mf-chip" onclick="setSubjectFilter('commande',this)">🛒 Commande</button>
           <button class="mf-chip" onclick="setSubjectFilter('devis',this)">📐 Devis</button>
           <button class="mf-chip" onclick="setSubjectFilter('livraison',this)">📦 Livraison</button>
@@ -449,12 +761,11 @@ tr:last-child td{border-bottom:none}
 <!-- EMAILJS -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-// ⚙️ EMAILJS — à configurer sur https://www.emailjs.com
-const EMAILJS_SERVICE          = 'service_f73dvuk';           // ✅ TON SERVICE ID
-const EMAILJS_TPL_ADMIN        = 'template_8a89xmr';    // ⬅ Template 1 : notif admin
-const EMAILJS_TPL_CLIENT_CONF  = 'template_h2is8un';    // ⬅ Template 2 : confirmation client
-const EMAILJS_TPL_REPLY        = 'template_h2is8un';    // ⬅ Template 3 : réponse dashboard
-const EMAILJS_PUBLIC_KEY       = 'Hz2TaEfDTVW8Usv6Q'; // ⬅ Account > General > Public Key
+const EMAILJS_SERVICE         = 'service_f73dvuk';
+const EMAILJS_TPL_ADMIN       = 'template_8a89xmr';
+const EMAILJS_TPL_CLIENT_CONF = 'template_h2is8un';
+const EMAILJS_TPL_REPLY       = 'template_h2is8un';
+const EMAILJS_PUBLIC_KEY      = 'Hz2TaEfDTVW8Usv6Q';
 emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 </script>
 
@@ -463,9 +774,6 @@ emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, getDoc, updateDoc, query, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-// ═══════════════════════════════════════
-// 🔥 CONFIGURATION FIREBASE
-// ═══════════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
   authDomain: "tbt3d-a0f04.firebaseapp.com",
@@ -475,17 +783,12 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
-// Cloudinary config
-const CLOUDINARY_CLOUD = 'dfcrqwbee';
+const CLOUDINARY_CLOUD  = 'dfcrqwbee';
 const CLOUDINARY_PRESET = 'umjs9csb';
-
-// ═══════════════════════════════════════
-// 🔐 MOT DE PASSE ADMIN
-// ═══════════════════════════════════════
 const ADMIN_PW = "tbt3d2024";
 
 window.checkLogin = () => {
-  if(document.getElementById('pwInput').value === ADMIN_PW) {
+  if(document.getElementById('pwInput').value === ADMIN_PW){
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appSidebar').style.display = '';
     document.getElementById('appMain').style.display = '';
@@ -498,112 +801,109 @@ window.checkLogin = () => {
   }
 };
 
-// ═══════════════════════════════════════
-// ÉTAT GLOBAL
-// ═══════════════════════════════════════
+// ── ÉTAT GLOBAL ──
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const BADGES = ['','Bestseller','Nouveau','Promo','Top vente','Exclusif','Sur mesure'];
 let arts = [], hpSlots = [], boutSlots = [];
-// photos = tableau d'URLs Firebase Storage (strings)
 let photos = [], caracs = [], variants = [], editId = null;
+let variantImages = {};
 let uploadInProgress = 0;
 
-// ═══════════════════════════════════════
-// FIREBASE — LECTURE / ÉCRITURE
-// ═══════════════════════════════════════
+// ── FIREBASE CRUD ──
 async function fbGetArticles() {
-  const snap = await getDocs(collection(db, 'articles'));
+  const snap = await getDocs(collection(db,'articles'));
   arts = [];
-  snap.forEach(d => arts.push({...d.data(), id: d.id}));
-  arts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  snap.forEach(d => arts.push({...d.data(), id:d.id}));
+  arts.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
 }
-async function fbSetArticle(art) { await setDoc(doc(db,'articles',String(art.id)), art); }
-async function fbDelArticle(id) { await deleteDoc(doc(db,'articles',String(id))); }
-async function fbGetConfig(key) { const d = await getDoc(doc(db,'config',key)); return d.exists()?d.data():null; }
-async function fbSetConfig(key,data) { await setDoc(doc(db,'config',key), data); }
+async function fbSetArticle(art){ await setDoc(doc(db,'articles',String(art.id)), art); }
+async function fbDelArticle(id){ await deleteDoc(doc(db,'articles',String(id))); }
+async function fbGetConfig(key){ const d=await getDoc(doc(db,'config',key)); return d.exists()?d.data():null; }
+async function fbSetConfig(key,data){ await setDoc(doc(db,'config',key), data); }
 
-// ═══════════════════════════════════════
-// UPLOAD PHOTO → FIREBASE STORAGE (avec compression)
-// ═══════════════════════════════════════
-async function compressImage(file, maxWidth=1200, quality=0.82) {
-  return new Promise(resolve => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let w = img.width, h = img.height;
-      if(w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      canvas.toBlob(blob => resolve(blob), 'image/jpeg', quality);
+// ── COMPRESSION IMAGE ──
+async function compressImage(file, maxWidth=1200, quality=0.82){
+  return new Promise(resolve=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      let w=img.width,h=img.height;
+      if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      canvas.toBlob(blob=>resolve(blob),'image/jpeg',quality);
       URL.revokeObjectURL(url);
     };
-    img.src = url;
+    img.src=url;
   });
 }
+function showUploadBanner(text){const b=document.getElementById('uploadBanner');document.getElementById('uploadBannerTxt').textContent=text;b.classList.add('show');}
+function hideUploadBanner(){document.getElementById('uploadBanner').classList.remove('show');}
 
-async function uploadPhoto(file) {
-  const compressed = await compressImage(file);
-  const path = `photos/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
-  const ref = storageRef(storage, path);
-  const snap = await uploadBytes(ref, compressed);
-  return await getDownloadURL(snap.ref);
-}
-
-function showUploadBanner(text) {
-  const b = document.getElementById('uploadBanner');
-  document.getElementById('uploadBannerTxt').textContent = text;
-  b.classList.add('show');
-}
-function hideUploadBanner() {
-  document.getElementById('uploadBanner').classList.remove('show');
-}
-
-// ═══════════════════════════════════════
-// INITIALISATION
-// ═══════════════════════════════════════
-async function initApp() {
-  try {
+// ── INIT ──
+async function initApp(){
+  try{
     await fbGetArticles();
     await loadHp();
     await loadBout();
     renderOverview(); renderArts(); updateBadges();
     renderPhotoSlots(); renderCaracs(); renderVariants();
+    // Start realtime msgs listener immediately for overview stats
+    startMsgsListener();
     toast('Firebase chargé ✓');
-  } catch(e) {
+  }catch(e){
     toast('Erreur Firebase : vérifier les règles Firestore', true);
     console.error(e);
   }
 }
 
-// ═══════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════
+// ── NAVIGATION ──
 window.goPage = (id, btn) => {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if(btn) btn.classList.add('active');
   if(id==='homepage') renderHpUI();
-  if(id==='boutique-cfg') { syncBoutSlots(); renderBoutUI(); }
+  if(id==='boutique-cfg'){ syncBoutSlots(); renderBoutUI(); }
+  if(id==='messages') loadMessages();
 };
 
-// ═══════════════════════════════════════
-// OVERVIEW
-// ═══════════════════════════════════════
-function renderOverview() {
-  document.getElementById('ovPublished').textContent = arts.filter(a=>a.status==='published').length;
-  document.getElementById('ovDraft').textContent = arts.filter(a=>a.status!=='published').length;
-  // Messages stats handled by real-time listener
+// ── OVERVIEW ──
+function renderOverview(){
+  const pub = arts.filter(a=>a.status==='published');
+  const draft = arts.filter(a=>a.status!=='published');
+  const total = arts.length;
+  document.getElementById('ovPublished').textContent = pub.length;
+  document.getElementById('ovDraft').textContent = draft.length;
+  document.getElementById('ovTotal').textContent = total;
+  // Barre de répartition
+  if(total>0){
+    document.getElementById('ovRepPub').style.width = (pub.length/total*100)+'%';
+    document.getElementById('ovRepDraft').style.width = (draft.length/total*100)+'%';
+  }
+  // Table avec slug et lien
   const tb = document.getElementById('ovTableBody');
   tb.innerHTML = arts.length
-    ? arts.map(a=>`<tr><td style="font-weight:500">${esc(a.name)}</td><td style="font-family:var(--mono);color:var(--accent)">${parseFloat(a.price).toFixed(2)} €</td><td style="color:var(--muted);font-size:11px">${a.variants?.length?a.variants.length+' opt':'—'}</td><td><span style="font-size:11px;color:${a.status==='published'?'var(--green)':'var(--orange)'}">${a.status==='published'?'● Publié':'○ Brouillon'}</span></td></tr>`).join('')
-    : `<tr><td colspan="4" style="color:var(--muted);padding:20px 0;text-align:center;font-size:11px">Aucun article — créez votre premier produit.</td></tr>`;
+    ? arts.map((a,i)=>`<tr>
+        <td style="font-weight:500;display:flex;align-items:center;gap:8px">
+          ${a.photos?.[0]?`<img src="${a.photos[0]}" style="width:28px;height:28px;border-radius:5px;object-fit:cover;flex-shrink:0">`:'<div style="width:28px;height:28px;border-radius:5px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:12px">🏮</div>'}
+          ${esc(a.name)}
+        </td>
+        <td style="font-family:var(--mono);color:var(--accent)">${parseFloat(a.price).toFixed(2)} €</td>
+        <td style="font-size:10px;color:var(--soft);font-family:var(--mono)">${a.slug?`/produit.html?id=${esc(a.slug)}`:'—'}</td>
+        <td style="color:var(--muted);font-size:11px">${a.variants?.length?a.variants.length+' opt':'—'}</td>
+        <td><span style="font-size:11px;color:${a.status==='published'?'var(--green)':'var(--orange)'}">${a.status==='published'?'● Publié':'○ Brouillon'}</span></td>
+        <td>
+          <div style="display:flex;gap:4px;justify-content:flex-end">
+            ${a.slug&&a.status==='published'?`<a href="/produit.html?id=${esc(a.slug)}" target="_blank" class="ib" title="Voir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`:''}
+            <div class="ib" onclick="goPage('articles',document.querySelectorAll('.nav-item')[3]);setTimeout(()=>editArt(${i}),50)" title="Éditer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+          </div>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="6" style="color:var(--muted);padding:20px 0;text-align:center;font-size:11px">Aucun article — créez votre premier produit.</td></tr>`;
 }
 
-// ═══════════════════════════════════════
-// PAGE D'ACCUEIL
-// ═══════════════════════════════════════
+// ── HOMEPAGE ──
 const HP_DEF = [
   {type:'article',articleId:null,overrideBadge:'Bestseller',overrideBadgeStyle:'black',overridePrice:'',overrideFrom:true},
   {type:'article',articleId:null,overrideBadge:'',overrideBadgeStyle:'black',overridePrice:'',overrideFrom:true},
@@ -616,20 +916,18 @@ window.loadHp = async () => {
   dirty('hp',false);
 };
 window.saveHp = async () => {
-  setBtnLoading('btnSaveHp', true, false);
-  try { await fbSetConfig('homepage',{slots:hpSlots,updatedAt:new Date().toISOString()}); dirty('hp',false); toast('Page d\'accueil sauvegardée ✓'); }
-  catch(e) { toast('Erreur : '+e.message, true); }
-  setBtnLoading('btnSaveHp', false, false);
+  setBtnLoading('btnSaveHp',true,false);
+  try{ await fbSetConfig('homepage',{slots:hpSlots,updatedAt:new Date().toISOString()}); dirty('hp',false); toast('Page d\'accueil sauvegardée ✓'); }
+  catch(e){ toast('Erreur : '+e.message, true); }
+  setBtnLoading('btnSaveHp',false,false);
 };
 window.resetHp = () => { if(!confirm('Réinitialiser ?'))return; hpSlots=HP_DEF.map(d=>({...d})); const pub=arts.filter(a=>a.status==='published'); for(let i=0;i<3&&i<pub.length;i++)hpSlots[i].articleId=pub[i].id; dirty('hp',true); renderHpUI(); };
 
-// ═══════════════════════════════════════
-// BOUTIQUE
-// ═══════════════════════════════════════
-function syncBoutSlots() {
-  const pub = arts.filter(a=>a.status==='published');
+// ── BOUTIQUE ──
+function syncBoutSlots(){
+  const pub=arts.filter(a=>a.status==='published');
   pub.forEach(a=>{ if(!boutSlots.find(s=>s.articleId===a.id)) boutSlots.push({type:'article',articleId:a.id,overrideBadge:a.badge||'',overrideBadgeStyle:'black',overridePrice:'',overrideFrom:true,hidden:false}); });
-  boutSlots = boutSlots.filter(s=>arts.find(a=>a.id===s.articleId));
+  boutSlots=boutSlots.filter(s=>arts.find(a=>a.id===s.articleId));
 }
 window.loadBout = async () => {
   const sv = await fbGetConfig('boutique');
@@ -637,76 +935,97 @@ window.loadBout = async () => {
   syncBoutSlots(); dirty('bout',false);
 };
 window.saveBout = async () => {
-  setBtnLoading('btnSaveBout', true, true);
-  try { syncBoutSlots(); await fbSetConfig('boutique',{slots:boutSlots,updatedAt:new Date().toISOString()}); dirty('bout',false); toast('Boutique sauvegardée ✓'); }
-  catch(e) { toast('Erreur : '+e.message, true); }
-  setBtnLoading('btnSaveBout', false, true);
+  setBtnLoading('btnSaveBout',true,true);
+  try{ syncBoutSlots(); await fbSetConfig('boutique',{slots:boutSlots,updatedAt:new Date().toISOString()}); dirty('bout',false); toast('Boutique sauvegardée ✓'); }
+  catch(e){ toast('Erreur : '+e.message, true); }
+  setBtnLoading('btnSaveBout',false,true);
 };
 window.resetBout = () => { boutSlots=[]; syncBoutSlots(); dirty('bout',true); renderBoutUI(); };
 
-// ═══════════════════════════════════════
-// DIRTY FLAG
-// ═══════════════════════════════════════
-function dirty(which, d) {
-  const el = document.getElementById(which+'Dirty'); if(!el) return;
-  el.textContent = d ? 'non enregistrées' : 'enregistrées ✓';
-  el.style.color = d ? 'var(--orange)' : 'var(--green)';
+// ── DIRTY FLAG ──
+function dirty(which,d){
+  const el=document.getElementById(which+'Dirty'); if(!el) return;
+  el.textContent=d?'non enregistrées':'enregistrées ✓';
+  el.style.color=d?'var(--orange)':'var(--green)';
 }
-function setBtnLoading(id, loading, purple=false) {
-  const btn = document.getElementById(id); if(!btn) return;
-  btn.disabled = loading;
-  if(loading) {
-    btn.innerHTML = `<div class="${purple?'spin-w':'spin'}"></div> Sauvegarde…`;
-  } else {
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Enregistrer`;
-  }
+function setBtnLoading(id,loading,purple=false){
+  const btn=document.getElementById(id); if(!btn) return;
+  btn.disabled=loading;
+  btn.innerHTML=loading
+    ?`<div class="${purple?'spin-w':'spin'}"></div> Sauvegarde…`
+    :`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Enregistrer${purple?' boutique':''}`;
 }
 
-// ═══════════════════════════════════════
-// SLOT CARDS
-// ═══════════════════════════════════════
-function renderSlotCard(ct, slot, i, prefix) {
-  const art = slot.type==='article' ? arts.find(a=>a.id===slot.articleId) : null;
-  const el = document.createElement('div');
-  el.className = 'sl'; el.dataset.idx = i; el.draggable = true;
-  const pub = arts.filter(a=>a.status==='published');
-  const opts = pub.map(a=>`<option value="${a.id}" ${slot.articleId===a.id?'selected':''}>${esc(a.name)} — ${parseFloat(a.price).toFixed(2)} €</option>`).join('');
-  const bv = slot.type==='custom'?(slot.customBadge||''):(slot.overrideBadge||'');
-  const bchips = BADGES.map(b=>`<button class="bc ${bv===b?'sel':''}" onclick="setBadge('${prefix}',${i},'${b}')">${b||'Aucun'}</button>`).join('');
-  const nc = prefix==='hp'?'background:var(--accent);color:#000':'background:var(--purple);color:#fff';
-  let body = slot.type==='article' ? `
+// ── SLOT CARDS ──
+function renderSlotCard(ct,slot,i,prefix){
+  const art=slot.type==='article'?arts.find(a=>a.id===slot.articleId):null;
+  const el=document.createElement('div');
+  el.className='sl'; el.dataset.idx=i; el.draggable=true;
+  const pub=arts.filter(a=>a.status==='published');
+  const opts=pub.map(a=>`<option value="${a.id}" ${slot.articleId===a.id?'selected':''}>${esc(a.name)} — ${parseFloat(a.price).toFixed(2)} €</option>`).join('');
+  const bv=slot.type==='custom'?(slot.customBadge||''):(slot.overrideBadge||'');
+  const bchips=BADGES.map(b=>`<button class="bc ${bv===b?'sel':''}" onclick="setBadge('${prefix}',${i},'${b}')">${b||'Aucun'}</button>`).join('');
+  const nc=prefix==='hp'?'background:var(--accent);color:#000':'background:var(--purple);color:#fff';
+  let body=slot.type==='article'?`
     <div class="field"><label>Produit</label>
       <select onchange="setSlotArt('${prefix}',${i},this.value)">
         <option value="">— Choisir —</option>${opts}
         ${prefix==='hp'?`<option value="__custom__">✦ Carte personnalisée</option>`:''}
       </select>
     </div>
-    ${art?`<div class="sl-prev">${art.photos?.[0]?`<img class="sl-thumb" src="${art.photos[0]}" style="width:42px;height:42px;border-radius:5px;object-fit:cover">`:`<div class="sl-thumb-ph">🏮</div>`}<div><div class="sl-pn">${esc(art.name)}</div><div class="sl-pp">${parseFloat(art.price).toFixed(2)} €</div></div></div>`:''}
+    ${art?`<div class="sl-prev">${art.photos?.[0]?`<img class="sl-thumb" src="${art.photos[0]}">`:`<div class="sl-thumb-ph">🏮</div>`}<div><div class="sl-pn">${esc(art.name)}</div><div class="sl-pp">${parseFloat(art.price).toFixed(2)} €</div></div></div>`:''}
     <div class="field"><label>Badge override</label><div class="bc-chips">${bchips}</div></div>
     <div class="frow">
       <div class="field"><label>Prix affiché</label><input type="text" value="${esc(slot.overridePrice||'')}" placeholder="Vide = prix article" oninput="setF('${prefix}',${i},'overridePrice',this.value)"></div>
       <div class="field" style="display:flex;flex-direction:column;justify-content:flex-end"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12px;margin-bottom:0"><input type="checkbox" ${slot.overrideFrom?'checked':''} onchange="setF('${prefix}',${i},'overrideFrom',this.checked)" style="width:auto;accent-color:var(--accent)">"À partir de"</label></div>
     </div>
     ${prefix==='bout'?`<div class="field"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12px;margin-bottom:0"><input type="checkbox" ${slot.hidden?'checked':''} onchange="setF('${prefix}',${i},'hidden',this.checked)" style="width:auto;accent-color:var(--red)">Masquer dans la boutique</label></div>`:''}
-  ` : `
+  `:`
     <div class="field"><label>Type</label><select onchange="setSlotType('${prefix}',${i},this.value)"><option value="custom" selected>✦ Carte perso</option>${pub.length>0?`<option value="article">← Article</option>`:''}</select></div>
     <div class="frow"><div class="field"><label>Titre</label><input type="text" value="${esc(slot.customLabel||'')}" oninput="setF('${prefix}',${i},'customLabel',this.value)"></div><div class="field"><label>Sous-titre</label><input type="text" value="${esc(slot.customSub||'')}" oninput="setF('${prefix}',${i},'customSub',this.value)"></div></div>
     <div class="frow"><div class="field"><label>Prix/texte</label><input type="text" value="${esc(slot.customPrice||'')}" oninput="setF('${prefix}',${i},'customPrice',this.value)"></div><div class="field"><label>Lien</label><input type="text" value="${esc(slot.customLink||'')}" oninput="setF('${prefix}',${i},'customLink',this.value)"></div></div>
     <div class="field"><label>Badge</label><div class="bc-chips">${bchips}</div></div>
     <div class="field"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12px;margin-bottom:0"><input type="checkbox" ${slot.customDark?'checked':''} onchange="setF('${prefix}',${i},'customDark',this.checked)" style="width:auto;accent-color:var(--accent)">Fond sombre</label></div>
   `;
-  el.innerHTML = `<div class="sl-head"><div class="sl-num" style="${nc}">${i+1}</div><span style="font-size:12px;font-weight:500;flex:1">${slot.type==='custom'?'Carte personnalisée':(art?esc(art.name):'— Choisir —')}</span>${slot.hidden?`<span style="font-size:9px;background:var(--red);color:#fff;padding:2px 6px;border-radius:3px">MASQUÉ</span>`:''}<div class="sl-drag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="19" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="19" r="1" fill="currentColor" stroke="none"/></svg></div></div><div class="sl-body">${body}</div>`;
+  el.innerHTML=`<div class="sl-head"><div class="sl-num" style="${nc}">${i+1}</div><span style="font-size:12px;font-weight:500;flex:1">${slot.type==='custom'?'Carte personnalisée':(art?esc(art.name):'— Choisir —')}</span>${slot.hidden?`<span style="font-size:9px;background:var(--red);color:#fff;padding:2px 6px;border-radius:3px">MASQUÉ</span>`:''}<div class="sl-drag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="5" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1" fill="currentColor" stroke="none"/><circle cx="9" cy="19" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="19" r="1" fill="currentColor" stroke="none"/></svg></div></div><div class="sl-body">${body}</div>`;
   ct.appendChild(el);
 }
-window.setSlotArt = (p,i,val)=>{ const sl=p==='hp'?hpSlots:boutSlots; if(val==='__custom__'){sl[i]={type:'custom',customLabel:'',customSub:'',customPrice:'',customBadge:'',customBadgeStyle:'black',customLink:'',customDark:false};}else{sl[i].articleId=val||null;} dirty(p,true); if(p==='hp')renderHpUI();else renderBoutUI(); };
-window.setSlotType = (p,i,val)=>{ const sl=p==='hp'?hpSlots:boutSlots; if(val==='article')sl[i]={type:'article',articleId:null,overrideBadge:'',overrideBadgeStyle:'black',overridePrice:'',overrideFrom:true,hidden:false}; dirty(p,true); if(p==='hp')renderHpUI();else renderBoutUI(); };
-window.setF = (p,i,field,val)=>{ (p==='hp'?hpSlots:boutSlots)[i][field]=val; dirty(p,true); if(p==='hp')renderHpPreview();else renderBoutPreview(); };
-window.setBadge = (p,i,badge)=>{ const s=(p==='hp'?hpSlots:boutSlots)[i]; if(s.type==='custom')s.customBadge=badge;else s.overrideBadge=badge; dirty(p,true); if(p==='hp')renderHpUI();else renderBoutUI(); };
+window.setSlotArt=(p,i,val)=>{const sl=p==='hp'?hpSlots:boutSlots; if(val==='__custom__'){sl[i]={type:'custom',customLabel:'',customSub:'',customPrice:'',customBadge:'',customBadgeStyle:'black',customLink:'',customDark:false};}else{sl[i].articleId=val||null;} dirty(p,true); if(p==='hp')renderHpUI();else renderBoutUI();};
+window.setSlotType=(p,i,val)=>{const sl=p==='hp'?hpSlots:boutSlots; if(val==='article')sl[i]={type:'article',articleId:null,overrideBadge:'',overrideBadgeStyle:'black',overridePrice:'',overrideFrom:true,hidden:false}; dirty(p,true); if(p==='hp')renderHpUI();else renderBoutUI();};
+window.setF=(p,i,field,val)=>{(p==='hp'?hpSlots:boutSlots)[i][field]=val; dirty(p,true); if(p==='hp')renderHpPreview();else{renderBoutPreview();renderBoutRecap();}};
+window.setBadge=(p,i,badge)=>{const s=(p==='hp'?hpSlots:boutSlots)[i]; if(s.type==='custom')s.customBadge=badge;else s.overrideBadge=badge; dirty(p,true); if(p==='hp')renderHpUI();else renderBoutUI();};
 
 function renderHpUI(){const ct=document.getElementById('hpSlots');ct.innerHTML='';hpSlots.forEach((s,i)=>renderSlotCard(ct,s,i,'hp'));renderHpPreview();initDrag('hpSlots',hpSlots,()=>{dirty('hp',true);renderHpUI();});}
-function renderBoutUI(){const ct=document.getElementById('boutSlots');ct.innerHTML='';boutSlots.forEach((s,i)=>renderSlotCard(ct,s,i,'bout'));document.getElementById('boutBadge').textContent=boutSlots.length;renderBoutPreview();initDrag('boutSlots',boutSlots,()=>{dirty('bout',true);renderBoutUI();});}
+
+function renderBoutUI(){
+  const ct=document.getElementById('boutSlots');
+  ct.innerHTML='';
+  boutSlots.forEach((s,i)=>renderSlotCard(ct,s,i,'bout'));
+  const visibleCount=boutSlots.filter(s=>!s.hidden).length;
+  const totalCount=boutSlots.length;
+  document.getElementById('boutBadge').textContent=totalCount;
+  document.getElementById('boutCount').textContent=`${totalCount} article${totalCount>1?'s':''} · ${visibleCount} visible${visibleCount>1?'s':''}`;
+  renderBoutPreview();
+  renderBoutRecap();
+  initDrag('boutSlots',boutSlots,()=>{dirty('bout',true);renderBoutUI();});
+}
+
+function renderBoutRecap(){
+  const el=document.getElementById('boutRecap');
+  if(!el) return;
+  el.innerHTML=boutSlots.map(s=>{
+    const art=arts.find(a=>a.id===s.articleId);
+    if(!art) return '';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+      ${art.photos?.[0]?`<img src="${art.photos[0]}" style="width:24px;height:24px;border-radius:4px;object-fit:cover;flex-shrink:0">`:'<div style="width:24px;height:24px;border-radius:4px;background:var(--bg);flex-shrink:0"></div>'}
+      <span style="flex:1;font-size:10px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(art.name)}</span>
+      <span style="font-size:9px;font-family:var(--mono);color:${s.hidden?'var(--red)':'var(--green)'}">${s.hidden?'MASQUÉ':'OK'}</span>
+    </div>`;
+  }).join('');
+}
+
 function renderPreview(gridId,slots){
-  const g=document.getElementById(gridId);if(!g)return;
+  const g=document.getElementById(gridId); if(!g) return;
   g.innerHTML=slots.filter(s=>!s.hidden).slice(0,4).map(slot=>{
     const art=slot.type==='article'?arts.find(a=>a.id===slot.articleId):null;
     const badge=slot.type==='custom'?slot.customBadge:slot.overrideBadge;
@@ -733,15 +1052,16 @@ function initDrag(cid,arr,cb){
   });
 }
 
-// ═══════════════════════════════════════
-// PHOTOS — UPLOAD VERS FIREBASE STORAGE
-// ═══════════════════════════════════════
+// ── PHOTOS ──
 function renderPhotoSlots(){
-  const g=document.getElementById('photosGrid');g.innerHTML='';
+  const g=document.getElementById('photosGrid'); g.innerHTML='';
   photos.forEach((src,i)=>{
     const s=document.createElement('div');
     s.className='photo-slot'+(i===0?' main-slot':'');
-    s.innerHTML=`<img src="${src}"><div class="ph-del" onclick="removePhoto(${i})">×</div>${i===0?'<div class="ph-badge">PRINCIPALE</div>':''}`;
+    let varLabel='';
+    variants.forEach(vg=>vg.options.forEach(o=>{if(o.image===src)varLabel=o.label;}));
+    s.innerHTML=`<img src="${src}"><div class="ph-del" onclick="removePhoto(${i})">×</div>${i===0?'<div class="ph-badge">PRINCIPALE</div>':''}${varLabel?`<div class="ph-var-label">${esc(varLabel)}</div>`:''}`;
+    if(varLabel) s.classList.add('is-variant');
     g.appendChild(s);
   });
   if(photos.length<8){
@@ -752,133 +1072,131 @@ function renderPhotoSlots(){
     g.appendChild(a);
   }
 }
-
 window.addPhotos = async (files) => {
-  const toUpload = Array.from(files).slice(0, 8 - photos.length);
+  const toUpload=Array.from(files).slice(0,8-photos.length);
   if(!toUpload.length) return;
-  document.getElementById('photoInput').value = '';
-
-  uploadInProgress += toUpload.length;
+  document.getElementById('photoInput').value='';
+  uploadInProgress+=toUpload.length;
   showUploadBanner(`Compression + upload de ${toUpload.length} photo${toUpload.length>1?'s':''} en parallèle…`);
-
-  // Placeholders immédiats
-  const startIdx = photos.length;
+  const startIdx=photos.length;
   toUpload.forEach(()=>photos.push(null));
   renderPhotoSlots();
-
-  // Compression en parallèle d'abord
-  const blobs = await Promise.all(toUpload.map(f => compressImage(f)));
-  document.getElementById('uploadBannerTxt').textContent = `Upload de ${toUpload.length} photo${toUpload.length>1?'s':''} en cours…`;
-
-  // Upload en parallèle
-  let done = 0;
-  await Promise.all(blobs.map(async (blob, i) => {
-    try {
-      const fd = new FormData();
-      fd.append('file', blob, 'photo.jpg');
-      fd.append('upload_preset', CLOUDINARY_PRESET);
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {method:'POST',body:fd});
-      const data = await res.json();
-      if(!res.ok || data.error) throw new Error(data.error?.message || 'HTTP ' + res.status);
-      if(!data.secure_url) throw new Error('Pas de secure_url dans la réponse');
-      const url = data.secure_url;
-      photos[startIdx + i] = url;
+  const blobs=await Promise.all(toUpload.map(f=>compressImage(f)));
+  document.getElementById('uploadBannerTxt').textContent=`Upload de ${toUpload.length} photo${toUpload.length>1?'s':''} en cours…`;
+  let done=0;
+  await Promise.all(blobs.map(async(blob,i)=>{
+    try{
+      const fd=new FormData();
+      fd.append('file',blob,'photo.jpg');
+      fd.append('upload_preset',CLOUDINARY_PRESET);
+      const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,{method:'POST',body:fd});
+      const data=await res.json();
+      if(!res.ok||data.error) throw new Error(data.error?.message||'HTTP '+res.status);
+      photos[startIdx+i]=data.secure_url;
       done++;
-      const bannerTxt = document.getElementById('uploadBannerTxt');
-      if(bannerTxt) bannerTxt.textContent = `${done}/${toUpload.length} photo${toUpload.length>1?'s':''} uploadée${done>1?'s':''}…`;
+      const bt=document.getElementById('uploadBannerTxt');
+      if(bt) bt.textContent=`${done}/${toUpload.length} photo${toUpload.length>1?'s':''} uploadée${done>1?'s':''}…`;
       renderPhotoSlots();
-    } catch(e) {
-      photos[startIdx + i] = null;
-      console.error('Upload error:', e);
-      toast('Erreur upload : ' + e.message, true);
+    }catch(e){
+      photos[startIdx+i]=null;
+      toast('Erreur upload : '+e.message, true);
     }
   }));
-
-  photos = photos.filter(p => p !== null);
-  uploadInProgress -= toUpload.length;
-  if(uploadInProgress <= 0) hideUploadBanner();
+  photos=photos.filter(p=>p!==null);
+  uploadInProgress-=toUpload.length;
+  if(uploadInProgress<=0) hideUploadBanner();
   renderPhotoSlots();
   toast(`${done} photo${done>1?'s':''} uploadée${done>1?'s':''} ✓`);
 };
+window.removePhoto=i=>{photos.splice(i,1);renderPhotoSlots();};
 
-window.removePhoto = i=>{photos.splice(i,1);renderPhotoSlots();};
-
-// ═══════════════════════════════════════
-// CARACS
-// ═══════════════════════════════════════
+// ── CARACS ──
 function renderCaracs(){document.getElementById('caracList').innerHTML=caracs.map((c,i)=>`<div class="crow"><input type="text" placeholder="Matériau" value="${esc(c.key)}" oninput="caracs[${i}].key=this.value"><input type="text" placeholder="PLA" value="${esc(c.val)}" oninput="caracs[${i}].val=this.value"><button class="row-del" onclick="removeCarac(${i})">×</button></div>`).join('');}
-window.addCarac = (k='',v='')=>{caracs.push({key:k,val:v});renderCaracs();};
-window.removeCarac = i=>{caracs.splice(i,1);renderCaracs();};
+window.addCarac=(k='',v='')=>{caracs.push({key:k,val:v});renderCaracs();};
+window.removeCarac=i=>{caracs.splice(i,1);renderCaracs();};
 
-// ═══════════════════════════════════════
-// VARIANTES
-// ═══════════════════════════════════════
+// ── VARIANTES ──
 function renderVariants(){const ct=document.getElementById('variantsContainer');ct.innerHTML='';variants.forEach((vg,gi)=>{const d=document.createElement('div');d.className='vg';d.innerHTML=`<div class="vg-head"><input class="vg-name" type="text" value="${esc(vg.name)}" placeholder="ex : Couleur" oninput="variants[${gi}].name=this.value"><button class="vg-del" onclick="removeVG(${gi})">Supprimer</button></div><div class="vchips" id="vc${gi}"></div><div class="vadd"><input type="color" id="vco${gi}" value="#888888"><input type="text" id="vt${gi}" placeholder="ex : Blanc" onkeydown="if(event.key==='Enter')addOpt(${gi})"><button onclick="addOpt(${gi})">+ Ajouter</button></div>`;ct.appendChild(d);renderChips(gi);});}
-function renderChips(gi){const el=document.getElementById('vc'+gi);if(!el)return;const opts=variants[gi].options;el.innerHTML=opts.length?opts.map((o,oi)=>`<div class="vchip">${o.color?`<span class="vdot" style="background:${o.color}"></span>`:''}<span>${esc(o.label)}</span><span class="vrm" onclick="removeOpt(${gi},${oi})">×</span></div>`).join(''):`<span style="font-size:10px;color:var(--muted)">Aucune option…</span>`;}
-window.addOpt = gi=>{const t=document.getElementById('vt'+gi).value.trim();if(!t)return;const c=document.getElementById('vco'+gi).value;variants[gi].options.push({label:t,color:c==='#888888'?'':c});renderChips(gi);document.getElementById('vt'+gi).value='';document.getElementById('vco'+gi).value='#888888';};
-window.removeOpt = (gi,oi)=>{variants[gi].options.splice(oi,1);renderChips(gi);};
-window.addVariantGroup = ()=>{variants.push({name:'',options:[]});renderVariants();setTimeout(()=>{const ins=document.querySelectorAll('.vg-name');ins[ins.length-1]?.focus();},50);};
-window.removeVG = gi=>{variants.splice(gi,1);renderVariants();};
-
-// ═══════════════════════════════════════
-// SOUMETTRE UN ARTICLE → FIREBASE
-// ═══════════════════════════════════════
-window.submitArticle = async () => {
-  if(uploadInProgress > 0) { toast('⏳ Upload de photos en cours, patientez…', true); return; }
-  const name = document.getElementById('aName').value.trim();
-  const price = document.getElementById('aPrice').value;
-  if(!name){toast('⚠ Nom requis', true);return;}
-  if(!price){toast('⚠ Prix requis', true);return;}
-  const btn = document.getElementById('btnSubmit');
-  btn.disabled=true; btn.innerHTML=`<div class="spin"></div> Sauvegarde sur Firebase…`;
-
-  // Auto-génère le slug depuis le nom si vide
-  let slug = document.getElementById('aSlug').value.trim();
-  if(!slug) {
-    slug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-    document.getElementById('aSlug').value = slug;
-  }
-
-  const art = {
-    id: editId||String(Date.now()),
-    name, price: parseFloat(price),
-    slug,
-    oldPrice: parseFloat(document.getElementById('aOldPrice').value)||null,
-    badge: document.getElementById('aBadge').value,
-    status: document.getElementById('aStatus').value,
-    tagline: document.getElementById('aTagline').value.trim(),
-    payhip: document.getElementById('aPayhip').value.trim(),
-    desc: document.getElementById('aDesc').value.trim(),
-    photos: [...photos],
-    caracs: caracs.filter(c=>c.key.trim()),
-    variants: variants.filter(v=>v.name&&v.options.length),
-    createdAt: editId?(arts.find(a=>a.id===editId)?.createdAt||new Date().toISOString()):new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+function renderChips(gi){
+  const el=document.getElementById('vc'+gi); if(!el) return;
+  const opts=variants[gi].options;
+  el.innerHTML=opts.length?opts.map((o,oi)=>{
+    const imgUrl=o.image||'';
+    const imgBtn=imgUrl?`<span class="vchip-img-btn" title="Changer l'image" onclick="pickVariantImg(${gi},${oi})"><img src="${imgUrl}"></span>`:`<span class="vchip-img-btn" title="Attacher une image" onclick="pickVariantImg(${gi},${oi})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>`;
+    return `<div class="vchip">${o.color?`<span class="vdot" style="background:${o.color}"></span>`:''}${imgBtn}<span>${esc(o.label)}</span><span class="vrm" onclick="removeOpt(${gi},${oi})">×</span></div>`;
+  }).join(''):`<span style="font-size:10px;color:var(--muted)">Aucune option…</span>`;
+}
+window.addOpt=gi=>{const t=document.getElementById('vt'+gi).value.trim();if(!t)return;const c=document.getElementById('vco'+gi).value;variants[gi].options.push({label:t,color:c==='#888888'?'':c,image:''});renderChips(gi);document.getElementById('vt'+gi).value='';document.getElementById('vco'+gi).value='#888888';};
+window.removeOpt=(gi,oi)=>{variants[gi].options.splice(oi,1);renderChips(gi);};
+window.addVariantGroup=()=>{variants.push({name:'',options:[]});renderVariants();setTimeout(()=>{const ins=document.querySelectorAll('.vg-name');ins[ins.length-1]?.focus();},50);};
+window.removeVG=gi=>{variants.splice(gi,1);renderVariants();};
+window.pickVariantImg=(gi,oi)=>{
+  const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*';
+  inp.onchange=async()=>{
+    const file=inp.files[0]; if(!file) return;
+    const opt=variants[gi].options[oi];
+    toast(`⏳ Upload image "${opt.label}"…`);
+    uploadInProgress++;
+    try{
+      const blob=await compressImage(file,1200,0.82);
+      const fd=new FormData(); fd.append('file',blob,'variant.jpg'); fd.append('upload_preset',CLOUDINARY_PRESET);
+      const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,{method:'POST',body:fd});
+      const data=await res.json();
+      if(!res.ok||data.error) throw new Error(data.error?.message||'HTTP '+res.status);
+      variants[gi].options[oi].image=data.secure_url;
+      if(!photos.includes(data.secure_url)) photos.push(data.secure_url);
+      renderChips(gi); renderPhotoSlots();
+      toast(`✓ Image attachée à l'option "${opt.label}"`);
+    }catch(e){ toast('Erreur upload : '+e.message, true); }
+    uploadInProgress--;
   };
-  try {
-    await fbSetArticle(art);
-    if(editId){const i=arts.findIndex(a=>a.id===editId);arts[i]=art;}else arts.unshift(art);
-    syncBoutSlots();
-    if(art.status==='published') {
-      const curPage = document.querySelector('.page.active');
-      if(curPage && curPage.id === 'page-homepage') renderHpUI();
-    }
-    editId=null;
-    renderArts(); renderOverview(); updateBadges(); resetForm();
-    const pageUrl = `/produit.html?id=${slug}`;
-    toast(`"${name}" ${art.status==='published'?`publié ✓ — <a href="${pageUrl}" target="_blank" style="color:var(--blue);text-decoration:underline">voir la page</a>`:'brouillon sauvegardé ✓'}`);
-  } catch(e) { toast('Erreur Firebase : '+e.message, true); }
-  btn.disabled=false; btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="btnLbl">Publier</span>`;
-  const lbl = document.getElementById("btnLbl"); if(lbl) lbl.textContent = "Publier";
+  inp.click();
 };
 
-window.editArt = i => {
+// ── SUBMIT ARTICLE ──
+window.submitArticle = async () => {
+  if(uploadInProgress>0){toast('⏳ Upload en cours, patientez…', true);return;}
+  const name=document.getElementById('aName').value.trim();
+  const price=document.getElementById('aPrice').value;
+  if(!name){toast('⚠ Nom requis', true);return;}
+  if(!price){toast('⚠ Prix requis', true);return;}
+  const btn=document.getElementById('btnSubmit');
+  btn.disabled=true; btn.innerHTML=`<div class="spin"></div> Sauvegarde sur Firebase…`;
+  let slug=document.getElementById('aSlug').value.trim();
+  if(!slug){ slug=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); document.getElementById('aSlug').value=slug; }
+  const art={
+    id:editId||String(Date.now()), name, price:parseFloat(price), slug,
+    oldPrice:parseFloat(document.getElementById('aOldPrice').value)||null,
+    badge:document.getElementById('aBadge').value,
+    status:document.getElementById('aStatus').value,
+    tagline:document.getElementById('aTagline').value.trim(),
+    payhip:document.getElementById('aPayhip').value.trim(),
+    desc:document.getElementById('aDesc').value.trim(),
+    photos:[...photos],
+    caracs:caracs.filter(c=>c.key.trim()),
+    variants:variants.filter(v=>v.name&&v.options.length),
+    createdAt:editId?(arts.find(a=>a.id===editId)?.createdAt||new Date().toISOString()):new Date().toISOString(),
+    updatedAt:new Date().toISOString(),
+  };
+  try{
+    await fbSetArticle(art);
+    if(editId){const idx=arts.findIndex(a=>a.id===editId);arts[idx]=art;}else arts.unshift(art);
+    syncBoutSlots();
+    editId=null;
+    renderArts(); renderOverview(); updateBadges(); resetForm();
+    toast(`"${name}" ${art.status==='published'?'publié ✓':'brouillon sauvegardé ✓'}`);
+  }catch(e){toast('Erreur Firebase : '+e.message, true);}
+  btn.disabled=false; btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="btnLbl">Publier</span>`;
+  const lbl=document.getElementById('btnLbl'); if(lbl) lbl.textContent='Publier';
+};
+
+window.editArt=i=>{
   const a=arts[i]; editId=a.id;
   document.getElementById('aName').value=a.name; document.getElementById('aPrice').value=a.price;
   document.getElementById('aOldPrice').value=a.oldPrice||''; document.getElementById('aBadge').value=a.badge||'';
   document.getElementById('aStatus').value=a.status; document.getElementById('aTagline').value=a.tagline||'';
-  document.getElementById('aSlug').value=a.slug||'';
-  document.getElementById('aPayhip').value=a.payhip||''; document.getElementById('aDesc').value=a.desc||'';
+  document.getElementById('aSlug').value=a.slug||''; document.getElementById('aPayhip').value=a.payhip||'';
+  document.getElementById('aDesc').value=a.desc||'';
   photos=[...(a.photos||[])]; caracs=(a.caracs||[]).map(c=>({...c})); variants=(a.variants||[]).map(v=>({...v,options:[...v.options]}));
   renderPhotoSlots(); renderCaracs(); renderVariants();
   document.getElementById('artPageTitle').textContent='Modifier — '+a.name;
@@ -887,207 +1205,162 @@ window.editArt = i => {
   document.getElementById('page-articles').querySelector('.ps').scrollTo({top:0,behavior:'smooth'});
 };
 
-window.delArt = async i => {
+window.delArt=async i=>{
   if(!confirm('Supprimer "'+arts[i].name+'" ?'))return;
   const did=arts[i].id;
-  try {
+  try{
     await fbDelArticle(did);
     arts.splice(i,1);
     hpSlots.forEach(s=>{if(s.articleId===did)s.articleId=null;});
     boutSlots=boutSlots.filter(s=>s.articleId!==did);
     renderArts(); renderOverview(); updateBadges(); toast('Article supprimé');
-  } catch(e){toast('Erreur : '+e.message,true);}
+  }catch(e){toast('Erreur : '+e.message, true);}
 };
 
 function renderArts(){
   document.getElementById('artCount').textContent='('+arts.length+')';
   const list=document.getElementById('artList');
   if(!arts.length){list.innerHTML='<div class="empty-state"><div class="ei">📦</div><div class="et">Aucun article.<br>Créez votre premier produit →</div></div>';return;}
-  list.innerHTML='<div class="art-list">'+arts.map((a,i)=>`<div class="art-item" style="cursor:pointer" onclick="${a.slug&&a.status==='published'?`window.open('/produit.html?id=${esc(a.slug)}','_blank')`:`editArt(${i})`}">${a.photos?.[0]?`<img class="art-thumb" src="${a.photos[0]}">`:`<div class="art-ph">🏮</div>`}<div class="art-info"><div class="art-name">${esc(a.name)}</div><div class="art-sub">${a.variants?.length?a.variants.length+' opt · ':''}<span style="color:${a.status==='published'?'var(--green)':'var(--orange)'}">${a.status==='published'?'Publié':'Brouillon'}</span>${a.slug?` · <span style="color:var(--blue)">/produit.html?id=${esc(a.slug)}</span>`:''}</div></div><div class="art-price">${parseFloat(a.price).toFixed(2)} €</div><div class="art-btns">${a.slug&&a.status==='published'?`<a href="/produit.html?id=${esc(a.slug)}" target="_blank" class="ib" title="Voir la page produit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`:''}<div class="ib" onclick="editArt(${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div class="ib del" onclick="delArt(${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg></div></div></div>`).join('')+'</div>';
+  list.innerHTML='<div class="art-list">'+arts.map((a,i)=>`
+    <div class="art-item">
+      ${a.photos?.[0]?`<img class="art-thumb" src="${a.photos[0]}">`:`<div class="art-ph">🏮</div>`}
+      <div class="art-info" style="cursor:pointer" onclick="editArt(${i})">
+        <div class="art-name">${esc(a.name)}</div>
+        <div class="art-sub">
+          ${a.variants?.length?a.variants.length+' opt · ':''}
+          <span style="color:${a.status==='published'?'var(--green)':'var(--orange)'}">${a.status==='published'?'Publié':'Brouillon'}</span>
+        </div>
+      </div>
+      <div class="art-price">${parseFloat(a.price).toFixed(2)} €</div>
+      <div class="art-btns">
+        ${a.slug&&a.status==='published'?`<a href="/produit.html?id=${esc(a.slug)}" target="_blank" class="ib" title="Voir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>`:''}
+        <div class="ib" onclick="editArt(${i})" title="Éditer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <div class="ib del" onclick="event.stopPropagation();delArt(${i})" title="Supprimer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4h6v2"/></svg></div>
+      </div>
+    </div>
+  `).join('')+'</div>';
 }
-function updateBadges(){document.getElementById('artBadge').textContent=arts.length;document.getElementById('boutBadge').textContent=boutSlots.length||arts.filter(a=>a.status==='published').length;}
-window.resetForm = ()=>{
+
+function updateBadges(){
+  document.getElementById('artBadge').textContent=arts.length;
+  document.getElementById('boutBadge').textContent=boutSlots.length||arts.filter(a=>a.status==='published').length;
+}
+
+window.resetForm=()=>{
   editId=null; ['aName','aPrice','aOldPrice','aTagline','aSlug','aPayhip','aDesc'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('aStatus').value='published'; document.getElementById('aBadge').value='';
-  photos=[]; caracs=[]; variants=[]; renderPhotoSlots(); renderCaracs(); renderVariants();
+  photos=[]; caracs=[]; variants=[]; variantImages={}; renderPhotoSlots(); renderCaracs(); renderVariants();
   document.getElementById('artPageTitle').textContent='Créer un article';
   document.getElementById('btnLbl').textContent='Publier';
   document.getElementById('btnCancel').style.display='none';
 };
 
-// ═══════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════
-window.toast = (msg, isErr=false) => {
-  const t=document.getElementById('toast'), dot=document.getElementById('tdot');
+// ── TOAST ──
+window.toast=(msg,isErr=false)=>{
+  const t=document.getElementById('toast'),dot=document.getElementById('tdot');
   document.getElementById('toastTxt').textContent=msg;
   dot.style.background=isErr?'var(--red)':'var(--green)';
   t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3500);
 };
 
-// ═══════════════════════════════════════
-// MESSAGES — SYSTÈME COMPLET
-// ═══════════════════════════════════════
-let allMsgs = [];
-let selectedMsgId = null;
-let msgFilter = 'all';
-let subjectFilter = 'all';
-let msgUnsubscribe = null;
+// ── MESSAGES ──
+let allMsgs=[],selectedMsgId=null,msgFilter='all',subjectFilter='all',msgUnsubscribe=null;
+const SUBJ_LABELS={commande:'🛒 Commande',devis:'📐 Devis',produit:'🏮 Produit',livraison:'📦 Livraison',partenariat:'🤝 Partenariat',autre:'💬 Autre'};
 
-const SUBJ_LABELS = {commande:'🛒 Commande',devis:'📐 Devis',produit:'🏮 Produit',livraison:'📦 Livraison',partenariat:'🤝 Partenariat',autre:'💬 Autre'};
-
-window.loadMessages = async () => {
-  // Real-time listener
-  if (msgUnsubscribe) msgUnsubscribe();
-  const q = query(collection(db, 'messages'), orderBy('createdAt', 'desc'));
-  msgUnsubscribe = onSnapshot(q, snap => {
-    allMsgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderMsgList();
+function startMsgsListener(){
+  if(msgUnsubscribe) msgUnsubscribe();
+  const q=query(collection(db,'messages'),orderBy('createdAt','desc'));
+  msgUnsubscribe=onSnapshot(q,snap=>{
+    allMsgs=snap.docs.map(d=>({id:d.id,...d.data()}));
     updateMsgBadges();
     // Update overview stats
-    const unread = allMsgs.filter(m => m.status === 'nouveau').length;
-    const el1 = document.getElementById('ovMsgs');
-    const el2 = document.getElementById('ovMsgsTotal');
-    if (el1) el1.textContent = unread;
-    if (el2) el2.textContent = allMsgs.length;
-  }, err => {
-    document.getElementById('msgListContainer').innerHTML = `<div class="msg-empty-state" style="color:var(--red)">Erreur Firestore : ${err.message}</div>`;
+    const unread=allMsgs.filter(m=>m.status==='nouveau').length;
+    const repondu=allMsgs.filter(m=>m.status==='repondu').length;
+    const el1=document.getElementById('ovMsgs'),el2=document.getElementById('ovMsgsTotal'),el3=document.getElementById('ovMsgsRep');
+    if(el1) el1.textContent=unread;
+    if(el2) el2.textContent=allMsgs.length;
+    if(el3) el3.textContent=repondu;
+    const tr=document.getElementById('ovMsgsTrend');
+    if(tr){ tr.style.display=unread>0?'':'none'; tr.textContent=`● ${unread} à traiter`; }
+    // Re-render list if on messages page
+    if(document.getElementById('page-messages').classList.contains('active')) renderMsgList();
+  },err=>{
+    const c=document.getElementById('msgListContainer');
+    if(c) c.innerHTML=`<div class="msg-empty-state" style="color:var(--red)">Erreur Firestore : ${err.message}</div>`;
   });
-};
-
-function updateMsgBadges() {
-  const unread = allMsgs.filter(m => m.status === 'nouveau').length;
-  const badge = document.getElementById('msgBadge');
-  if (unread > 0) { badge.textContent = unread; badge.style.display = ''; }
-  else badge.style.display = 'none';
 }
 
-window.setMsgFilter = (f, btn) => {
-  msgFilter = f;
-  btn.closest('.msgs-filter-bar').querySelectorAll('.mf-chip').forEach(c => c.classList.remove('on'));
-  btn.classList.add('on');
-  renderMsgList();
-};
+window.loadMessages=async()=>{ startMsgsListener(); };
 
-window.setSubjectFilter = (f, btn) => {
-  subjectFilter = f;
-  btn.closest('.msgs-filter-bar').querySelectorAll('.mf-chip').forEach(c => c.classList.remove('on'));
-  btn.classList.add('on');
-  renderMsgList();
-};
+function updateMsgBadges(){
+  const unread=allMsgs.filter(m=>m.status==='nouveau').length;
+  const badge=document.getElementById('msgBadge');
+  if(unread>0){badge.textContent=unread;badge.style.display='';}
+  else badge.style.display='none';
+}
+window.setMsgFilter=(f,btn)=>{msgFilter=f;btn.closest('.msgs-filter-bar').querySelectorAll('.mf-chip').forEach(c=>c.classList.remove('on'));btn.classList.add('on');renderMsgList();};
+window.setSubjectFilter=(f,btn)=>{subjectFilter=f;btn.closest('.msgs-filter-bar').querySelectorAll('.mf-chip').forEach(c=>c.classList.remove('on'));btn.classList.add('on');renderMsgList();};
+window.filterMsgs=(q)=>{renderMsgList(q.toLowerCase());};
 
-window.filterMsgs = (q) => {
-  const term = q.toLowerCase();
-  renderMsgList(term);
-};
-
-function renderMsgList(searchTerm = '') {
-  let filtered = allMsgs.filter(m => {
-    if (msgFilter !== 'all' && m.status !== msgFilter) return false;
-    if (subjectFilter !== 'all' && m.sujet !== subjectFilter) return false;
-    if (searchTerm) {
-      const hay = `${m.prenom} ${m.nom} ${m.email} ${m.message} ${m.sujet}`.toLowerCase();
-      if (!hay.includes(searchTerm)) return false;
-    }
+function renderMsgList(searchTerm=''){
+  let filtered=allMsgs.filter(m=>{
+    if(msgFilter!=='all'&&m.status!==msgFilter) return false;
+    if(subjectFilter!=='all'&&m.sujet!==subjectFilter) return false;
+    if(searchTerm){const hay=`${m.prenom} ${m.nom} ${m.email} ${m.message} ${m.sujet}`.toLowerCase();if(!hay.includes(searchTerm))return false;}
     return true;
   });
-
-  const ct = document.getElementById('msgListContainer');
-  if (!filtered.length) {
-    ct.innerHTML = `<div class="msg-empty-state">Aucun message${msgFilter !== 'all' ? ' dans cette catégorie' : ''}</div>`;
-    return;
-  }
-
-  ct.innerHTML = filtered.map(m => {
-    const date = m.createdAt?.toDate ? m.createdAt.toDate().toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}) : '—';
-    const sbadge = {nouveau:`<span class="msg-status-badge msb-nouveau">Nouveau</span>`,lu:`<span class="msg-status-badge msb-lu">Lu</span>`,repondu:`<span class="msg-status-badge msb-repondu">Répondu</span>`}[m.status] || '';
-    const preview = (m.message || '').replace(/\n/g,' ').slice(0, 70) + (m.message?.length > 70 ? '…' : '');
-    return `<div class="msg-item ${m.status === 'nouveau' ? 'unread' : ''} ${selectedMsgId === m.id ? 'selected' : ''}" onclick="openMsg('${m.id}')">
-      <div class="msg-item-head">
-        <span class="msg-item-name">${esc(m.prenom || '')} ${esc(m.nom || '')}</span>
-        <span style="display:flex;align-items:center;gap:4px">${sbadge}<span class="msg-item-date">${date}</span></span>
-      </div>
-      <div class="msg-item-subj">${SUBJ_LABELS[m.sujet] || m.sujet || '—'}</div>
+  const ct=document.getElementById('msgListContainer');
+  if(!filtered.length){ct.innerHTML=`<div class="msg-empty-state">Aucun message${msgFilter!=='all'?' dans cette catégorie':''}</div>`;return;}
+  ct.innerHTML=filtered.map(m=>{
+    const date=m.createdAt?.toDate?m.createdAt.toDate().toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}):'—';
+    const sbadge={nouveau:`<span class="msg-status-badge msb-nouveau">Nouveau</span>`,lu:`<span class="msg-status-badge msb-lu">Lu</span>`,repondu:`<span class="msg-status-badge msb-repondu">Répondu</span>`}[m.status]||'';
+    const preview=(m.message||'').replace(/\n/g,' ').slice(0,70)+(m.message?.length>70?'…':'');
+    return `<div class="msg-item ${m.status==='nouveau'?'unread':''} ${selectedMsgId===m.id?'selected':''}" onclick="openMsg('${m.id}')">
+      <div class="msg-item-head"><span class="msg-item-name">${esc(m.prenom||'')} ${esc(m.nom||'')}</span><span style="display:flex;align-items:center;gap:4px">${sbadge}<span class="msg-item-date">${date}</span></span></div>
+      <div class="msg-item-subj">${SUBJ_LABELS[m.sujet]||m.sujet||'—'}</div>
       <div class="msg-item-preview">${esc(preview)}</div>
     </div>`;
   }).join('');
 }
 
-window.openMsg = async (id) => {
-  selectedMsgId = id;
-  renderMsgList(document.getElementById('msgSearch').value);
-  const m = allMsgs.find(x => x.id === id);
-  if (!m) return;
-
-  // Marquer comme lu si nouveau
-  if (m.status === 'nouveau') {
-    await updateDoc(doc(db, 'messages', id), { status: 'lu' });
-    m.status = 'lu';
-  }
-
-  const date = m.createdAt?.toDate ? m.createdAt.toDate().toLocaleString('fr-FR') : '—';
-  const initials = `${m.prenom?.[0]||''}${m.nom?.[0]||''}`.toUpperCase() || '?';
-  const col = document.getElementById('msgDetailCol');
-
-  col.innerHTML = `
+window.openMsg=async(id)=>{
+  selectedMsgId=id; renderMsgList(document.getElementById('msgSearch').value);
+  const m=allMsgs.find(x=>x.id===id); if(!m) return;
+  if(m.status==='nouveau'){await updateDoc(doc(db,'messages',id),{status:'lu'});m.status='lu';}
+  const date=m.createdAt?.toDate?m.createdAt.toDate().toLocaleString('fr-FR'):'—';
+  const initials=`${m.prenom?.[0]||''}${m.nom?.[0]||''}`.toUpperCase()||'?';
+  const col=document.getElementById('msgDetailCol');
+  col.innerHTML=`
     <div class="msg-detail-wrap" id="msgDetailWrap">
       <div class="msg-d-header">
         <div class="msg-d-meta">
           <div class="msg-d-avatar">${initials}</div>
-          <div>
-            <div class="msg-d-name">${esc(m.prenom||'')} ${esc(m.nom||'')}</div>
-            <div class="msg-d-email">${esc(m.email||'')}</div>
-          </div>
+          <div><div class="msg-d-name">${esc(m.prenom||'')} ${esc(m.nom||'')}</div><div class="msg-d-email">${esc(m.email||'')}</div></div>
           <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
             <button class="btn btn-g" style="font-size:10px;padding:5px 10px" onclick="deleteMsgById('${id}')">🗑</button>
-            ${m.userId ? `<a href="/compte.html" class="btn btn-g" style="font-size:10px;padding:5px 10px" target="_blank">Voir le profil</a>` : ''}
           </div>
         </div>
         <div class="msg-d-tags">
           <span class="msg-d-tag" style="background:rgba(255,107,53,.12);color:var(--accent)">${SUBJ_LABELS[m.sujet]||m.sujet}</span>
           <span class="msg-d-tag" style="background:var(--bg3);color:var(--soft);font-family:var(--mono);font-size:9px">${date}</span>
-          ${m.status==='repondu' ? `<span class="msg-d-tag" style="background:rgba(46,204,138,.1);color:var(--green)">Répondu ✓</span>` : ''}
-          ${m.userId ? `<span class="msg-d-tag" style="background:rgba(77,166,255,.1);color:var(--blue)">Client enregistré</span>` : ''}
+          ${m.status==='repondu'?`<span class="msg-d-tag" style="background:rgba(46,204,138,.1);color:var(--green)">Répondu ✓</span>`:''}
+          ${m.userId?`<span class="msg-d-tag" style="background:rgba(77,166,255,.1);color:var(--blue)">Client enregistré</span>`:''}
         </div>
       </div>
-
-      ${m.tel || m.orderRef || m.fileName ? `
-      <div class="msg-d-extras">
-        ${m.tel ? `<div class="msg-d-extra"><strong>Téléphone</strong>${esc(m.tel)}</div>` : ''}
-        ${m.orderRef ? `<div class="msg-d-extra"><strong>N° commande</strong>${esc(m.orderRef)}</div>` : ''}
-        ${m.fileName ? `<div class="msg-d-extra"><strong>Pièce jointe</strong>
-          ${m.fileUrl
-            ? (m.fileFormat && ['jpg','jpeg','png','webp','gif'].includes(m.fileFormat)
-                ? `<a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;">
-                     <img src="${m.fileUrl}" alt="${esc(m.fileName)}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border2);flex-shrink:0;">
-                     <span style="font-size:11px;">${esc(m.fileName)}</span>
-                   </a>`
-                : `<a href="${m.fileUrl}" target="_blank" download="${esc(m.fileName)}" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;border:1px solid rgba(255,107,53,.3);padding:5px 10px;border-radius:7px;font-size:11px;background:rgba(255,107,53,.06);">
-                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                     ${esc(m.fileName)}
-                   </a>`)
-            : `📎 ${esc(m.fileName)}`
-          }</div>` : ''}
-      </div>` : ''}
-
+      ${m.tel||m.orderRef||m.fileName?`<div class="msg-d-extras">
+        ${m.tel?`<div class="msg-d-extra"><strong>Téléphone</strong>${esc(m.tel)}</div>`:''}
+        ${m.orderRef?`<div class="msg-d-extra"><strong>N° commande</strong>${esc(m.orderRef)}</div>`:''}
+        ${m.fileName?`<div class="msg-d-extra"><strong>Pièce jointe</strong>${m.fileUrl?(m.fileFormat&&['jpg','jpeg','png','webp','gif'].includes(m.fileFormat)?`<a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;"><img src="${m.fileUrl}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border2)"><span style="font-size:11px">${esc(m.fileName)}</span></a>`:`<a href="${m.fileUrl}" target="_blank" download="${esc(m.fileName)}" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;border:1px solid rgba(255,107,53,.3);padding:5px 10px;border-radius:7px;font-size:11px;background:rgba(255,107,53,.06)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>${esc(m.fileName)}</a>`):`📎 ${esc(m.fileName)}`}</div>`:''}
+      </div>`:''}
       <div class="msg-d-body">${esc(m.message||'')}</div>
-
-      ${m.reply ? `
-      <div class="prev-reply">
-        <div class="prev-reply-label">✉ Ta réponse — ${m.repliedAt ? new Date(m.repliedAt).toLocaleDateString('fr-FR') : ''}</div>
-        <div class="prev-reply-text">${esc(m.reply)}</div>
-      </div>` : ''}
+      ${m.reply?`<div class="prev-reply"><div class="prev-reply-label">✉ Ta réponse — ${m.repliedAt?new Date(m.repliedAt).toLocaleDateString('fr-FR'):''}</div><div class="prev-reply-text">${esc(m.reply)}</div></div>`:''}
     </div>
-
     <div class="reply-section">
-      <div class="reply-section-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>
-        ${m.reply ? 'Modifier la réponse' : 'Répondre'}
-      </div>
+      <div class="reply-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg>${m.reply?'Modifier la réponse':'Répondre'}</div>
       <div class="reply-to">→ Répondre à <strong>${esc(m.email)}</strong></div>
       <textarea class="reply-area" id="replyArea" placeholder="Votre réponse…" rows="4">${esc(m.reply||'')}</textarea>
       <div class="reply-actions">
-        <div class="reply-note">Email envoyé automatiquement au client via EmailJS</div>
+        <div class="reply-note">Email envoyé automatiquement via EmailJS</div>
         <div class="reply-send-row">
           <button class="btn btn-g" onclick="markReplied('${id}')">Marquer répondu (sans mail)</button>
           <button class="btn btn-a" id="sendReplyBtn" onclick="sendReply('${id}')">
@@ -1099,83 +1372,43 @@ window.openMsg = async (id) => {
     </div>`;
 };
 
-window.sendReply = async (id) => {
-  const replyText = document.getElementById('replyArea').value.trim();
-  if (!replyText) { toast('Écrivez votre réponse d\'abord', true); return; }
-  const m = allMsgs.find(x => x.id === id);
-  if (!m) return;
-
-  const btn = document.getElementById('sendReplyBtn');
-  btn.disabled = true;
-  btn.innerHTML = `<div class="spin"></div> Envoi…`;
-
-  try {
-    // Send email via EmailJS
-    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TPL_REPLY, {
-      to_email:   m.email,
-      to_name:    m.prenom || 'Client',
-      reply_text: replyText,
-      original_msg: m.message,
-      sujet: SUBJ_LABELS[m.sujet] || m.sujet,
-    });
-
-    // Save to Firestore
-    await updateDoc(doc(db, 'messages', id), {
-      reply:     replyText,
-      status:    'repondu',
-      repliedAt: new Date().toISOString(),
-    });
-
-    toast('Réponse envoyée ✓');
-    m.reply = replyText;
-    m.status = 'repondu';
-    openMsg(id);
-  } catch(e) {
-    // Si EmailJS pas configuré, on sauvegarde quand même
-    if (e?.text?.includes('service') || e?.status === 400) {
-      await updateDoc(doc(db, 'messages', id), { reply: replyText, status: 'repondu', repliedAt: new Date().toISOString() });
+window.sendReply=async(id)=>{
+  const replyText=document.getElementById('replyArea').value.trim();
+  if(!replyText){toast('Écrivez votre réponse d\'abord', true);return;}
+  const m=allMsgs.find(x=>x.id===id); if(!m) return;
+  const btn=document.getElementById('sendReplyBtn'); btn.disabled=true; btn.innerHTML=`<div class="spin"></div> Envoi…`;
+  try{
+    await emailjs.send(EMAILJS_SERVICE,EMAILJS_TPL_REPLY,{to_email:m.email,to_name:m.prenom||'Client',reply_text:replyText,original_msg:m.message,sujet:SUBJ_LABELS[m.sujet]||m.sujet});
+    await updateDoc(doc(db,'messages',id),{reply:replyText,status:'repondu',repliedAt:new Date().toISOString()});
+    toast('Réponse envoyée ✓'); m.reply=replyText; m.status='repondu'; openMsg(id);
+  }catch(e){
+    if(e?.text?.includes('service')||e?.status===400){
+      await updateDoc(doc(db,'messages',id),{reply:replyText,status:'repondu',repliedAt:new Date().toISOString()});
       toast('Réponse sauvegardée (⚠ Email non envoyé : configurez EmailJS)');
-      m.reply = replyText; m.status = 'repondu';
-      openMsg(id);
-    } else {
-      toast('Erreur envoi : ' + e.message, true);
-      btn.disabled = false;
-      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Envoyer la réponse`;
+      m.reply=replyText; m.status='repondu'; openMsg(id);
+    }else{
+      toast('Erreur envoi : '+e.message, true);
+      btn.disabled=false; btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Envoyer la réponse`;
     }
   }
 };
 
-window.markReplied = async (id) => {
-  const replyText = document.getElementById('replyArea').value.trim();
-  await updateDoc(doc(db, 'messages', id), {
-    status: 'repondu',
-    reply: replyText || null,
-    repliedAt: new Date().toISOString(),
-  });
-  const m = allMsgs.find(x => x.id === id);
-  if (m) { m.status = 'repondu'; if(replyText) m.reply = replyText; }
-  toast('Marqué comme répondu ✓');
-  openMsg(id);
+window.markReplied=async(id)=>{
+  const replyText=document.getElementById('replyArea').value.trim();
+  await updateDoc(doc(db,'messages',id),{status:'repondu',reply:replyText||null,repliedAt:new Date().toISOString()});
+  const m=allMsgs.find(x=>x.id===id);
+  if(m){m.status='repondu';if(replyText)m.reply=replyText;}
+  toast('Marqué comme répondu ✓'); openMsg(id);
 };
 
-window.deleteMsgById = async (id) => {
-  if (!confirm('Supprimer ce message définitivement ?')) return;
-  try {
-    await deleteDoc(doc(db, 'messages', id));
-    allMsgs = allMsgs.filter(m => m.id !== id);
-    selectedMsgId = null;
-    document.getElementById('msgDetailCol').innerHTML = `<div class="msg-detail-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span style="font-size:12px;font-family:var(--mono)">Sélectionnez un message</span></div>`;
-    renderMsgList();
-    updateMsgBadges();
-    toast('Message supprimé');
-  } catch(e) { toast('Erreur : ' + e.message, true); }
-};
-
-// Hook goPage for messages
-const _origGoPage = window.goPage;
-window.goPage = (id, btn) => {
-  _origGoPage(id, btn);
-  if (id === 'messages') loadMessages();
+window.deleteMsgById=async(id)=>{
+  if(!confirm('Supprimer ce message définitivement ?'))return;
+  try{
+    await deleteDoc(doc(db,'messages',id));
+    allMsgs=allMsgs.filter(m=>m.id!==id); selectedMsgId=null;
+    document.getElementById('msgDetailCol').innerHTML=`<div class="msg-detail-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span style="font-size:12px;font-family:var(--mono)">Sélectionnez un message</span></div>`;
+    renderMsgList(); updateMsgBadges(); toast('Message supprimé');
+  }catch(e){toast('Erreur : '+e.message, true);}
 };
 </script>
 </body>
