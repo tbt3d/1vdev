@@ -149,21 +149,57 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .spec-key { font-size: 12px; color: var(--muted); flex: 1; }
 .spec-val { font-size: 12px; font-weight: 500; color: var(--text); text-align: right; }
 
-/* ─── TABS ─── */
-.prod-tabs { max-width: var(--max); margin: 0 auto; padding: 0 32px 80px; }
-@media(max-width:768px) { .prod-tabs { padding: 0 20px 60px; } }
-.tab-nav { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
-.tab-btn { padding: 12px 20px; font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all .15s; margin-bottom: -1px; }
-.tab-btn.on { color: var(--black); border-bottom-color: var(--black); }
-.tab-pane { display: none; }
-.tab-pane.on { display: block; }
-.desc-text { font-size: 14px; color: var(--soft); line-height: 1.9; white-space: pre-wrap; max-width: 700px; }
-.specs-table { width: 100%; max-width: 600px; border-collapse: collapse; }
-.specs-table tr { border-bottom: 1px solid var(--border); }
-.specs-table tr:last-child { border-bottom: none; }
-.specs-table td { padding: 12px 0; font-size: 13px; }
-.specs-table td:first-child { color: var(--muted); width: 45%; }
-.specs-table td:last-child { font-weight: 500; }
+/* ─── STORY SECTION ─── */
+.story-section { background: var(--white); padding: 80px 32px; }
+.story-inner { max-width: var(--max); margin: 0 auto; display: grid; grid-template-columns: 280px 1fr; gap: 80px; align-items: start; }
+.story-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding-top: 4px; }
+.story-text { font-size: 15px; color: var(--soft); line-height: 1.9; white-space: pre-wrap; max-width: 680px; }
+@media(max-width:768px) { .story-section { padding: 48px 20px; } .story-inner { grid-template-columns: 1fr; gap: 16px; } }
+
+/* ─── PRODUCT INFORMATION ─── */
+.info-section { background: var(--bg); padding: 80px 32px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.info-inner { max-width: var(--max); margin: 0 auto; }
+.info-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 40px; }
+.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--white); }
+.info-block { padding: 28px 32px; border-right: 1px solid var(--border); }
+.info-block:last-child { border-right: none; }
+.info-block-title { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+.info-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.info-item:last-child { border-bottom: none; }
+.info-item-icon { width: 26px; height: 26px; border-radius: 7px; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.info-item-icon svg { width: 12px; height: 12px; opacity: .5; }
+.info-item-key { font-size: 12px; color: var(--muted); flex: 1; }
+.info-item-val { font-size: 12px; font-weight: 500; }
+@media(max-width:768px) { .info-section { padding: 48px 20px; } .info-grid { grid-template-columns: 1fr; } .info-block { border-right: none; border-bottom: 1px solid var(--border); } .info-block:last-child { border-bottom: none; } }
+
+/* ─── HERO STORY ─── */
+.hero-story { position: relative; max-height: 600px; overflow: hidden; }
+.hero-story-img { width: 100%; height: 600px; object-fit: cover; display: block; filter: brightness(.85); }
+.hero-story-caption { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.7); background: rgba(0,0,0,.35); padding: 8px 20px; border-radius: 20px; white-space: nowrap; }
+@media(max-width:768px) { .hero-story-img { height: 320px; } .hero-story-caption { font-size: 10px; bottom: 20px; } }
+
+/* ─── MORE SECTION ─── */
+.more-section { background: var(--white); padding: 100px 32px; text-align: center; }
+.more-inner { max-width: 640px; margin: 0 auto; }
+.more-label { font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+.more-title { font-size: 36px; font-weight: 300; letter-spacing: -.03em; color: var(--black); margin-bottom: 20px; line-height: 1.2; }
+.more-text { font-size: 15px; color: var(--soft); line-height: 1.9; }
+@media(max-width:768px) { .more-section { padding: 64px 20px; } .more-title { font-size: 26px; } }
+
+/* ─── SIMILAR PRODUCTS ─── */
+.similar-section { background: var(--bg); padding: 80px 32px 100px; border-top: 1px solid var(--border); }
+.similar-inner { max-width: var(--max); margin: 0 auto; }
+.similar-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 36px; }
+.similar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.sim-card { text-decoration: none; color: var(--text); display: block; }
+.sim-img-wrap { aspect-ratio: 3/4; border-radius: 12px; overflow: hidden; background: var(--white); margin-bottom: 14px; }
+.sim-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+.sim-card:hover .sim-img-wrap img { transform: scale(1.04); }
+.sim-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; background: var(--white); }
+.sim-name { font-size: 14px; font-weight: 500; letter-spacing: -.01em; margin-bottom: 4px; }
+.sim-price { font-size: 13px; color: var(--muted); }
+@media(max-width:900px) { .similar-grid { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:500px) { .similar-section { padding: 48px 20px 64px; } }
 
 /* ─── FOOTER ─── */
 #footer { background: #111; color: rgba(255,255,255,.7); }
@@ -343,17 +379,45 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     </div>
   </div>
 
-  <!-- ─── TABS description / caractéristiques ─── -->
-  <div class="prod-tabs">
-    <div class="tab-nav">
-      <button class="tab-btn on" onclick="switchTab('desc', this)">Description</button>
-      <button class="tab-btn" onclick="switchTab('specs', this)" id="tabSpecsBtn" style="display:none">Caractéristiques</button>
+  <!-- ─── DIVIDER ─── -->
+  <div style="height:1px;background:var(--border);max-width:var(--max);margin:0 auto 0;"></div>
+
+  <!-- ─── DESCRIPTION STORYTELLING ─── -->
+  <div class="story-section" id="storySection" style="display:none">
+    <div class="story-inner">
+      <div class="story-label">DESCRIPTION.</div>
+      <p class="story-text" id="prodDesc"></p>
     </div>
-    <div class="tab-pane on" id="tab-desc">
-      <p class="desc-text" id="prodDesc"></p>
+  </div>
+
+  <!-- ─── PRODUCT INFORMATION ─── -->
+  <div class="info-section" id="infoSection" style="display:none">
+    <div class="info-inner">
+      <div class="info-label">PRODUCT INFORMATION.</div>
+      <div class="info-grid" id="infoGrid"></div>
     </div>
-    <div class="tab-pane" id="tab-specs">
-      <table class="specs-table" id="specsTable"></table>
+  </div>
+
+  <!-- ─── GRANDE IMAGE STORYTELLING ─── -->
+  <div class="hero-story" id="heroStory" style="display:none">
+    <img id="heroStoryImg" src="" alt="" class="hero-story-img">
+    <div class="hero-story-caption" id="heroStoryCaption"></div>
+  </div>
+
+  <!-- ─── MORE THAN A DESIGN ─── -->
+  <div class="more-section">
+    <div class="more-inner">
+      <div class="more-label">FABRIQUÉ À LILLE.</div>
+      <h2 class="more-title">Plus qu'un objet.</h2>
+      <p class="more-text">Chaque pièce est conçue, modélisée et imprimée en 3D à la main dans notre atelier à Lille. Nous utilisons des matériaux soigneusement sélectionnés pour allier durabilité et esthétique. Pas de production en masse — chaque commande est unique.</p>
+    </div>
+  </div>
+
+  <!-- ─── PRODUITS SIMILAIRES ─── -->
+  <div class="similar-section" id="similarSection" style="display:none">
+    <div class="similar-inner">
+      <div class="similar-label">AUTRES CRÉATIONS.</div>
+      <div class="similar-grid" id="similarGrid"></div>
     </div>
   </div>
 
@@ -595,41 +659,42 @@ function renderProduct(art) {
   }
 
   // Description
-  document.getElementById('prodDesc').textContent = art.desc || 'Aucune description disponible.';
+  if (art.desc) {
+    document.getElementById('prodDesc').textContent = art.desc;
+    document.getElementById('storySection').style.display = '';
+  }
 
-  // Caractéristiques — onglet (reste pour la section tabs)
+  // Caractéristiques
   if (art.caracs && art.caracs.filter(c => c.key).length > 0) {
     const validCaracs = art.caracs.filter(c => c.key);
 
-    // Icônes intelligentes selon la clé
     const SPEC_ICONS = {
       default: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
       matiere: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
       materiau: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
       taille: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 3H3v18h18V3z"/><path d="M3 9h18M9 21V9"/></svg>`,
-      dimensions: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 3H3v18h18V3z"/><path d="M3 9h18M9 21V9"/></svg>`,
+      dimension: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 3H3v18h18V3z"/><path d="M3 9h18M9 21V9"/></svg>`,
       hauteur: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="20" x2="12" y2="4"/><polyline points="6 10 12 4 18 10"/></svg>`,
       largeur: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></svg>`,
-      poids: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" transform="translate(0,4)"/><path d="M6.5 8a2 2 0 00-1.905 1.405L3 14l-.5 6h19l-.5-6-1.596-4.595A2 2 0 0017.5 8z"/></svg>`,
+      poids: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 8a2 2 0 00-1.905 1.405L3 14l-.5 6h19l-.5-6-1.596-4.595A2 2 0 0017.5 8z"/><circle cx="12" cy="6" r="3"/></svg>`,
       couleur: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>`,
       finition: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
       impression: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`,
       livraison: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
       garantie: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
-      technologie: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>`,
       ampoule: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/></svg>`,
       cable: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12H3M21 12h-2M12 3V1M12 23v-2"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>`,
+      technologie: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>`,
     };
-
     function getIcon(key) {
       const k = key.toLowerCase().trim();
-      for (const [pattern, icon] of Object.entries(SPEC_ICONS)) {
-        if (pattern !== 'default' && k.includes(pattern)) return icon;
+      for (const [p, icon] of Object.entries(SPEC_ICONS)) {
+        if (p !== 'default' && k.includes(p)) return icon;
       }
       return SPEC_ICONS.default;
     }
 
-    // Specs inline sous le bouton achat
+    // Specs inline sous le bouton achat (colonne droite)
     const specsInline = document.getElementById('specsInline');
     specsInline.innerHTML = `<div class="specs-inline-title">Caractéristiques</div>` +
       validCaracs.map(c => `
@@ -640,11 +705,33 @@ function renderProduct(art) {
         </div>`).join('');
     specsInline.style.display = '';
 
-    // Onglet specs (section tabs en bas)
-    document.getElementById('specsTable').innerHTML = validCaracs
-      .map(c => `<tr><td>${esc(c.key)}</td><td>${esc(c.val)}</td></tr>`)
-      .join('');
-    document.getElementById('tabSpecsBtn').style.display = '';
+    // Product Information structuré style Sonogo (3 colonnes)
+    const chunkSize = Math.ceil(validCaracs.length / 3);
+    const cols = [
+      validCaracs.slice(0, chunkSize),
+      validCaracs.slice(chunkSize, chunkSize * 2),
+      validCaracs.slice(chunkSize * 2)
+    ].filter(c => c.length > 0);
+    const BLOCK_TITLES = ['Dimensions & Taille', 'Détails techniques', 'Matériaux'];
+    document.getElementById('infoGrid').innerHTML = cols.map((col, i) => `
+      <div class="info-block">
+        <div class="info-block-title">${BLOCK_TITLES[i] || 'Informations'}</div>
+        ${col.map(c => `
+          <div class="info-item">
+            <div class="info-item-icon">${getIcon(c.key)}</div>
+            <span class="info-item-key">${esc(c.key)}</span>
+            <span class="info-item-val">${esc(c.val)}</span>
+          </div>`).join('')}
+      </div>`).join('');
+    document.getElementById('infoSection').style.display = '';
+  }
+
+  // Grande image storytelling = 2ème photo si dispo
+  if (_photos.length >= 2) {
+    document.getElementById('heroStoryImg').src = _photos[1];
+    document.getElementById('heroStoryImg').alt = art.name;
+    document.getElementById('heroStoryCaption').textContent = 'Fabriqué à Lille · Impression 3D · Made in France';
+    document.getElementById('heroStory').style.display = '';
   }
 
   // Bouton achat
@@ -682,6 +769,34 @@ function renderProduct(art) {
 
   // Afficher le produit
   document.getElementById('productWrap').style.display = 'block';
+
+  // Charger les produits similaires (autres articles publiés)
+  loadSimilar(art.id, art.slug);
+}
+
+async function loadSimilar(currentId, currentSlug) {
+  try {
+    const snap = await getDocs(query(collection(db, 'articles'), where('status', '==', 'published')));
+    const others = [];
+    snap.forEach(d => {
+      const a = { id: d.id, ...d.data() };
+      if (a.id !== currentId && a.slug !== currentSlug) others.push(a);
+    });
+    if (others.length === 0) return;
+    // Max 4 produits
+    const toShow = others.slice(0, 4);
+    document.getElementById('similarGrid').innerHTML = toShow.map(a => `
+      <a href="/produit.html?id=${esc(a.slug || a.id)}" class="sim-card">
+        <div class="sim-img-wrap">
+          ${a.photos?.[0]
+            ? `<img src="${esc(a.photos[0])}" alt="${esc(a.name)}" loading="lazy">`
+            : `<div class="sim-img-placeholder">🏮</div>`}
+        </div>
+        <div class="sim-name">${esc(a.name)}</div>
+        <div class="sim-price">${parseFloat(a.price).toFixed(2)} €</div>
+      </a>`).join('');
+    document.getElementById('similarSection').style.display = '';
+  } catch(e) { console.warn('Similar products error:', e); }
 }
 </script>
 
