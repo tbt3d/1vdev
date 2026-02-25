@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paiement Réussi — TBT3D</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #fff;
+      --black: #111;
+      --bg: #f9f9f9;
+      --border: #e8e8e8;
+      --text: #111;
+      --muted: #888;
+      --soft: #555;
+      --font: 'Inter', system-ui, sans-serif;
+      --nav-h: 70px;
+      --max: 1280px;
+      --success: #16a34a;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font); color: var(--text); background: var(--white); padding-top: var(--nav-h); font-size: 14px; line-height: 1.5; }
+
+    /* NAVBAR */
+    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--white); border-bottom: 1px solid var(--border); transition: box-shadow .2s; }
+    #navbar.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,.06); }
+    .nav-inner { max-width: var(--max); margin: 0 auto; height: var(--nav-h); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+    .nav-logo { font-size: 16px; font-weight: 600; text-decoration: none; color: var(--black); }
+    .nav-status { font-size: 13px; color: var(--success); font-weight: 600; }
+
+    .container {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 80px 32px;
+    }
+
+    @media(max-width: 768px) {
+      .container { padding: 40px 20px; }
+    }
+
+    .confirmation {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    @media(max-width: 960px) {
+      .confirmation { grid-template-columns: 1fr; gap: 40px; }
+    }
+
+    .conf-visual {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .conf-icon {
+      width: 120px;
+      height: 120px;
+      background: linear-gradient(135deg, var(--success), #15803d);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      animation: scaleIn 0.5s cubic-bezier(0.34,1.4,0.64,1);
+    }
+
+    .conf-icon svg {
+      width: 60px;
+      height: 60px;
+      color: white;
+      stroke-width: 2;
+    }
+
+    .conf-title {
+      font-size: 36px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--black);
+    }
+
+    .conf-subtitle {
+      font-size: 15px;
+      color: var(--soft);
+      line-height: 1.6;
+      max-width: 380px;
+    }
+
+    .conf-details {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .detail-box {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: border-color .2s;
+    }
+
+    .detail-box:hover { border-color: var(--success); }
+
+    .detail-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .order-number {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .order-number-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--success), #15803d);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .order-number-text strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--success);
+      font-family: 'Courier New', monospace;
+    }
+
+    .order-number-text small {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .product-info {
+      flex: 1;
+    }
+
+    .product-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .product-meta {
+      font-size: 13px;
+      color: var(--soft);
+      line-height: 1.6;
+    }
+
+    .product-variants {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .variant-item {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+    }
+
+    .variant-item strong { color: var(--text); }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .price-row.total {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, var(--success), #15803d);
+      color: white;
+      border: none;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .price-row strong { font-weight: 600; }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all .2s;
+    }
+
+    .btn-primary {
+      background: var(--black);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-secondary:hover { border-color: var(--text); }
+
+    .info-banner {
+      background: #f0fdf4;
+      border: 1px solid rgba(22, 163, 74, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 32px;
+      font-size: 13px;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .info-banner strong { color: var(--success); }
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 16px;
+      color: var(--muted);
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 2px solid var(--border);
+      border-top-color: var(--black);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    .error-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--soft);
+    }
+
+    .error-state h2 {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: var(--black);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes scaleIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .confirmation { animation: slideUp 0.6s ease-out; }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">TBT3D</a>
+    <div class="nav-status">✓ Paiement réussi</div>
+  </div>
+</nav>
+
+<!-- LOADING STATE -->
+<div id="loadingState" class="container">
+  <div class="loading">
+    <div class="spinner"></div>
+    <p>Finalisation de votre commande...</p>
+  </div>
+</div>
+
+<!-- CONFIRMATION STATE -->
+<div class="container" id="confirmationState" style="display:none">
+  <div class="confirmation">
+
+    <!-- LEFT: Visual -->
+    <div class="conf-visual">
+      <div class="conf-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h1 class="conf-title">Paiement réussi!</h1>
+      <p class="conf-subtitle">
+        Merci pour votre achat. Votre commande a été enregistrée et vous recevrez une confirmation par email.
+      </p>
+    </div>
+
+    <!-- RIGHT: Details -->
+    <div class="conf-details">
+
+      <!-- Order Number -->
+      <div class="detail-box">
+        <div class="detail-label">Numéro de commande</div>
+        <div class="order-number">
+          <div class="order-number-icon">📦</div>
+          <div class="order-number-text">
+            <strong id="orderNumber">ORD-0000000000</strong>
+            <small>Conservez ce numéro</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product -->
+      <div class="detail-box">
+        <div class="detail-label">Produit</div>
+        <div class="product-info">
+          <div class="product-name" id="productName">Produit</div>
+          <div class="product-meta">
+            <div>Quantité: <strong id="productQty">1</strong></div>
+            <div>Prix unitaire: <strong id="productPrice">0,00 €</strong></div>
+          </div>
+          <div class="product-variants" id="variantsContainer"></div>
+        </div>
+      </div>
+
+      <!-- Pricing -->
+      <div class="detail-box">
+        <div class="detail-label">Récapitulatif</div>
+        <div class="pricing-grid">
+          <div class="price-row">
+            <span>Sous-total</span>
+            <strong id="subtotal">0,00 €</strong>
+          </div>
+          <div class="price-row">
+            <span>Frais</span>
+            <strong id="shipping">0,00 €</strong>
+          </div>
+          <div class="price-row">
+            <span>Taxes</span>
+            <strong id="tax">0,00 €</strong>
+          </div>
+          <div class="price-row total">
+            <span>TOTAL PAYÉ</span>
+            <strong id="total">0,00 €</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <a href="/" class="btn btn-primary">
+          <span>↖</span>
+          Retour à l'accueil
+        </a>
+        <a href="/contact.html" class="btn btn-secondary">
+          Vous avez une question?
+        </a>
+      </div>
+
+      <!-- Info -->
+      <div class="info-banner">
+        <strong>✓ Confirmation envoyée</strong> — Consultez votre email (même dossier spam)
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- ERROR STATE -->
+<div id="errorState" style="display:none">
+  <div class="container">
+    <div class="error-state">
+      <h2>Erreur</h2>
+      <p id="errorMessage">Une erreur est survenue. Veuillez réessayer.</p>
+      <a href="/" style="margin-top: 24px; display: inline-block; padding: 14px 28px; background: var(--black); color: white; text-decoration: none; border-radius: 12px; font-weight: 600;">Retour à l'accueil</a>
+    </div>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+// MÊME CONFIG QUE TON PRODUIT.HTML
+const firebaseConfig = {
+  apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
+  authDomain: "tbt3d-a0f04.firebaseapp.com",
+  projectId: "tbt3d-a0f04",
+  storageBucket: "tbt3d-a0f04.firebasestorage.app",
+  appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
+};
+
+const db = getFirestore(initializeApp(firebaseConfig));
+
+// ──── INITIALISATION ────
+document.addEventListener('DOMContentLoaded', async function() {
+  try {
+    // Récupérer les données du panier
+    const orderData = sessionStorage.getItem('pendingOrder');
+
+    if (!orderData) {
+      showError('Données de commande non trouvées');
+      return;
+    }
+
+    const cartData = JSON.parse(orderData);
+
+    // Enregistrer dans Firestore
+    const orderId = await recordOrder(cartData);
+
+    // Afficher les données
+    displayOrderInfo(cartData, orderId);
+
+  } catch(error) {
+    console.error('Erreur:', error);
+    showError('Erreur: ' + error.message);
+  }
+});
+
+// ──── ENREGISTRER LA COMMANDE ────
+async function recordOrder(cartData) {
+  const orderId = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+
+  const order = {
+    orderId: orderId,
+    status: 'completed',
+    product: {
+      name: cartData.product.name,
+      price: cartData.product.price,
+      quantity: cartData.product.quantity
+    },
+    variants: cartData.variants || [],
+    subtotal: cartData.subtotal,
+    shipping: cartData.shipping,
+    tax: cartData.tax,
+    total: cartData.total,
+    currency: 'EUR',
+    paymentMethod: 'payhip',
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+
+  // Sauvegarder dans Firestore
+  await addDoc(collection(db, 'commandes'), order);
+  
+  console.log('✓ Commande enregistrée:', orderId);
+  return orderId;
+}
+
+// ──── AFFICHER LES INFOS ────
+function displayOrderInfo(order, orderId) {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('confirmationState').style.display = '';
+
+  // N° de commande
+  document.getElementById('orderNumber').textContent = orderId;
+
+  // Produit
+  document.getElementById('productName').textContent = order.product.name;
+  document.getElementById('productQty').textContent = order.product.quantity;
+  document.getElementById('productPrice').textContent = order.product.price.toFixed(2) + ' €';
+
+  // Variantes
+  if (order.variants && order.variants.length > 0) {
+    const variantsHTML = order.variants
+      .map(v => `<div class="variant-item"><strong>${v.groupName}:</strong> ${v.selectedValue}</div>`)
+      .join('');
+    document.getElementById('variantsContainer').innerHTML = variantsHTML;
+  }
+
+  // Prix
+  document.getElementById('subtotal').textContent = order.subtotal.toFixed(2) + ' €';
+  document.getElementById('shipping').textContent = order.shipping.toFixed(2) + ' €';
+  document.getElementById('tax').textContent = order.tax.toFixed(2) + ' €';
+  document.getElementById('total').textContent = order.total.toFixed(2) + ' €';
+
+  // Nettoyer sessionStorage
+  sessionStorage.removeItem('pendingOrder');
+
+  // Scroll navbar
+  window.addEventListener('scroll', function() {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+  });
+}
+
+// ──── AFFICHER ERREUR ────
+function showError(message) {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('confirmationState').style.display = 'none';
+  document.getElementById('errorState').style.display = '';
+  document.getElementById('errorMessage').textContent = message;
+}
+</script>
+
+</body>
+</html>

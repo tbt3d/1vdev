@@ -1062,8 +1062,53 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowLeft') lightboxNav(-1);
 });
 
+// ─── FONCTION RÉCUPÉRER LES DONNÉES DU PANIER ───
+window.getCartData = function() {
+  const variants = [];
+  document.querySelectorAll('.opt-block').forEach((block) => {
+    const label = block.querySelector('.opt-label strong')?.textContent || '';
+    const selected = block.querySelector('.chip.on, .color-chip.on');
+    if (selected) {
+      variants.push({
+        groupName: label,
+        selectedValue: selected.dataset.val || selected.textContent.trim()
+      });
+    }
+  });
+
+  const qty = parseInt(document.getElementById('qNum').value) || 1;
+  const priceText = document.getElementById('prodPrice').textContent;
+  const price = parseFloat(priceText.replace('€', '').trim());
+  const subtotal = price * qty;
+  const shipping = 8.00;
+  const tax = (subtotal + shipping) * 0.2;
+
+  return {
+    product: {
+      name: document.getElementById('prodName').textContent,
+      price: price,
+      quantity: qty
+    },
+    variants: variants,
+    subtotal: subtotal,
+    shipping: shipping,
+    tax: tax,
+    total: subtotal + shipping + tax
+  };
+};
+
 // ─── PAYHIP MODAL ───
 window.openPayhipModal = function(url) {
+  // SAUVEGARDER LES DONNÉES DU PANIER AVANT PAYHIP
+  try {
+    const cartData = window.getCartData();
+    sessionStorage.setItem('pendingOrder', JSON.stringify(cartData));
+    console.log('✓ Données du panier sauvegardées');
+  } catch(e) {
+    console.warn('Erreur sauvegarde panier:', e);
+  }
+  
+  // Ouvrir PayHip
   document.getElementById('payhipIframe').src = url;
   document.getElementById('payhipModal').classList.add('open');
   document.body.style.overflow = 'hidden';
