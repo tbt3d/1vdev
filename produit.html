@@ -7,6 +7,7 @@
 <meta name="description" id="metaDesc" content="Lampe imprimée en 3D — TBT3D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://payhip.com/payhip.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -614,6 +615,13 @@ function updateBuyButton() {
     btnBuy.href = url;
     btnBuy.setAttribute('target', '_blank');
     btnBuy.setAttribute('rel', 'noopener noreferrer');
+    // Popup Payhip si lien payhip
+    if (url.includes('payhip.com')) {
+      btnBuy.classList.add('payhip-buy-button');
+      btnBuy.removeAttribute('target');
+    } else {
+      btnBuy.classList.remove('payhip-buy-button');
+    }
     btnBuy.innerHTML = `
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
         <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
