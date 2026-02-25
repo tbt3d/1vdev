@@ -176,12 +176,10 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .mood-section { background: var(--white); padding: 0 32px 80px; }
 .mood-inner { max-width: var(--max); margin: 0 auto; }
 .mood-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
-.mood-mosaic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.mood-mosaic img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 10px; display: block; transition: transform .4s ease, filter .3s ease; filter: brightness(.95); }
+.mood-mosaic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.mood-mosaic img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 12px; display: block; transition: transform .4s ease, filter .3s ease; filter: brightness(.96); }
 .mood-mosaic img:hover { transform: scale(1.02); filter: brightness(1); }
-.mood-mosaic img:first-child:nth-last-child(1) { grid-column: span 3; aspect-ratio: 16/7; }
-.mood-mosaic img:first-child:nth-last-child(2), .mood-mosaic img:first-child:nth-last-child(2) ~ img { grid-column: span 1; }
-@media(max-width:600px) { .mood-section { padding: 0 20px 48px; } .mood-mosaic { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:600px) { .mood-section { padding: 0 20px 48px; } .mood-mosaic { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
 
 /* ─── MORE SECTION ─── */
 .more-section { background: var(--white); padding: 100px 32px; text-align: center; }
@@ -548,6 +546,53 @@ window.nextImg = function() { goToImg((_idx + 1) % _photos.length); };
 
 // ── Variantes avec images stockées ──
 let _variantImages = {}; // { "gi_label": "url" }
+let _art = null;          // article courant (pour comboLinks)
+
+// ── Calcule la clé combo à partir des chips actives ──
+function _currentComboKey() {
+  const vals = [];
+  document.querySelectorAll('.opt-block').forEach(block => {
+    const active = block.querySelector('.chip.on, .color-chip.on');
+    if (active) vals.push(active.dataset.val);
+  });
+  return vals.join('|');
+}
+
+// ── Met à jour le bouton Acheter selon la combo sélectionnée ──
+function updateBuyButton() {
+  if (!_art) return;
+  const btnBuy = document.getElementById('btnBuy');
+  const comboKey = _currentComboKey();
+  const combo = (_art.comboLinks || {})[comboKey];
+
+  const url   = (combo && combo.url && combo.url.trim())   ? combo.url.trim()   : _art.payhip || '';
+  const price = (combo && combo.price && String(combo.price).trim()) ? parseFloat(combo.price) : parseFloat(_art.price);
+  const priceStr = (isNaN(price) ? parseFloat(_art.price) : price).toFixed(2) + ' €';
+
+  // Mettre à jour le prix affiché
+  document.getElementById('prodPrice').textContent = priceStr;
+
+  if (url) {
+    btnBuy.href = url;
+    btnBuy.setAttribute('target', '_blank');
+    btnBuy.setAttribute('rel', 'noopener noreferrer');
+    btnBuy.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
+        <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+      </svg>
+      Acheter — ${priceStr}`;
+    document.getElementById('stripeNote').style.display = 'flex';
+  } else {
+    btnBuy.href = '/contact.html';
+    btnBuy.removeAttribute('target');
+    btnBuy.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      </svg>
+      Commander — nous contacter`;
+    document.getElementById('stripeNote').style.display = 'none';
+  }
+}
 
 // ── Sélection variante ──
 window.pickVariant = function(el, gi) {
@@ -562,13 +607,14 @@ window.pickVariant = function(el, gi) {
     if (idx !== -1) {
       goToImg(idx);
     } else {
-      // Image de variante pas dans la galerie principale, l'afficher directement
       document.getElementById('mainImg').src = _variantImages[key];
       document.getElementById('mainImg').style.display = 'block';
       document.getElementById('mainPlaceholder').style.display = 'none';
       document.querySelectorAll('#galleryThumbs img').forEach(t => t.classList.remove('active'));
     }
   }
+  // Mettre à jour lien + prix selon la combinaison
+  updateBuyButton();
 };
 
 // ── Rendu du produit ──
@@ -712,18 +758,43 @@ function renderProduct(art) {
         </div>`).join('');
     specsInline.style.display = '';
 
-    // Product Information structuré style Sonogo (3 colonnes)
-    const chunkSize = Math.ceil(validCaracs.length / 3);
-    const cols = [
-      validCaracs.slice(0, chunkSize),
-      validCaracs.slice(chunkSize, chunkSize * 2),
-      validCaracs.slice(chunkSize * 2)
-    ].filter(c => c.length > 0);
-    const BLOCK_TITLES = ['Dimensions & Taille', 'Détails techniques', 'Matériaux'];
-    document.getElementById('infoGrid').innerHTML = cols.map((col, i) => `
+    // Product Information structuré — groupement intelligent par catégorie
+    const DIM_KEYS = ['hauteur','largeur','longueur','taille','dimension','profondeur','diametre','diamètre','poids','volume'];
+    const TECH_KEYS = ['ampoule','cable','câble','culot','culot','voltage','tension','watt','wattage','puissance','interrupteur','cord','lumens','lumen','température','technologie','impression','fabrication','matière','materiau','matériau'];
+
+    const colDim = validCaracs.filter(c => DIM_KEYS.some(k => c.key.toLowerCase().includes(k)));
+    const colTech = validCaracs.filter(c => !DIM_KEYS.some(k => c.key.toLowerCase().includes(k)) && TECH_KEYS.some(k => c.key.toLowerCase().includes(k)));
+    const colOther = validCaracs.filter(c => !DIM_KEYS.some(k => c.key.toLowerCase().includes(k)) && !TECH_KEYS.some(k => c.key.toLowerCase().includes(k)));
+
+    // Si le tri automatique donne des colonnes vides, fallback en 3 chunks égaux
+    let cols;
+    if (colDim.length > 0 || colTech.length > 0 || colOther.length > 0) {
+      cols = [
+        { title: 'Dimensions & Taille', items: colDim },
+        { title: 'Détails techniques', items: colTech },
+        { title: 'Matériaux & Finitions', items: colOther }
+      ].filter(c => c.items.length > 0);
+      // Si tout va dans une seule colonne, redistribuer en chunks
+      if (cols.length === 1) {
+        const chunk = Math.ceil(validCaracs.length / 2);
+        cols = [
+          { title: 'Informations', items: validCaracs.slice(0, chunk) },
+          { title: 'Détails', items: validCaracs.slice(chunk) }
+        ].filter(c => c.items.length > 0);
+      }
+    } else {
+      const chunk = Math.ceil(validCaracs.length / 3);
+      cols = [
+        { title: 'Dimensions & Taille', items: validCaracs.slice(0, chunk) },
+        { title: 'Détails techniques', items: validCaracs.slice(chunk, chunk * 2) },
+        { title: 'Matériaux', items: validCaracs.slice(chunk * 2) }
+      ].filter(c => c.items.length > 0);
+    }
+
+    document.getElementById('infoGrid').innerHTML = cols.map(col => `
       <div class="info-block">
-        <div class="info-block-title">${BLOCK_TITLES[i] || 'Informations'}</div>
-        ${col.map(c => `
+        <div class="info-block-title">${col.title}</div>
+        ${col.items.map(c => `
           <div class="info-item">
             <div class="info-item-icon">${getIcon(c.key)}</div>
             <span class="info-item-key">${esc(c.key)}</span>
@@ -741,28 +812,11 @@ function renderProduct(art) {
     document.getElementById('moodSection').style.display = '';
   }
 
-  // Bouton achat
-  const btnBuy = document.getElementById('btnBuy');
-  const priceStr = parseFloat(art.price).toFixed(2) + ' €';
-  if (art.payhip) {
-    btnBuy.href = art.payhip;
-    btnBuy.setAttribute('target', '_blank');
-    btnBuy.setAttribute('rel', 'noopener noreferrer');
-    btnBuy.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
-        <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-      </svg>
-      Acheter — ${priceStr}`;
-    document.getElementById('stripeNote').style.display = 'flex';
-  } else {
-    btnBuy.href = '/contact.html';
-    btnBuy.removeAttribute('target');
-    btnBuy.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
-        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-      </svg>
-      Commander — nous contacter`;
-  }
+  // Stocker l'article courant (pour comboLinks)
+  _art = art;
+
+  // Bouton achat — géré par updateBuyButton() qui lit les combos
+  updateBuyButton();
 
   // Quantité
   document.getElementById('qMinus').onclick = function() {
@@ -783,23 +837,33 @@ function renderProduct(art) {
 
 async function loadSuggestions(art) {
   try {
-    const snap = await getDocs(query(collection(db, 'articles'), where('status', '==', 'published')));
+    // Récupérer TOUS les articles (publiés ou non) pour trouver les suggestions
+    const snap = await getDocs(collection(db, 'articles'));
     const allArts = [];
     snap.forEach(d => allArts.push({ id: d.id, ...d.data() }));
 
     let toShow = [];
     if (art.suggestions && art.suggestions.length > 0) {
-      art.suggestions.forEach(id => {
-        const found = allArts.find(a => a.id === id);
-        if (found) toShow.push(found);
+      art.suggestions.forEach(sugId => {
+        // Chercher par doc id OU par champ id stocké dans le document
+        const found = allArts.find(a => a.id === sugId || String(a.id) === String(sugId));
+        if (found && found.status === 'published') toShow.push(found);
       });
     }
+    // Fallback : autres articles publiés si aucune suggestion trouvée
     if (toShow.length === 0) {
-      toShow = allArts.filter(a => a.id !== art.id && a.slug !== art.slug).slice(0, 4);
+      toShow = allArts
+        .filter(a => a.status === 'published' && a.id !== art.id && a.slug !== art.slug)
+        .slice(0, 4);
     }
     if (toShow.length === 0) return;
 
-    document.getElementById('similarGrid').innerHTML = toShow.map(a => `
+    // Adapter la grille au nombre réel de résultats
+    const grid = document.getElementById('similarGrid');
+    const count = toShow.length;
+    grid.style.gridTemplateColumns = count === 1 ? '1fr' : count === 2 ? 'repeat(2,1fr)' : count === 3 ? 'repeat(3,1fr)' : 'repeat(4,1fr)';
+
+    grid.innerHTML = toShow.map(a => `
       <a href="/produit.html?id=${esc(a.slug || a.id)}" class="sim-card">
         <div class="sim-img-wrap">
           ${a.photos?.[0]
