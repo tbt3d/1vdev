@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><script src="https://payhip.com/payhip.js"></script>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Produit — TBT3D</title>
@@ -73,7 +73,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .gallery-thumbs img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1.5px solid var(--border); cursor: pointer; transition: border-color .15s, opacity .15s; opacity: .55; }
 .gallery-thumbs img.active { border-color: var(--black); opacity: 1; }
 .gallery-main { flex: 1; position: relative; border-radius: 10px; overflow: hidden; background: var(--bg); max-height: calc(100vh - var(--nav-h) - 56px); }
-.gallery-main-img { width: 100%; aspect-ratio: 3/4; object-fit: contain; display: block; max-height: calc(100vh - var(--nav-h) - 56px); background: var(--bg); }
+.gallery-main-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; max-height: calc(100vh - var(--nav-h) - 56px); }
 .gallery-placeholder { width: 100%; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; font-size: 56px; background: var(--bg); max-height: calc(100vh - var(--nav-h) - 56px); }
 @media(max-width:960px) { .gallery-main { max-height: none; } .gallery-main-img { max-height: none; } .gallery-placeholder { max-height: none; } }
 .gallery-nav { position: absolute; bottom: 14px; right: 14px; display: flex; gap: 6px; }
@@ -172,246 +172,11 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .info-item-val { font-size: 12px; font-weight: 500; }
 @media(max-width:768px) { .info-section { padding: 48px 20px; } .info-grid { grid-template-columns: 1fr; } .info-block { border-right: none; border-bottom: 1px solid var(--border); } .info-block:last-child { border-bottom: none; } }
 
-/* ─── MOOD GRID (galerie d'ambiance) ─── */
-.mood-section { background: var(--white); padding: 80px 32px 80px; }
-.mood-inner { max-width: var(--max); margin: 0 auto; }
-.mood-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; }
-.mood-mosaic { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.mood-mosaic img { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: center center; border-radius: 12px; display: block; transition: transform .4s ease; cursor: zoom-in; background: var(--bg); }
-.mood-mosaic img:hover { transform: scale(1.03); }
-@media(max-width:768px) { .mood-mosaic { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
-@media(max-width:600px) { .mood-section { padding: 48px 20px; } }
-
-/* ─── LIGHTBOX ─── */
-.lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.92); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; backdrop-filter: blur(6px); }
-.lightbox.open { opacity: 1; pointer-events: all; }
-.lightbox-img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 10px; transform: scale(.94); transition: transform .3s cubic-bezier(.34,1.4,.64,1); box-shadow: 0 32px 80px rgba(0,0,0,.6); }
-.lightbox.open .lightbox-img { transform: scale(1); }
-.lightbox-close { position: absolute; top: 20px; right: 24px; width: 40px; height: 40px; background: rgba(255,255,255,.12); border: none; border-radius: 50%; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
-.lightbox-close:hover { background: rgba(255,255,255,.25); }
-.lightbox-prev, .lightbox-next { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; background: rgba(255,255,255,.12); border: none; border-radius: 50%; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
-.lightbox-prev { left: 20px; }
-.lightbox-next { right: 20px; }
-.lightbox-prev:hover, .lightbox-next:hover { background: rgba(255,255,255,.25); }
-.lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255,255,255,.5); font-family: var(--font); letter-spacing: .08em; }
-
-/* ─── BOUTON PAYHIP WRAPPER ─── */
-#payhipBtnWrapper {
-  margin-bottom: 10px;
-}
-
-/* Surcharge style du bouton PayHip natif */
-#payhipBtnWrapper .payhip-buy-button,
-#btnPayhip {
-  display: block !important;
-  width: 100% !important;
-  padding: 16px 24px !important;
-  background: #111 !important;
-  color: #fff !important;
-  border: none !important;
-  border-radius: 14px !important;
-  font-family: var(--font) !important;
-  font-size: 15px !important;
-  font-weight: 600 !important;
-  text-align: center !important;
-  text-decoration: none !important;
-  cursor: pointer !important;
-  transition: all .2s ease !important;
-  letter-spacing: -0.01em !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15), 0 1px 2px rgba(0,0,0,.1) !important;
-  position: relative !important;
-  overflow: hidden !important;
-}
-
-#payhipBtnWrapper .payhip-buy-button::before,
-#btnPayhip::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,.08) 0%, transparent 60%);
-  pointer-events: none;
-}
-
-#payhipBtnWrapper .payhip-buy-button:hover,
-#btnPayhip:hover {
-  background: #222 !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 4px 16px rgba(0,0,0,.2), 0 2px 4px rgba(0,0,0,.12) !important;
-}
-
-#payhipBtnWrapper .payhip-buy-button:active,
-#btnPayhip:active {
-  transform: translateY(0) !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,.15) !important;
-}
-
-/* Note sécurité sous le bouton */
-.pay-secure-note {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--muted);
-  margin-bottom: 12px;
-  letter-spacing: .02em;
-}
-.pay-secure-note svg { width: 11px; height: 11px; opacity: .7; }
-
-/* ─── MODALE PAIEMENT PRO ─── */
-@keyframes phModalIn {
-  from { opacity: 0; transform: translateY(28px) scale(.96); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes phOverlayIn { from{opacity:0;} to{opacity:1;} }
-
-/* Overlay backdrop */
-#payhipModal {
-  position: fixed; inset: 0; z-index: 9000;
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-  opacity: 0; pointer-events: none;
-  transition: opacity .25s ease;
-}
-#payhipModal.open { opacity: 1; pointer-events: all; }
-#payhipModal.open #payhipBackdrop { animation: phOverlayIn .25s ease forwards; }
-#payhipModal.open #payhipBox    { animation: phModalIn .38s cubic-bezier(.22,1,.36,1) forwards; }
-
-#payhipBackdrop {
-  position: absolute; inset: 0;
-  background: rgba(8,8,8,.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* Boîte modale */
-#payhipBox {
-  position: relative; z-index: 1;
-  width: 100%; max-width: 900px; max-height: 90vh;
-  background: #fff;
-  border-radius: 24px;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.07), 0 16px 40px rgba(0,0,0,.14), 0 48px 96px rgba(0,0,0,.22);
-  display: flex; flex-direction: column;
-  overflow: hidden;
-}
-
-/* Header */
-#payhipModalHeader {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 20px 16px;
-  border-bottom: 1px solid #f0f0f0;
-}
-#payhipModalMeta { display: flex; align-items: center; gap: 11px; }
-#payhipModalIcon {
-  width: 38px; height: 38px;
-  background: #111; border-radius: 11px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-#payhipModalIcon svg { width: 17px; height: 17px; color: #fff; }
-#payhipModalTitle { font-size: 14px; font-weight: 700; color: #111; letter-spacing: -.02em; }
-#payhipModalSub   { font-size: 11px; color: #bbb; margin-top: 2px; }
-#payhipCloseBtn {
-  width: 30px; height: 30px;
-  background: #f2f2f2; border: none; border-radius: 50%;
-  color: #888; font-size: 17px; line-height: 1;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all .18s;
-}
-#payhipCloseBtn:hover { background: #e5e5e5; color: #111; transform: rotate(90deg); }
-
-/* Recap produit */
-#payhipRecap {
-  display: flex; align-items: center; gap: 14px;
-  padding: 16px 20px;
-  border-bottom: 1px solid #f5f5f5;
-  background: #fafafa;
-}
-#payhipRecapImg {
-  width: 60px; height: 60px; border-radius: 12px;
-  background: #efefef; overflow: hidden; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-}
-#payhipRecapImg img { width: 100%; height: 100%; object-fit: cover; display: block; }
-#payhipRecapImg .recap-ph { font-size: 24px; }
-#payhipRecapInfo { flex: 1; min-width: 0; }
-#payhipRecapName {
-  font-size: 13px; font-weight: 600; color: #111;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  letter-spacing: -.01em;
-}
-#payhipRecapSub { font-size: 11px; color: #aaa; margin-top: 3px; line-height: 1.5; }
-#payhipRecapPrice { font-size: 20px; font-weight: 700; color: #111; letter-spacing: -.03em; flex-shrink: 0; }
-
-/* Zone bouton payer */
-#payhipPayZone { padding: 20px 20px 18px; display: flex; flex-direction: column; gap: 14px; }
-
-/* Bouton PayHip stylisé — payhip.js intercepte le clic */
-#payhipBox .payhip-buy-button,
-#payhipPayTrigger {
-  display: flex !important;
-  width: 100% !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 9px !important;
-  padding: 16px 22px !important;
-  background: #111 !important;
-  color: #fff !important;
-  border: none !important;
-  border-radius: 14px !important;
-  font-family: var(--font) !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  letter-spacing: -.01em !important;
-  cursor: pointer !important;
-  text-decoration: none !important;
-  transition: all .2s !important;
-  box-shadow: 0 2px 12px rgba(0,0,0,.2), 0 1px 3px rgba(0,0,0,.1) !important;
-  position: relative !important; overflow: hidden !important;
-}
-#payhipBox .payhip-buy-button::after,
-#payhipPayTrigger::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,.1) 0%, transparent 55%);
-  pointer-events: none;
-}
-#payhipBox .payhip-buy-button:hover,
-#payhipPayTrigger:hover {
-  background: #1c1c1c !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 6px 20px rgba(0,0,0,.24) !important;
-}
-#payhipPayTrigger svg { width: 16px; height: 16px; flex-shrink: 0; }
-
-/* Séparateur méthodes */
-.ph-methods-sep {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 10px; color: #ccc; letter-spacing: .06em; text-transform: uppercase;
-}
-.ph-methods-sep::before, .ph-methods-sep::after { content: ''; flex: 1; height: 1px; background: #f0f0f0; }
-
-/* Logos paiement */
-.ph-logos { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
-.ph-logo-pill {
-  display: flex; align-items: center; gap: 5px;
-  background: #f7f7f7; border: 1px solid #ebebeb;
-  border-radius: 8px; padding: 5px 10px;
-  font-size: 10.5px; color: #555; font-weight: 600;
-}
-
-/* Barre de confiance bas */
-#payhipModalFooter {
-  border-top: 1px solid #f0f0f0;
-  background: #fafafa;
-  padding: 10px 20px 14px;
-  display: flex; align-items: center; justify-content: center; gap: 16px;
-}
-.modal-trust { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #bbb; font-weight: 500; }
-.modal-trust svg { width: 10px; height: 10px; opacity: .7; }
-
-@media(max-width: 480px) {
-  #payhipBox { border-radius: 20px; }
-}
+/* ─── HERO STORY ─── */
+.hero-story { position: relative; max-height: 600px; overflow: hidden; }
+.hero-story-img { width: 100%; height: 600px; object-fit: cover; display: block; filter: brightness(.85); }
+.hero-story-caption { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.7); background: rgba(0,0,0,.35); padding: 8px 20px; border-radius: 20px; white-space: nowrap; }
+@media(max-width:768px) { .hero-story-img { height: 320px; } .hero-story-caption { font-size: 10px; bottom: 20px; } }
 
 /* ─── MORE SECTION ─── */
 .more-section { background: var(--white); padding: 100px 32px; text-align: center; }
@@ -422,17 +187,17 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 @media(max-width:768px) { .more-section { padding: 64px 20px; } .more-title { font-size: 26px; } }
 
 /* ─── SIMILAR PRODUCTS ─── */
-.similar-section { background: var(--bg); padding: 60px 32px 80px; border-top: 1px solid var(--border); }
+.similar-section { background: var(--bg); padding: 80px 32px 100px; border-top: 1px solid var(--border); }
 .similar-inner { max-width: var(--max); margin: 0 auto; }
-.similar-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
-.similar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 350px; }
+.similar-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 36px; }
+.similar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .sim-card { text-decoration: none; color: var(--text); display: block; }
-.sim-img-wrap { aspect-ratio: 9/16; border-radius: 10px; overflow: hidden; background: var(--white); margin-bottom: 10px; }
+.sim-img-wrap { aspect-ratio: 3/4; border-radius: 12px; overflow: hidden; background: var(--white); margin-bottom: 14px; }
 .sim-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
 .sim-card:hover .sim-img-wrap img { transform: scale(1.04); }
-.sim-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 28px; background: var(--white); }
-.sim-name { font-size: 12px; font-weight: 500; letter-spacing: -.01em; margin-bottom: 3px; }
-.sim-price { font-size: 12px; color: var(--muted); }
+.sim-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; background: var(--white); }
+.sim-name { font-size: 14px; font-weight: 500; letter-spacing: -.01em; margin-bottom: 4px; }
+.sim-price { font-size: 13px; color: var(--muted); }
 @media(max-width:900px) { .similar-grid { grid-template-columns: repeat(2, 1fr); } }
 @media(max-width:500px) { .similar-section { padding: 48px 20px 64px; } }
 
@@ -574,48 +339,17 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
       <div class="hr"></div>
 
-      <!-- Bouton achat PayHip officiel -->
-      <div id="payhipBtnWrapper">
-        <a href="#" class="payhip-buy-button" data-theme="blue" data-product="" id="btnPayhip" style="display:none">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:8px;margin-bottom:1px"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Acheter maintenant
-        </a>
-      </div>
-      <!-- Note sécurité -->
-      <p class="pay-secure-note" id="paySecureNote" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Paiement 100% sécurisé · Stripe &amp; PayPal
-      </p>
-      <!-- Fallback si pas de lien PayHip configuré -->
-      <a href="/contact.html" class="btn-buy" id="btnNoPayhip" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        Commander — nous contacter
+      <!-- Bouton achat Stripe -->
+      <a href="#" class="btn-buy" id="btnBuy" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Acheter
       </a>
 
-      <!-- ─── MODALE PAIEMENT PRO ─── -->
-      <div id="payhipModal" onclick="handleModalClick(event)">
-        <div id="payhipBackdrop"></div>
-        <div id="payhipBox">
-
-          <!-- Header -->
-          <div id="payhipModalHeader">
-            <div id="payhipModalMeta">
-              <div id="payhipModalIcon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              </div>
-              <div>
-                <div id="payhipModalTitle">Finaliser la commande</div>
-                <div id="payhipModalSub">Paiement sécurisé · TBT3D</div>
-              </div>
-            </div>
-            <button id="payhipCloseBtn" onclick="closePayhipModal()" title="Fermer">×</button>
-          </div>
-
-          <!-- IFRAME Payhip affichée directement DEDANS le modal -->
-          <iframe id="payhipIframe" sandbox="allow-same-origin allow-forms allow-scripts allow-popups allow-top-navigation" style="width:100%;height:600px;border:none;background:#fff;flex:1;" src="about:blank"></iframe>
-
-        </div>
-      </div>
+      <!-- Note sécurité Stripe -->
+      <p class="stripe-note" id="stripeNote">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Paiement 100% sécurisé via Stripe
+      </p>
 
       <!-- Bouton contact secondaire -->
       <a href="/contact.html" class="btn-contact">
@@ -664,24 +398,11 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     </div>
   </div>
 
-  <!-- ─── MOOD GRID ─── -->
-  <div class="mood-section" id="moodSection" style="display:none">
-    <div class="mood-inner">
-      <div class="mood-label">EN SITUATION.</div>
-      <div class="mood-mosaic" id="moodMosaic"></div>
-    </div>
+  <!-- ─── GRANDE IMAGE STORYTELLING ─── -->
+  <div class="hero-story" id="heroStory" style="display:none">
+    <img id="heroStoryImg" src="" alt="" class="hero-story-img">
+    <div class="hero-story-caption" id="heroStoryCaption"></div>
   </div>
-
-  <!-- LIGHTBOX -->
-  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
-    <button class="lightbox-close" onclick="closeLightbox()">×</button>
-    <button class="lightbox-prev" onclick="event.stopPropagation();lightboxNav(-1)">‹</button>
-    <img class="lightbox-img" id="lightboxImg" src="" alt="">
-    <button class="lightbox-next" onclick="event.stopPropagation();lightboxNav(1)">›</button>
-    <div class="lightbox-counter" id="lightboxCounter"></div>
-  </div>
-
-  <!-- Bouton PayHip officiel - popup géré nativement par payhip.js -->
 
   <!-- ─── MORE THAN A DESIGN ─── -->
   <div class="more-section">
@@ -820,128 +541,6 @@ window.nextImg = function() { goToImg((_idx + 1) % _photos.length); };
 
 // ── Variantes avec images stockées ──
 let _variantImages = {}; // { "gi_label": "url" }
-let _art = null;          // article courant (pour comboLinks)
-
-// ── Calcule la clé combo à partir des chips actives ──
-function _currentComboKey() {
-  const vals = [];
-  document.querySelectorAll('.opt-block').forEach(block => {
-    const active = block.querySelector('.chip.on, .color-chip.on');
-    if (active) vals.push(active.dataset.val);
-  });
-  return vals.join('|');
-}
-
-// ── Met à jour le bouton Acheter selon la combo sélectionnée ──
-function updateBuyButton() {
-  if (!_art) return;
-  const comboKey = _currentComboKey();
-  const combo = (_art.comboLinks || {})[comboKey];
-
-  const url   = (combo && combo.url && combo.url.trim())   ? combo.url.trim()   : _art.payhip || '';
-  const price = (combo && combo.price && String(combo.price).trim()) ? parseFloat(combo.price) : parseFloat(_art.price);
-  const priceStr = (isNaN(price) ? parseFloat(_art.price) : price).toFixed(2) + ' €';
-
-  // Mettre à jour le prix affiché
-  document.getElementById('prodPrice').textContent = priceStr;
-
-  // Prix barré : priorité combo.oldPrice, sinon art.oldPrice global
-  const oldPriceRaw = (combo && combo.oldPrice && String(combo.oldPrice).trim()) ? parseFloat(combo.oldPrice) : (parseFloat(_art.oldPrice) || null);
-  const oldEl = document.getElementById('prodOldPrice');
-  const saveEl = document.getElementById('prodSave');
-  if (oldPriceRaw && !isNaN(oldPriceRaw) && oldPriceRaw > price) {
-    const pct = Math.round((1 - price / oldPriceRaw) * 100);
-    oldEl.textContent = oldPriceRaw.toFixed(2) + ' €';
-    oldEl.style.display = '';
-    saveEl.textContent = '−' + pct + '%';
-    saveEl.style.display = '';
-  } else {
-    oldEl.style.display = 'none';
-    saveEl.style.display = 'none';
-  }
-
-  const btnPayhip   = document.getElementById('btnPayhip');
-  const btnNoPayhip = document.getElementById('btnNoPayhip');
-
-  if (url && (url.includes('payhip.com/b/') || url.includes('payhip.com/buy?'))) {
-    // Extraire l'ID produit depuis l'URL (ex: payhip.com/b/s0I76 → s0I76)
-    const match = url.match(/payhip\.com\/b\/([A-Za-z0-9]+)/);
-    const productId = match ? match[1] : '';
-
-    // Mettre à jour le bouton — ouvre notre modale, pas le popup PayHip natif
-    btnPayhip.setAttribute('data-product', productId);
-    btnPayhip.style.display = '';
-    btnNoPayhip.style.display = 'none';
-    btnPayhip.onclick = function(e) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      // Récupérer les données du produit pour le récap
-      const artData = _art ? {
-        photo:    (_art.photos && _art.photos[0]) || '',
-        name:     _art.name || '',
-        variants: (function(){
-          const parts = [];
-          document.querySelectorAll('.opt-chips .chip.on, .color-chip.on').forEach(c => {
-            if (c.closest('#colorChips')) {
-              parts.push(c.dataset.v || c.textContent.trim());
-            } else {
-              parts.push(c.textContent.trim());
-            }
-          });
-          return parts.join(' · ');
-        })(),
-        price: document.getElementById('prodPrice') ? document.getElementById('prodPrice').textContent : ''
-      } : null;
-      openPayhipModal(url, artData);
-      return false;
-    };
-  } else {
-    // Pas de lien PayHip → bouton contact
-    btnPayhip.style.display = 'none';
-    btnNoPayhip.style.display = '';
-  }
-}
-
-
-// ── Modale paiement pro ──
-window.openPayhipModal = function(url, artData) {
-  const modal   = document.getElementById('payhipModal');
-  const iframe  = document.getElementById('payhipIframe');
-
-  // Vérifier et charger directement l'URL Payhip dans l'iframe
-  if (url && url.trim()) {
-    console.log('Chargement PayHip:', url);
-    iframe.src = url.trim();
-  } else {
-    console.warn('Pas d\'URL PayHip fournie');
-    iframe.src = 'about:blank';
-  }
-
-  // Ouvrir la modale
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-};
-
-window.closePayhipModal = function() {
-  document.getElementById('payhipModal').classList.remove('open');
-  document.body.style.overflow = '';
-};
-
-window.handleModalClick = function(e) {
-  if (e.target === document.getElementById('payhipModal') ||
-      e.target === document.getElementById('payhipBackdrop')) {
-    closePayhipModal();
-  }
-};
-
-// Alias
-window.openPayhipOverlay  = window.openPayhipModal;
-window.closePayhipOverlay = window.closePayhipModal;
-
-// Fermer avec Echap
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closePayhipModal();
-});
 
 // ── Sélection variante ──
 window.pickVariant = function(el, gi) {
@@ -956,14 +555,13 @@ window.pickVariant = function(el, gi) {
     if (idx !== -1) {
       goToImg(idx);
     } else {
+      // Image de variante pas dans la galerie principale, l'afficher directement
       document.getElementById('mainImg').src = _variantImages[key];
       document.getElementById('mainImg').style.display = 'block';
       document.getElementById('mainPlaceholder').style.display = 'none';
       document.querySelectorAll('#galleryThumbs img').forEach(t => t.classList.remove('active'));
     }
   }
-  // Mettre à jour lien + prix selon la combinaison
-  updateBuyButton();
 };
 
 // ── Rendu du produit ──
@@ -989,6 +587,15 @@ function renderProduct(art) {
 
   // Prix
   document.getElementById('prodPrice').textContent = parseFloat(art.price).toFixed(2) + ' €';
+  if (art.oldPrice) {
+    const pct = Math.round((1 - art.price / art.oldPrice) * 100);
+    const oldEl = document.getElementById('prodOldPrice');
+    const saveEl = document.getElementById('prodSave');
+    oldEl.textContent = parseFloat(art.oldPrice).toFixed(2) + ' €';
+    oldEl.style.display = '';
+    saveEl.textContent = '−' + pct + '%';
+    saveEl.style.display = '';
+  }
 
   // Galerie
   _photos = art.photos || [];
@@ -1098,43 +705,18 @@ function renderProduct(art) {
         </div>`).join('');
     specsInline.style.display = '';
 
-    // Product Information structuré — groupement intelligent par catégorie
-    const DIM_KEYS = ['hauteur','largeur','longueur','taille','dimension','profondeur','diametre','diamètre','poids','volume'];
-    const TECH_KEYS = ['ampoule','cable','câble','culot','culot','voltage','tension','watt','wattage','puissance','interrupteur','cord','lumens','lumen','température','technologie','impression','fabrication','matière','materiau','matériau'];
-
-    const colDim = validCaracs.filter(c => DIM_KEYS.some(k => c.key.toLowerCase().includes(k)));
-    const colTech = validCaracs.filter(c => !DIM_KEYS.some(k => c.key.toLowerCase().includes(k)) && TECH_KEYS.some(k => c.key.toLowerCase().includes(k)));
-    const colOther = validCaracs.filter(c => !DIM_KEYS.some(k => c.key.toLowerCase().includes(k)) && !TECH_KEYS.some(k => c.key.toLowerCase().includes(k)));
-
-    // Si le tri automatique donne des colonnes vides, fallback en 3 chunks égaux
-    let cols;
-    if (colDim.length > 0 || colTech.length > 0 || colOther.length > 0) {
-      cols = [
-        { title: 'Dimensions & Taille', items: colDim },
-        { title: 'Détails techniques', items: colTech },
-        { title: 'Matériaux & Finitions', items: colOther }
-      ].filter(c => c.items.length > 0);
-      // Si tout va dans une seule colonne, redistribuer en chunks
-      if (cols.length === 1) {
-        const chunk = Math.ceil(validCaracs.length / 2);
-        cols = [
-          { title: 'Informations', items: validCaracs.slice(0, chunk) },
-          { title: 'Détails', items: validCaracs.slice(chunk) }
-        ].filter(c => c.items.length > 0);
-      }
-    } else {
-      const chunk = Math.ceil(validCaracs.length / 3);
-      cols = [
-        { title: 'Dimensions & Taille', items: validCaracs.slice(0, chunk) },
-        { title: 'Détails techniques', items: validCaracs.slice(chunk, chunk * 2) },
-        { title: 'Matériaux', items: validCaracs.slice(chunk * 2) }
-      ].filter(c => c.items.length > 0);
-    }
-
-    document.getElementById('infoGrid').innerHTML = cols.map(col => `
+    // Product Information structuré style Sonogo (3 colonnes)
+    const chunkSize = Math.ceil(validCaracs.length / 3);
+    const cols = [
+      validCaracs.slice(0, chunkSize),
+      validCaracs.slice(chunkSize, chunkSize * 2),
+      validCaracs.slice(chunkSize * 2)
+    ].filter(c => c.length > 0);
+    const BLOCK_TITLES = ['Dimensions & Taille', 'Détails techniques', 'Matériaux'];
+    document.getElementById('infoGrid').innerHTML = cols.map((col, i) => `
       <div class="info-block">
-        <div class="info-block-title">${col.title}</div>
-        ${col.items.map(c => `
+        <div class="info-block-title">${BLOCK_TITLES[i] || 'Informations'}</div>
+        ${col.map(c => `
           <div class="info-item">
             <div class="info-item-icon">${getIcon(c.key)}</div>
             <span class="info-item-key">${esc(c.key)}</span>
@@ -1144,19 +726,36 @@ function renderProduct(art) {
     document.getElementById('infoSection').style.display = '';
   }
 
-  // Galerie d'ambiance (moodboard)
-  if (art.moodPhotos && art.moodPhotos.length > 0) {
-    document.getElementById('moodMosaic').innerHTML = art.moodPhotos
-      .map((src, i) => `<img src="${esc(src)}" alt="ambiance ${i+1}" loading="lazy" onclick="openLightbox(${i})">`)
-      .join('');
-    document.getElementById('moodSection').style.display = '';
+  // Grande image storytelling = 2ème photo si dispo
+  if (_photos.length >= 2) {
+    document.getElementById('heroStoryImg').src = _photos[1];
+    document.getElementById('heroStoryImg').alt = art.name;
+    document.getElementById('heroStoryCaption').textContent = 'Fabriqué à Lille · Impression 3D · Made in France';
+    document.getElementById('heroStory').style.display = '';
   }
 
-  // Stocker l'article courant (pour comboLinks)
-  _art = art;
-
-  // Bouton achat — géré par updateBuyButton() qui lit les combos
-  updateBuyButton();
+  // Bouton achat
+  const btnBuy = document.getElementById('btnBuy');
+  const priceStr = parseFloat(art.price).toFixed(2) + ' €';
+  if (art.payhip) {
+    btnBuy.href = art.payhip;
+    btnBuy.setAttribute('target', '_blank');
+    btnBuy.setAttribute('rel', 'noopener noreferrer');
+    btnBuy.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
+        <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+      </svg>
+      Acheter — ${priceStr}`;
+    document.getElementById('stripeNote').style.display = 'flex';
+  } else {
+    btnBuy.href = '/contact.html';
+    btnBuy.removeAttribute('target');
+    btnBuy.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      </svg>
+      Commander — nous contacter`;
+  }
 
   // Quantité
   document.getElementById('qMinus').onclick = function() {
@@ -1171,39 +770,22 @@ function renderProduct(art) {
   // Afficher le produit
   document.getElementById('productWrap').style.display = 'block';
 
-  // Charger suggestions (fixes ou fallback auto)
-  loadSuggestions(art);
+  // Charger les produits similaires (autres articles publiés)
+  loadSimilar(art.id, art.slug);
 }
 
-async function loadSuggestions(art) {
+async function loadSimilar(currentId, currentSlug) {
   try {
-    // Récupérer TOUS les articles (publiés ou non) pour trouver les suggestions
-    const snap = await getDocs(collection(db, 'articles'));
-    const allArts = [];
-    snap.forEach(d => allArts.push({ id: d.id, ...d.data() }));
-
-    let toShow = [];
-    if (art.suggestions && art.suggestions.length > 0) {
-      art.suggestions.forEach(sugId => {
-        // Chercher par doc id OU par champ id stocké dans le document
-        const found = allArts.find(a => a.id === sugId || String(a.id) === String(sugId));
-        if (found && found.status === 'published') toShow.push(found);
-      });
-    }
-    // Fallback : autres articles publiés si aucune suggestion trouvée
-    if (toShow.length === 0) {
-      toShow = allArts
-        .filter(a => a.status === 'published' && a.id !== art.id && a.slug !== art.slug)
-        .slice(0, 4);
-    }
-    if (toShow.length === 0) return;
-
-    // Adapter la grille au nombre réel de résultats
-    const grid = document.getElementById('similarGrid');
-    const count = toShow.length;
-    grid.style.gridTemplateColumns = count === 1 ? '1fr' : count === 2 ? 'repeat(2,1fr)' : count === 3 ? 'repeat(3,1fr)' : 'repeat(4,1fr)';
-
-    grid.innerHTML = toShow.map(a => `
+    const snap = await getDocs(query(collection(db, 'articles'), where('status', '==', 'published')));
+    const others = [];
+    snap.forEach(d => {
+      const a = { id: d.id, ...d.data() };
+      if (a.id !== currentId && a.slug !== currentSlug) others.push(a);
+    });
+    if (others.length === 0) return;
+    // Max 4 produits
+    const toShow = others.slice(0, 4);
+    document.getElementById('similarGrid').innerHTML = toShow.map(a => `
       <a href="/produit.html?id=${esc(a.slug || a.id)}" class="sim-card">
         <div class="sim-img-wrap">
           ${a.photos?.[0]
@@ -1214,7 +796,7 @@ async function loadSuggestions(art) {
         <div class="sim-price">${parseFloat(a.price).toFixed(2)} €</div>
       </a>`).join('');
     document.getElementById('similarSection').style.display = '';
-  } catch(e) { console.warn('Suggestions error:', e); }
+  } catch(e) { console.warn('Similar products error:', e); }
 }
 </script>
 
@@ -1222,80 +804,6 @@ async function loadSuggestions(art) {
 <script>
 // Année footer
 document.getElementById('footerYear').textContent = new Date().getFullYear();
-
-// ─── LIGHTBOX ───
-let _lbPhotos = [];
-let _lbIndex = 0;
-
-window.openLightbox = function(i) {
-  const imgs = document.querySelectorAll('#moodMosaic img');
-  _lbPhotos = Array.from(imgs).map(img => img.src);
-  _lbIndex = i;
-  _updateLightbox();
-  document.getElementById('lightbox').classList.add('open');
-  document.body.style.overflow = 'hidden';
-};
-
-window.closeLightbox = function(e) {
-  if (e && e.target !== document.getElementById('lightbox') && !e.currentTarget.classList.contains('lightbox-close')) return;
-  document.getElementById('lightbox').classList.remove('open');
-  document.body.style.overflow = '';
-};
-
-window.lightboxNav = function(dir) {
-  _lbIndex = (_lbIndex + dir + _lbPhotos.length) % _lbPhotos.length;
-  _updateLightbox();
-};
-
-function _updateLightbox() {
-  document.getElementById('lightboxImg').src = _lbPhotos[_lbIndex];
-  document.getElementById('lightboxCounter').textContent = (_lbIndex + 1) + ' / ' + _lbPhotos.length;
-}
-
-document.addEventListener('keydown', function(e) {
-  const lb = document.getElementById('lightbox');
-  if (!lb.classList.contains('open')) return;
-  if (e.key === 'Escape') { lb.classList.remove('open'); document.body.style.overflow = ''; }
-  if (e.key === 'ArrowRight') lightboxNav(1);
-  if (e.key === 'ArrowLeft') lightboxNav(-1);
-});
-
-// ─── RÉCUPÉRER DONNÉES DU PANIER ───
-window.getCartData = function() {
-  const variants = [];
-  document.querySelectorAll('.opt-block').forEach((block) => {
-    const label = block.querySelector('.opt-label strong')?.textContent || '';
-    const selected = block.querySelector('.chip.on, .color-chip.on');
-    if (selected) {
-      variants.push({
-        groupName: label,
-        selectedValue: selected.dataset.val || selected.textContent.trim()
-      });
-    }
-  });
-
-  const qty = parseInt(document.getElementById('qNum').value) || 1;
-  const priceText = document.getElementById('prodPrice').textContent;
-  const price = parseFloat(priceText.replace('€', '').trim());
-  const subtotal = price * qty;
-  const shipping = 8.00;
-  const tax = (subtotal + shipping) * 0.2;
-
-  return {
-    product: {
-      name: document.getElementById('prodName').textContent,
-      price: price,
-      quantity: qty
-    },
-    variants: variants,
-    subtotal: subtotal,
-    shipping: shipping,
-    tax: tax,
-    total: subtotal + shipping + tax
-  };
-};
-
-// ─── Payhip modal géré plus haut ───
 
 // Lien actif navbar
 document.querySelectorAll('.nav-links a').forEach(function(a) {
