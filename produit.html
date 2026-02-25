@@ -130,8 +130,6 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 }
 .btn-buy:hover { opacity: .86; transform: translateY(-1px); }
 .btn-buy svg { width: 17px; height: 17px; flex-shrink: 0; }
-.stripe-note { display: none; align-items: center; justify-content: center; gap: 5px; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
-.stripe-note svg { width: 12px; height: 12px; }
 .btn-contact { width: 100%; padding: 13px 20px; background: var(--white); color: var(--text); border: 1.5px solid var(--border); font-family: var(--font); font-size: 13px; border-radius: var(--r); cursor: pointer; transition: border-color .2s; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .btn-contact:hover { border-color: var(--text); }
 .btn-contact svg { width: 15px; height: 15px; }
@@ -139,7 +137,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .trust-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
 .trust-item svg { width: 13px; height: 13px; flex-shrink: 0; }
 
-/* ─── SPECS INLINE (sous bouton achat) ─── */
+/* ─── SPECS INLINE ─── */
 .specs-inline { margin-top: 20px; display: flex; flex-direction: column; gap: 0; border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; }
 .specs-inline-title { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 12px 16px 8px; }
 .spec-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--border); transition: background .15s; }
@@ -172,7 +170,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .info-item-val { font-size: 12px; font-weight: 500; }
 @media(max-width:768px) { .info-section { padding: 48px 20px; } .info-grid { grid-template-columns: 1fr; } .info-block { border-right: none; border-bottom: 1px solid var(--border); } .info-block:last-child { border-bottom: none; } }
 
-/* ─── MOOD GRID (galerie d'ambiance) ─── */
+/* ─── MOOD GRID ─── */
 .mood-section { background: var(--white); padding: 80px 32px 80px; }
 .mood-inner { max-width: var(--max); margin: 0 auto; }
 .mood-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; }
@@ -195,6 +193,77 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .lightbox-prev:hover, .lightbox-next:hover { background: rgba(255,255,255,.25); }
 .lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255,255,255,.5); font-family: var(--font); letter-spacing: .08em; }
 
+/* ─── MODALE PAIEMENT PRO ─── */
+@keyframes phModalIn {
+  from { opacity: 0; transform: translateY(28px) scale(.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes phOverlayIn { from{opacity:0;} to{opacity:1;} }
+
+#payhipModal {
+  position: fixed; inset: 0; z-index: 9000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease;
+}
+#payhipModal.open { opacity: 1; pointer-events: all; }
+#payhipModal.open #payhipBackdrop { animation: phOverlayIn .25s ease forwards; }
+#payhipModal.open #payhipBox    { animation: phModalIn .38s cubic-bezier(.22,1,.36,1) forwards; }
+
+#payhipBackdrop {
+  position: absolute; inset: 0;
+  background: rgba(8,8,8,.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+#payhipBox {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 900px; max-height: 90vh;
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.07), 0 16px 40px rgba(0,0,0,.14), 0 48px 96px rgba(0,0,0,.22);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+#payhipModalHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+#payhipModalMeta { display: flex; align-items: center; gap: 11px; }
+#payhipModalIcon {
+  width: 38px; height: 38px;
+  background: #111; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+#payhipModalIcon svg { width: 17px; height: 17px; color: #fff; }
+#payhipModalTitle { font-size: 14px; font-weight: 700; color: #111; letter-spacing: -.02em; }
+#payhipModalSub   { font-size: 11px; color: #bbb; margin-top: 2px; }
+#payhipCloseBtn {
+  width: 30px; height: 30px;
+  background: #f2f2f2; border: none; border-radius: 50%;
+  color: #888; font-size: 17px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .18s;
+}
+#payhipCloseBtn:hover { background: #e5e5e5; color: #111; transform: rotate(90deg); }
+
+#payhipIframe {
+  width: 100%;
+  height: auto;
+  min-height: 600px;
+  border: none;
+  background: #fff;
+  flex: 1;
+}
+
+@media(max-width: 480px) {
+  #payhipBox { border-radius: 20px; }
+}
+
 /* ─── MORE SECTION ─── */
 .more-section { background: var(--white); padding: 100px 32px; text-align: center; }
 .more-inner { max-width: 640px; margin: 0 auto; }
@@ -209,7 +278,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .similar-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
 .similar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 860px; }
 .sim-card { text-decoration: none; color: var(--text); display: block; }
-.sim-img-wrap { aspect-ratio: 3/4; border-radius: 10px; overflow: hidden; background: var(--white); margin-bottom: 10px; }
+.sim-img-wrap { aspect-ratio: 9/16; border-radius: 10px; overflow: hidden; background: var(--white); margin-bottom: 10px; }
 .sim-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
 .sim-card:hover .sim-img-wrap img { transform: scale(1.04); }
 .sim-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 28px; background: var(--white); }
@@ -356,17 +425,44 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
       <div class="hr"></div>
 
-      <!-- Bouton achat Stripe -->
-      <a href="#" class="btn-buy" id="btnBuy" target="_blank" rel="noopener noreferrer">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Acheter
+      <!-- Bouton achat — ouvre NOTRE modale, pas payhip.js -->
+      <div id="payhipBtnWrapper">
+        <button id="btnPayhip" class="btn-buy" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Acheter maintenant
+        </button>
+      </div>
+
+      <!-- Fallback si pas de lien PayHip configuré -->
+      <a href="/contact.html" class="btn-buy" id="btnNoPayhip" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Commander — nous contacter
       </a>
 
-      <!-- Note sécurité Stripe -->
-      <p class="stripe-note" id="stripeNote">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Paiement 100% sécurisé
-      </p>
+      <!-- ─── MODALE PAIEMENT PRO ─── -->
+      <div id="payhipModal" onclick="handleModalClick(event)">
+        <div id="payhipBackdrop"></div>
+        <div id="payhipBox">
+
+          <!-- Header -->
+          <div id="payhipModalHeader">
+            <div id="payhipModalMeta">
+              <div id="payhipModalIcon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              </div>
+              <div>
+                <div id="payhipModalTitle">Finaliser la commande</div>
+                <div id="payhipModalSub">Paiement sécurisé · TBT3D</div>
+              </div>
+            </div>
+            <button id="payhipCloseBtn" onclick="closePayhipModal()" title="Fermer">×</button>
+          </div>
+
+          <!-- IFRAME Payhip -->
+          <iframe id="payhipIframe" src=""></iframe>
+
+        </div>
+      </div>
 
       <!-- Bouton contact secondaire -->
       <a href="/contact.html" class="btn-contact">
@@ -516,7 +612,6 @@ const firebaseConfig = {
 const db = getFirestore(initializeApp(firebaseConfig));
 const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-// ── Récupération du slug dans l'URL ──
 const slug = new URLSearchParams(window.location.search).get('id');
 if (!slug) {
   showNotFound();
@@ -526,9 +621,7 @@ if (!slug) {
 
 async function loadProduct(slug) {
   try {
-    // 1. Cherche par slug
     let snap = await getDocs(query(collection(db, 'articles'), where('slug', '==', slug)));
-    // 2. Fallback : cherche par id (articles créés avant l'ajout du slug)
     if (snap.empty) {
       snap = await getDocs(query(collection(db, 'articles'), where('id', '==', slug)));
     }
@@ -553,7 +646,6 @@ function showNotFound() {
   document.getElementById('notFound').style.display = 'flex';
 }
 
-// ── État galerie ──
 let _photos = [];
 let _idx = 0;
 
@@ -567,11 +659,9 @@ window.goToImg = function(i) {
 window.prevImg = function() { goToImg((_idx - 1 + _photos.length) % _photos.length); };
 window.nextImg = function() { goToImg((_idx + 1) % _photos.length); };
 
-// ── Variantes avec images stockées ──
-let _variantImages = {}; // { "gi_label": "url" }
-let _art = null;          // article courant (pour comboLinks)
+let _variantImages = {};
+let _art = null;
 
-// ── Calcule la clé combo à partir des chips actives ──
 function _currentComboKey() {
   const vals = [];
   document.querySelectorAll('.opt-block').forEach(block => {
@@ -581,10 +671,8 @@ function _currentComboKey() {
   return vals.join('|');
 }
 
-// ── Met à jour le bouton Acheter selon la combo sélectionnée ──
 function updateBuyButton() {
   if (!_art) return;
-  const btnBuy = document.getElementById('btnBuy');
   const comboKey = _currentComboKey();
   const combo = (_art.comboLinks || {})[comboKey];
 
@@ -592,10 +680,8 @@ function updateBuyButton() {
   const price = (combo && combo.price && String(combo.price).trim()) ? parseFloat(combo.price) : parseFloat(_art.price);
   const priceStr = (isNaN(price) ? parseFloat(_art.price) : price).toFixed(2) + ' €';
 
-  // Mettre à jour le prix affiché
   document.getElementById('prodPrice').textContent = priceStr;
 
-  // Prix barré : priorité combo.oldPrice, sinon art.oldPrice global
   const oldPriceRaw = (combo && combo.oldPrice && String(combo.oldPrice).trim()) ? parseFloat(combo.oldPrice) : (parseFloat(_art.oldPrice) || null);
   const oldEl = document.getElementById('prodOldPrice');
   const saveEl = document.getElementById('prodSave');
@@ -610,45 +696,59 @@ function updateBuyButton() {
     saveEl.style.display = 'none';
   }
 
-  if (url) {
+  const btnPayhip   = document.getElementById('btnPayhip');
+  const btnNoPayhip = document.getElementById('btnNoPayhip');
+
+  if (url && (url.includes('payhip.com/b/') || url.includes('payhip.com/buy?'))) {
+    btnPayhip.style.display = '';
+    btnNoPayhip.style.display = 'none';
     
-    btnBuy.href = url;
-    
-    // Add the payhip-buy-button class if the URL is a Payhip link (short or full)
-    if (url.includes('payhip.com/b/') || url.includes('payhip.com/buy?')) {
-      btnBuy.classList.add('payhip-buy-button');
-    } else {
-      btnBuy.classList.remove('payhip-buy-button');
-    }
-    
-    btnBuy.setAttribute('target', '_blank');
-    btnBuy.setAttribute('rel', 'noopener noreferrer');
-    btnBuy.classList.remove('payhip-buy-button');
-    btnBuy.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
-        <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-      </svg>
-      Acheter — ${priceStr}`;
-    document.getElementById('stripeNote').style.display = 'flex';
+    btnPayhip.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      openPayhipModal(url, _art);
+      return false;
+    };
   } else {
-    btnBuy.href = '/contact.html';
-    btnBuy.removeAttribute('target');
-    btnBuy.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
-        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-      </svg>
-      Commander — nous contacter`;
-    document.getElementById('stripeNote').style.display = 'none';
+    btnPayhip.style.display = 'none';
+    btnNoPayhip.style.display = '';
   }
 }
 
-// ── Sélection variante ──
+window.openPayhipModal = function(url, artData) {
+  const modal   = document.getElementById('payhipModal');
+  const iframe  = document.getElementById('payhipIframe');
+
+  if (url) {
+    iframe.src = url;
+  }
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closePayhipModal = function() {
+  document.getElementById('payhipModal').classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+window.handleModalClick = function(e) {
+  if (e.target === document.getElementById('payhipModal') ||
+      e.target === document.getElementById('payhipBackdrop')) {
+    closePayhipModal();
+  }
+};
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closePayhipModal();
+});
+
 window.pickVariant = function(el, gi) {
   el.closest('.chips').querySelectorAll('.chip, .color-chip').forEach(c => c.classList.remove('on'));
   el.classList.add('on');
   const lbl = document.getElementById('vv' + gi);
   if (lbl) lbl.textContent = el.dataset.val;
-  // Changer l'image si une image est associée à cette variante
   const key = gi + '_' + el.dataset.val;
   if (_variantImages[key]) {
     const idx = _photos.indexOf(_variantImages[key]);
@@ -661,35 +761,27 @@ window.pickVariant = function(el, gi) {
       document.querySelectorAll('#galleryThumbs img').forEach(t => t.classList.remove('active'));
     }
   }
-  // Mettre à jour lien + prix selon la combinaison
   updateBuyButton();
 };
 
-// ── Rendu du produit ──
 function renderProduct(art) {
   document.getElementById('loadingState').style.display = 'none';
 
-  // SEO
   document.title = art.name + ' — TBT3D';
   document.getElementById('metaDesc').setAttribute('content', art.tagline || art.name + ' — TBT3D');
 
-  // Breadcrumb
   document.getElementById('bcName').textContent = art.name;
   document.getElementById('breadcrumb').style.display = '';
 
-  // Badge
   if (art.badge) {
     document.getElementById('prodBadges').innerHTML = `<span class="prod-badge">${esc(art.badge)}</span>`;
   }
 
-  // Nom & tagline
   document.getElementById('prodName').textContent = art.name;
   document.getElementById('prodTagline').textContent = art.tagline || '';
 
-  // Prix
   document.getElementById('prodPrice').textContent = parseFloat(art.price).toFixed(2) + ' €';
 
-  // Galerie
   _photos = art.photos || [];
   if (_photos.length > 0) {
     const mainImg = document.getElementById('mainImg');
@@ -705,9 +797,7 @@ function renderProduct(art) {
     }
   }
 
-  // Variantes
   if (art.variants && art.variants.length > 0) {
-    // Construire la map des images de variantes
     _variantImages = {};
     art.variants.forEach((vg, gi) => {
       vg.options.forEach(opt => {
@@ -736,12 +826,10 @@ function renderProduct(art) {
       </div>`;
     }).join('');
 
-    // Afficher l'image de la 1ère variante si elle en a une
     const firstVg = art.variants[0];
     if (firstVg?.options?.[0]?.image) {
       const firstKey = '0_' + firstVg.options[0].label;
       if (_variantImages[firstKey]) {
-        // Switcher vers cette image après chargement galerie
         setTimeout(() => {
           const idx = _photos.indexOf(_variantImages[firstKey]);
           if (idx !== -1) goToImg(idx);
@@ -750,13 +838,11 @@ function renderProduct(art) {
     }
   }
 
-  // Description
   if (art.desc) {
     document.getElementById('prodDesc').textContent = art.desc;
     document.getElementById('storySection').style.display = '';
   }
 
-  // Caractéristiques
   if (art.caracs && art.caracs.filter(c => c.key).length > 0) {
     const validCaracs = art.caracs.filter(c => c.key);
 
@@ -786,7 +872,6 @@ function renderProduct(art) {
       return SPEC_ICONS.default;
     }
 
-    // Specs inline sous le bouton achat (colonne droite)
     const specsInline = document.getElementById('specsInline');
     specsInline.innerHTML = `<div class="specs-inline-title">Caractéristiques</div>` +
       validCaracs.map(c => `
@@ -797,7 +882,6 @@ function renderProduct(art) {
         </div>`).join('');
     specsInline.style.display = '';
 
-    // Product Information structuré — groupement intelligent par catégorie
     const DIM_KEYS = ['hauteur','largeur','longueur','taille','dimension','profondeur','diametre','diamètre','poids','volume'];
     const TECH_KEYS = ['ampoule','cable','câble','culot','culot','voltage','tension','watt','wattage','puissance','interrupteur','cord','lumens','lumen','température','technologie','impression','fabrication','matière','materiau','matériau'];
 
@@ -805,7 +889,6 @@ function renderProduct(art) {
     const colTech = validCaracs.filter(c => !DIM_KEYS.some(k => c.key.toLowerCase().includes(k)) && TECH_KEYS.some(k => c.key.toLowerCase().includes(k)));
     const colOther = validCaracs.filter(c => !DIM_KEYS.some(k => c.key.toLowerCase().includes(k)) && !TECH_KEYS.some(k => c.key.toLowerCase().includes(k)));
 
-    // Si le tri automatique donne des colonnes vides, fallback en 3 chunks égaux
     let cols;
     if (colDim.length > 0 || colTech.length > 0 || colOther.length > 0) {
       cols = [
@@ -813,7 +896,6 @@ function renderProduct(art) {
         { title: 'Détails techniques', items: colTech },
         { title: 'Matériaux & Finitions', items: colOther }
       ].filter(c => c.items.length > 0);
-      // Si tout va dans une seule colonne, redistribuer en chunks
       if (cols.length === 1) {
         const chunk = Math.ceil(validCaracs.length / 2);
         cols = [
@@ -843,7 +925,6 @@ function renderProduct(art) {
     document.getElementById('infoSection').style.display = '';
   }
 
-  // Galerie d'ambiance (moodboard)
   if (art.moodPhotos && art.moodPhotos.length > 0) {
     document.getElementById('moodMosaic').innerHTML = art.moodPhotos
       .map((src, i) => `<img src="${esc(src)}" alt="ambiance ${i+1}" loading="lazy" onclick="openLightbox(${i})">`)
@@ -851,13 +932,10 @@ function renderProduct(art) {
     document.getElementById('moodSection').style.display = '';
   }
 
-  // Stocker l'article courant (pour comboLinks)
   _art = art;
 
-  // Bouton achat — géré par updateBuyButton() qui lit les combos
   updateBuyButton();
 
-  // Quantité
   document.getElementById('qMinus').onclick = function() {
     const n = document.getElementById('qNum');
     if (+n.value > 1) n.value = +n.value - 1;
@@ -867,16 +945,13 @@ function renderProduct(art) {
     if (+n.value < 99) n.value = +n.value + 1;
   };
 
-  // Afficher le produit
   document.getElementById('productWrap').style.display = 'block';
 
-  // Charger suggestions (fixes ou fallback auto)
   loadSuggestions(art);
 }
 
 async function loadSuggestions(art) {
   try {
-    // Récupérer TOUS les articles (publiés ou non) pour trouver les suggestions
     const snap = await getDocs(collection(db, 'articles'));
     const allArts = [];
     snap.forEach(d => allArts.push({ id: d.id, ...d.data() }));
@@ -884,12 +959,10 @@ async function loadSuggestions(art) {
     let toShow = [];
     if (art.suggestions && art.suggestions.length > 0) {
       art.suggestions.forEach(sugId => {
-        // Chercher par doc id OU par champ id stocké dans le document
         const found = allArts.find(a => a.id === sugId || String(a.id) === String(sugId));
         if (found && found.status === 'published') toShow.push(found);
       });
     }
-    // Fallback : autres articles publiés si aucune suggestion trouvée
     if (toShow.length === 0) {
       toShow = allArts
         .filter(a => a.status === 'published' && a.id !== art.id && a.slug !== art.slug)
@@ -897,7 +970,6 @@ async function loadSuggestions(art) {
     }
     if (toShow.length === 0) return;
 
-    // Adapter la grille au nombre réel de résultats
     const grid = document.getElementById('similarGrid');
     const count = toShow.length;
     grid.style.gridTemplateColumns = count === 1 ? '1fr' : count === 2 ? 'repeat(2,1fr)' : count === 3 ? 'repeat(3,1fr)' : 'repeat(4,1fr)';
@@ -917,12 +989,9 @@ async function loadSuggestions(art) {
 }
 </script>
 
-<!-- ─── NAVBAR UTILS ─── -->
 <script>
-// Année footer
 document.getElementById('footerYear').textContent = new Date().getFullYear();
 
-// ─── LIGHTBOX ───
 let _lbPhotos = [];
 let _lbIndex = 0;
 
@@ -959,17 +1028,14 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'ArrowLeft') lightboxNav(-1);
 });
 
-// Lien actif navbar
 document.querySelectorAll('.nav-links a').forEach(function(a) {
   if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
 });
 
-// Scroll shadow navbar
 window.addEventListener('scroll', function() {
   document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
 });
 
-// Recherche
 function toggleSearch() {
   var b = document.getElementById('searchBar');
   b.classList.toggle('open');
@@ -982,7 +1048,6 @@ function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('open');
 }
 
-// Tabs
 function switchTab(id, btn) {
   document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('on'); });
   document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('on'); });
@@ -990,7 +1055,6 @@ function switchTab(id, btn) {
   btn.classList.add('on');
 }
 
-// Search live (nécessite search.js)
 function searchLive() {}
 function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
 </script>
