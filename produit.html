@@ -612,7 +612,16 @@ function updateBuyButton() {
   }
 
   if (url) {
+    
     btnBuy.href = url;
+    
+    // Add the payhip-buy-button class if the URL is a Payhip link
+    if (url.includes('payhip.com')) {
+      btnBuy.classList.add('payhip-buy-button');
+    } else {
+      btnBuy.classList.remove('payhip-buy-button');
+    }
+    
     btnBuy.setAttribute('target', '_blank');
     btnBuy.setAttribute('rel', 'noopener noreferrer');
     // Popup Payhip si lien payhip
