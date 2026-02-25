@@ -1099,7 +1099,7 @@ window.getCartData = function() {
 
 // ─── PAYHIP MODAL ───
 window.openPayhipModal = function(url) {
-  // Sauvegarder les données du panier AVANT PayHip
+  // Sauvegarder le panier AVANT PayHip
   try {
     const cartData = window.getCartData();
     sessionStorage.setItem('pendingOrder', JSON.stringify(cartData));
