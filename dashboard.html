@@ -1157,7 +1157,7 @@ window.submitArticle = async () => {
   if(uploadInProgress>0){toast('⏳ Upload en cours, patientez…', true);return;}
   const nameEl=document.getElementById('aName');
   const priceEl=document.getElementById('aPrice');
-  if(!nameEl||!priceEl) return;
+  if(!nameEl||!priceEl) { console.error('ERREUR: champs nom/prix introuvables'); return; }
   const name=nameEl.value.trim();
   const price=priceEl.value;
   if(!name){toast('⚠ Nom requis', true);return;}
@@ -1172,7 +1172,7 @@ window.submitArticle = async () => {
     const slugEl=document.getElementById('aSlug'); if(slugEl) slugEl.value=slug;
   }
 
-  // Sécuriser les variantes : filtrer celles qui ont un nom ET au moins une option
+  // Sécuriser les variantes
   const safeVariants = variants
     .filter(v => v && v.name && v.name.trim() && Array.isArray(v.options) && v.options.length > 0)
     .map(v => ({
@@ -1202,8 +1202,15 @@ window.submitArticle = async () => {
     updatedAt: new Date().toISOString(),
   };
 
+  console.log('=== SUBMIT ARTICLE ===');
+  console.log('art object:', JSON.stringify(art, null, 2));
+  console.log('editId:', editId);
+
   try{
+    console.log('Tentative fbSetArticle...');
     await fbSetArticle(art);
+    console.log('fbSetArticle OK ✓');
+
     if(editId){
       const idx=arts.findIndex(a=>a.id===editId);
       if(idx>=0) arts[idx]=art; else arts.unshift(art);
@@ -1213,7 +1220,6 @@ window.submitArticle = async () => {
     syncBoutSlots();
     editId=null;
 
-    // Remettre le bouton AVANT resetForm pour éviter le crash null
     if(btn){
       btn.disabled=false;
       btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="btnLbl">Publier</span>`;
@@ -1227,7 +1233,10 @@ window.submitArticle = async () => {
     toast(`"${name}" ${art.status==='published'?'publié ✓':'brouillon sauvegardé ✓'}`);
 
   }catch(e){
-    console.error('Firebase error:', e);
+    console.error('=== ERREUR FIREBASE ===');
+    console.error('Message:', e.message);
+    console.error('Code:', e.code);
+    console.error('Full error:', e);
     toast('Erreur Firebase : '+e.message, true);
     if(btn){
       btn.disabled=false;
