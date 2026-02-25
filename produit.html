@@ -7,7 +7,6 @@
 <meta name="description" id="metaDesc" content="Lampe imprimée en 3D — TBT3D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://payhip.com/payhip.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -366,7 +365,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
       <!-- Note sécurité Stripe -->
       <p class="stripe-note" id="stripeNote">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Paiement 100% sécurisé via Stripe
+        Paiement 100% sécurisé
       </p>
 
       <!-- Bouton contact secondaire -->
@@ -612,25 +611,10 @@ function updateBuyButton() {
   }
 
   if (url) {
-    
     btnBuy.href = url;
-    
-    // Add the payhip-buy-button class if the URL is a Payhip link
-    if (url.includes('payhip.com')) {
-      btnBuy.classList.add('payhip-buy-button');
-    } else {
-      btnBuy.classList.remove('payhip-buy-button');
-    }
-    
     btnBuy.setAttribute('target', '_blank');
     btnBuy.setAttribute('rel', 'noopener noreferrer');
-    // Popup Payhip si lien payhip
-    if (url.includes('payhip.com')) {
-      btnBuy.classList.add('payhip-buy-button');
-      btnBuy.removeAttribute('target');
-    } else {
-      btnBuy.classList.remove('payhip-buy-button');
-    }
+    btnBuy.classList.remove('payhip-buy-button');
     btnBuy.innerHTML = `
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
         <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
