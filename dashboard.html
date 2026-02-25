@@ -129,15 +129,15 @@ tr:hover td{background:rgba(255,255,255,.01)}
 .field select option{background:var(--bg3)}
 .fhint{font-size:10px;color:var(--muted);margin-top:5px;font-family:var(--mono)}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.photos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
-.photo-slot{aspect-ratio:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);position:relative;overflow:hidden;transition:border-color .2s}
+.photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.photo-slot{aspect-ratio:16/9;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r);position:relative;overflow:hidden;transition:border-color .2s}
 .photo-slot.main-slot{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
 .photo-slot img{width:100%;height:100%;object-fit:cover;display:block}
 .ph-del{position:absolute;top:5px;right:5px;width:22px;height:22px;background:rgba(0,0,0,.9);border-radius:5px;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#fff;font-weight:700;transition:background .15s}
 .ph-del:hover{background:var(--red)}
 .photo-slot:hover .ph-del{display:flex}
 .ph-badge{position:absolute;bottom:5px;left:5px;background:var(--accent);color:#fff;font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;font-family:var(--mono);pointer-events:none;letter-spacing:.06em}
-.photo-add{aspect-ratio:1;background:var(--bg3);border:1.5px dashed var(--border2);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:6px;color:var(--muted);font-size:10px;transition:all .2s;font-family:var(--mono)}
+.photo-add{aspect-ratio:16/9;background:var(--bg3);border:1.5px dashed var(--border2);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:6px;color:var(--muted);font-size:10px;transition:all .2s;font-family:var(--mono)}
 .photo-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
 .photo-add svg{width:18px;height:18px}
 #photoInput{display:none}
@@ -190,7 +190,7 @@ tr:hover td{background:rgba(255,255,255,.01)}
 .sugg-limit{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:4px}
 
 /* ── COMBO LINKS ── */
-.combo-row{display:grid;grid-template-columns:1fr 1fr 140px 24px;gap:6px;align-items:center;margin-bottom:6px}
+.combo-row{display:grid;grid-template-columns:1fr 1fr 110px 110px 24px;gap:6px;align-items:center;margin-bottom:6px}
 .combo-label{font-size:11px;font-weight:600;color:var(--text);background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
 .combo-label .cl-dot{width:8px;height:8px;border-radius:2px;background:var(--accent);flex-shrink:0}
 .combo-url{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:11px;font-family:var(--mono);color:var(--text);outline:none;transition:border-color .15s}
@@ -199,6 +199,9 @@ tr:hover td{background:rgba(255,255,255,.01)}
 .combo-price{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:11px;font-family:var(--mono);color:var(--text);outline:none;transition:border-color .15s}
 .combo-price:focus{border-color:var(--accent)}
 .combo-price.has-price{border-color:rgba(22,163,74,.5);background:rgba(22,163,74,.04)}
+.combo-old-price{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:11px;font-family:var(--mono);color:var(--text);outline:none;transition:border-color .15s}
+.combo-old-price:focus{border-color:var(--accent)}
+.combo-old-price.has-old{border-color:rgba(245,166,35,.5);background:rgba(245,166,35,.04)}
 .combo-clear{width:24px;height:24px;border:none;background:none;cursor:pointer;color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:background .15s;flex-shrink:0}
 .combo-clear:hover{background:var(--red);color:#fff}
 .combo-separator{grid-column:1/-1;height:1px;background:var(--border);margin:6px 0}
@@ -723,10 +726,11 @@ tr:hover td{background:rgba(255,255,255,.01)}
               <div class="fhint" style="margin-bottom:12px">Généré automatiquement depuis vos variantes. Ajoutez un lien Stripe et un prix pour chaque combinaison souhaitée.</div>
               <div id="comboLinksEmpty" style="font-size:11px;color:var(--muted);padding:8px 0">Ajoutez d'abord des options & variantes ci-dessus.</div>
               <div id="comboLinksList" style="display:none">
-                <div style="display:grid;grid-template-columns:1fr 1fr 140px 24px;gap:6px;margin-bottom:8px;padding:0 2px">
+                <div style="display:grid;grid-template-columns:1fr 1fr 110px 110px 24px;gap:6px;margin-bottom:8px;padding:0 2px">
                   <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Combinaison</span>
                   <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Lien Stripe</span>
                   <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Prix (€)</span>
+                  <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Barré (€)</span>
                   <span></span>
                 </div>
                 <div id="comboLinksRows"></div>
@@ -1426,9 +1430,10 @@ function renderComboLinks() {
 
   rows.innerHTML = allCombos.map(combo => {
     const key = comboKey(combo);
-    const data = links[key] || { url: '', price: '' };
+    const data = links[key] || { url: '', price: '', oldPrice: '' };
     const hasUrl = data.url && data.url.trim();
     const hasPrice = data.price && String(data.price).trim();
+    const hasOld = data.oldPrice && String(data.oldPrice).trim();
     const label = comboLabel(combo);
     return `<div class="combo-row" data-key="${key.replace(/"/g,'&quot;')}">
       <div class="combo-label" title="${label}">
@@ -1441,6 +1446,9 @@ function renderComboLinks() {
       <input class="combo-price${hasPrice?' has-price':''}" type="number" step="0.01" min="0" placeholder="Prix"
         value="${data.price||''}"
         oninput="updateCombo('${key.replace(/'/g,"\\'")}','price',this.value);this.classList.toggle('has-price',!!this.value.trim())">
+      <input class="combo-old-price${hasOld?' has-old':''}" type="number" step="0.01" min="0" placeholder="Barré"
+        value="${data.oldPrice||''}"
+        oninput="updateCombo('${key.replace(/'/g,"\\'")}','oldPrice',this.value);this.classList.toggle('has-old',!!this.value.trim())">
       <button class="combo-clear" onclick="clearCombo('${key.replace(/'/g,"\\'")}')">×</button>
     </div>`;
   }).join('');
@@ -1452,7 +1460,7 @@ window.updateCombo = (key, field, val) => {
 };
 
 window.clearCombo = (key) => {
-  if (window.comboLinks[key]) { window.comboLinks[key] = { url: '', price: '' }; }
+  if (window.comboLinks[key]) { window.comboLinks[key] = { url: '', price: '', oldPrice: '' }; }
   renderComboLinks();
 };
 
