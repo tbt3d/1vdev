@@ -1091,9 +1091,18 @@ window.addPhotos = async (files) => {
 window.removePhoto=i=>{photos.splice(i,1);renderPhotoSlots();};
 
 // ── CARACS ──
-function renderCaracs(){document.getElementById('caracList').innerHTML=caracs.map((c,i)=>`<div class="crow"><input type="text" placeholder="Matériau" value="${esc(c.key)}" oninput="caracs[${i}].key=this.value"><input type="text" placeholder="PLA" value="${esc(c.val)}" oninput="caracs[${i}].val=this.value"><button class="row-del" onclick="removeCarac(${i})">×</button></div>`).join('');}
-window.addCarac=(k='',v='')=>{caracs.push({key:k,val:v});renderCaracs();};
-window.removeCarac=i=>{caracs.splice(i,1);renderCaracs();};
+function renderCaracs(){
+  const el=document.getElementById('caracList');
+  if(!el) return;
+  el.innerHTML=caracs.map((c,i)=>`
+    <div class="crow">
+      <input type="text" placeholder="Matériau" value="${esc(c.key)}" oninput="caracs[${i}].key=this.value">
+      <input type="text" placeholder="PLA" value="${esc(c.val)}" oninput="caracs[${i}].val=this.value">
+      <button class="row-del" onclick="removeCarac(${i})">×</button>
+    </div>`).join('');
+}
+window.addCarac=(k='',v='')=>{ caracs.push({key:String(k),val:String(v)}); renderCaracs(); };
+window.removeCarac=i=>{ caracs.splice(i,1); renderCaracs(); };
 
 // ── VARIANTES ──
 function renderVariants(){const ct=document.getElementById('variantsContainer');ct.innerHTML='';variants.forEach((vg,gi)=>{const d=document.createElement('div');d.className='vg';d.innerHTML=`<div class="vg-head"><input class="vg-name" type="text" value="${esc(vg.name)}" placeholder="ex : Couleur" oninput="variants[${gi}].name=this.value"><button class="vg-del" onclick="removeVG(${gi})">Supprimer</button></div><div class="vchips" id="vc${gi}"></div><div class="vadd"><input type="color" id="vco${gi}" value="#888888"><input type="text" id="vt${gi}" placeholder="ex : Blanc" onkeydown="if(event.key==='Enter')addOpt(${gi})"><button onclick="addOpt(${gi})">+ Ajouter</button></div>`;ct.appendChild(d);renderChips(gi);});}
@@ -1106,7 +1115,17 @@ function renderChips(gi){
     return `<div class="vchip">${o.color?`<span class="vdot" style="background:${o.color}"></span>`:''}${imgBtn}<span>${esc(o.label)}</span><span class="vrm" onclick="removeOpt(${gi},${oi})">×</span></div>`;
   }).join(''):`<span style="font-size:10px;color:var(--muted)">Aucune option…</span>`;
 }
-window.addOpt=gi=>{const t=document.getElementById('vt'+gi).value.trim();if(!t)return;const c=document.getElementById('vco'+gi).value;variants[gi].options.push({label:t,color:c==='#888888'?'':c,image:''});renderChips(gi);document.getElementById('vt'+gi).value='';document.getElementById('vco'+gi).value='#888888';};
+window.addOpt=gi=>{
+  const t=document.getElementById('vt'+gi); if(!t) return;
+  const label=t.value.trim(); if(!label) return;
+  const cEl=document.getElementById('vco'+gi);
+  const color=cEl?cEl.value:'';
+  if(!variants[gi]) return;
+  variants[gi].options.push({label, color: color==='#888888'?'':color, image:''});
+  renderChips(gi);
+  t.value='';
+  if(cEl) cEl.value='#888888';
+};
 window.removeOpt=(gi,oi)=>{variants[gi].options.splice(oi,1);renderChips(gi);};
 window.addVariantGroup=()=>{variants.push({name:'',options:[]});renderVariants();setTimeout(()=>{const ins=document.querySelectorAll('.vg-name');ins[ins.length-1]?.focus();},50);};
 window.removeVG=gi=>{variants.splice(gi,1);renderVariants();};
@@ -1219,21 +1238,44 @@ window.submitArticle = async () => {
 
 window.editArt=i=>{
   const a=arts[i]; editId=a.id;
-  document.getElementById('aName').value=a.name;
-  document.getElementById('aPrice').value=a.price;
+  document.getElementById('aName').value=a.name||'';
+  document.getElementById('aPrice').value=a.price||'';
   document.getElementById('aOldPrice').value=a.oldPrice||'';
   document.getElementById('aBadge').value=a.badge||'';
-  document.getElementById('aStatus').value=a.status;
+  document.getElementById('aStatus').value=a.status||'published';
   document.getElementById('aTagline').value=a.tagline||'';
   document.getElementById('aSlug').value=a.slug||'';
   document.getElementById('aPayhip').value=a.payhip||'';
   document.getElementById('aDesc').value=a.desc||'';
-  photos=[...(a.photos||[])];
-  caracs=(a.caracs||[]).map(c=>({...c}));
-  variants=(a.variants||[]).map(v=>({...v,options:[...v.options]}));
-  renderPhotoSlots(); renderCaracs(); renderVariants();
+
+  // Recharger photos
+  photos = Array.isArray(a.photos) ? a.photos.filter(Boolean) : [];
+
+  // Recharger caracs — deep copy sécurisée
+  caracs = Array.isArray(a.caracs)
+    ? a.caracs.filter(c=>c&&c.key).map(c=>({ key: c.key||'', val: c.val||'' }))
+    : [];
+
+  // Recharger variants — deep copy sécurisée
+  variants = Array.isArray(a.variants)
+    ? a.variants.filter(v=>v&&v.name).map(v=>({
+        name: v.name||'',
+        options: Array.isArray(v.options)
+          ? v.options.filter(o=>o&&o.label).map(o=>({ label:o.label||'', color:o.color||'', image:o.image||'' }))
+          : []
+      }))
+    : [];
+
+  renderPhotoSlots();
+  renderCaracs();
+  renderVariants();
+
   document.getElementById('artPageTitle').textContent='Modifier — '+a.name;
-  const lbl=document.getElementById('btnLbl'); if(lbl) lbl.textContent='Enregistrer';
+  const btn=document.getElementById('btnSubmit');
+  if(btn){
+    btn.disabled=false;
+    btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="btnLbl">Enregistrer</span>`;
+  }
   document.getElementById('btnCancel').style.display='';
   document.getElementById('page-articles').querySelector('.ps').scrollTo({top:0,behavior:'smooth'});
 };
