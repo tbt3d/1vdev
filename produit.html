@@ -73,8 +73,9 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .gallery-thumbs img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1.5px solid var(--border); cursor: pointer; transition: border-color .15s, opacity .15s; opacity: .55; }
 .gallery-thumbs img.active { border-color: var(--black); opacity: 1; }
 .gallery-main { flex: 1; position: relative; border-radius: 10px; overflow: hidden; background: var(--bg); }
-.gallery-main-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
-.gallery-placeholder { width: 100%; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; font-size: 56px; background: var(--bg); }
+.gallery-main-img { width: 100%; height: calc(100vh - var(--nav-h) - 60px); max-height: 680px; min-height: 320px; object-fit: cover; display: block; }
+.gallery-placeholder { width: 100%; height: calc(100vh - var(--nav-h) - 60px); max-height: 680px; min-height: 320px; display: flex; align-items: center; justify-content: center; font-size: 56px; background: var(--bg); }
+@media(max-width:960px) { .gallery-main-img { height: auto; aspect-ratio: 4/3; max-height: none; } .gallery-placeholder { height: auto; aspect-ratio: 4/3; max-height: none; } }
 .gallery-nav { position: absolute; bottom: 14px; right: 14px; display: flex; gap: 6px; }
 .gallery-btn { width: 34px; height: 34px; background: rgba(255,255,255,.92); border: 1px solid rgba(0,0,0,.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
 .gallery-btn:hover { background: var(--white); }
