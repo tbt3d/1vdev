@@ -176,10 +176,23 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .mood-section { background: var(--white); padding: 80px 32px 80px; }
 .mood-inner { max-width: var(--max); margin: 0 auto; }
 .mood-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
-.mood-mosaic { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.mood-mosaic img { width: 100%; aspect-ratio: 16/9; object-fit: cover; object-position: center center; border-radius: 12px; display: block; transition: transform .4s ease, filter .3s ease; filter: brightness(.96); }
+.mood-mosaic { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.mood-mosaic img { width: 100%; aspect-ratio: 9/16; object-fit: cover; object-position: center center; border-radius: 12px; display: block; transition: transform .4s ease, filter .3s ease; filter: brightness(.96); cursor: zoom-in; }
 .mood-mosaic img:hover { transform: scale(1.02); filter: brightness(1); }
-@media(max-width:600px) { .mood-section { padding: 0 20px 48px; } .mood-mosaic { grid-template-columns: 1fr; gap: 10px; } }
+@media(max-width:600px) { .mood-section { padding: 0 20px 48px; } .mood-mosaic { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
+
+/* ─── LIGHTBOX ─── */
+.lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.92); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; backdrop-filter: blur(6px); }
+.lightbox.open { opacity: 1; pointer-events: all; }
+.lightbox-img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 10px; transform: scale(.94); transition: transform .3s cubic-bezier(.34,1.4,.64,1); box-shadow: 0 32px 80px rgba(0,0,0,.6); }
+.lightbox.open .lightbox-img { transform: scale(1); }
+.lightbox-close { position: absolute; top: 20px; right: 24px; width: 40px; height: 40px; background: rgba(255,255,255,.12); border: none; border-radius: 50%; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
+.lightbox-close:hover { background: rgba(255,255,255,.25); }
+.lightbox-prev, .lightbox-next { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; background: rgba(255,255,255,.12); border: none; border-radius: 50%; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
+.lightbox-prev { left: 20px; }
+.lightbox-next { right: 20px; }
+.lightbox-prev:hover, .lightbox-next:hover { background: rgba(255,255,255,.25); }
+.lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255,255,255,.5); font-family: var(--font); letter-spacing: .08em; }
 
 /* ─── MORE SECTION ─── */
 .more-section { background: var(--white); padding: 100px 32px; text-align: center; }
@@ -407,6 +420,15 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
       <div class="mood-label">EN SITUATION.</div>
       <div class="mood-mosaic" id="moodMosaic"></div>
     </div>
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <button class="lightbox-close" onclick="closeLightbox()">×</button>
+    <button class="lightbox-prev" onclick="event.stopPropagation();lightboxNav(-1)">‹</button>
+    <img class="lightbox-img" id="lightboxImg" src="" alt="">
+    <button class="lightbox-next" onclick="event.stopPropagation();lightboxNav(1)">›</button>
+    <div class="lightbox-counter" id="lightboxCounter"></div>
   </div>
 
   <!-- ─── MORE THAN A DESIGN ─── -->
@@ -813,7 +835,7 @@ function renderProduct(art) {
   // Galerie d'ambiance (moodboard)
   if (art.moodPhotos && art.moodPhotos.length > 0) {
     document.getElementById('moodMosaic').innerHTML = art.moodPhotos
-      .map((src, i) => `<img src="${esc(src)}" alt="ambiance ${i+1}" loading="lazy">`)
+      .map((src, i) => `<img src="${esc(src)}" alt="ambiance ${i+1}" loading="lazy" onclick="openLightbox(${i})">`)
       .join('');
     document.getElementById('moodSection').style.display = '';
   }
@@ -888,6 +910,43 @@ async function loadSuggestions(art) {
 <script>
 // Année footer
 document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+// ─── LIGHTBOX ───
+let _lbPhotos = [];
+let _lbIndex = 0;
+
+window.openLightbox = function(i) {
+  const imgs = document.querySelectorAll('#moodMosaic img');
+  _lbPhotos = Array.from(imgs).map(img => img.src);
+  _lbIndex = i;
+  _updateLightbox();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+
+window.closeLightbox = function(e) {
+  if (e && e.target !== document.getElementById('lightbox') && !e.currentTarget.classList.contains('lightbox-close')) return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+};
+
+window.lightboxNav = function(dir) {
+  _lbIndex = (_lbIndex + dir + _lbPhotos.length) % _lbPhotos.length;
+  _updateLightbox();
+};
+
+function _updateLightbox() {
+  document.getElementById('lightboxImg').src = _lbPhotos[_lbIndex];
+  document.getElementById('lightboxCounter').textContent = (_lbIndex + 1) + ' / ' + _lbPhotos.length;
+}
+
+document.addEventListener('keydown', function(e) {
+  const lb = document.getElementById('lightbox');
+  if (!lb.classList.contains('open')) return;
+  if (e.key === 'Escape') { lb.classList.remove('open'); document.body.style.overflow = ''; }
+  if (e.key === 'ArrowRight') lightboxNav(1);
+  if (e.key === 'ArrowLeft') lightboxNav(-1);
+});
 
 // Lien actif navbar
 document.querySelectorAll('.nav-links a').forEach(function(a) {
