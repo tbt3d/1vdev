@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produit — TBT3D</title>
+<meta name="description" id="metaDesc" content="Lampe imprimée en 3D — TBT3D">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --white: #fff; --black: #111; --bg: #f9f9f9; --border: #e8e8e8;
+  --text: #111; --muted: #888; --soft: #555;
+  --font: 'Inter', system-ui, sans-serif;
+  --nav-h: 70px; --max: 1280px; --r: 50px;
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); color: var(--text); background: var(--white); padding-top: var(--nav-h); font-size: 14px; line-height: 1.5; }
+
+/* ─── NAVBAR ─── */
+#navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--white); border-bottom: 1px solid var(--border); transition: box-shadow .2s; }
+#navbar.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,.06); }
+.nav-inner { max-width: var(--max); margin: 0 auto; height: var(--nav-h); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.nav-links { display: flex; align-items: center; }
+.nav-links a { text-decoration: none; color: var(--soft); font-size: 14px; padding: 8px 16px; border-radius: 6px; transition: color .15s, background .15s; white-space: nowrap; }
+.nav-links a:hover, .nav-links a.active { color: var(--black); }
+.nav-links a.active { font-weight: 500; }
+.nav-actions { display: flex; align-items: center; gap: 4px; }
+.nav-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; border-radius: 6px; color: var(--black); transition: background .15s; text-decoration: none; }
+.nav-icon:hover { background: var(--bg); }
+.nav-icon svg { width: 20px; height: 20px; }
+.nav-burger { display: none; }
+.search-bar { display: none; border-top: 1px solid var(--border); background: var(--white); padding: 12px 32px; }
+.search-bar.open { display: block; }
+.search-inner { max-width: 600px; margin: 0 auto; display: flex; align-items: center; gap: 12px; border: 1.5px solid var(--border); border-radius: 50px; padding: 10px 18px; transition: border-color .2s; }
+.search-inner:focus-within { border-color: var(--black); }
+.search-inner input { flex: 1; border: none; outline: none; font-family: var(--font); font-size: 14px; background: transparent; }
+.search-inner button { background: none; border: none; cursor: pointer; font-size: 20px; color: var(--muted); }
+.mobile-nav { display: none; flex-direction: column; padding: 16px 24px 20px; border-top: 1px solid var(--border); gap: 4px; }
+.mobile-nav.open { display: flex; }
+.mobile-nav a { text-decoration: none; color: var(--black); font-size: 15px; padding: 10px 12px; border-radius: 6px; transition: background .15s; }
+.mobile-nav a:hover { background: var(--bg); }
+@media(max-width:768px) { .nav-links { display: none; } .nav-burger { display: flex; } .nav-inner { padding: 0 20px; } }
+
+/* ─── BREADCRUMB ─── */
+.breadcrumb { max-width: var(--max); margin: 0 auto; padding: 16px 32px 0; display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); }
+.breadcrumb a { color: var(--muted); text-decoration: none; transition: color .15s; }
+.breadcrumb a:hover { color: var(--black); }
+.breadcrumb .sep { opacity: .4; }
+@media(max-width:768px) { .breadcrumb { padding: 12px 20px 0; } }
+
+/* ─── LOADING ─── */
+#loadingState { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 16px; color: var(--muted); }
+.loader { width: 36px; height: 36px; border: 2px solid var(--border); border-top-color: var(--black); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── NOT FOUND ─── */
+#notFound { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 12px; text-align: center; padding: 40px; }
+#notFound h2 { font-size: 22px; font-weight: 400; }
+#notFound p { color: var(--muted); font-size: 14px; }
+#notFound a { margin-top: 8px; padding: 12px 28px; background: var(--black); color: var(--white); text-decoration: none; border-radius: var(--r); font-size: 13px; font-weight: 500; }
+
+/* ─── LAYOUT PRODUIT ─── */
+#productWrap { display: none; }
+.product-inner { max-width: var(--max); margin: 0 auto; padding: 28px 32px 80px; display: grid; grid-template-columns: 1fr 460px; gap: 64px; align-items: start; }
+@media(max-width:960px) { .product-inner { grid-template-columns: 1fr; gap: 36px; padding: 20px 20px 60px; } }
+
+/* ─── GALERIE GAUCHE ─── */
+.gallery { display: flex; gap: 12px; position: sticky; top: calc(var(--nav-h) + 20px); }
+@media(max-width:960px) { .gallery { position: static; } }
+.gallery-thumbs { display: flex; flex-direction: column; gap: 8px; width: 72px; flex-shrink: 0; }
+.gallery-thumbs img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1.5px solid var(--border); cursor: pointer; transition: border-color .15s, opacity .15s; opacity: .55; }
+.gallery-thumbs img.active { border-color: var(--black); opacity: 1; }
+.gallery-main { flex: 1; position: relative; border-radius: 10px; overflow: hidden; background: var(--bg); max-height: calc(100vh - var(--nav-h) - 56px); }
+.gallery-main-img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; max-height: calc(100vh - var(--nav-h) - 56px); }
+.gallery-placeholder { width: 100%; aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; font-size: 56px; background: var(--bg); max-height: calc(100vh - var(--nav-h) - 56px); }
+@media(max-width:960px) { .gallery-main { max-height: none; } .gallery-main-img { max-height: none; } .gallery-placeholder { max-height: none; } }
+.gallery-nav { position: absolute; bottom: 14px; right: 14px; display: flex; gap: 6px; }
+.gallery-btn { width: 34px; height: 34px; background: rgba(255,255,255,.92); border: 1px solid rgba(0,0,0,.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+.gallery-btn:hover { background: var(--white); }
+.gallery-btn svg { width: 14px; height: 14px; }
+@media(max-width:600px) { .gallery { flex-direction: column-reverse; } .gallery-thumbs { flex-direction: row; width: 100%; overflow-x: auto; padding-bottom: 4px; } .gallery-thumbs img { width: 60px; height: 60px; flex-shrink: 0; } }
+
+/* ─── DETAIL DROITE ─── */
+.prod-detail { display: flex; flex-direction: column; }
+.prod-badges { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.prod-badge { font-size: 10px; font-weight: 600; padding: 4px 12px; border-radius: 20px; letter-spacing: .06em; text-transform: uppercase; background: var(--black); color: var(--white); }
+.prod-name { font-size: 30px; font-weight: 400; letter-spacing: -.02em; margin-bottom: 8px; line-height: 1.15; }
+.prod-tagline { font-size: 14px; color: var(--soft); margin-bottom: 20px; line-height: 1.6; }
+.prod-price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.prod-price { font-size: 28px; font-weight: 400; }
+.prod-old-price { font-size: 16px; color: var(--muted); text-decoration: line-through; }
+.prod-save { font-size: 11px; color: #16a34a; font-weight: 600; background: #f0fdf4; padding: 3px 9px; border-radius: 4px; }
+.hr { height: 1px; background: var(--border); margin: 20px 0; }
+
+/* Variantes */
+.opt-block { margin-bottom: 18px; }
+.opt-label { font-size: 12px; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.opt-label strong { font-weight: 500; }
+.opt-val { color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 8px 18px; border: 1.5px solid var(--border); border-radius: var(--r); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .15s; color: var(--soft); background: var(--white); user-select: none; }
+.chip:hover { border-color: #999; color: var(--text); }
+.chip.on { border-color: var(--black); background: var(--black); color: var(--white); }
+.color-chip { display: flex; align-items: center; gap: 7px; padding: 7px 14px 7px 10px; border: 1.5px solid var(--border); border-radius: var(--r); cursor: pointer; transition: all .15s; font-size: 13px; color: var(--soft); background: var(--white); user-select: none; }
+.color-chip:hover { border-color: #999; }
+.color-chip.on { border-color: var(--black); background: var(--black); color: var(--white); }
+.color-chip.on .cdot { box-shadow: 0 0 0 2px var(--black), 0 0 0 3.5px var(--white); }
+.cdot { width: 13px; height: 13px; border-radius: 50%; border: 1px solid rgba(0,0,0,.12); flex-shrink: 0; }
+
+/* Quantité */
+.qty-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.qty-label { font-size: 12px; font-weight: 500; min-width: 70px; }
+.qty-wrap { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: var(--r); overflow: hidden; width: fit-content; }
+.qty-btn { width: 42px; height: 42px; border: none; background: var(--white); font-size: 22px; cursor: pointer; color: var(--text); font-weight: 300; transition: background .15s; }
+.qty-btn:hover { background: var(--bg); }
+.qty-num { width: 52px; text-align: center; border: none; border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border); font-family: var(--font); font-size: 14px; height: 42px; outline: none; -moz-appearance: textfield; background: var(--white); }
+.qty-num::-webkit-inner-spin-button, .qty-num::-webkit-outer-spin-button { display: none; }
+
+/* Bouton achat */
+.btn-buy {
+  width: 100%; padding: 16px 24px;
+  background: var(--black); color: var(--white);
+  border: none; font-family: var(--font); font-size: 15px; font-weight: 500;
+  border-radius: var(--r); cursor: pointer;
+  transition: opacity .2s, transform .15s;
+  margin-bottom: 8px; text-decoration: none;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-buy:hover { opacity: .86; transform: translateY(-1px); }
+.btn-buy svg { width: 17px; height: 17px; flex-shrink: 0; }
+.stripe-note { display: none; align-items: center; justify-content: center; gap: 5px; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.stripe-note svg { width: 12px; height: 12px; }
+.btn-contact { width: 100%; padding: 13px 20px; background: var(--white); color: var(--text); border: 1.5px solid var(--border); font-family: var(--font); font-size: 13px; border-radius: var(--r); cursor: pointer; transition: border-color .2s; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-contact:hover { border-color: var(--text); }
+.btn-contact svg { width: 15px; height: 15px; }
+.trust-row { display: flex; gap: 16px; margin-top: 18px; flex-wrap: wrap; }
+.trust-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.trust-item svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* ─── SPECS INLINE (sous bouton achat) ─── */
+.specs-inline { margin-top: 20px; display: flex; flex-direction: column; gap: 0; border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; }
+.specs-inline-title { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 12px 16px 8px; }
+.spec-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--border); transition: background .15s; }
+.spec-row:hover { background: var(--bg); }
+.spec-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.spec-icon svg { width: 14px; height: 14px; color: var(--black); opacity: .6; }
+.spec-key { font-size: 12px; color: var(--muted); flex: 1; }
+.spec-val { font-size: 12px; font-weight: 500; color: var(--text); text-align: right; }
+
+/* ─── STORY SECTION ─── */
+.story-section { background: var(--white); padding: 80px 32px; }
+.story-inner { max-width: var(--max); margin: 0 auto; display: grid; grid-template-columns: 280px 1fr; gap: 80px; align-items: start; }
+.story-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding-top: 4px; }
+.story-text { font-size: 15px; color: var(--soft); line-height: 1.9; white-space: pre-wrap; max-width: 680px; }
+@media(max-width:768px) { .story-section { padding: 48px 20px; } .story-inner { grid-template-columns: 1fr; gap: 16px; } }
+
+/* ─── PRODUCT INFORMATION ─── */
+.info-section { background: var(--bg); padding: 80px 32px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.info-inner { max-width: var(--max); margin: 0 auto; }
+.info-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 40px; }
+.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--white); }
+.info-block { padding: 28px 32px; border-right: 1px solid var(--border); }
+.info-block:last-child { border-right: none; }
+.info-block-title { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+.info-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.info-item:last-child { border-bottom: none; }
+.info-item-icon { width: 26px; height: 26px; border-radius: 7px; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.info-item-icon svg { width: 12px; height: 12px; opacity: .5; }
+.info-item-key { font-size: 12px; color: var(--muted); flex: 1; }
+.info-item-val { font-size: 12px; font-weight: 500; }
+@media(max-width:768px) { .info-section { padding: 48px 20px; } .info-grid { grid-template-columns: 1fr; } .info-block { border-right: none; border-bottom: 1px solid var(--border); } .info-block:last-child { border-bottom: none; } }
+
+/* ─── HERO STORY ─── */
+.hero-story { position: relative; max-height: 600px; overflow: hidden; }
+.hero-story-img { width: 100%; height: 600px; object-fit: cover; display: block; filter: brightness(.85); }
+.hero-story-caption { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.7); background: rgba(0,0,0,.35); padding: 8px 20px; border-radius: 20px; white-space: nowrap; }
+@media(max-width:768px) { .hero-story-img { height: 320px; } .hero-story-caption { font-size: 10px; bottom: 20px; } }
+
+/* ─── MORE SECTION ─── */
+.more-section { background: var(--white); padding: 100px 32px; text-align: center; }
+.more-inner { max-width: 640px; margin: 0 auto; }
+.more-label { font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+.more-title { font-size: 36px; font-weight: 300; letter-spacing: -.03em; color: var(--black); margin-bottom: 20px; line-height: 1.2; }
+.more-text { font-size: 15px; color: var(--soft); line-height: 1.9; }
+@media(max-width:768px) { .more-section { padding: 64px 20px; } .more-title { font-size: 26px; } }
+
+/* ─── SIMILAR PRODUCTS ─── */
+.similar-section { background: var(--bg); padding: 80px 32px 100px; border-top: 1px solid var(--border); }
+.similar-inner { max-width: var(--max); margin: 0 auto; }
+.similar-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 36px; }
+.similar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.sim-card { text-decoration: none; color: var(--text); display: block; }
+.sim-img-wrap { aspect-ratio: 3/4; border-radius: 12px; overflow: hidden; background: var(--white); margin-bottom: 14px; }
+.sim-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+.sim-card:hover .sim-img-wrap img { transform: scale(1.04); }
+.sim-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; background: var(--white); }
+.sim-name { font-size: 14px; font-weight: 500; letter-spacing: -.01em; margin-bottom: 4px; }
+.sim-price { font-size: 13px; color: var(--muted); }
+@media(max-width:900px) { .similar-grid { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:500px) { .similar-section { padding: 48px 20px 64px; } }
+
+/* ─── FOOTER ─── */
+#footer { background: #111; color: rgba(255,255,255,.7); }
+.footer-inner { max-width: var(--max); margin: 0 auto; padding: 60px 32px 40px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
+@media(max-width:900px) { .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; } }
+@media(max-width:600px) { .footer-inner { grid-template-columns: 1fr; gap: 28px; padding: 40px 20px 28px; } }
+.footer-brand p { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,.55); margin-bottom: 4px; }
+.footer-tagline { font-size: 12px; margin-top: 12px !important; color: rgba(255,255,255,.3) !important; }
+.footer-col-title { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.35); margin-bottom: 14px; font-weight: 500; }
+.footer-col { display: flex; flex-direction: column; gap: 2px; }
+.footer-col a { text-decoration: none; color: rgba(255,255,255,.55); font-size: 13px; padding: 5px 0; transition: color .15s; }
+.footer-col a:hover { color: #fff; }
+.footer-social { display: flex; gap: 10px; margin-top: 12px; }
+.footer-social a { width: 36px; height: 36px; border: 1px solid rgba(255,255,255,.15); border-radius: 50%; display: flex !important; align-items: center; justify-content: center; transition: border-color .15s !important; }
+.footer-social a:hover { border-color: rgba(255,255,255,.5) !important; }
+.footer-social svg { width: 16px; height: 16px; }
+.footer-bottom { max-width: var(--max); margin: 0 auto; padding: 20px 32px; border-top: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,.3); flex-wrap: wrap; gap: 12px; }
+.footer-pay { display: flex; gap: 6px; align-items: center; }
+@media(max-width:600px) { .footer-bottom { padding: 16px 20px; } }
+</style>
+</head>
+<body data-page="boutique">
+
+<!-- ─── NAVBAR ─── -->
+<header id="navbar">
+  <div class="nav-inner">
+    <a href="/index.html">
+      <img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" style="height:44px;width:auto;object-fit:contain;border-radius:6px" alt="TBT3D">
+    </a>
+    <nav class="nav-links">
+      <a href="/index.html" data-page="home">Home</a>
+      <a href="/boutique.html" data-page="boutique">Boutique</a>
+      <a href="/devis.html" data-page="devis">Devis STL</a>
+      <a href="/a-propos.html" data-page="apropos">À propos</a>
+      <a href="/contact.html" data-page="contact">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="nav-icon" onclick="toggleSearch()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
+      <a href="/compte.html" class="nav-icon" title="Mon compte">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </a>
+      <button class="nav-icon nav-burger" onclick="toggleMobileNav()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="search-bar" id="searchBar">
+    <div class="search-inner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="18" height="18"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Rechercher..." oninput="searchLive()" onkeydown="searchKeydown(event)">
+      <button onclick="toggleSearch()">×</button>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="/index.html">Home</a>
+    <a href="/boutique.html">Boutique</a>
+    <a href="/devis.html">Devis STL</a>
+    <a href="/a-propos.html">À propos</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/compte.html">Mon compte</a>
+  </div>
+</header>
+
+<!-- ─── BREADCRUMB ─── -->
+<nav class="breadcrumb" id="breadcrumb" style="display:none">
+  <a href="/index.html">Home</a>
+  <span class="sep">›</span>
+  <a href="/boutique.html">Boutique</a>
+  <span class="sep">›</span>
+  <span id="bcName">Produit</span>
+</nav>
+
+<!-- ─── LOADING ─── -->
+<div id="loadingState">
+  <div class="loader"></div>
+  <span style="font-size:13px">Chargement du produit…</span>
+</div>
+
+<!-- ─── NOT FOUND ─── -->
+<div id="notFound">
+  <h2>Produit introuvable</h2>
+  <p>Ce produit n'existe pas ou a été supprimé.</p>
+  <a href="/boutique.html">← Retour à la boutique</a>
+</div>
+
+<!-- ─── PRODUIT ─── -->
+<div id="productWrap">
+
+  <div class="product-inner">
+
+    <!-- GAUCHE : galerie images -->
+    <div class="gallery">
+      <div class="gallery-thumbs" id="galleryThumbs"></div>
+      <div class="gallery-main">
+        <img id="mainImg" class="gallery-main-img" src="" alt="" style="display:none">
+        <div id="mainPlaceholder" class="gallery-placeholder">🏮</div>
+        <div class="gallery-nav" id="galleryNav" style="display:none">
+          <button class="gallery-btn" onclick="prevImg()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="gallery-btn" onclick="nextImg()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DROITE : détails + achat -->
+    <div class="prod-detail">
+
+      <div class="prod-badges" id="prodBadges"></div>
+      <h1 class="prod-name" id="prodName"></h1>
+      <p class="prod-tagline" id="prodTagline"></p>
+
+      <div class="prod-price-row">
+        <span class="prod-price" id="prodPrice"></span>
+        <span class="prod-old-price" id="prodOldPrice" style="display:none"></span>
+        <span class="prod-save" id="prodSave" style="display:none"></span>
+      </div>
+
+      <div class="hr"></div>
+
+      <!-- Variantes générées dynamiquement -->
+      <div id="variantsWrap"></div>
+
+      <!-- Quantité -->
+      <div class="qty-row">
+        <span class="qty-label">Quantité</span>
+        <div class="qty-wrap">
+          <button class="qty-btn" id="qMinus">−</button>
+          <input type="number" class="qty-num" id="qNum" value="1" min="1" max="99" readonly>
+          <button class="qty-btn" id="qPlus">+</button>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <!-- Bouton achat Stripe -->
+      <a href="#" class="btn-buy" id="btnBuy" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Acheter
+      </a>
+
+      <!-- Note sécurité Stripe -->
+      <p class="stripe-note" id="stripeNote">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Paiement 100% sécurisé via Stripe
+      </p>
+
+      <!-- Bouton contact secondaire -->
+      <a href="/contact.html" class="btn-contact">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Une question ? Contactez-nous
+      </a>
+
+      <!-- Caractéristiques inline (générées dynamiquement) -->
+      <div class="specs-inline" id="specsInline" style="display:none"></div>
+
+      <!-- Badges de confiance -->
+      <div class="trust-row">
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Paiement sécurisé
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Made in Lille
+        </div>
+        <div class="trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          Livraison 7–30 jours
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── DIVIDER ─── -->
+  <div style="height:1px;background:var(--border);max-width:var(--max);margin:0 auto 0;"></div>
+
+  <!-- ─── DESCRIPTION STORYTELLING ─── -->
+  <div class="story-section" id="storySection" style="display:none">
+    <div class="story-inner">
+      <div class="story-label">DESCRIPTION.</div>
+      <p class="story-text" id="prodDesc"></p>
+    </div>
+  </div>
+
+  <!-- ─── PRODUCT INFORMATION ─── -->
+  <div class="info-section" id="infoSection" style="display:none">
+    <div class="info-inner">
+      <div class="info-label">PRODUCT INFORMATION.</div>
+      <div class="info-grid" id="infoGrid"></div>
+    </div>
+  </div>
+
+  <!-- ─── GRANDE IMAGE STORYTELLING ─── -->
+  <div class="hero-story" id="heroStory" style="display:none">
+    <img id="heroStoryImg" src="" alt="" class="hero-story-img">
+    <div class="hero-story-caption" id="heroStoryCaption"></div>
+  </div>
+
+  <!-- ─── MORE THAN A DESIGN ─── -->
+  <div class="more-section">
+    <div class="more-inner">
+      <div class="more-label">FABRIQUÉ À LILLE.</div>
+      <h2 class="more-title">Plus qu'un objet.</h2>
+      <p class="more-text">Chaque pièce est conçue, modélisée et imprimée en 3D à la main dans notre atelier à Lille. Nous utilisons des matériaux soigneusement sélectionnés pour allier durabilité et esthétique. Pas de production en masse — chaque commande est unique.</p>
+    </div>
+  </div>
+
+  <!-- ─── PRODUITS SIMILAIRES ─── -->
+  <div class="similar-section" id="similarSection" style="display:none">
+    <div class="similar-inner">
+      <div class="similar-label">AUTRES CRÉATIONS.</div>
+      <div class="similar-grid" id="similarGrid"></div>
+    </div>
+  </div>
+
+</div><!-- #productWrap -->
+
+<!-- ─── FOOTER ─── -->
+<footer id="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="/index.html">
+        <img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D">
+      </a>
+      <p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p>
+      <p class="footer-tagline">Made in France 🇫🇷</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Navigation</div>
+      <a href="/index.html">Home</a>
+      <a href="/boutique.html">Boutique</a>
+      <a href="/devis.html">Impression sur mesure</a>
+      <a href="/a-propos.html">À propos</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Légal</div>
+      <a href="/mentions-legales.html">Mentions légales</a>
+      <a href="/cgv.html">CGV</a>
+      <a href="/politique-confidentialite.html">Confidentialité</a>
+      <a href="/politique-retour.html">Retours</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Contact</div>
+      <a href="/contact.html">Formulaire</a>
+      <a href="/devis.html">Devis STL</a>
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+        </a>
+        <a href="#" aria-label="TikTok">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span>
+    <span class="footer-pay">
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#003087"/><text x="19" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="white" font-family="sans-serif">PayPal</text></svg>
+    </span>
+  </div>
+</footer>
+
+<!-- ─── FIREBASE + LOGIQUE PRODUIT ─── -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
+  authDomain: "tbt3d-a0f04.firebaseapp.com",
+  projectId: "tbt3d-a0f04",
+  storageBucket: "tbt3d-a0f04.firebasestorage.app",
+  appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
+};
+
+const db = getFirestore(initializeApp(firebaseConfig));
+const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// ── Récupération du slug dans l'URL ──
+const slug = new URLSearchParams(window.location.search).get('id');
+if (!slug) {
+  showNotFound();
+} else {
+  loadProduct(slug);
+}
+
+async function loadProduct(slug) {
+  try {
+    // 1. Cherche par slug
+    let snap = await getDocs(query(collection(db, 'articles'), where('slug', '==', slug)));
+    // 2. Fallback : cherche par id (articles créés avant l'ajout du slug)
+    if (snap.empty) {
+      snap = await getDocs(query(collection(db, 'articles'), where('id', '==', slug)));
+    }
+    if (snap.empty) {
+      showNotFound();
+      return;
+    }
+    const art = { id: snap.docs[0].id, ...snap.docs[0].data() };
+    if (art.status !== 'published') {
+      showNotFound();
+      return;
+    }
+    renderProduct(art);
+  } catch (e) {
+    console.error('Erreur Firebase:', e);
+    showNotFound();
+  }
+}
+
+function showNotFound() {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('notFound').style.display = 'flex';
+}
+
+// ── État galerie ──
+let _photos = [];
+let _idx = 0;
+
+window.goToImg = function(i) {
+  _idx = i;
+  document.getElementById('mainImg').src = _photos[i];
+  document.querySelectorAll('#galleryThumbs img').forEach((el, j) => {
+    el.classList.toggle('active', j === i);
+  });
+};
+window.prevImg = function() { goToImg((_idx - 1 + _photos.length) % _photos.length); };
+window.nextImg = function() { goToImg((_idx + 1) % _photos.length); };
+
+// ── Variantes avec images stockées ──
+let _variantImages = {}; // { "gi_label": "url" }
+
+// ── Sélection variante ──
+window.pickVariant = function(el, gi) {
+  el.closest('.chips').querySelectorAll('.chip, .color-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  const lbl = document.getElementById('vv' + gi);
+  if (lbl) lbl.textContent = el.dataset.val;
+  // Changer l'image si une image est associée à cette variante
+  const key = gi + '_' + el.dataset.val;
+  if (_variantImages[key]) {
+    const idx = _photos.indexOf(_variantImages[key]);
+    if (idx !== -1) {
+      goToImg(idx);
+    } else {
+      // Image de variante pas dans la galerie principale, l'afficher directement
+      document.getElementById('mainImg').src = _variantImages[key];
+      document.getElementById('mainImg').style.display = 'block';
+      document.getElementById('mainPlaceholder').style.display = 'none';
+      document.querySelectorAll('#galleryThumbs img').forEach(t => t.classList.remove('active'));
+    }
+  }
+};
+
+// ── Rendu du produit ──
+function renderProduct(art) {
+  document.getElementById('loadingState').style.display = 'none';
+
+  // SEO
+  document.title = art.name + ' — TBT3D';
+  document.getElementById('metaDesc').setAttribute('content', art.tagline || art.name + ' — TBT3D');
+
+  // Breadcrumb
+  document.getElementById('bcName').textContent = art.name;
+  document.getElementById('breadcrumb').style.display = '';
+
+  // Badge
+  if (art.badge) {
+    document.getElementById('prodBadges').innerHTML = `<span class="prod-badge">${esc(art.badge)}</span>`;
+  }
+
+  // Nom & tagline
+  document.getElementById('prodName').textContent = art.name;
+  document.getElementById('prodTagline').textContent = art.tagline || '';
+
+  // Prix
+  document.getElementById('prodPrice').textContent = parseFloat(art.price).toFixed(2) + ' €';
+  if (art.oldPrice) {
+    const pct = Math.round((1 - art.price / art.oldPrice) * 100);
+    const oldEl = document.getElementById('prodOldPrice');
+    const saveEl = document.getElementById('prodSave');
+    oldEl.textContent = parseFloat(art.oldPrice).toFixed(2) + ' €';
+    oldEl.style.display = '';
+    saveEl.textContent = '−' + pct + '%';
+    saveEl.style.display = '';
+  }
+
+  // Galerie
+  _photos = art.photos || [];
+  if (_photos.length > 0) {
+    const mainImg = document.getElementById('mainImg');
+    mainImg.src = _photos[0];
+    mainImg.alt = art.name;
+    mainImg.style.display = 'block';
+    document.getElementById('mainPlaceholder').style.display = 'none';
+    if (_photos.length > 1) {
+      document.getElementById('galleryThumbs').innerHTML = _photos.map((src, i) =>
+        `<img src="${src}" alt="${esc(art.name)} ${i + 1}" class="${i === 0 ? 'active' : ''}" onclick="goToImg(${i})">`
+      ).join('');
+      document.getElementById('galleryNav').style.display = 'flex';
+    }
+  }
+
+  // Variantes
+  if (art.variants && art.variants.length > 0) {
+    // Construire la map des images de variantes
+    _variantImages = {};
+    art.variants.forEach((vg, gi) => {
+      vg.options.forEach(opt => {
+        if (opt.image) {
+          _variantImages[gi + '_' + opt.label] = opt.image;
+        }
+      });
+    });
+
+    document.getElementById('variantsWrap').innerHTML = art.variants.map((vg, gi) => {
+      const isColor = vg.options.some(o => o.color);
+      const chips = vg.options.map((opt, oi) => {
+        if (isColor) {
+          return `<div class="color-chip${oi === 0 ? ' on' : ''}" onclick="pickVariant(this,${gi})" data-val="${esc(opt.label)}">
+            <span class="cdot" style="background:${opt.color || '#888'}"></span>${esc(opt.label)}
+          </div>`;
+        }
+        return `<div class="chip${oi === 0 ? ' on' : ''}" onclick="pickVariant(this,${gi})" data-val="${esc(opt.label)}">${esc(opt.label)}</div>`;
+      }).join('');
+      return `<div class="opt-block">
+        <div class="opt-label">
+          <strong>${esc(vg.name)}</strong>
+          <span class="opt-val" id="vv${gi}">${esc(vg.options[0]?.label || '')}</span>
+        </div>
+        <div class="chips">${chips}</div>
+      </div>`;
+    }).join('');
+
+    // Afficher l'image de la 1ère variante si elle en a une
+    const firstVg = art.variants[0];
+    if (firstVg?.options?.[0]?.image) {
+      const firstKey = '0_' + firstVg.options[0].label;
+      if (_variantImages[firstKey]) {
+        // Switcher vers cette image après chargement galerie
+        setTimeout(() => {
+          const idx = _photos.indexOf(_variantImages[firstKey]);
+          if (idx !== -1) goToImg(idx);
+        }, 50);
+      }
+    }
+  }
+
+  // Description
+  if (art.desc) {
+    document.getElementById('prodDesc').textContent = art.desc;
+    document.getElementById('storySection').style.display = '';
+  }
+
+  // Caractéristiques
+  if (art.caracs && art.caracs.filter(c => c.key).length > 0) {
+    const validCaracs = art.caracs.filter(c => c.key);
+
+    const SPEC_ICONS = {
+      default: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+      matiere: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
+      materiau: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
+      taille: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 3H3v18h18V3z"/><path d="M3 9h18M9 21V9"/></svg>`,
+      dimension: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 3H3v18h18V3z"/><path d="M3 9h18M9 21V9"/></svg>`,
+      hauteur: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="20" x2="12" y2="4"/><polyline points="6 10 12 4 18 10"/></svg>`,
+      largeur: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></svg>`,
+      poids: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 8a2 2 0 00-1.905 1.405L3 14l-.5 6h19l-.5-6-1.596-4.595A2 2 0 0017.5 8z"/><circle cx="12" cy="6" r="3"/></svg>`,
+      couleur: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 011.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>`,
+      finition: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`,
+      impression: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`,
+      livraison: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>`,
+      garantie: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+      ampoule: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/></svg>`,
+      cable: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12H3M21 12h-2M12 3V1M12 23v-2"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3"/></svg>`,
+      technologie: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>`,
+    };
+    function getIcon(key) {
+      const k = key.toLowerCase().trim();
+      for (const [p, icon] of Object.entries(SPEC_ICONS)) {
+        if (p !== 'default' && k.includes(p)) return icon;
+      }
+      return SPEC_ICONS.default;
+    }
+
+    // Specs inline sous le bouton achat (colonne droite)
+    const specsInline = document.getElementById('specsInline');
+    specsInline.innerHTML = `<div class="specs-inline-title">Caractéristiques</div>` +
+      validCaracs.map(c => `
+        <div class="spec-row">
+          <div class="spec-icon">${getIcon(c.key)}</div>
+          <span class="spec-key">${esc(c.key)}</span>
+          <span class="spec-val">${esc(c.val)}</span>
+        </div>`).join('');
+    specsInline.style.display = '';
+
+    // Product Information structuré style Sonogo (3 colonnes)
+    const chunkSize = Math.ceil(validCaracs.length / 3);
+    const cols = [
+      validCaracs.slice(0, chunkSize),
+      validCaracs.slice(chunkSize, chunkSize * 2),
+      validCaracs.slice(chunkSize * 2)
+    ].filter(c => c.length > 0);
+    const BLOCK_TITLES = ['Dimensions & Taille', 'Détails techniques', 'Matériaux'];
+    document.getElementById('infoGrid').innerHTML = cols.map((col, i) => `
+      <div class="info-block">
+        <div class="info-block-title">${BLOCK_TITLES[i] || 'Informations'}</div>
+        ${col.map(c => `
+          <div class="info-item">
+            <div class="info-item-icon">${getIcon(c.key)}</div>
+            <span class="info-item-key">${esc(c.key)}</span>
+            <span class="info-item-val">${esc(c.val)}</span>
+          </div>`).join('')}
+      </div>`).join('');
+    document.getElementById('infoSection').style.display = '';
+  }
+
+  // Grande image storytelling = 2ème photo si dispo
+  if (_photos.length >= 2) {
+    document.getElementById('heroStoryImg').src = _photos[1];
+    document.getElementById('heroStoryImg').alt = art.name;
+    document.getElementById('heroStoryCaption').textContent = 'Fabriqué à Lille · Impression 3D · Made in France';
+    document.getElementById('heroStory').style.display = '';
+  }
+
+  // Bouton achat
+  const btnBuy = document.getElementById('btnBuy');
+  const priceStr = parseFloat(art.price).toFixed(2) + ' €';
+  if (art.payhip) {
+    btnBuy.href = art.payhip;
+    btnBuy.setAttribute('target', '_blank');
+    btnBuy.setAttribute('rel', 'noopener noreferrer');
+    btnBuy.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
+        <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+      </svg>
+      Acheter — ${priceStr}`;
+    document.getElementById('stripeNote').style.display = 'flex';
+  } else {
+    btnBuy.href = '/contact.html';
+    btnBuy.removeAttribute('target');
+    btnBuy.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0">
+        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+      </svg>
+      Commander — nous contacter`;
+  }
+
+  // Quantité
+  document.getElementById('qMinus').onclick = function() {
+    const n = document.getElementById('qNum');
+    if (+n.value > 1) n.value = +n.value - 1;
+  };
+  document.getElementById('qPlus').onclick = function() {
+    const n = document.getElementById('qNum');
+    if (+n.value < 99) n.value = +n.value + 1;
+  };
+
+  // Afficher le produit
+  document.getElementById('productWrap').style.display = 'block';
+
+  // Charger les produits similaires (autres articles publiés)
+  loadSimilar(art.id, art.slug);
+}
+
+async function loadSimilar(currentId, currentSlug) {
+  try {
+    const snap = await getDocs(query(collection(db, 'articles'), where('status', '==', 'published')));
+    const others = [];
+    snap.forEach(d => {
+      const a = { id: d.id, ...d.data() };
+      if (a.id !== currentId && a.slug !== currentSlug) others.push(a);
+    });
+    if (others.length === 0) return;
+    // Max 4 produits
+    const toShow = others.slice(0, 4);
+    document.getElementById('similarGrid').innerHTML = toShow.map(a => `
+      <a href="/produit.html?id=${esc(a.slug || a.id)}" class="sim-card">
+        <div class="sim-img-wrap">
+          ${a.photos?.[0]
+            ? `<img src="${esc(a.photos[0])}" alt="${esc(a.name)}" loading="lazy">`
+            : `<div class="sim-img-placeholder">🏮</div>`}
+        </div>
+        <div class="sim-name">${esc(a.name)}</div>
+        <div class="sim-price">${parseFloat(a.price).toFixed(2)} €</div>
+      </a>`).join('');
+    document.getElementById('similarSection').style.display = '';
+  } catch(e) { console.warn('Similar products error:', e); }
+}
+</script>
+
+<!-- ─── NAVBAR UTILS ─── -->
+<script>
+// Année footer
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+// Lien actif navbar
+document.querySelectorAll('.nav-links a').forEach(function(a) {
+  if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
+});
+
+// Scroll shadow navbar
+window.addEventListener('scroll', function() {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+});
+
+// Recherche
+function toggleSearch() {
+  var b = document.getElementById('searchBar');
+  b.classList.toggle('open');
+  if (b.classList.contains('open')) {
+    setTimeout(function() { document.getElementById('searchInput').focus(); }, 50);
+  }
+}
+
+function toggleMobileNav() {
+  document.getElementById('mobileNav').classList.toggle('open');
+}
+
+// Tabs
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('on'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('on'); });
+  document.getElementById('tab-' + id).classList.add('on');
+  btn.classList.add('on');
+}
+
+// Search live (nécessite search.js)
+function searchLive() {}
+function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
+</script>
+
+<script src="/search.js"></script>
+</body>
+</html>
