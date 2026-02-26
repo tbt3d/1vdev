@@ -628,6 +628,11 @@ renderCart();
         <div><strong>Paiement confirmé !</strong><span>Merci pour votre commande. Vous recevrez une confirmation par email. Thibault s'occupe du reste !</span></div>`;
       container.prepend(banner);
     }
+    // Rediriger vers confirmation si session_id disponible
+    const sessionId = params.get('session_id');
+    if (sessionId) {
+      setTimeout(() => window.location.replace('https://tbt3d.fr/confirmation.html?session_id=' + sessionId), 1500);
+    }
     window.history.replaceState({}, '', '/panier.html');
   }
 
