@@ -444,10 +444,15 @@ function openCheckout() {
 }
 
 // ── Prépare les items pour le Worker (gère stripePrice ET isDynamic) ──
-function buildWorkerItems(items) {
+function buildWorkerItems(items, mode) {
   return items.map(item => {
-    if (item.stripePrice && item.stripePrice.startsWith('price_')) {
-      return { stripePrice: item.stripePrice, qty: item.qty };
+    // Choisit le bon price ID selon le mode (test ou live)
+    let priceId = item.stripePrice;
+    if (mode === 'live' && item.stripePriceLive) priceId = item.stripePriceLive;
+    else if (mode === 'test' && item.stripePriceTest) priceId = item.stripePriceTest;
+    else if (item.stripePriceTest) priceId = item.stripePriceTest; // fallback test
+    if (priceId && priceId.startsWith('price_')) {
+      return { stripePrice: priceId, qty: item.qty };
     }
     if (item.isDynamic) {
       return {
@@ -516,6 +521,7 @@ async function stripeCheckout() {
   try {
     const cfg = await getPanierCfg();
     const workerUrl  = cfg.workerUrl  || WORKER_URL_DEFAULT;
+    const stripeMode = cfg.stripeMode || 'test';
     const successUrl = cfg.successUrl || 'https://tbt3d.fr/panier.html?success=1';
     const cancelUrl  = cfg.cancelUrl  || 'https://tbt3d.fr/panier.html?cancelled=1';
 
@@ -558,6 +564,7 @@ async function stripeCheckoutPartial() {
   try {
     const cfg = await getPanierCfg();
     const workerUrl  = cfg.workerUrl  || WORKER_URL_DEFAULT;
+    const stripeMode = cfg.stripeMode || 'test';
     const successUrl = cfg.successUrl || 'https://tbt3d.fr/panier.html?success=1';
     const cancelUrl  = cfg.cancelUrl  || 'https://tbt3d.fr/panier.html?cancelled=1';
 
@@ -567,7 +574,7 @@ async function stripeCheckoutPartial() {
     const res = await fetch(workerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cancelUrl, successUrl, items: buildWorkerItems(stripeItems) }),
+      body: JSON.stringify({ cancelUrl, successUrl, items: buildWorkerItems(stripeItems, stripeMode) }),
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || 'Erreur serveur');

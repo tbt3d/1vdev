@@ -744,11 +744,26 @@ tr:hover td{background:rgba(255,255,255,.01)}
               </div>
               <div class="field">
                 <label>Stripe Price ID <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">— pour panier multi-produits</span></label>
-                <input type="text" id="aStripePrice" placeholder="price_1Abc123XYZ…">
-                <div class="fhint" style="display:flex;align-items:center;gap:6px">
-                  <span>Trouvez-le dans</span>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                  <div>
+                    <div style="font-size:10px;font-weight:600;color:#d97706;margin-bottom:5px;display:flex;align-items:center;gap:4px">
+                      <span style="width:8px;height:8px;background:#f59e0b;border-radius:50%;display:inline-block"></span>
+                      Mode TEST
+                    </div>
+                    <input type="text" id="aStripePriceTest" placeholder="price_test_…" style="font-family:monospace;font-size:12px;border-color:rgba(245,158,11,.4)">
+                  </div>
+                  <div>
+                    <div style="font-size:10px;font-weight:600;color:#16a34a;margin-bottom:5px;display:flex;align-items:center;gap:4px">
+                      <span style="width:8px;height:8px;background:#16a34a;border-radius:50%;display:inline-block"></span>
+                      Mode LIVE
+                    </div>
+                    <input type="text" id="aStripePriceLive" placeholder="price_live_…" style="font-family:monospace;font-size:12px;border-color:rgba(22,163,74,.4)">
+                  </div>
+                </div>
+                <div class="fhint" style="display:flex;align-items:center;gap:6px;margin-top:6px">
+                  <span>Trouvez-les dans</span>
                   <a href="https://dashboard.stripe.com/products" target="_blank" style="color:var(--accent);text-decoration:none;font-size:10px;border:1px solid rgba(255,107,53,.3);padding:1px 7px;border-radius:10px">Stripe → Catalogue →</a>
-                  <span>Copier l'ID "price_…" du tarif</span>
+                  <span>Toggle Test/Live → copier l'ID "price_…"</span>
                 </div>
               </div>
             </div>
@@ -997,12 +1012,25 @@ tr:hover td{background:rgba(255,255,255,.01)}
               <div class="fhint">L'URL de ton Worker Cloudflare qui crée les sessions Stripe. Utilisée par le panier et le bouton "Acheter maintenant" de la boutique.</div>
             </div>
             <div class="field" style="margin-top:14px">
-              <label>Mode Stripe</label>
-              <select id="pcfgStripeMode" style="width:100%;padding:10px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none">
-                <option value="test">🧪 Mode TEST — utiliser pour les développements (cartes fictives)</option>
-                <option value="live">✅ Mode LIVE — paiements réels</option>
-              </select>
-              <div class="fhint">En mode TEST, les price_id Stripe doivent être des IDs test (créés dans le dashboard Stripe avec le toggle "Mode test" activé). En mode LIVE, utiliser les IDs live.</div>
+              <label>Mode actif</label>
+              <div style="display:flex;gap:8px">
+                <label id="pcfgLblTest" onclick="pcfgSelectMode('test')" style="flex:1;display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid #f59e0b;border-radius:10px;cursor:pointer;background:rgba(245,158,11,.1);transition:.2s">
+                  <input type="radio" name="pcfgModePicker" value="test" checked onchange="pcfgSelectMode('test')">
+                  <div>
+                    <div style="font-weight:700;font-size:13px">🧪 Mode TEST</div>
+                    <div style="font-size:11px;color:var(--muted)">Cartes fictives — utilise les Price ID test</div>
+                  </div>
+                </label>
+                <label id="pcfgLblLive" onclick="pcfgSelectMode('live')" style="flex:1;display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid var(--border2);border-radius:10px;cursor:pointer;transition:.2s">
+                  <input type="radio" name="pcfgModePicker" value="live" onchange="pcfgSelectMode('live')">
+                  <div>
+                    <div style="font-weight:700;font-size:13px">✅ Mode LIVE</div>
+                    <div style="font-size:11px;color:var(--muted)">Paiements réels — utilise les Price ID live</div>
+                  </div>
+                </label>
+              </div>
+              <input type="hidden" id="pcfgStripeMode" value="test">
+              <div class="fhint" style="margin-top:6px">Le mode détermine quel Price ID est utilisé au checkout pour chaque produit.</div>
             </div>
           </div>
         </div>
@@ -2053,7 +2081,7 @@ window.generateCombos = () => {
   const newLinks = {};
   combos.forEach(combo => {
     const key = comboKey(combo);
-    newLinks[key] = existing[key] || { url: '', price: '', oldPrice: '', stripePrice: '' };
+    newLinks[key] = existing[key] || { url: '', price: '', oldPrice: '', stripePrice: '', stripePriceTest: '', stripePriceLive: '' };
   });
   window.comboLinks = newLinks;
   comboLinks = newLinks;
@@ -2080,7 +2108,7 @@ function renderComboLinks() {
 
   rows.innerHTML = allCombos.map(combo => {
     const key = comboKey(combo);
-    const data = links[key] || { url: '', price: '', oldPrice: '', stripePrice: '' };
+    const data = links[key] || { url: '', price: '', oldPrice: '', stripePrice: '', stripePriceTest: '', stripePriceLive: '' };
     const hasUrl = data.url && data.url.trim();
     const hasPrice = data.price && String(data.price).trim();
     const hasOld = data.oldPrice && String(data.oldPrice).trim();
@@ -2094,9 +2122,17 @@ function renderComboLinks() {
       <input class="combo-url${hasUrl?' has-url':''}" type="text" placeholder="https://buy.stripe.com/…"
         value="${(data.url||'').replace(/"/g,'&quot;')}"
         oninput="updateCombo('${key.replace(/'/g,"\\'")}','url',this.value);this.classList.toggle('has-url',!!this.value.trim())">
-      <input class="combo-stripe${hasStripe?' has-stripe':''}" type="text" placeholder="price_1Abc…"
-        value="${(data.stripePrice||'').replace(/"/g,'&quot;')}"
-        oninput="updateCombo('${key.replace(/'/g,"\\'")}','stripePrice',this.value);this.classList.toggle('has-stripe',!!this.value.trim())">
+      <input class="combo-stripe${data.stripePriceTest?' has-stripe':''}" type="text" placeholder="🧪 price_test…"
+        title="Price ID TEST"
+        value="${(data.stripePriceTest||data.stripePrice||'').replace(/"/g,'&quot;')}"
+        style="border-color:${data.stripePriceTest?'rgba(245,158,11,.5)':''}" 
+        oninput="updateCombo('${key.replace(/'/g,"\\'")}','stripePriceTest',this.value);updateCombo('${key.replace(/'/g,"\\'")}','stripePrice',this.value);this.classList.toggle('has-stripe',!!this.value.trim())"
+        >
+      <input class="combo-stripe${data.stripePriceLive?' has-stripe':''}" type="text" placeholder="✅ price_live…"
+        title="Price ID LIVE"
+        value="${(data.stripePriceLive||'').replace(/"/g,'&quot;')}"
+        style="border-color:${data.stripePriceLive?'rgba(22,163,74,.5)':''}" 
+        oninput="updateCombo('${key.replace(/'/g,"\\'")}','stripePriceLive',this.value);this.classList.toggle('has-stripe',!!this.value.trim())">
       <input class="combo-price${hasPrice?' has-price':''}" type="number" step="0.01" min="0" placeholder="Prix"
         value="${data.price||''}"
         oninput="updateCombo('${key.replace(/'/g,"\\'")}','price',this.value);this.classList.toggle('has-price',!!this.value.trim())">
@@ -2114,7 +2150,7 @@ window.updateCombo = (key, field, val) => {
 };
 
 window.clearCombo = (key) => {
-  if (window.comboLinks[key]) { window.comboLinks[key] = { url: '', price: '', oldPrice: '', stripePrice: '' }; }
+  if (window.comboLinks[key]) { window.comboLinks[key] = { url: '', price: '', oldPrice: '', stripePrice: '', stripePriceTest: '', stripePriceLive: '' }; }
   renderComboLinks();
 };
 
@@ -2160,7 +2196,9 @@ window.submitArticle = async () => {
     status: document.getElementById('aStatus').value||'published',
     tagline: (document.getElementById('aTagline').value||'').trim(),
     payhip: (document.getElementById('aPayhip').value||'').trim(),
-    stripePrice: (document.getElementById('aStripePrice').value||'').trim(),
+    stripePriceTest: (document.getElementById('aStripePriceTest').value||'').trim(),
+    stripePriceLive: (document.getElementById('aStripePriceLive').value||'').trim(),
+    stripePrice: (document.getElementById('aStripePriceTest').value||document.getElementById('aStripePriceLive').value||'').trim(),
     desc: (document.getElementById('aDesc').value||'').trim(),
     photos: [...photos].filter(Boolean),
     caracs: window.caracs.filter(c=>c&&c.key&&c.key.trim()),
@@ -2227,7 +2265,8 @@ window.editArt=i=>{
   document.getElementById('aTagline').value=a.tagline||'';
   document.getElementById('aSlug').value=a.slug||'';
   document.getElementById('aPayhip').value=a.payhip||'';
-  document.getElementById('aStripePrice').value=a.stripePrice||'';
+  document.getElementById('aStripePriceTest').value=a.stripePriceTest||a.stripePrice||'';
+  document.getElementById('aStripePriceLive').value=a.stripePriceLive||'';
   document.getElementById('aDesc').value=a.desc||'';
 
   // Recharger photos
@@ -2326,7 +2365,7 @@ function updateBadges(){
 
 window.resetForm=()=>{
   editId=null;
-  ['aName','aPrice','aOldPrice','aTagline','aSlug','aPayhip','aStripePrice','aDesc'].forEach(id=>{
+  ['aName','aPrice','aOldPrice','aTagline','aSlug','aPayhip','aStripePriceTest','aStripePriceLive','aDesc'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   const statusEl=document.getElementById('aStatus'); if(statusEl) statusEl.value='published';
@@ -3181,12 +3220,29 @@ const PCFG_DEFAULTS = {
   cancelUrlDirect:  'https://tbt3d.fr/boutique.html?cancelled=1',
 };
 
+// ─── Toggle mode TEST/LIVE dans Config Panier ───
+window.pcfgSelectMode = (mode) => {
+  document.getElementById('pcfgStripeMode').value = mode;
+  const radios = document.querySelectorAll('input[name="pcfgModePicker"]');
+  radios.forEach(r => { r.checked = r.value === mode; });
+  const lblTest = document.getElementById('pcfgLblTest');
+  const lblLive = document.getElementById('pcfgLblLive');
+  if (!lblTest || !lblLive) return;
+  if (mode === 'test') {
+    lblTest.style.border = '2px solid #f59e0b'; lblTest.style.background = 'rgba(245,158,11,.1)';
+    lblLive.style.border = '2px solid var(--border2)'; lblLive.style.background = '';
+  } else {
+    lblLive.style.border = '2px solid #16a34a'; lblLive.style.background = 'rgba(22,163,74,.1)';
+    lblTest.style.border = '2px solid var(--border2)'; lblTest.style.background = '';
+  }
+};
+
 window.loadPanierCfg = async () => {
   try {
     const data = await fbGetConfig('panier');
     const cfg = data || PCFG_DEFAULTS;
     document.getElementById('pcfgWorkerUrl').value       = cfg.workerUrl || PCFG_DEFAULTS.workerUrl;
-    document.getElementById('pcfgStripeMode').value      = cfg.stripeMode || 'test';
+    pcfgSelectMode(cfg.stripeMode || 'test');
     document.getElementById('pcfgSuccessUrl').value      = cfg.successUrl || PCFG_DEFAULTS.successUrl;
     document.getElementById('pcfgCancelUrl').value       = cfg.cancelUrl || PCFG_DEFAULTS.cancelUrl;
     document.getElementById('pcfgSuccessUrlDirect').value = cfg.successUrlDirect || PCFG_DEFAULTS.successUrlDirect;
