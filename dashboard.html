@@ -68,10 +68,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);display:flex
 .btn-g{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}.btn-g:hover{border-color:var(--soft);background:var(--bg4)}
 .btn-p{background:var(--purple);color:#fff;box-shadow:0 2px 12px rgba(155,114,255,.3)}.btn-p:hover{filter:brightness(1.15);transform:translateY(-1px)}
 .btn-r{background:var(--red);color:#fff}.btn-r:hover{filter:brightness(1.1)}
-.page{display:none;flex:1;overflow-y:auto;flex-direction:column;min-height:0}
+.page{display:none;flex:1;overflow-y:auto;flex-direction:column;min-height:0;width:100%}
 .page#page-users{padding:40px 48px}
-.page.active{display:flex}
-.ps{padding:28px 32px}
+.page.active{display:flex;width:100%}
+.ps{padding:28px 32px;width:100%;box-sizing:border-box}
 
 /* ── STATS ── */
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
@@ -1008,7 +1008,7 @@ tr:hover td{background:rgba(255,255,255,.01)}
           <div class="fsec-body">
             <div class="field">
               <label>URL du Worker Cloudflare</label>
-              <input type="url" id="pcfgWorkerUrl" placeholder="https://tbt3d-checkout.xxx.workers.dev">
+              <input type="text" id="pcfgWorkerUrl" placeholder="https://tbt3d-checkout.xxx.workers.dev">
               <div class="fhint">L'URL de ton Worker Cloudflare qui crée les sessions Stripe. Utilisée par le panier et le bouton "Acheter maintenant" de la boutique.</div>
             </div>
             <div class="field" style="margin-top:14px">
@@ -1044,28 +1044,95 @@ tr:hover td{background:rgba(255,255,255,.01)}
             <div class="frow">
               <div class="field">
                 <label>URL de succès (panier)</label>
-                <input type="url" id="pcfgSuccessUrl" placeholder="https://tbt3d.fr/panier.html?success=1">
+                <input type="text" id="pcfgSuccessUrl" placeholder="https://tbt3d.fr/panier.html?success=1">
                 <div class="fhint">Redirection après paiement réussi depuis le panier</div>
               </div>
               <div class="field">
                 <label>URL d'annulation (panier)</label>
-                <input type="url" id="pcfgCancelUrl" placeholder="https://tbt3d.fr/panier.html?cancelled=1">
+                <input type="text" id="pcfgCancelUrl" placeholder="https://tbt3d.fr/panier.html?cancelled=1">
                 <div class="fhint">Redirection si le client annule depuis le panier</div>
               </div>
             </div>
             <div class="frow" style="margin-top:12px">
               <div class="field">
                 <label>URL de succès (boutique — Acheter maintenant)</label>
-                <input type="url" id="pcfgSuccessUrlDirect" placeholder="https://tbt3d.fr/boutique.html?success=1">
+                <input type="text" id="pcfgSuccessUrlDirect" placeholder="https://tbt3d.fr/boutique.html?success=1">
                 <div class="fhint">Redirection après achat direct depuis une fiche produit</div>
               </div>
               <div class="field">
                 <label>URL d'annulation (boutique)</label>
-                <input type="url" id="pcfgCancelUrlDirect" placeholder="https://tbt3d.fr/boutique.html?cancelled=1">
+                <input type="text" id="pcfgCancelUrlDirect" placeholder="https://tbt3d.fr/boutique.html?cancelled=1">
               </div>
             </div>
           </div>
         </div>
+
+
+        <!-- ── SECTION CLÉ STRIPE ── -->
+        <div class="fsec" style="margin-bottom:16px;border:1.5px solid rgba(245,158,11,.3);background:rgba(245,158,11,.04)">
+          <div class="fsec-head" style="background:rgba(245,158,11,.1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:#d97706"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            <span class="fsec-title" style="color:#d97706">Clé Stripe — Basculer Test ↔ Live</span>
+          </div>
+          <div class="fsec-body">
+            <div style="background:rgba(245,158,11,.1);border-radius:8px;padding:10px 12px;font-size:12px;color:#92400e;margin-bottom:14px;line-height:1.7">
+              ⚡ Colle la bonne clé selon le mode choisi et clique <strong>Appliquer</strong> pour mettre à jour ton Worker directement.<br>
+              Clé <strong>TEST</strong> = <code style="background:rgba(0,0,0,.08);padding:1px 4px;border-radius:3px">sk_test_...</code> &nbsp;|&nbsp; Clé <strong>LIVE</strong> = <code style="background:rgba(0,0,0,.08);padding:1px 4px;border-radius:3px">sk_live_...</code><br>
+              👉 <a href="https://dashboard.stripe.com/apikeys" target="_blank" style="color:#d97706;text-decoration:underline">dashboard.stripe.com → Developers → API Keys</a>
+            </div>
+
+            <div class="frow" style="margin-bottom:14px">
+              <div class="field">
+                <label>Clé Stripe TEST <span style="color:#d97706">sk_test_...</span></label>
+                <div style="position:relative">
+                  <input type="password" id="skTest" placeholder="sk_test_xxxxxxxxxxxxxxxx" autocomplete="off" style="font-family:monospace;font-size:12px;padding-right:40px">
+                  <button type="button" onclick="toggleVis('skTest',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">👁</button>
+                </div>
+              </div>
+              <div class="field">
+                <label>Clé Stripe LIVE <span style="color:#16a34a">sk_live_...</span></label>
+                <div style="position:relative">
+                  <input type="password" id="skLive" placeholder="sk_live_xxxxxxxxxxxxxxxx" autocomplete="off" style="font-family:monospace;font-size:12px;padding-right:40px">
+                  <button type="button" onclick="toggleVis('skLive',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">👁</button>
+                </div>
+              </div>
+            </div>
+
+            <details style="margin-bottom:12px">
+              <summary style="font-size:12px;color:var(--muted);cursor:pointer;margin-bottom:8px;padding:6px 0">🔧 Infos Cloudflare (pour appliquer automatiquement)</summary>
+              <div style="font-size:11px;color:var(--muted);background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:10px;line-height:1.7">
+                <strong>Account ID</strong> : <a href="https://dash.cloudflare.com" target="_blank" style="color:var(--accent)">dash.cloudflare.com</a> → clique ton Worker → barre latérale droite<br>
+                <strong>API Token</strong> : Profile → API Tokens → Create Token → "Edit Cloudflare Workers" → copie (affiché une seule fois)<br>
+                <strong>Nom du Worker</strong> : ex: <code>tbt3d-checkout</code>
+              </div>
+              <div class="frow">
+                <div class="field">
+                  <label>Account ID Cloudflare</label>
+                  <input type="text" id="cfAccountId" placeholder="a1b2c3d4..." autocomplete="off" style="font-family:monospace;font-size:12px">
+                </div>
+                <div class="field">
+                  <label>Nom du Worker</label>
+                  <input type="text" id="cfWorkerName" placeholder="tbt3d-checkout">
+                </div>
+              </div>
+              <div class="field">
+                <label>API Token Cloudflare</label>
+                <div style="position:relative">
+                  <input type="password" id="cfApiToken" placeholder="xxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" style="font-family:monospace;font-size:12px;padding-right:40px">
+                  <button type="button" onclick="toggleVis('cfApiToken',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">👁</button>
+                </div>
+                <div class="fhint">Effacé après usage — jamais sauvegardé.</div>
+              </div>
+            </details>
+
+            <div id="stripeKeyFeedback" style="display:none;margin-bottom:10px;border-radius:8px;padding:10px 12px;font-size:12px"></div>
+            <button type="button" class="btn btn-a" onclick="applyStripeKey()" id="btnApplyStripeKey" style="font-size:12px;width:100%;justify-content:center;background:#d97706;border-color:#d97706">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              Appliquer la clé sur le Worker Cloudflare
+            </button>
+          </div>
+        </div>
+        <!-- ── FIN CLÉ STRIPE ── -->
 
         <div id="pcfgFeedback" style="display:none;margin-bottom:12px"></div>
         <div style="display:flex;gap:10px">
@@ -3234,6 +3301,66 @@ window.pcfgSelectMode = (mode) => {
   } else {
     lblLive.style.border = '2px solid #16a34a'; lblLive.style.background = 'rgba(22,163,74,.1)';
     lblTest.style.border = '2px solid var(--border2)'; lblTest.style.background = '';
+  }
+};
+
+
+// ─── Afficher/masquer mot de passe ───
+window.toggleVis = (id, btn) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.type === 'password') { el.type = 'text'; btn.textContent = '🙈'; }
+  else { el.type = 'password'; btn.textContent = '👁'; }
+};
+
+// ─── Appliquer la clé Stripe sur le Worker Cloudflare ───
+window.applyStripeKey = async () => {
+  const fb  = document.getElementById('stripeKeyFeedback');
+  const btn = document.getElementById('btnApplyStripeKey');
+  const mode = document.getElementById('pcfgStripeMode').value || 'test';
+  const skTest = document.getElementById('skTest').value.trim();
+  const skLive = document.getElementById('skLive').value.trim();
+  const accountId  = document.getElementById('cfAccountId').value.trim();
+  const workerName = document.getElementById('cfWorkerName').value.trim();
+  const apiToken   = document.getElementById('cfApiToken').value.trim();
+  const keyToApply = mode === 'live' ? skLive : skTest;
+
+  const showFb = (type, msg) => {
+    const styles = { success:'color:#16a34a;background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.2)', error:'color:#e11d48;background:rgba(225,29,72,.1);border:1px solid rgba(225,29,72,.2)' };
+    fb.style.cssText = 'display:block;border-radius:8px;padding:10px 12px;font-size:12px;' + styles[type];
+    fb.textContent = msg;
+  };
+
+  if (!keyToApply) return showFb('error', 'Remplis la clé Stripe ' + mode.toUpperCase());
+  if (!accountId)  return showFb('error', 'Account ID Cloudflare requis');
+  if (!workerName) return showFb('error', 'Nom du Worker requis');
+  if (!apiToken)   return showFb('error', 'API Token Cloudflare requis');
+  if (!keyToApply.startsWith('sk_' + mode + '_')) return showFb('error', 'La clé doit commencer par sk_' + mode + '_...');
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Application en cours…';
+  fb.style.display = 'none';
+
+  try {
+    const url = 'https://api.cloudflare.com/client/v4/accounts/' + accountId + '/workers/scripts/' + workerName + '/secrets';
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + apiToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'STRIPE_SECRET_KEY', text: keyToApply, type: 'secret_text' }),
+    });
+    const json = await res.json();
+    document.getElementById('cfApiToken').value = '';
+    if (!res.ok || !json.success) throw new Error((json.errors && json.errors[0] && json.errors[0].message) || 'Erreur API');
+    showFb('success', '✓ Clé Stripe ' + mode.toUpperCase() + ' appliquée ! Le Worker utilise maintenant sk_' + mode + '_...');
+    try { const ex = await fbGetConfig('panier') || {}; await fbSetConfig('panier', Object.assign({}, ex, { stripeMode: mode, updatedAt: new Date() })); } catch(e2){}
+    toast('Clé Stripe ' + mode.toUpperCase() + ' appliquée ✓');
+    btn.disabled = false;
+    btn.innerHTML = '✓ Appliqué !';
+    setTimeout(() => { btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Appliquer la clé sur le Worker Cloudflare'; }, 4000);
+  } catch(e) {
+    showFb('error', 'Erreur Cloudflare : ' + e.message);
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Appliquer la clé sur le Worker Cloudflare';
   }
 };
 
