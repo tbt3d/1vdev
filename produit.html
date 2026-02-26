@@ -31,7 +31,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .nav-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; border-radius: 6px; color: var(--black); transition: background .15s; text-decoration: none; }
 .nav-icon:hover { background: var(--bg); }
 .nav-icon svg { width: 20px; height: 20px; }
-.cart-badge { position: absolute; top: 4px; right: 4px; background: var(--black); color: var(--white); font-size: 9px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: none; align-items: center; justify-content: center; padding: 0 4px; line-height: 1; }
+.cart-badge { position: absolute; top: 3px; left: 3px; background: #e11d48; width: 9px; height: 9px; border-radius: 50%; display: none; border: 1.5px solid var(--white); }
 .nav-burger { display: none; }
 .search-bar { display: none; border-top: 1px solid var(--border); background: var(--white); padding: 12px 32px; }
 .search-bar.open { display: block; }
@@ -78,8 +78,8 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .gallery-main { flex: 1; position: relative; border-radius: 10px; overflow: hidden; background: var(--bg); height: calc(100vh - var(--nav-h) - 60px); max-height: 780px; }
 .gallery-main-img { width: 100%; height: 100%; object-fit: cover; object-position: center center; display: block; background: var(--bg); }
 .gallery-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 56px; background: var(--bg); }
-@media(max-width:960px) { .gallery-main { height: 55vw; max-height: 480px; border-radius: 0; } }
-@media(max-width:600px) { .gallery-main { height: 72vw; max-height: 420px; border-radius: 0; } }
+@media(max-width:960px) { .gallery-main { height: 50vw; max-height: 420px; border-radius: 0; } }
+@media(max-width:600px) { .gallery-main { height: 56vw; max-height: 280px; border-radius: 0; } }
 .gallery-nav { position: absolute; bottom: 14px; right: 14px; display: flex; gap: 6px; }
 .gallery-btn { width: 34px; height: 34px; background: rgba(255,255,255,.92); border: 1px solid rgba(0,0,0,.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
 .gallery-btn:hover { background: var(--white); }
@@ -298,7 +298,29 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 @media(max-width:500px) { .similar-section { padding: 48px 16px 64px; } }
 @media(max-width:400px) { .similar-grid { grid-template-columns: 1fr 1fr; gap: 10px; } }
 
-/* ─── FOOTER ─── */
+/* ─── STICKY MOBILE BUY BAR ─── */
+.mobile-buy-bar { display: none; }
+@media(max-width:768px) {
+  .mobile-buy-bar {
+    display: flex; align-items: center; gap: 10px;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
+    background: var(--white); border-top: 1px solid var(--border);
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0,0,0,.08);
+  }
+  .mobile-buy-bar .btn-buy { margin-bottom: 0; flex: 1; padding: 14px 16px; font-size: 14px; }
+  .mobile-buy-bar .btn-cart-icon {
+    width: 50px; height: 50px; flex-shrink: 0; border: 1.5px solid var(--border);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: var(--white); cursor: pointer; transition: all .15s;
+  }
+  .mobile-buy-bar .btn-cart-icon:hover { border-color: var(--black); }
+  .mobile-buy-bar .btn-cart-icon svg { width: 20px; height: 20px; }
+  /* Add padding-bottom to avoid content hidden behind bar */
+  .prod-detail .hr:last-of-type { margin-bottom: 80px; }
+  .trust-row { margin-bottom: 80px; }
+}
+
 #footer { background: #111; color: rgba(255,255,255,.7); }
 .footer-inner { max-width: var(--max); margin: 0 auto; padding: 60px 32px 40px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
 @media(max-width:900px) { .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; } }
@@ -398,7 +420,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     <div class="gallery">
       <div class="gallery-thumbs" id="galleryThumbs"></div>
       <div class="gallery-main">
-        <img id="mainImg" class="gallery-main-img" src="" alt="" style="display:none">
+        <img id="mainImg" class="gallery-main-img" src="" alt="" style="display:none;cursor:zoom-in" onclick="openGalleryLightbox(_idx)">
         <div id="mainPlaceholder" class="gallery-placeholder">🏮</div>
         <div class="gallery-nav" id="galleryNav" style="display:none">
           <button class="gallery-btn" onclick="prevImg()">
@@ -441,23 +463,25 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
       <div class="hr"></div>
 
-      <!-- Bouton achat principal -->
-      <button id="btnPayhip" class="btn-buy" style="display:none" onclick="openPayhipModal()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Acheter maintenant
-      </button>
-
-      <!-- Lien de paiement direct (Stripe, autre) ou fallback contact -->
-      <a href="/contact.html" class="btn-buy" id="btnNoPayhip" style="display:none" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Acheter maintenant
-      </a>
-
-      <!-- Bouton Ajouter au panier -->
-      <button id="btnAddCart" class="btn-contact" style="margin-top:4px" onclick="addToCart()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-        Ajouter au panier
-      </button>
+      <!-- Groupe boutons achat -->
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+        <button id="btnPayhip" class="btn-buy" style="display:none" onclick="openPayhipModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Acheter maintenant
+        </button>
+        <a href="/contact.html" class="btn-buy" id="btnNoPayhip" style="display:none" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Acheter maintenant
+        </a>
+        <button id="btnAddCart" class="btn-contact" onclick="addToCart()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          Ajouter au panier
+        </button>
+        <a href="/contact.html" class="btn-contact">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Une question ? Contactez-nous
+        </a>
+      </div>
 
       <!-- ─── POPUP PAIEMENT ─── -->
       <div id="payhipModal" onclick="if(event.target===this)closePayhipModal()">
@@ -489,10 +513,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
       </div>
 
       <!-- Bouton contact secondaire -->
-      <a href="/contact.html" class="btn-contact">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        Une question ? Contactez-nous
-      </a>
+
 
       <!-- Caractéristiques inline (générées dynamiquement) -->
       <div class="specs-inline" id="specsInline" style="display:none"></div>
@@ -795,6 +816,7 @@ function renderProduct(art) {
   document.getElementById('prodPrice').textContent = parseFloat(art.price).toFixed(2) + ' €';
 
   _photos = art.photos || [];
+  window._photos = _photos;
   if (_photos.length > 0) {
     const mainImg = document.getElementById('mainImg');
     mainImg.src = _photos[0];
@@ -946,6 +968,11 @@ function renderProduct(art) {
 
   _art = art;
 
+  // Exposition globale pour le script non-module (addToCart)
+  window._art = art;
+  window._photos = _photos;
+  window._currentComboKey = _currentComboKey;
+
   updateBuyButton();
 
   document.getElementById('qMinus').onclick = function() {
@@ -958,6 +985,10 @@ function renderProduct(art) {
   };
 
   document.getElementById('productWrap').style.display = 'block';
+
+  // Afficher la barre sticky mobile
+  const mbb = document.getElementById('mobileBuyBar');
+  if (mbb) mbb.style.display = '';
 
   loadSuggestions(art);
 }
@@ -1084,6 +1115,9 @@ function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
 <script>
 /* ─── PANIER ─── */
 function addToCart() {
+  const _art = window._art;
+  const _photos = window._photos || [];
+  const _currentComboKey = window._currentComboKey;
   if (!_art) return;
 
   // Récupérer la variante sélectionnée
@@ -1097,7 +1131,7 @@ function addToCart() {
   const variantStr = variantParts.join(' · ');
 
   // Récupérer l'URL de paiement du combo actuel
-  const comboKey = _currentComboKey();
+  const comboKey = _currentComboKey ? _currentComboKey() : '';
   const combo = (_art.comboLinks || {})[comboKey];
   const paymentUrl = (combo && combo.url && combo.url.trim()) ? combo.url.trim() : (_art.payhip || '');
 
@@ -1154,5 +1188,15 @@ function showCartToast(name) {
   }, 3000);
 }
 </script>
+<!-- ─── STICKY MOBILE BUY BAR ─── -->
+<div class="mobile-buy-bar" id="mobileBuyBar" style="display:none">
+  <button class="btn-cart-icon" onclick="addToCart()" title="Ajouter au panier">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+  </button>
+  <button class="btn-buy" id="mobileBtnBuy" onclick="openPayhipModal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    Acheter maintenant
+  </button>
+</div>
+
 </body>
-</html>

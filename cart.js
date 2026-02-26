@@ -19,8 +19,7 @@ const TBTCart = (() => {
     const items = load();
     const total = items.reduce((s, i) => s + i.qty, 0);
     document.querySelectorAll('.cart-badge').forEach(b => {
-      b.textContent = total;
-      b.style.display = total > 0 ? '' : 'none';
+      b.style.display = total > 0 ? 'block' : 'none';
     });
   }
 
