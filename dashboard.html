@@ -849,128 +849,147 @@ tr:hover td{background:rgba(255,255,255,.01)}
 
   <!-- ═══ PAGE UTILISATEURS ═══ -->
   <div class="page" id="page-users">
-    <div class="page-head">
+
+    <!-- Header -->
+    <div class="page-head" style="margin-bottom:24px">
       <div>
         <div class="page-title">Utilisateurs</div>
         <div class="page-sub">Gérer les comptes, rôles et informations</div>
       </div>
-      <button class="btn btn-a" onclick="loadUsers()" style="font-size:11px">
+      <button class="btn btn-a" onclick="loadUsers()" style="font-size:11px;gap:6px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
         Actualiser
       </button>
     </div>
 
+    <!-- Stats cards -->
+    <div id="usersStatsCards" style="display:none;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px"></div>
+
     <!-- Search + filters -->
-    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
-      <div style="flex:1;min-width:200px;position:relative">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;opacity:.4"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input id="userSearch" type="text" placeholder="Rechercher un utilisateur…" oninput="filterUsers()"
-          style="width:100%;padding:9px 12px 9px 34px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none">
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+      <div style="flex:1;min-width:220px;position:relative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;opacity:.35"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="userSearch" type="text" placeholder="Nom, email, telephone..." oninput="filterUsers()"
+          style="width:100%;padding:9px 12px 9px 36px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none;transition:border-color .15s"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
       </div>
-      <select id="userRoleFilter" onchange="filterUsers()" style="padding:9px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none;cursor:pointer">
-        <option value="">Tous les rôles</option>
+      <select id="userRoleFilter" onchange="filterUsers()" style="padding:9px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;font-weight:600;border-radius:var(--r);outline:none;cursor:pointer;letter-spacing:.04em">
+        <option value="">Tous les roles</option>
         <option value="admin">Admin</option>
-        <option value="user">Utilisateur</option>
         <option value="vip">VIP</option>
+        <option value="user">Utilisateur</option>
         <option value="banned">Banni</option>
       </select>
+      <div id="usersCount" style="font-size:12px;color:var(--muted);font-family:var(--mono);white-space:nowrap"></div>
+    </div>
+
+    <!-- Loading -->
+    <div id="usersLoading" style="text-align:center;padding:80px 20px;color:var(--muted)">
+      <div style="width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px"></div>
+      <div style="font-size:12px;font-family:var(--mono)">Chargement des utilisateurs...</div>
+    </div>
+
+    <!-- Empty -->
+    <div id="usersEmpty" style="display:none;text-align:center;padding:80px 20px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="width:48px;height:48px;opacity:.15;margin:0 auto 16px;display:block"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">Aucun utilisateur trouve</div>
+      <div style="font-size:12px;color:var(--muted)">Les comptes apparaissent ici des l'inscription</div>
     </div>
 
     <!-- Users list -->
-    <div id="usersLoading" style="text-align:center;padding:60px;color:var(--muted);font-size:13px">
-      <div style="width:28px;height:28px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px"></div>
-      Chargement…
-    </div>
-    <div id="usersEmpty" style="display:none;text-align:center;padding:60px;color:var(--muted);font-size:13px">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px;opacity:.2;margin:0 auto 12px;display:block"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-      Aucun utilisateur trouvé
-    </div>
-    <div id="usersList" style="display:none;display:flex;flex-direction:column;gap:8px"></div>
+    <div id="usersList" style="display:none;flex-direction:column;gap:2px"></div>
 
-    <!-- Stats bar -->
-    <div id="usersStats" style="display:none;margin-top:20px;display:flex;gap:16px;flex-wrap:wrap"></div>
   </div>
 
   <!-- ═══ MODAL EDIT USER ═══ -->
-  <div id="userModal" onclick="if(event.target===this)closeUserModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
-    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:32px;position:relative">
-      <button onclick="closeUserModal()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;background:var(--bg3);border:none;border-radius:50%;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px">×</button>
-      
-      <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-family:var(--mono)">Modifier l'utilisateur</div>
-      <div id="userModalEmail" style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:24px"></div>
+  <div id="userModal" onclick="if(event.target===this)closeUserModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;position:relative;display:flex;flex-direction:column">
 
-      <!-- Avatar + nom -->
-      <div style="display:flex;gap:14px;margin-bottom:20px;align-items:center">
-        <div id="userModalAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:#fff;flex-shrink:0"></div>
-        <div style="flex:1">
-          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase">Rôle actuel</div>
-          <div id="userModalRole" style="font-size:13px;font-weight:600"></div>
+      <!-- Modal header -->
+      <div style="display:flex;align-items:center;gap:14px;padding:20px 22px 18px;border-bottom:1px solid var(--border2);flex-shrink:0;position:sticky;top:0;background:var(--bg2);z-index:1;border-radius:20px 20px 0 0">
+        <div id="userModalAvatar" style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div id="userModalName" style="font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
+          <div id="userModalEmail" style="font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
         </div>
+        <div id="userModalRoleBadge" style="flex-shrink:0"></div>
+        <button onclick="closeUserModal()" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--border2);border-radius:50%;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:all .15s">x</button>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-        <div class="field">
-          <label>Prénom</label>
-          <input id="umFirstName" type="text" placeholder="Prénom">
+      <!-- Modal body -->
+      <div style="padding:22px;flex:1">
+
+        <div style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-family:var(--mono)">Identite</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div class="field"><label>Prenom</label><input id="umPrenom" type="text" placeholder="Marie"></div>
+          <div class="field"><label>Nom</label><input id="umNom" type="text" placeholder="Dupont"></div>
         </div>
-        <div class="field">
-          <label>Nom</label>
-          <input id="umLastName" type="text" placeholder="Nom">
+        <div class="field" style="margin-bottom:10px">
+          <label>Email</label>
+          <input id="umEmail" type="email" placeholder="email@exemple.fr">
+          <div class="fhint">Changer l'email deconnectera l'utilisateur</div>
         </div>
-      </div>
-      <div class="field" style="margin-bottom:12px">
-        <label>Email</label>
-        <input id="umEmail" type="email" placeholder="email@exemple.fr">
-        <div class="fhint">⚠ Changer l'email déconnectera l'utilisateur</div>
-      </div>
-      <div class="field" style="margin-bottom:12px">
-        <label>Téléphone</label>
-        <input id="umPhone" type="tel" placeholder="+33 6 00 00 00 00">
-      </div>
-      <div class="field" style="margin-bottom:12px">
-        <label>Adresse</label>
-        <input id="umAddress" type="text" placeholder="Rue, numéro">
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
-        <div class="field">
-          <label>Code postal</label>
-          <input id="umZip" type="text" placeholder="59000">
+        <div class="field" style="margin-bottom:20px">
+          <label>Telephone</label>
+          <input id="umPhone" type="tel" placeholder="+33 6 00 00 00 00">
         </div>
-        <div class="field">
-          <label>Ville</label>
-          <input id="umCity" type="text" placeholder="Lille">
+
+        <div style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-family:var(--mono)">Adresse</div>
+        <div class="field" style="margin-bottom:10px">
+          <label>Rue</label>
+          <input id="umAddress" type="text" placeholder="12 rue de la Paix">
         </div>
-        <div class="field">
-          <label>Pays</label>
-          <input id="umCountry" type="text" placeholder="France">
+        <div style="display:grid;grid-template-columns:100px 1fr 120px;gap:10px;margin-bottom:20px">
+          <div class="field"><label>CP</label><input id="umZip" type="text" placeholder="59000"></div>
+          <div class="field"><label>Ville</label><input id="umCity" type="text" placeholder="Lille"></div>
+          <div class="field"><label>Pays</label><input id="umCountry" type="text" placeholder="France"></div>
         </div>
-      </div>
-      <div class="field" style="margin-bottom:20px">
-        <label>Rôle</label>
-        <select id="umRole" style="width:100%;padding:10px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none">
-          <option value="user">Utilisateur</option>
-          <option value="vip">VIP</option>
-          <option value="admin">Admin</option>
-          <option value="banned">Banni</option>
-        </select>
-      </div>
-      <div class="field" style="margin-bottom:24px">
-        <label>Note interne</label>
-        <textarea id="umNote" placeholder="Note privée (non visible par l'utilisateur)…" style="min-height:70px"></textarea>
+
+        <div style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-family:var(--mono)">Role</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px" id="umRolePicker">
+          <label id="umRoleUser" onclick="selectRole('user')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:10px;border:1.5px solid var(--border2);cursor:pointer;transition:all .15s;text-align:center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase">Client</span>
+          </label>
+          <label id="umRoleVip" onclick="selectRole('vip')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:10px;border:1.5px solid var(--border2);cursor:pointer;transition:all .15s;text-align:center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase">VIP</span>
+          </label>
+          <label id="umRoleAdmin" onclick="selectRole('admin')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:10px;border:1.5px solid var(--border2);cursor:pointer;transition:all .15s;text-align:center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase">Admin</span>
+          </label>
+          <label id="umRoleBanned" onclick="selectRole('banned')" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border-radius:10px;border:1.5px solid var(--border2);cursor:pointer;transition:all .15s;text-align:center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            <span style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase">Banni</span>
+          </label>
+        </div>
+        <input type="hidden" id="umRole" value="user">
+
+        <div style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-family:var(--mono)">Note interne</div>
+        <div class="field" style="margin-bottom:16px">
+          <textarea id="umNote" placeholder="Note privee (non visible par l'utilisateur)..." style="min-height:72px"></textarea>
+        </div>
+
+        <div id="umFeedback" style="margin-bottom:4px;font-size:12px;text-align:center;display:none;padding:10px;border-radius:8px"></div>
       </div>
 
-      <div style="display:flex;gap:10px">
-        <button onclick="saveUserEdit()" class="btn btn-a" style="flex:1">
+      <!-- Modal footer -->
+      <div style="padding:16px 22px;border-top:1px solid var(--border2);display:flex;gap:10px;flex-shrink:0;background:var(--bg2);border-radius:0 0 20px 20px;position:sticky;bottom:0">
+        <button onclick="saveUserEdit()" class="btn btn-a" style="flex:1;font-size:13px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
           Enregistrer
         </button>
-        <button onclick="confirmDeleteUser()" class="btn" style="background:#e11d48;color:#fff;padding:10px 16px" title="Supprimer le compte">
+        <button onclick="confirmDeleteUser()" style="padding:10px 16px;background:rgba(225,29,72,.12);border:1px solid rgba(225,29,72,.3);color:#e11d48;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;font-family:var(--font);transition:all .15s">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          Supprimer
         </button>
       </div>
-      <div id="umFeedback" style="margin-top:12px;font-size:12px;text-align:center;display:none"></div>
+
     </div>
   </div>
+
+>
 
 
 <div class="toast" id="toast"><div class="tdot" id="tdot"></div><span id="toastTxt"></span></div>
@@ -2056,108 +2075,163 @@ window.deleteMsgById=async(id)=>{
 
 let _allUsers = [];
 let _editingUserId = null;
+let _selectedRole = 'user';
 
-const ROLE_COLORS = {
-  admin:  { bg: 'rgba(255,107,53,.15)', color: 'var(--accent)', label: 'Admin' },
-  vip:    { bg: 'rgba(155,114,255,.15)', color: 'var(--purple)', label: 'VIP' },
-  user:   { bg: 'rgba(100,100,100,.12)', color: 'var(--soft)', label: 'Utilisateur' },
-  banned: { bg: 'rgba(225,29,72,.12)', color: '#e11d48', label: 'Banni' },
+const ROLE_CFG = {
+  user:    { bg: 'rgba(100,116,139,.15)', color: '#94a3b8', label: 'Client',   accent: '#64748b' },
+  vip:     { bg: 'rgba(168,85,247,.15)',  color: '#a855f7', label: 'VIP',      accent: '#a855f7' },
+  admin:   { bg: 'rgba(255,107,53,.15)',  color: 'var(--accent)', label: 'Admin', accent: 'var(--accent)' },
+  banned:  { bg: 'rgba(225,29,72,.15)',   color: '#e11d48', label: 'Banni',    accent: '#e11d48' },
 };
+
+// couleur avatar deterministe par initiale
+const AVATAR_COLORS = [
+  ['135deg,#ff6b35,#f7931e'],['135deg,#a855f7,#7c3aed'],['135deg,#0ea5e9,#0284c7'],
+  ['135deg,#10b981,#059669'],['135deg,#f59e0b,#d97706'],['135deg,#ef4444,#dc2626'],
+  ['135deg,#8b5cf6,#7c3aed'],['135deg,#06b6d4,#0891b2'],
+];
+function avatarGradient(name) {
+  const code = (name||'?').charCodeAt(0) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[code][0];
+}
 
 window.loadUsers = async () => {
   document.getElementById('usersLoading').style.display = 'block';
   document.getElementById('usersEmpty').style.display = 'none';
   document.getElementById('usersList').style.display = 'none';
-  document.getElementById('usersStats').style.display = 'none';
+  document.getElementById('usersStatsCards').style.display = 'none';
 
   try {
     const snap = await getDocs(collection(db, 'users'));
     _allUsers = [];
     snap.forEach(d => _allUsers.push({ uid: d.id, ...d.data() }));
-    // Trier par date de création desc
-    _allUsers.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-    // Badge sidebar
+    _allUsers.sort((a, b) => {
+      const da = a.createdAt?.toDate?.() || new Date(a.createdAt||0);
+      const db2 = b.createdAt?.toDate?.() || new Date(b.createdAt||0);
+      return db2 - da;
+    });
     const badge = document.getElementById('usersBadge');
-    badge.textContent = _allUsers.length;
-    badge.style.display = _allUsers.length ? '' : 'none';
-
+    if (badge) { badge.textContent = _allUsers.length; badge.style.display = _allUsers.length ? '' : 'none'; }
     renderUsersList(_allUsers);
   } catch(e) {
     document.getElementById('usersLoading').style.display = 'none';
-    toast('Erreur chargement utilisateurs : ' + e.message, true);
+    toast('Erreur chargement : ' + e.message, true);
   }
 };
 
+function getUserName(u) {
+  // supporte prenom/nom (compte.html) ET firstName/lastName (ancien)
+  const p = u.prenom || u.firstName || '';
+  const n = u.nom   || u.lastName  || '';
+  return (p + ' ' + n).trim() || u.displayName || '';
+}
+
+function formatDate(u) {
+  const raw = u.createdAt;
+  if (!raw) return '';
+  try {
+    const d = raw.toDate ? raw.toDate() : new Date(raw);
+    return d.toLocaleDateString('fr-FR', {day:'2-digit', month:'short', year:'numeric'});
+  } catch { return ''; }
+}
+
 function renderUsersList(users) {
   document.getElementById('usersLoading').style.display = 'none';
+  document.getElementById('usersCount').textContent = users.length + ' compte' + (users.length > 1 ? 's' : '');
 
   if (!users.length) {
     document.getElementById('usersEmpty').style.display = 'block';
     document.getElementById('usersList').style.display = 'none';
-    document.getElementById('usersStats').style.display = 'none';
+    document.getElementById('usersStatsCards').style.display = 'none';
     return;
   }
 
   document.getElementById('usersEmpty').style.display = 'none';
-  const list = document.getElementById('usersList');
-  list.style.display = 'flex';
 
-  list.innerHTML = users.map(u => {
-    const role = u.role || 'user';
-    const rc = ROLE_COLORS[role] || ROLE_COLORS.user;
-    const name = [u.firstName, u.lastName].filter(Boolean).join(' ') || '—';
-    const initials = (u.firstName?.[0] || u.email?.[0] || '?').toUpperCase();
-    const date = u.createdAt?.toDate ? u.createdAt.toDate().toLocaleDateString('fr-FR') : '—';
-    return `
-      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:border-color .15s;cursor:pointer"
-           onclick="openUserModal('${u.uid}')" onmouseover="this.style.borderColor='var(--border)'" onmouseout="this.style.borderColor='var(--border2)'">
-        <!-- Avatar -->
-        <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0">${initials}</div>
-        <!-- Info -->
-        <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px">${name}</div>
-          <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.email || '—'}</div>
-        </div>
-        <!-- Phone -->
-        <div style="font-size:12px;color:var(--soft);min-width:120px;display:none" class="u-phone">${u.phone || ''}</div>
-        <!-- Date -->
-        <div style="font-size:11px;color:var(--muted);font-family:var(--mono);white-space:nowrap">${date}</div>
-        <!-- Role badge -->
-        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:20px;background:${rc.bg};color:${rc.color};white-space:nowrap">${rc.label}</div>
-        <!-- Edit btn -->
-        <button onclick="event.stopPropagation();openUserModal('${u.uid}')"
-          style="width:30px;height:30px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s"
-          onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-      </div>`;
+  // Stats cards
+  const counts = { admin:0, vip:0, user:0, banned:0 };
+  _allUsers.forEach(u => { const r = u.role||'user'; counts[r] = (counts[r]||0)+1; });
+  const sc = document.getElementById('usersStatsCards');
+  sc.style.display = 'grid';
+  sc.innerHTML = Object.entries(ROLE_CFG).map(([role, rc]) => {
+    const icons = {
+      user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+      vip: '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+      admin: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+      banned: '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>',
+    };
+    return `<div style="background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:12px">
+      <div style="width:38px;height:38px;border-radius:10px;background:${rc.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="${rc.color}" stroke-width="1.8" style="width:18px;height:18px">${icons[role]}</svg>
+      </div>
+      <div>
+        <div style="font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.03em;line-height:1">${counts[role]||0}</div>
+        <div style="font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">${rc.label}${(counts[role]||0)>1?'s':''}</div>
+      </div>
+    </div>`;
   }).join('');
 
-  // Stats bar
-  const stats = document.getElementById('usersStats');
-  stats.style.display = 'flex';
-  const counts = { admin: 0, vip: 0, user: 0, banned: 0 };
-  users.forEach(u => { counts[u.role || 'user'] = (counts[u.role || 'user'] || 0) + 1; });
-  stats.innerHTML = Object.entries(ROLE_COLORS).map(([role, rc]) => `
-    <div style="background:${rc.bg};padding:8px 16px;border-radius:30px;font-size:12px;font-weight:600;color:${rc.color}">
-      ${counts[role] || 0} ${rc.label}${(counts[role] || 0) > 1 ? 's' : ''}
-    </div>`).join('') + `<div style="font-size:12px;color:var(--muted);align-self:center;margin-left:auto">${users.length} total</div>`;
+  // Users list
+  const list = document.getElementById('usersList');
+  list.style.display = 'flex';
+  list.innerHTML = users.map((u, idx) => {
+    const role = u.role || 'user';
+    const rc = ROLE_CFG[role] || ROLE_CFG.user;
+    const name = getUserName(u);
+    const initials = name ? name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : (u.email||'?')[0].toUpperCase();
+    const grad = avatarGradient(initials[0]);
+    const date = formatDate(u);
+    const isFirst = idx === 0;
+    const isLast = idx === users.length - 1;
+    return `<div onclick="openUserModal('${u.uid}')"
+      style="background:var(--bg2);border:1px solid var(--border2);padding:12px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .15s;
+             border-radius:${isFirst?'12px 12px 4px 4px': isLast?'4px 4px 12px 12px':'4px'};
+             ${isFirst?'':'border-top:none'}"
+      onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+      <!-- Avatar -->
+      <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(${grad});display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;letter-spacing:-.01em">${initials}</div>
+      <!-- Nom + email -->
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${name || '<span style="color:var(--muted);font-style:italic">Sans nom</span>'}</div>
+        <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px">${u.email||'—'}</div>
+      </div>
+      <!-- Tel -->
+      <div style="font-size:12px;color:var(--soft);width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:none" class="u-tel">${u.tel||u.phone||''}</div>
+      <!-- Date -->
+      <div style="font-size:11px;color:var(--muted);font-family:var(--mono);white-space:nowrap;width:90px;text-align:right">${date}</div>
+      <!-- Role -->
+      <div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 10px;border-radius:20px;background:${rc.bg};color:${rc.color};white-space:nowrap;flex-shrink:0">${rc.label}</div>
+      <!-- Arrow -->
+      <div style="color:var(--muted);opacity:.4;flex-shrink:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 window.filterUsers = () => {
   const q = (document.getElementById('userSearch').value || '').toLowerCase();
   const role = document.getElementById('userRoleFilter').value;
   const filtered = _allUsers.filter(u => {
-    const matchQ = !q ||
-      (u.email || '').toLowerCase().includes(q) ||
-      (u.firstName || '').toLowerCase().includes(q) ||
-      (u.lastName || '').toLowerCase().includes(q) ||
-      (u.phone || '').includes(q);
-    const matchRole = !role || (u.role || 'user') === role;
+    const name = getUserName(u).toLowerCase();
+    const matchQ = !q || name.includes(q) || (u.email||'').toLowerCase().includes(q) || (u.tel||u.phone||'').includes(q);
+    const matchRole = !role || (u.role||'user') === role;
     return matchQ && matchRole;
   });
   renderUsersList(filtered);
+};
+
+window.selectRole = (role) => {
+  _selectedRole = role;
+  document.getElementById('umRole').value = role;
+  ['user','vip','admin','banned'].forEach(r => {
+    const el = document.getElementById('umRole' + r.charAt(0).toUpperCase() + r.slice(1));
+    if (!el) return;
+    const rc = ROLE_CFG[r];
+    el.style.borderColor = r === role ? rc.accent : 'var(--border2)';
+    el.style.background  = r === role ? rc.bg : 'transparent';
+    el.style.color       = r === role ? rc.color : 'var(--text)';
+  });
 };
 
 window.openUserModal = (uid) => {
@@ -2167,86 +2241,101 @@ window.openUserModal = (uid) => {
 
   const modal = document.getElementById('userModal');
   modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
 
-  const initials = (u.firstName?.[0] || u.email?.[0] || '?').toUpperCase();
-  document.getElementById('userModalAvatar').textContent = initials;
-  document.getElementById('userModalEmail').textContent = u.email || uid;
-
+  const name = getUserName(u);
+  const initials = name ? name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : (u.email||'?')[0].toUpperCase();
+  const grad = avatarGradient(initials[0]);
   const role = u.role || 'user';
-  const rc = ROLE_COLORS[role] || ROLE_COLORS.user;
-  document.getElementById('userModalRole').innerHTML =
-    `<span style="padding:3px 10px;border-radius:20px;background:${rc.bg};color:${rc.color}">${rc.label}</span>`;
+  const rc = ROLE_CFG[role] || ROLE_CFG.user;
 
-  document.getElementById('umFirstName').value = u.firstName || '';
-  document.getElementById('umLastName').value = u.lastName || '';
-  document.getElementById('umEmail').value = u.email || '';
-  document.getElementById('umPhone').value = u.phone || '';
+  const av = document.getElementById('userModalAvatar');
+  av.textContent = initials;
+  av.style.background = `linear-gradient(${grad})`;
+
+  document.getElementById('userModalName').textContent  = name || 'Sans nom';
+  document.getElementById('userModalEmail').textContent = u.email || uid;
+  document.getElementById('userModalRoleBadge').innerHTML =
+    `<span style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 10px;border-radius:20px;background:${rc.bg};color:${rc.color}">${rc.label}</span>`;
+
+  document.getElementById('umPrenom').value  = u.prenom || u.firstName || '';
+  document.getElementById('umNom').value     = u.nom    || u.lastName  || '';
+  document.getElementById('umEmail').value   = u.email  || '';
+  document.getElementById('umPhone').value   = u.tel    || u.phone     || '';
   document.getElementById('umAddress').value = u.address || '';
-  document.getElementById('umZip').value = u.zip || '';
-  document.getElementById('umCity').value = u.city || '';
+  document.getElementById('umZip').value     = u.zip    || '';
+  document.getElementById('umCity').value    = u.city   || u.ville     || '';
   document.getElementById('umCountry').value = u.country || 'France';
-  document.getElementById('umRole').value = role;
-  document.getElementById('umNote').value = u.adminNote || '';
+  document.getElementById('umNote').value    = u.adminNote || '';
   document.getElementById('umFeedback').style.display = 'none';
+
+  selectRole(role);
 };
 
 window.closeUserModal = () => {
   document.getElementById('userModal').style.display = 'none';
+  document.body.style.overflow = '';
   _editingUserId = null;
 };
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('userModal')?.style.display === 'flex') closeUserModal();
+});
 
 window.saveUserEdit = async () => {
   if (!_editingUserId) return;
   const fb = document.getElementById('umFeedback');
   fb.style.display = 'none';
 
+  const prenom = document.getElementById('umPrenom').value.trim();
+  const nom    = document.getElementById('umNom').value.trim();
+  const role   = document.getElementById('umRole').value;
+
   const updates = {
-    firstName: document.getElementById('umFirstName').value.trim(),
-    lastName:  document.getElementById('umLastName').value.trim(),
+    prenom, nom,
+    firstName: prenom, lastName: nom,  // compat legacy
     email:     document.getElementById('umEmail').value.trim(),
+    tel:       document.getElementById('umPhone').value.trim(),
     phone:     document.getElementById('umPhone').value.trim(),
     address:   document.getElementById('umAddress').value.trim(),
     zip:       document.getElementById('umZip').value.trim(),
     city:      document.getElementById('umCity').value.trim(),
+    ville:     document.getElementById('umCity').value.trim(),
     country:   document.getElementById('umCountry').value.trim(),
-    role:      document.getElementById('umRole').value,
+    role,
     adminNote: document.getElementById('umNote').value.trim(),
     updatedAt: new Date(),
   };
 
   try {
     await updateDoc(doc(db, 'users', _editingUserId), updates);
-    // Mettre à jour le cache local
     const idx = _allUsers.findIndex(u => u.uid === _editingUserId);
     if (idx !== -1) _allUsers[idx] = { ..._allUsers[idx], ...updates };
 
-    fb.style.cssText = 'display:block;color:#16a34a;margin-top:12px;font-size:12px;text-align:center';
-    fb.textContent = '✓ Modifications enregistrées';
+    fb.style.cssText = 'display:block;color:#16a34a;background:rgba(22,163,74,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center';
+    fb.textContent = 'Modifications enregistrees !';
     renderUsersList(_allUsers);
-    setTimeout(closeUserModal, 1200);
-    toast('Utilisateur mis à jour');
+    toast('Utilisateur mis a jour');
+    setTimeout(closeUserModal, 1000);
   } catch(e) {
-    fb.style.cssText = 'display:block;color:#e11d48;margin-top:12px;font-size:12px;text-align:center';
-    fb.textContent = '⚠ Erreur : ' + e.message;
+    fb.style.cssText = 'display:block;color:#e11d48;background:rgba(225,29,72,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center';
+    fb.textContent = 'Erreur : ' + e.message;
   }
 };
 
 window.confirmDeleteUser = async () => {
   if (!_editingUserId) return;
   const u = _allUsers.find(x => x.uid === _editingUserId);
-  const name = u ? (u.email || u.uid) : _editingUserId;
-  if (!confirm(`Supprimer le compte de "${name}" ?
-
-Cette action supprime uniquement le profil Firestore. Le compte Firebase Auth devra être supprimé manuellement si nécessaire.`)) return;
+  const name = u ? (getUserName(u) || u.email || u.uid) : _editingUserId;
+  if (!confirm('Supprimer le compte de "' + name + '" ?\n\nCette action supprime le profil Firestore.')) return;
   try {
     await deleteDoc(doc(db, 'users', _editingUserId));
     _allUsers = _allUsers.filter(u => u.uid !== _editingUserId);
     const badge = document.getElementById('usersBadge');
-    badge.textContent = _allUsers.length;
-    badge.style.display = _allUsers.length ? '' : 'none';
+    if (badge) { badge.textContent = _allUsers.length; badge.style.display = _allUsers.length ? '' : 'none'; }
     closeUserModal();
     renderUsersList(_allUsers);
-    toast('Compte supprimé');
+    toast('Compte supprime');
   } catch(e) {
     toast('Erreur suppression : ' + e.message, true);
   }
