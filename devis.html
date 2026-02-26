@@ -1332,8 +1332,56 @@ function handleModalBackdropClick(e) {
 
 document.addEventListener('keydown', e => { if (e.key==='Escape') closeOrderModal(); });
 
-// ── URL de ton Cloudflare Worker (identique à panier.html) ──
-const WORKER_URL = 'https://tbt3d-checkout.optionpdg.workers.dev';
+// ── URL du Worker (lue depuis Firebase config, fallback hardcodé) ──
+let WORKER_URL = 'https://tbt3d-checkout.optionpdg.workers.dev';
+let _devisFirebaseDb = null;
+
+(async function loadDevisConfig() {
+  try {
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const fbCfg = {
+      apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
+      authDomain: "tbt3d-a0f04.firebaseapp.com",
+      projectId: "tbt3d-a0f04",
+      storageBucket: "tbt3d-a0f04.firebasestorage.app",
+      appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
+    };
+    const apps = getApps();
+    const app = apps.length ? apps[0] : initializeApp(fbCfg);
+    _devisFirebaseDb = getFirestore(app);
+    const snap = await getDoc(doc(_devisFirebaseDb, 'config', 'devis'));
+    if (snap.exists()) {
+      const cfg = snap.data();
+      if (cfg.workerUrl) WORKER_URL = cfg.workerUrl;
+    }
+  } catch(e) {
+    console.log('Firebase config non disponible, URL par défaut utilisée');
+  }
+})();
+
+// ── Sauvegarde commande 3D dans Firebase ──
+async function saveDevisOrderToFirebase(orderData) {
+  try {
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const { getFirestore, collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const fbCfg = {
+      apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
+      authDomain: "tbt3d-a0f04.firebaseapp.com",
+      projectId: "tbt3d-a0f04",
+      storageBucket: "tbt3d-a0f04.firebasestorage.app",
+      appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
+    };
+    const apps = getApps();
+    const app = apps.length ? apps[0] : initializeApp(fbCfg);
+    const db = getFirestore(app);
+    const ref = await addDoc(collection(db, 'commandes'), orderData);
+    return ref.id;
+  } catch(e) {
+    console.warn('Firebase order save failed:', e);
+    return null;
+  }
+}
 
 async function goToPayment() {
   const n  = document.getElementById('cName').value.trim();
@@ -1356,6 +1404,35 @@ async function goToPayment() {
   const payBtn = document.querySelector('#modalFooter .btn-primary');
   payBtn.disabled = true;
   payBtn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Création du paiement…';
+
+  // ── Sauvegarde Firebase ──
+  const orderData = {
+    createdAt: new Date(),
+    status: 'initié',
+    source: 'devis',
+    client: {
+      name: n,
+      email: em,
+      message: document.getElementById('cMsg')?.value || '',
+    },
+    items: [{
+      name: 'Impression sur mesure — ' + (S.file ? S.file.name : 'STL'),
+      variant: variant,
+      qty: S.qty,
+      price: ttc,
+      isDynamic: true,
+      is3d: true,
+      tech: S.tech,
+      material: m.label,
+      color: S.color,
+      fill: S.tech === 'fdm' ? S.fill : null,
+      dims: S.dims || null,
+      fileName: S.file ? S.file.name : null,
+      note: note,
+    }],
+    total: parseFloat((ttc * S.qty).toFixed(2)),
+  };
+  saveDevisOrderToFirebase(orderData);
 
   try {
     const res  = await fetch(WORKER_URL, {

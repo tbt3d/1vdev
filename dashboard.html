@@ -343,6 +343,56 @@ tr:hover td{background:rgba(255,255,255,.01)}
 /* ── OVERVIEW BARRE DE RÉPARTITION ── */
 .repartition-bar{height:6px;border-radius:3px;background:var(--border2);overflow:hidden;margin-top:8px;display:flex;gap:1px}
 .rep-seg{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* ── COMMANDES PAGE ── */
+.cmd-filter-bar{display:flex;gap:6px;padding:18px 28px 0;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:14px}
+.cmd-chip{padding:6px 14px;border:1.5px solid var(--border2);border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;background:none;font-family:var(--mono);color:var(--soft);transition:all .15s;letter-spacing:.04em;text-transform:uppercase}
+.cmd-chip:hover{border-color:var(--soft);color:var(--text)}
+.cmd-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.cmd-list{padding:18px 28px;display:flex;flex-direction:column;gap:10px}
+.cmd-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .15s}
+.cmd-card:hover{border-color:var(--border);transform:translateX(2px)}
+.cmd-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cmd-icon svg{width:20px;height:20px}
+.cmd-info{flex:1;min-width:0}
+.cmd-title{font-size:13px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmd-sub{font-size:11px;color:var(--soft);margin-top:3px;font-family:var(--mono)}
+.cmd-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.cmd-price{font-size:16px;font-weight:800;font-family:var(--mono);color:var(--accent);letter-spacing:-.02em}
+.cmd-date{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.cmd-status{font-size:9px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:20px;font-weight:700}
+.cs-init{background:rgba(245,166,35,.15);color:var(--orange);border:1px solid rgba(245,166,35,.3)}
+.cs-paye{background:rgba(46,204,138,.12);color:var(--green);border:1px solid rgba(46,204,138,.25)}
+.cs-exp{background:rgba(77,166,255,.12);color:var(--blue);border:1px solid rgba(77,166,255,.25)}
+.cs-ann{background:rgba(255,61,90,.1);color:var(--red);border:1px solid rgba(255,61,90,.2)}
+.cmd-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:12px;text-align:center}
+.cmd-empty svg{width:40px;height:40px;opacity:.15;display:block}
+/* ── MODAL COMMANDE ── */
+#cmdModal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;display:none}
+#cmdModal.open{display:flex}
+.cmd-modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;position:relative;display:flex;flex-direction:column}
+.cmd-modal-head{padding:20px 24px 18px;border-bottom:1px solid var(--border2);display:flex;align-items:center;gap:14px;position:sticky;top:0;background:var(--bg2);border-radius:20px 20px 0 0;z-index:1}
+.cmd-modal-body{padding:24px;flex:1}
+.cmd-section-lbl{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-family:var(--mono);display:flex;align-items:center;gap:7px}
+.cmd-section-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+.cmd-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.cmd-detail-box{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px 14px}
+.cmd-detail-box label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:5px;font-family:var(--mono)}
+.cmd-detail-box span{font-size:12px;color:var(--text);font-weight:500}
+.cmd-item-row{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:8px}
+.cmd-item-row:last-child{margin-bottom:0}
+.cmd-item-name{font-size:13px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.cmd-item-specs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.cmd-spec-tag{font-size:10px;font-family:var(--mono);padding:3px 9px;border-radius:6px;font-weight:600}
+.cmd-3d-badge{background:rgba(155,114,255,.12);color:var(--purple);border:1px solid rgba(155,114,255,.25);font-size:9px;font-family:var(--mono);padding:2px 8px;border-radius:10px;letter-spacing:.04em;font-weight:700}
+.cmd-dl-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(155,114,255,.1);border:1px solid rgba(155,114,255,.3);color:var(--purple);border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--mono);transition:all .15s;text-decoration:none;margin-top:10px}
+.cmd-dl-btn:hover{background:rgba(155,114,255,.2)}
+.cmd-dl-btn svg{width:12px;height:12px}
+.cmd-status-select{padding:8px 12px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;font-weight:600;border-radius:var(--r);outline:none;cursor:pointer;transition:border-color .2s}
+.cmd-status-select:focus{border-color:var(--accent)}
+/* ── DEVIS CONFIG PAGE ── */
+.dcfg-wrap{max-width:700px;margin:0 auto}
+.dcfg-info{background:rgba(155,114,255,.07);border:1px solid rgba(155,114,255,.2);border-radius:var(--r);padding:11px 15px;margin-bottom:22px;font-size:11px;color:rgba(155,114,255,.9);display:flex;align-items:center;gap:8px;font-family:var(--mono)}
 </style>
 </head>
 <body>
@@ -389,6 +439,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
     Messages<span class="nb nb-r" id="msgBadge" style="display:none">0</span>
   </button>
+  <button class="nav-item" onclick="goPage('commandes',this)" id="navCommandes">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+    Commandes<span class="nb nb-p" id="cmdBadge" style="display:none">0</span>
+  </button>
 
   <div class="sb-section">Site</div>
   <a href="index.html" target="_blank" class="nav-item">
@@ -411,6 +465,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
     Devis
   </a>
+  <button class="nav-item" onclick="goPage('devis-cfg',this)" id="navDevisCfg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+    Config Devis
+  </button>
   <a href="produit.html" target="_blank" class="nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
     Produit
@@ -848,6 +906,158 @@ tr:hover td{background:rgba(255,255,255,.01)}
 
 </div>
 
+  <!-- ═══ COMMANDES ═══ -->
+  <div class="page" id="page-commandes" style="overflow:hidden">
+    <div class="topbar">
+      <div class="topbar-title">Historique des commandes</div>
+      <div class="topbar-right">
+        <div class="sync-indicator"><div class="sync-dot"></div>Firebase</div>
+        <button class="btn btn-g" onclick="loadCommandes()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Actualiser
+        </button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto">
+      <!-- Stats rapides -->
+      <div id="cmdStatsRow" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:18px 28px 0"></div>
+      <!-- Filtres -->
+      <div class="cmd-filter-bar">
+        <button class="cmd-chip on" onclick="setCmdFilter('all',this)">Toutes</button>
+        <button class="cmd-chip" onclick="setCmdFilter('initié',this)">⏳ Initié</button>
+        <button class="cmd-chip" onclick="setCmdFilter('payé',this)">✓ Payé</button>
+        <button class="cmd-chip" onclick="setCmdFilter('expédié',this)">📦 Expédié</button>
+        <button class="cmd-chip" onclick="setCmdFilter('annulé',this)">✕ Annulé</button>
+        <div style="margin-left:auto;position:relative">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);width:12px;height:12px;opacity:.4"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="cmdSearch" placeholder="Rechercher…" oninput="filterCommandes()" style="padding:6px 10px 6px 28px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:11px;border-radius:20px;outline:none;transition:border-color .2s;width:200px" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+        </div>
+      </div>
+      <!-- Liste -->
+      <div id="cmdList" class="cmd-list">
+        <div class="cmd-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Chargement…</div>
+          <div style="font-size:11px;color:var(--muted)">Connexion Firebase en cours</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL DÉTAIL COMMANDE ═══ -->
+  <div id="cmdModal" onclick="if(event.target===this)closeCmdModal()">
+    <div class="cmd-modal-box">
+      <div class="cmd-modal-head">
+        <div id="cmdModalIcon" style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">
+          <div id="cmdModalTitle" style="font-size:15px;font-weight:700;letter-spacing:-.01em"></div>
+          <div id="cmdModalSub" style="font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--mono)"></div>
+        </div>
+        <select id="cmdModalStatus" class="cmd-status-select" onchange="updateCmdStatus()"></select>
+        <button onclick="closeCmdModal()" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--border2);border-radius:50%;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:all .15s;margin-left:8px">×</button>
+      </div>
+      <div class="cmd-modal-body" id="cmdModalBody"></div>
+    </div>
+  </div>
+
+  <!-- ═══ CONFIG DEVIS ═══ -->
+  <div class="page" id="page-devis-cfg">
+    <div class="topbar">
+      <div class="topbar-title">Configuration — Page Devis</div>
+      <div class="topbar-right">
+        <div class="sync-indicator"><div class="sync-dot"></div>Firebase Config</div>
+      </div>
+    </div>
+    <div class="ps" style="flex:1;overflow-y:auto">
+      <div class="dcfg-wrap">
+        <div class="dcfg-info">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Les réglages sont sauvegardés sur Firebase et lus en temps réel par la page devis.html.
+        </div>
+
+        <div class="fsec" style="margin-bottom:16px">
+          <div class="fsec-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <span class="fsec-title">Paiement Stripe — Worker URL</span>
+          </div>
+          <div class="fsec-body">
+            <div class="field">
+              <label>URL du Worker Cloudflare (Checkout dynamique)</label>
+              <input type="url" id="dcfgWorkerUrl" placeholder="https://tbt3d-checkout.xxx.workers.dev" value="https://tbt3d-checkout.optionpdg.workers.dev">
+              <div class="fhint">Cette URL est appelée pour créer dynamiquement un prix Stripe lors du paiement d'un devis 3D. Modifiez-la si vous changez de Worker ou de compte Stripe.</div>
+            </div>
+            <div class="field" style="margin-top:14px">
+              <label>Lien de paiement Stripe statique (fallback optionnel)</label>
+              <input type="url" id="dcfgFallbackUrl" placeholder="https://buy.stripe.com/xxx (optionnel)">
+              <div class="fhint">Si renseigné, un bouton "Payer directement" sera affiché comme alternative au Worker dynamique.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fsec" style="margin-bottom:16px">
+          <div class="fsec-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span class="fsec-title">URLs de redirection Stripe</span>
+          </div>
+          <div class="fsec-body">
+            <div class="frow">
+              <div class="field">
+                <label>URL de succès</label>
+                <input type="url" id="dcfgSuccessUrl" placeholder="https://tbt3d.fr/devis.html?success=1">
+                <div class="fhint">Redirection après paiement réussi</div>
+              </div>
+              <div class="field">
+                <label>URL d'annulation</label>
+                <input type="url" id="dcfgCancelUrl" placeholder="https://tbt3d.fr/devis.html?cancelled=1">
+                <div class="fhint">Redirection si le client annule</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fsec" style="margin-bottom:22px">
+          <div class="fsec-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            <span class="fsec-title">Options impression 3D</span>
+          </div>
+          <div class="fsec-body">
+            <div class="frow">
+              <div class="field">
+                <label>Tarif FDM (€ / cm³)</label>
+                <input type="number" id="dcfgFdmRate" placeholder="0.08" step="0.01" min="0">
+                <div class="fhint">Coût de base FDM par cm³</div>
+              </div>
+              <div class="field">
+                <label>Tarif SLA (€ / cm³)</label>
+                <input type="number" id="dcfgSlaRate" placeholder="0.22" step="0.01" min="0">
+                <div class="fhint">Coût de base SLA par cm³</div>
+              </div>
+            </div>
+            <div class="frow" style="margin-top:12px">
+              <div class="field">
+                <label>Minimum de commande (€)</label>
+                <input type="number" id="dcfgMinPrice" placeholder="5.00" step="0.50" min="0">
+              </div>
+              <div class="field">
+                <label>Délai de production (jours)</label>
+                <input type="number" id="dcfgDelay" placeholder="5" min="1">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-g" onclick="loadDevisCfg()" style="font-size:12px">↺ Réinitialiser</button>
+          <button class="btn btn-a" onclick="saveDevisCfg()" style="font-size:12px;flex:1;justify-content:center" id="btnSaveDevisCfg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
+            Enregistrer la configuration
+          </button>
+        </div>
+        <div id="dcfgFeedback" style="display:none;margin-top:14px;font-size:12px;text-align:center;padding:10px;border-radius:8px"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ PAGE UTILISATEURS ═══ -->
   <div class="page" id="page-users">
 
@@ -1006,7 +1216,7 @@ emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 <!-- FIREBASE SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, getDoc, updateDoc, query, orderBy, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, collection, doc, getDocs, setDoc, addDoc, deleteDoc, getDoc, updateDoc, query, orderBy, onSnapshot, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
@@ -1017,6 +1227,9 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
+window.__tbt3dDb = db;
+window.__tbt3dAddDoc = addDoc;
+window.__tbt3dCollection = collection;
 const CLOUDINARY_CLOUD  = 'dfcrqwbee';
 const CLOUDINARY_PRESET = 'umjs9csb';
 const ADMIN_PW = "tbt3d2024";
@@ -1114,6 +1327,8 @@ window.goPage = (id, btn) => {
   if(id==='boutique-cfg'){ syncBoutSlots(); renderBoutUI(); }
   if(id==='messages') loadMessages();
   if(id==='users') loadUsers();
+  if(id==='commandes') loadCommandes();
+  if(id==='devis-cfg') loadDevisCfg();
 };
 
 // ── OVERVIEW ──
@@ -2273,6 +2488,360 @@ window.confirmDeleteUser = async () => {
     renderUsersList(_allUsers);
     toast('Compte supprime');
   } catch(e){ toast('Erreur : '+e.message,true); }
+};
+
+// ══════════════════════════════════════════════════════════════
+// ── COMMANDES ─────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+let _allCommandes = [], _cmdFilter = 'all', _editingCmdId = null;
+
+const CMD_STATUS_CFG = {
+  'initié':  { label:'Initié',  cls:'cs-init', color:'var(--orange)' },
+  'payé':    { label:'Payé',    cls:'cs-paye', color:'var(--green)'  },
+  'expédié': { label:'Expédié', cls:'cs-exp',  color:'var(--blue)'   },
+  'annulé':  { label:'Annulé',  cls:'cs-ann',  color:'var(--red)'    },
+};
+
+function fmtCmdDate(raw){
+  if(!raw) return '—';
+  try{
+    const d = raw?.toDate ? raw.toDate() : new Date(raw);
+    return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  }catch{ return '—'; }
+}
+
+window.loadCommandes = async () => {
+  document.getElementById('cmdList').innerHTML = '<div class="cmd-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Chargement…</div></div>';
+  try {
+    const q = query(collection(db,'commandes'), orderBy('createdAt','desc'));
+    const snap = await getDocs(q);
+    _allCommandes = [];
+    snap.forEach(d => _allCommandes.push({...d.data(), _id: d.id}));
+    renderCommandesBadge();
+    renderCommandesStats();
+    filterCommandes();
+    toast('Commandes chargées ✓');
+  } catch(e) {
+    document.getElementById('cmdList').innerHTML = '<div class="cmd-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/></svg><div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:4px">Erreur de chargement</div><div style="font-size:11px;color:var(--muted)">' + esc(e.message) + '</div></div>';
+    toast('Erreur : '+e.message, true);
+  }
+};
+
+function renderCommandesBadge(){
+  const badge = document.getElementById('cmdBadge');
+  if(!badge) return;
+  const count = _allCommandes.filter(c => c.status === 'initié' || c.status === 'payé').length;
+  badge.textContent = count;
+  badge.style.display = count ? '' : 'none';
+}
+
+function renderCommandesStats(){
+  const el = document.getElementById('cmdStatsRow');
+  if(!el) return;
+  const counts = {total: _allCommandes.length, initié:0, payé:0, expédié:0, annulé:0};
+  let totalCA = 0;
+  _allCommandes.forEach(c => {
+    counts[c.status] = (counts[c.status]||0) + 1;
+    if(c.status === 'payé' || c.status === 'expédié') totalCA += parseFloat(c.total||0);
+  });
+  el.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">Total commandes</div>
+      <div style="font-size:28px;font-weight:800;font-family:var(--mono);letter-spacing:-.03em">${counts.total}</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">CA encaissé</div>
+      <div style="font-size:28px;font-weight:800;font-family:var(--mono);letter-spacing:-.03em;color:var(--accent)">${totalCA.toFixed(2)} €</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">En attente paiement</div>
+      <div style="font-size:28px;font-weight:800;font-family:var(--mono);letter-spacing:-.03em;color:var(--orange)">${counts['initié']||0}</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:14px 16px">
+      <div style="font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">Payées / Expédiées</div>
+      <div style="font-size:28px;font-weight:800;font-family:var(--mono);letter-spacing:-.03em;color:var(--green)">${(counts['payé']||0) + (counts['expédié']||0)}</div>
+    </div>
+  `;
+}
+
+window.setCmdFilter = (f, btn) => {
+  _cmdFilter = f;
+  document.querySelectorAll('.cmd-chip').forEach(c => c.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  filterCommandes();
+};
+
+window.filterCommandes = () => {
+  const q = (document.getElementById('cmdSearch')?.value||'').toLowerCase();
+  const filtered = _allCommandes.filter(c => {
+    if(_cmdFilter !== 'all' && c.status !== _cmdFilter) return false;
+    if(!q) return true;
+    const clientName = ((c.client?.name||'') + ' ' + (c.client?.email||'')).toLowerCase();
+    const items = (c.items||[]).map(i=>i.name||'').join(' ').toLowerCase();
+    return clientName.includes(q) || items.includes(q) || (c._id||'').toLowerCase().includes(q);
+  });
+  renderCommandesList(filtered);
+};
+
+function renderCommandesList(commandes){
+  const list = document.getElementById('cmdList');
+  if(!commandes.length){
+    list.innerHTML = `<div class="cmd-empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Aucune commande</div>
+      <div style="font-size:11px;color:var(--muted)">Les commandes apparaissent ici dès qu'un client initie un paiement</div>
+    </div>`;
+    return;
+  }
+  list.innerHTML = commandes.map(c => {
+    const sc = CMD_STATUS_CFG[c.status] || CMD_STATUS_CFG['initié'];
+    const has3d = (c.items||[]).some(i => i.isDynamic || i.is3d);
+    const itemCount = (c.items||[]).length;
+    const clientName = c.client?.name || c.client?.email || 'Client inconnu';
+    const iconBg = has3d ? 'rgba(155,114,255,.12)' : 'rgba(255,107,53,.1)';
+    const iconColor = has3d ? 'var(--purple)' : 'var(--accent)';
+    const icon3d = `<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>`;
+    const iconShop = `<path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>`;
+    return `<div class="cmd-card" onclick="openCmdModal('${esc(c._id)}')">
+      <div class="cmd-icon" style="background:${iconBg}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="${iconColor}" stroke-width="1.8">${has3d?icon3d:iconShop}</svg>
+      </div>
+      <div class="cmd-info">
+        <div class="cmd-title">${esc(clientName)}${has3d?' <span style="font-size:9px;background:rgba(155,114,255,.12);color:var(--purple);border:1px solid rgba(155,114,255,.25);padding:2px 7px;border-radius:10px;font-family:var(--mono);font-weight:700;letter-spacing:.04em;margin-left:4px">IMPRESSION 3D</span>':''}</div>
+        <div class="cmd-sub">${itemCount} article${itemCount>1?'s':''} · ${esc(c.source||'boutique')} · #${(c._id||'').slice(-6).toUpperCase()}</div>
+      </div>
+      <div class="cmd-right">
+        <div class="cmd-price">${parseFloat(c.total||0).toFixed(2)} €</div>
+        <div class="cmd-date">${fmtCmdDate(c.createdAt)}</div>
+        <div class="cmd-status ${sc.cls}">${sc.label}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.openCmdModal = (id) => {
+  const c = _allCommandes.find(x => x._id === id);
+  if(!c) return;
+  _editingCmdId = id;
+  const modal = document.getElementById('cmdModal');
+  const has3d = (c.items||[]).some(i => i.isDynamic || i.is3d);
+  const sc = CMD_STATUS_CFG[c.status] || CMD_STATUS_CFG['initié'];
+
+  // Icon
+  const iconEl = document.getElementById('cmdModalIcon');
+  iconEl.style.background = has3d ? 'rgba(155,114,255,.12)' : 'rgba(255,107,53,.1)';
+  iconEl.innerHTML = has3d
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8" style="width:22px;height:22px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" style="width:22px;height:22px"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>`;
+
+  document.getElementById('cmdModalTitle').textContent = (c.client?.name || c.client?.email || 'Commande anonyme') + ' — ' + parseFloat(c.total||0).toFixed(2) + ' €';
+  document.getElementById('cmdModalSub').textContent = '#' + id.slice(-8).toUpperCase() + ' · ' + fmtCmdDate(c.createdAt) + ' · ' + (c.source||'boutique');
+
+  // Status select
+  const sel = document.getElementById('cmdModalStatus');
+  sel.innerHTML = Object.entries(CMD_STATUS_CFG).map(([v,cfg]) =>
+    `<option value="${v}" ${c.status===v?'selected':''}>${cfg.label}</option>`
+  ).join('');
+
+  // Body
+  document.getElementById('cmdModalBody').innerHTML = buildCmdModalBody(c);
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+
+function buildCmdModalBody(c){
+  let html = '';
+
+  // ── CLIENT ──
+  html += `<div class="cmd-section-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Informations client</div>`;
+  html += `<div class="cmd-detail-grid" style="margin-bottom:20px">`;
+  html += `<div class="cmd-detail-box"><label>Nom</label><span>${esc(c.client?.name||'—')}</span></div>`;
+  html += `<div class="cmd-detail-box"><label>Email</label><span>${esc(c.client?.email||'—')}</span></div>`;
+  if(c.client?.phone) html += `<div class="cmd-detail-box"><label>Téléphone</label><span>${esc(c.client.phone)}</span></div>`;
+  if(c.client?.address) html += `<div class="cmd-detail-box"><label>Adresse</label><span>${esc(c.client.address)}</span></div>`;
+  if(c.client?.zip||c.client?.city) html += `<div class="cmd-detail-box"><label>Ville</label><span>${esc((c.client?.zip||'') + ' ' + (c.client?.city||''))}</span></div>`;
+  if(c.client?.country) html += `<div class="cmd-detail-box"><label>Pays</label><span>${esc(c.client.country)}</span></div>`;
+  html += `</div>`;
+
+  // ── LIVRAISON ──
+  if(c.shipping){
+    html += `<div class="cmd-section-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> Livraison</div>`;
+    html += `<div class="cmd-detail-grid" style="margin-bottom:20px">`;
+    if(c.shipping.method) html += `<div class="cmd-detail-box"><label>Mode</label><span>${esc(c.shipping.method)}</span></div>`;
+    if(c.shipping.address) html += `<div class="cmd-detail-box"><label>Adresse</label><span>${esc(c.shipping.address)}</span></div>`;
+    if(c.shipping.tracking) html += `<div class="cmd-detail-box" style="grid-column:1/-1"><label>Numéro de suivi</label><span style="font-family:var(--mono);color:var(--blue)">${esc(c.shipping.tracking)}</span></div>`;
+    html += `</div>`;
+  }
+
+  // ── ARTICLES ──
+  html += `<div class="cmd-section-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg> Articles commandés</div>`;
+  (c.items||[]).forEach(item => {
+    const is3d = item.isDynamic || item.is3d;
+    html += `<div class="cmd-item-row">`;
+    html += `<div class="cmd-item-name">${esc(item.name||'Article')} ${is3d ? '<span class="cmd-3d-badge">IMPRESSION 3D</span>' : ''}</div>`;
+    html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">`;
+    html += `<div style="font-size:11px;color:var(--muted)">${esc(item.variant||'')}</div>`;
+    html += `<div style="font-size:13px;font-weight:700;font-family:var(--mono);color:var(--accent)">${(parseFloat(item.price||0)*parseInt(item.qty||1)).toFixed(2)} €</div>`;
+    html += `</div>`;
+    html += `<div class="cmd-item-specs">`;
+    html += `<span class="cmd-spec-tag" style="background:var(--bg);border:1px solid var(--border2);color:var(--soft)">Qté : ${item.qty||1}</span>`;
+    html += `<span class="cmd-spec-tag" style="background:var(--bg);border:1px solid var(--border2);color:var(--soft)">PU : ${parseFloat(item.price||0).toFixed(2)} €</span>`;
+    if(is3d){
+      if(item.tech) html += `<span class="cmd-spec-tag" style="background:rgba(155,114,255,.1);border:1px solid rgba(155,114,255,.2);color:var(--purple)">${esc(item.tech.toUpperCase())}</span>`;
+      if(item.material) html += `<span class="cmd-spec-tag" style="background:rgba(155,114,255,.1);border:1px solid rgba(155,114,255,.2);color:var(--purple)">${esc(item.material)}</span>`;
+      if(item.color) html += `<span class="cmd-spec-tag" style="background:rgba(155,114,255,.1);border:1px solid rgba(155,114,255,.2);color:var(--purple)">Couleur : ${esc(item.color)}</span>`;
+      if(item.fill) html += `<span class="cmd-spec-tag" style="background:rgba(155,114,255,.1);border:1px solid rgba(155,114,255,.2);color:var(--purple)">Remplissage : ${item.fill}%</span>`;
+      if(item.dims) html += `<span class="cmd-spec-tag" style="background:rgba(77,166,255,.1);border:1px solid rgba(77,166,255,.2);color:var(--blue)">📐 ${item.dims.x}×${item.dims.y}×${item.dims.z} mm</span>`;
+      if(item.volume) html += `<span class="cmd-spec-tag" style="background:rgba(77,166,255,.1);border:1px solid rgba(77,166,255,.2);color:var(--blue)">Volume : ${item.volume} cm³</span>`;
+      if(item.fileName){
+        html += `</div>`;
+        html += `<div style="margin-top:10px;padding:10px 14px;background:rgba(155,114,255,.05);border:1px solid rgba(155,114,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:10px">`;
+        html += `<div><div style="font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--purple);margin-bottom:3px">Fichier 3D</div><div style="font-size:12px;font-weight:600;font-family:var(--mono)">${esc(item.fileName)}</div></div>`;
+        if(item.fileDataUrl){
+          html += `<a href="${item.fileDataUrl}" download="${esc(item.fileName)}" class="cmd-dl-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Télécharger STL</a>`;
+        } else {
+          html += `<div style="font-size:10px;font-family:var(--mono);color:var(--muted);background:var(--bg3);padding:6px 10px;border-radius:6px;border:1px solid var(--border2)">Fichier non stocké</div>`;
+        }
+        html += `</div>`;
+        html += `<div class="cmd-item-specs" style="margin-top:8px">`;
+      }
+    }
+    html += `</div>`;
+    if(item.note){
+      html += `<div style="margin-top:8px;font-size:11px;color:var(--soft);font-style:italic;background:var(--bg);border-left:2px solid var(--border2);padding:6px 10px;border-radius:0 6px 6px 0">${esc(item.note)}</div>`;
+    }
+    html += `</div>`;
+  });
+
+  // ── TOTAUX ──
+  html += `<div style="margin-top:16px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">`;
+  html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>Sous-total</span><span style="font-family:var(--mono)">${parseFloat(c.total||0).toFixed(2)} €</span></div>`;
+  if(c.shipping?.cost) html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>Livraison</span><span style="font-family:var(--mono)">${parseFloat(c.shipping.cost).toFixed(2)} €</span></div>`;
+  html += `<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;border-top:1px solid var(--border2);padding-top:10px;margin-top:4px"><span>Total TTC</span><span style="font-family:var(--mono);color:var(--accent)">${parseFloat(c.total||0).toFixed(2)} €</span></div>`;
+  html += `</div>`;
+
+  // ── NOTE INTERNE ──
+  html += `<div style="margin-top:16px">`;
+  html += `<div class="cmd-section-lbl" style="margin-bottom:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Note interne</div>`;
+  html += `<textarea id="cmdNoteField" style="width:100%;padding:10px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;border-radius:var(--r);outline:none;resize:vertical;min-height:80px;transition:border-color .2s" placeholder="Note privée sur cette commande…" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">${esc(c.adminNote||'')}</textarea>`;
+  html += `<div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end">`;
+  html += `<button onclick="saveCmdNote()" class="btn btn-g" style="font-size:11px">💾 Enregistrer la note</button>`;
+  html += `<button onclick="deleteCmdConfirm()" style="padding:7px 12px;background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.2);color:var(--red);border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:11px;font-weight:600;transition:all .15s">Supprimer la commande</button>`;
+  html += `</div>`;
+  html += `</div>`;
+
+  return html;
+}
+
+window.closeCmdModal = () => {
+  document.getElementById('cmdModal').classList.remove('open');
+  document.body.style.overflow = '';
+  _editingCmdId = null;
+};
+
+window.updateCmdStatus = async () => {
+  if(!_editingCmdId) return;
+  const newStatus = document.getElementById('cmdModalStatus').value;
+  try {
+    await updateDoc(doc(db,'commandes',_editingCmdId), { status: newStatus, updatedAt: new Date() });
+    const idx = _allCommandes.findIndex(c => c._id === _editingCmdId);
+    if(idx !== -1) _allCommandes[idx].status = newStatus;
+    renderCommandesBadge();
+    renderCommandesStats();
+    filterCommandes();
+    toast('Statut mis à jour → ' + newStatus);
+  } catch(e){ toast('Erreur : '+e.message, true); }
+};
+
+window.saveCmdNote = async () => {
+  if(!_editingCmdId) return;
+  const note = document.getElementById('cmdNoteField').value;
+  try {
+    await updateDoc(doc(db,'commandes',_editingCmdId), { adminNote: note, updatedAt: new Date() });
+    const idx = _allCommandes.findIndex(c => c._id === _editingCmdId);
+    if(idx !== -1) _allCommandes[idx].adminNote = note;
+    toast('Note enregistrée');
+  } catch(e){ toast('Erreur : '+e.message, true); }
+};
+
+window.deleteCmdConfirm = async () => {
+  if(!_editingCmdId) return;
+  if(!confirm('Supprimer cette commande de la base de données ?')) return;
+  try {
+    await deleteDoc(doc(db,'commandes',_editingCmdId));
+    _allCommandes = _allCommandes.filter(c => c._id !== _editingCmdId);
+    closeCmdModal();
+    renderCommandesBadge();
+    renderCommandesStats();
+    filterCommandes();
+    toast('Commande supprimée');
+  } catch(e){ toast('Erreur : '+e.message, true); }
+};
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape' && document.getElementById('cmdModal')?.classList.contains('open')) closeCmdModal();
+});
+
+// ══════════════════════════════════════════════════════════════
+// ── CONFIG DEVIS ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+const DCFG_DEFAULTS = {
+  workerUrl: 'https://tbt3d-checkout.optionpdg.workers.dev',
+  fallbackUrl: '',
+  successUrl: 'https://tbt3d.fr/devis.html?success=1',
+  cancelUrl: 'https://tbt3d.fr/devis.html?cancelled=1',
+  fdmRate: 0.08,
+  slaRate: 0.22,
+  minPrice: 5.00,
+  delay: 5,
+};
+
+window.loadDevisCfg = async () => {
+  try {
+    const data = await fbGetConfig('devis');
+    const cfg = data || DCFG_DEFAULTS;
+    document.getElementById('dcfgWorkerUrl').value = cfg.workerUrl || DCFG_DEFAULTS.workerUrl;
+    document.getElementById('dcfgFallbackUrl').value = cfg.fallbackUrl || '';
+    document.getElementById('dcfgSuccessUrl').value = cfg.successUrl || DCFG_DEFAULTS.successUrl;
+    document.getElementById('dcfgCancelUrl').value = cfg.cancelUrl || DCFG_DEFAULTS.cancelUrl;
+    document.getElementById('dcfgFdmRate').value = cfg.fdmRate ?? DCFG_DEFAULTS.fdmRate;
+    document.getElementById('dcfgSlaRate').value = cfg.slaRate ?? DCFG_DEFAULTS.slaRate;
+    document.getElementById('dcfgMinPrice').value = cfg.minPrice ?? DCFG_DEFAULTS.minPrice;
+    document.getElementById('dcfgDelay').value = cfg.delay ?? DCFG_DEFAULTS.delay;
+  } catch(e){ console.log('Config devis not found, using defaults'); }
+};
+
+window.saveDevisCfg = async () => {
+  const btn = document.getElementById('btnSaveDevisCfg');
+  const fb = document.getElementById('dcfgFeedback');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Enregistrement…';
+  fb.style.display = 'none';
+  try {
+    const cfg = {
+      workerUrl:   document.getElementById('dcfgWorkerUrl').value.trim(),
+      fallbackUrl: document.getElementById('dcfgFallbackUrl').value.trim(),
+      successUrl:  document.getElementById('dcfgSuccessUrl').value.trim(),
+      cancelUrl:   document.getElementById('dcfgCancelUrl').value.trim(),
+      fdmRate:     parseFloat(document.getElementById('dcfgFdmRate').value) || DCFG_DEFAULTS.fdmRate,
+      slaRate:     parseFloat(document.getElementById('dcfgSlaRate').value) || DCFG_DEFAULTS.slaRate,
+      minPrice:    parseFloat(document.getElementById('dcfgMinPrice').value) || DCFG_DEFAULTS.minPrice,
+      delay:       parseInt(document.getElementById('dcfgDelay').value) || DCFG_DEFAULTS.delay,
+      updatedAt:   new Date(),
+    };
+    await fbSetConfig('devis', cfg);
+    fb.style.cssText = 'display:block;color:#16a34a;background:rgba(22,163,74,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center';
+    fb.textContent = '✓ Configuration enregistrée ! La page devis.html utilisera ces paramètres dès le prochain chargement.';
+    toast('Config Devis sauvegardée ✓');
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer la configuration';
+    setTimeout(() => fb.style.display='none', 5000);
+  } catch(e){
+    fb.style.cssText = 'display:block;color:#e11d48;background:rgba(225,29,72,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center';
+    fb.textContent = '⚠ Erreur : ' + e.message;
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer la configuration';
+  }
 };
 
 </script>

@@ -442,7 +442,51 @@ function buildWorkerItems(items) {
   }).filter(Boolean);
 }
 
-// ── Checkout Stripe unifié (tous les items passent par le Worker) ──
+// ── SAUVEGARDE COMMANDE FIREBASE ──────────────────────────────
+async function saveOrderToFirebase(items, source) {
+  try {
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const { getFirestore, collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const fbCfg = {
+      apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
+      authDomain: "tbt3d-a0f04.firebaseapp.com",
+      projectId: "tbt3d-a0f04",
+      storageBucket: "tbt3d-a0f04.firebasestorage.app",
+      appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
+    };
+    const apps = getApps();
+    const app = apps.length ? apps[0] : initializeApp(fbCfg);
+    const db = getFirestore(app);
+    const total = items.reduce((s,i) => s + parseFloat(i.price||0)*parseInt(i.qty||1), 0);
+    const orderItems = items.map(i => ({
+      id: i.id || '',
+      name: i.name || '',
+      variant: i.variant || '',
+      qty: i.qty || 1,
+      price: parseFloat(i.price||0),
+      isDynamic: !!i.isDynamic,
+      is3d: !!i.isDynamic,
+      fileName: i._note ? (i._note.match(/Fichier\s*:\s*([^\s|]+)/)?.[1]||'') : '',
+      note: i._note || '',
+      image: i.image || null,
+    }));
+    const orderDoc = {
+      createdAt: new Date(),
+      status: 'initié',
+      source: source || 'panier',
+      client: { name: '', email: '' },
+      items: orderItems,
+      total: parseFloat(total.toFixed(2)),
+    };
+    const ref = await addDoc(collection(db, 'commandes'), orderDoc);
+    localStorage.setItem('tbt3d_lastOrderId', ref.id);
+    return ref.id;
+  } catch(e) {
+    console.warn('Firebase order save failed:', e);
+    return null;
+  }
+}
+
 async function stripeCheckout() {
   const btn = document.getElementById('stripeCheckoutBtn');
   btn.disabled = true;
@@ -450,6 +494,9 @@ async function stripeCheckout() {
 
   try {
     const items = TBTCart.load();
+    // Sauvegarde dans Firebase (async, sans bloquer)
+    saveOrderToFirebase(items, 'panier');
+
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -484,6 +531,9 @@ async function stripeCheckoutPartial() {
   btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Redirection…';
 
   try {
+    // Sauvegarde dans Firebase
+    saveOrderToFirebase(stripeItems, 'panier');
+
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
