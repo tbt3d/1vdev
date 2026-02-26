@@ -477,24 +477,53 @@ onAuthStateChanged(auth, async user => {
   if (user) {
     document.getElementById('authWall').style.display    = 'none';
     document.getElementById('accountDash').style.display = 'block';
-    document.getElementById('userName').textContent  = user.displayName || 'Client';
     document.getElementById('userEmail').textContent = user.email;
-    const initials = (user.displayName || user.email).split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-    const av = document.getElementById('userAvatar');
-    if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}" alt="">`;
-    else av.textContent = initials;
-    const nameParts = (user.displayName || '').split(' ');
-    document.getElementById('pPrenom').value = nameParts[0] || '';
-    document.getElementById('pNom').value    = nameParts.slice(1).join(' ') || '';
-    document.getElementById('pEmail').value  = user.email;
+    document.getElementById('pEmail').value = user.email;
+    // Lire le profil complet depuis Firestore (prenom, nom, tel, ville, etc.)
     try {
       const snap = await getDoc(doc(db, 'users', user.uid));
       if (snap.exists()) {
         const d = snap.data();
+        // Prenom / Nom : priorite Firestore, fallback displayName Auth
+        const prenom = d.prenom || (user.displayName||'').split(' ')[0] || '';
+        const nom    = d.nom    || (user.displayName||'').split(' ').slice(1).join(' ') || '';
+        const fullName = (prenom+' '+nom).trim() || user.displayName || 'Client';
+        document.getElementById('userName').textContent = fullName;
+        document.getElementById('pPrenom').value = prenom;
+        document.getElementById('pNom').value    = nom;
         if (d.tel)   document.getElementById('pTel').value   = d.tel;
         if (d.ville) document.getElementById('pVille').value = d.ville;
+        const initials = ((prenom[0]||'')+(nom[0]||'')).toUpperCase() || user.email[0].toUpperCase();
+        const av = document.getElementById('userAvatar');
+        if (user.photoURL) av.innerHTML = '<img src="'+user.photoURL+'" alt="">';
+        else av.textContent = initials;
+      } else {
+        // Pas encore de doc Firestore (ex: ancien compte Google)
+        const displayName = user.displayName || 'Client';
+        document.getElementById('userName').textContent = displayName;
+        const nameParts = displayName.split(' ');
+        document.getElementById('pPrenom').value = nameParts[0] || '';
+        document.getElementById('pNom').value    = nameParts.slice(1).join(' ') || '';
+        const initials = (user.displayName||user.email).split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+        const av = document.getElementById('userAvatar');
+        if (user.photoURL) av.innerHTML = '<img src="'+user.photoURL+'" alt="">';
+        else av.textContent = initials;
+        // Creer le doc Firestore pour les prochaines connexions
+        await setDoc(doc(db, 'users', user.uid), {
+          prenom: nameParts[0]||'', nom: nameParts.slice(1).join(' ')||'',
+          email: user.email, role: 'user', createdAt: new Date().toISOString()
+        }, {merge: true});
       }
-    } catch(e) {}
+    } catch(e) {
+      // En cas d'erreur reseau, utiliser les infos Auth
+      const displayName = user.displayName || 'Client';
+      document.getElementById('userName').textContent = displayName;
+      const nameParts = displayName.split(' ');
+      document.getElementById('pPrenom').value = nameParts[0]||'';
+      document.getElementById('pNom').value    = nameParts.slice(1).join(' ')||'';
+      const av = document.getElementById('userAvatar');
+      av.textContent = (user.displayName||user.email)[0].toUpperCase();
+    }
     loadMessages(user.uid);
     loadOrders(user.uid);
   } else {
@@ -661,18 +690,41 @@ window.doRegister = async () => {
   const prenom=document.getElementById('rPrenom').value.trim(), nom=document.getElementById('rNom').value.trim();
   const email=document.getElementById('rEmail').value.trim(), pwd=document.getElementById('rPwd').value, pwd2=document.getElementById('rPwd2').value;
   const err=document.getElementById('registerErr'); err.style.display='none';
+  if(!prenom){err.textContent='Veuillez entrer votre prenom.';err.style.display='block';return;}
   if(pwd!==pwd2){err.textContent='Les mots de passe ne correspondent pas.';err.style.display='block';return;}
-  if(pwd.length<8){err.textContent='Mot de passe trop court (min. 8 caractères).';err.style.display='block';return;}
+  if(pwd.length<8){err.textContent='Mot de passe trop court (min. 8 caracteres).';err.style.display='block';return;}
   try {
-    const cred=await createUserWithEmailAndPassword(auth,email,pwd);
-    await updateProfile(cred.user,{displayName:`${prenom} ${nom}`.trim()});
-    await setDoc(doc(db,'users',cred.user.uid),{prenom,nom,email,createdAt:new Date().toISOString()});
+    // 1. Creer le compte Firebase Auth
+    const cred = await createUserWithEmailAndPassword(auth, email, pwd);
+    // 2. Mettre a jour le displayName
+    await updateProfile(cred.user, {displayName: (prenom+' '+nom).trim()});
+    // 3. Sauvegarder le profil complet dans Firestore avec le role
+    await setDoc(doc(db, 'users', cred.user.uid), {
+      prenom, nom, email,
+      role: 'user',
+      createdAt: new Date().toISOString()
+    });
+    // 4. Recharger pour que onAuthStateChanged lise le bon displayName
+    await cred.user.reload();
+    // 5. Mettre a jour l'affichage immediatement sans attendre le prochain event
+    document.getElementById('userName').textContent = (prenom+' '+nom).trim();
+    const initials = ((prenom[0]||'')+(nom[0]||'')).toUpperCase();
+    document.getElementById('userAvatar').textContent = initials;
+    document.getElementById('pPrenom').value = prenom;
+    document.getElementById('pNom').value    = nom;
+    document.getElementById('pEmail').value  = email;
   } catch(e){err.textContent=errFr(e);err.style.display='block';}
 };
 window.doGoogle = async () => {
   try {
     const cred=await signInWithPopup(auth,googleProvider);
-    await setDoc(doc(db,'users',cred.user.uid),{email:cred.user.email,displayName:cred.user.displayName,createdAt:new Date().toISOString()},{merge:true});
+    const gParts = (cred.user.displayName||'').split(' ');
+    await setDoc(doc(db,'users',cred.user.uid),{
+      prenom: gParts[0]||'', nom: gParts.slice(1).join(' ')||'',
+      email: cred.user.email,
+      role: 'user',
+      createdAt: new Date().toISOString()
+    },{merge:true});
   } catch(e) {
     const id=document.getElementById('tabRegister').style.display==='none'?'loginErr':'registerErr';
     const el=document.getElementById(id); el.textContent=errFr(e); el.style.display='block';

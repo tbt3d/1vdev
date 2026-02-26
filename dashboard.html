@@ -415,6 +415,12 @@ tr:hover td{background:rgba(255,255,255,.01)}
     Produit
   </a>
 
+  <button class="nav-item" onclick="goPage('users',this)" id="navUsers">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Utilisateurs
+    <span class="sb-badge" id="usersBadge" style="display:none">0</span>
+  </button>
+
   <div class="sb-section">Outils</div>
   <a href="https://dashboard.stripe.com" target="_blank" class="nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
@@ -840,6 +846,133 @@ tr:hover td{background:rgba(255,255,255,.01)}
   </div>
 
 </div>
+
+  <!-- ═══ PAGE UTILISATEURS ═══ -->
+  <div class="page" id="page-users">
+    <div class="page-head">
+      <div>
+        <div class="page-title">Utilisateurs</div>
+        <div class="page-sub">Gérer les comptes, rôles et informations</div>
+      </div>
+      <button class="btn btn-a" onclick="loadUsers()" style="font-size:11px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+        Actualiser
+      </button>
+    </div>
+
+    <!-- Search + filters -->
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px;position:relative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);width:14px;height:14px;opacity:.4"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input id="userSearch" type="text" placeholder="Rechercher un utilisateur…" oninput="filterUsers()"
+          style="width:100%;padding:9px 12px 9px 34px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none">
+      </div>
+      <select id="userRoleFilter" onchange="filterUsers()" style="padding:9px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none;cursor:pointer">
+        <option value="">Tous les rôles</option>
+        <option value="admin">Admin</option>
+        <option value="user">Utilisateur</option>
+        <option value="vip">VIP</option>
+        <option value="banned">Banni</option>
+      </select>
+    </div>
+
+    <!-- Users list -->
+    <div id="usersLoading" style="text-align:center;padding:60px;color:var(--muted);font-size:13px">
+      <div style="width:28px;height:28px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px"></div>
+      Chargement…
+    </div>
+    <div id="usersEmpty" style="display:none;text-align:center;padding:60px;color:var(--muted);font-size:13px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:40px;height:40px;opacity:.2;margin:0 auto 12px;display:block"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      Aucun utilisateur trouvé
+    </div>
+    <div id="usersList" style="display:none;display:flex;flex-direction:column;gap:8px"></div>
+
+    <!-- Stats bar -->
+    <div id="usersStats" style="display:none;margin-top:20px;display:flex;gap:16px;flex-wrap:wrap"></div>
+  </div>
+
+  <!-- ═══ MODAL EDIT USER ═══ -->
+  <div id="userModal" onclick="if(event.target===this)closeUserModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:32px;position:relative">
+      <button onclick="closeUserModal()" style="position:absolute;top:14px;right:14px;width:30px;height:30px;background:var(--bg3);border:none;border-radius:50%;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px">×</button>
+      
+      <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-family:var(--mono)">Modifier l'utilisateur</div>
+      <div id="userModalEmail" style="font-size:17px;font-weight:600;color:var(--text);margin-bottom:24px"></div>
+
+      <!-- Avatar + nom -->
+      <div style="display:flex;gap:14px;margin-bottom:20px;align-items:center">
+        <div id="userModalAvatar" style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:600;color:#fff;flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase">Rôle actuel</div>
+          <div id="userModalRole" style="font-size:13px;font-weight:600"></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="field">
+          <label>Prénom</label>
+          <input id="umFirstName" type="text" placeholder="Prénom">
+        </div>
+        <div class="field">
+          <label>Nom</label>
+          <input id="umLastName" type="text" placeholder="Nom">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>Email</label>
+        <input id="umEmail" type="email" placeholder="email@exemple.fr">
+        <div class="fhint">⚠ Changer l'email déconnectera l'utilisateur</div>
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>Téléphone</label>
+        <input id="umPhone" type="tel" placeholder="+33 6 00 00 00 00">
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>Adresse</label>
+        <input id="umAddress" type="text" placeholder="Rue, numéro">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="field">
+          <label>Code postal</label>
+          <input id="umZip" type="text" placeholder="59000">
+        </div>
+        <div class="field">
+          <label>Ville</label>
+          <input id="umCity" type="text" placeholder="Lille">
+        </div>
+        <div class="field">
+          <label>Pays</label>
+          <input id="umCountry" type="text" placeholder="France">
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:20px">
+        <label>Rôle</label>
+        <select id="umRole" style="width:100%;padding:10px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none">
+          <option value="user">Utilisateur</option>
+          <option value="vip">VIP</option>
+          <option value="admin">Admin</option>
+          <option value="banned">Banni</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:24px">
+        <label>Note interne</label>
+        <textarea id="umNote" placeholder="Note privée (non visible par l'utilisateur)…" style="min-height:70px"></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button onclick="saveUserEdit()" class="btn btn-a" style="flex:1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
+          Enregistrer
+        </button>
+        <button onclick="confirmDeleteUser()" class="btn" style="background:#e11d48;color:#fff;padding:10px 16px" title="Supprimer le compte">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>
+      </div>
+      <div id="umFeedback" style="margin-top:12px;font-size:12px;text-align:center;display:none"></div>
+    </div>
+  </div>
+
+
 <div class="toast" id="toast"><div class="tdot" id="tdot"></div><span id="toastTxt"></span></div>
 
 <!-- EMAILJS -->
@@ -963,6 +1096,7 @@ window.goPage = (id, btn) => {
   if(id==='homepage') renderHpUI();
   if(id==='boutique-cfg'){ syncBoutSlots(); renderBoutUI(); }
   if(id==='messages') loadMessages();
+  if(id==='users') loadUsers();
 };
 
 // ── OVERVIEW ──
@@ -1915,6 +2049,209 @@ window.deleteMsgById=async(id)=>{
     renderMsgList(); updateMsgBadges(); toast('Message supprimé');
   }catch(e){toast('Erreur : '+e.message, true);}
 };
+
+// ══════════════════════════════════════════════
+// ── USERS MANAGEMENT ──────────────────────────
+// ══════════════════════════════════════════════
+
+let _allUsers = [];
+let _editingUserId = null;
+
+const ROLE_COLORS = {
+  admin:  { bg: 'rgba(255,107,53,.15)', color: 'var(--accent)', label: 'Admin' },
+  vip:    { bg: 'rgba(155,114,255,.15)', color: 'var(--purple)', label: 'VIP' },
+  user:   { bg: 'rgba(100,100,100,.12)', color: 'var(--soft)', label: 'Utilisateur' },
+  banned: { bg: 'rgba(225,29,72,.12)', color: '#e11d48', label: 'Banni' },
+};
+
+window.loadUsers = async () => {
+  document.getElementById('usersLoading').style.display = 'block';
+  document.getElementById('usersEmpty').style.display = 'none';
+  document.getElementById('usersList').style.display = 'none';
+  document.getElementById('usersStats').style.display = 'none';
+
+  try {
+    const snap = await getDocs(collection(db, 'users'));
+    _allUsers = [];
+    snap.forEach(d => _allUsers.push({ uid: d.id, ...d.data() }));
+    // Trier par date de création desc
+    _allUsers.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+    // Badge sidebar
+    const badge = document.getElementById('usersBadge');
+    badge.textContent = _allUsers.length;
+    badge.style.display = _allUsers.length ? '' : 'none';
+
+    renderUsersList(_allUsers);
+  } catch(e) {
+    document.getElementById('usersLoading').style.display = 'none';
+    toast('Erreur chargement utilisateurs : ' + e.message, true);
+  }
+};
+
+function renderUsersList(users) {
+  document.getElementById('usersLoading').style.display = 'none';
+
+  if (!users.length) {
+    document.getElementById('usersEmpty').style.display = 'block';
+    document.getElementById('usersList').style.display = 'none';
+    document.getElementById('usersStats').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('usersEmpty').style.display = 'none';
+  const list = document.getElementById('usersList');
+  list.style.display = 'flex';
+
+  list.innerHTML = users.map(u => {
+    const role = u.role || 'user';
+    const rc = ROLE_COLORS[role] || ROLE_COLORS.user;
+    const name = [u.firstName, u.lastName].filter(Boolean).join(' ') || '—';
+    const initials = (u.firstName?.[0] || u.email?.[0] || '?').toUpperCase();
+    const date = u.createdAt?.toDate ? u.createdAt.toDate().toLocaleDateString('fr-FR') : '—';
+    return `
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;transition:border-color .15s;cursor:pointer"
+           onclick="openUserModal('${u.uid}')" onmouseover="this.style.borderColor='var(--border)'" onmouseout="this.style.borderColor='var(--border2)'">
+        <!-- Avatar -->
+        <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0">${initials}</div>
+        <!-- Info -->
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px">${name}</div>
+          <div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.email || '—'}</div>
+        </div>
+        <!-- Phone -->
+        <div style="font-size:12px;color:var(--soft);min-width:120px;display:none" class="u-phone">${u.phone || ''}</div>
+        <!-- Date -->
+        <div style="font-size:11px;color:var(--muted);font-family:var(--mono);white-space:nowrap">${date}</div>
+        <!-- Role badge -->
+        <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:20px;background:${rc.bg};color:${rc.color};white-space:nowrap">${rc.label}</div>
+        <!-- Edit btn -->
+        <button onclick="event.stopPropagation();openUserModal('${u.uid}')"
+          style="width:30px;height:30px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s"
+          onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>`;
+  }).join('');
+
+  // Stats bar
+  const stats = document.getElementById('usersStats');
+  stats.style.display = 'flex';
+  const counts = { admin: 0, vip: 0, user: 0, banned: 0 };
+  users.forEach(u => { counts[u.role || 'user'] = (counts[u.role || 'user'] || 0) + 1; });
+  stats.innerHTML = Object.entries(ROLE_COLORS).map(([role, rc]) => `
+    <div style="background:${rc.bg};padding:8px 16px;border-radius:30px;font-size:12px;font-weight:600;color:${rc.color}">
+      ${counts[role] || 0} ${rc.label}${(counts[role] || 0) > 1 ? 's' : ''}
+    </div>`).join('') + `<div style="font-size:12px;color:var(--muted);align-self:center;margin-left:auto">${users.length} total</div>`;
+}
+
+window.filterUsers = () => {
+  const q = (document.getElementById('userSearch').value || '').toLowerCase();
+  const role = document.getElementById('userRoleFilter').value;
+  const filtered = _allUsers.filter(u => {
+    const matchQ = !q ||
+      (u.email || '').toLowerCase().includes(q) ||
+      (u.firstName || '').toLowerCase().includes(q) ||
+      (u.lastName || '').toLowerCase().includes(q) ||
+      (u.phone || '').includes(q);
+    const matchRole = !role || (u.role || 'user') === role;
+    return matchQ && matchRole;
+  });
+  renderUsersList(filtered);
+};
+
+window.openUserModal = (uid) => {
+  const u = _allUsers.find(x => x.uid === uid);
+  if (!u) return;
+  _editingUserId = uid;
+
+  const modal = document.getElementById('userModal');
+  modal.style.display = 'flex';
+
+  const initials = (u.firstName?.[0] || u.email?.[0] || '?').toUpperCase();
+  document.getElementById('userModalAvatar').textContent = initials;
+  document.getElementById('userModalEmail').textContent = u.email || uid;
+
+  const role = u.role || 'user';
+  const rc = ROLE_COLORS[role] || ROLE_COLORS.user;
+  document.getElementById('userModalRole').innerHTML =
+    `<span style="padding:3px 10px;border-radius:20px;background:${rc.bg};color:${rc.color}">${rc.label}</span>`;
+
+  document.getElementById('umFirstName').value = u.firstName || '';
+  document.getElementById('umLastName').value = u.lastName || '';
+  document.getElementById('umEmail').value = u.email || '';
+  document.getElementById('umPhone').value = u.phone || '';
+  document.getElementById('umAddress').value = u.address || '';
+  document.getElementById('umZip').value = u.zip || '';
+  document.getElementById('umCity').value = u.city || '';
+  document.getElementById('umCountry').value = u.country || 'France';
+  document.getElementById('umRole').value = role;
+  document.getElementById('umNote').value = u.adminNote || '';
+  document.getElementById('umFeedback').style.display = 'none';
+};
+
+window.closeUserModal = () => {
+  document.getElementById('userModal').style.display = 'none';
+  _editingUserId = null;
+};
+
+window.saveUserEdit = async () => {
+  if (!_editingUserId) return;
+  const fb = document.getElementById('umFeedback');
+  fb.style.display = 'none';
+
+  const updates = {
+    firstName: document.getElementById('umFirstName').value.trim(),
+    lastName:  document.getElementById('umLastName').value.trim(),
+    email:     document.getElementById('umEmail').value.trim(),
+    phone:     document.getElementById('umPhone').value.trim(),
+    address:   document.getElementById('umAddress').value.trim(),
+    zip:       document.getElementById('umZip').value.trim(),
+    city:      document.getElementById('umCity').value.trim(),
+    country:   document.getElementById('umCountry').value.trim(),
+    role:      document.getElementById('umRole').value,
+    adminNote: document.getElementById('umNote').value.trim(),
+    updatedAt: new Date(),
+  };
+
+  try {
+    await updateDoc(doc(db, 'users', _editingUserId), updates);
+    // Mettre à jour le cache local
+    const idx = _allUsers.findIndex(u => u.uid === _editingUserId);
+    if (idx !== -1) _allUsers[idx] = { ..._allUsers[idx], ...updates };
+
+    fb.style.cssText = 'display:block;color:#16a34a;margin-top:12px;font-size:12px;text-align:center';
+    fb.textContent = '✓ Modifications enregistrées';
+    renderUsersList(_allUsers);
+    setTimeout(closeUserModal, 1200);
+    toast('Utilisateur mis à jour');
+  } catch(e) {
+    fb.style.cssText = 'display:block;color:#e11d48;margin-top:12px;font-size:12px;text-align:center';
+    fb.textContent = '⚠ Erreur : ' + e.message;
+  }
+};
+
+window.confirmDeleteUser = async () => {
+  if (!_editingUserId) return;
+  const u = _allUsers.find(x => x.uid === _editingUserId);
+  const name = u ? (u.email || u.uid) : _editingUserId;
+  if (!confirm(`Supprimer le compte de "${name}" ?
+
+Cette action supprime uniquement le profil Firestore. Le compte Firebase Auth devra être supprimé manuellement si nécessaire.`)) return;
+  try {
+    await deleteDoc(doc(db, 'users', _editingUserId));
+    _allUsers = _allUsers.filter(u => u.uid !== _editingUserId);
+    const badge = document.getElementById('usersBadge');
+    badge.textContent = _allUsers.length;
+    badge.style.display = _allUsers.length ? '' : 'none';
+    closeUserModal();
+    renderUsersList(_allUsers);
+    toast('Compte supprimé');
+  } catch(e) {
+    toast('Erreur suppression : ' + e.message, true);
+  }
+};
+
 </script>
 </body>
 </html>
