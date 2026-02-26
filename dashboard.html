@@ -192,7 +192,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
 .sugg-limit{font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:4px}
 
 /* ── COMBO LINKS ── */
-.combo-row{display:grid;grid-template-columns:1fr 1fr 110px 110px 24px;gap:6px;align-items:center;margin-bottom:6px}
+.combo-row{display:grid;grid-template-columns:1fr 1fr 130px 90px 90px 24px;gap:6px;align-items:center;margin-bottom:6px}
+.combo-stripe{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:11px;font-family:var(--mono);color:var(--text);outline:none;transition:border-color .15s}
+.combo-stripe:focus{border-color:var(--purple)}
+.combo-stripe.has-stripe{border-color:rgba(155,114,255,.6);background:rgba(155,114,255,.06)}
 .combo-label{font-size:11px;font-weight:600;color:var(--text);background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px}
 .combo-label .cl-dot{width:8px;height:8px;border-radius:2px;background:var(--accent);flex-shrink:0}
 .combo-url{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 10px;font-size:11px;font-family:var(--mono);color:var(--text);outline:none;transition:border-color .15s}
@@ -1489,19 +1492,23 @@ function renderComboLinks() {
 
   rows.innerHTML = allCombos.map(combo => {
     const key = comboKey(combo);
-    const data = links[key] || { url: '', price: '', oldPrice: '' };
+    const data = links[key] || { url: '', price: '', oldPrice: '', stripePrice: '' };
     const hasUrl = data.url && data.url.trim();
     const hasPrice = data.price && String(data.price).trim();
     const hasOld = data.oldPrice && String(data.oldPrice).trim();
+    const hasStripe = data.stripePrice && String(data.stripePrice).trim();
     const label = comboLabel(combo);
     return `<div class="combo-row" data-key="${key.replace(/"/g,'&quot;')}">
       <div class="combo-label" title="${label}">
-        <span class="cl-dot" style="${hasUrl?'background:#16a34a':''}"></span>
+        <span class="cl-dot" style="${hasUrl?'background:#16a34a':hasStripe?'background:var(--purple)':''}"></span>
         <span style="overflow:hidden;text-overflow:ellipsis">${label}</span>
       </div>
       <input class="combo-url${hasUrl?' has-url':''}" type="text" placeholder="https://buy.stripe.com/…"
         value="${(data.url||'').replace(/"/g,'&quot;')}"
         oninput="updateCombo('${key.replace(/'/g,"\\'")}','url',this.value);this.classList.toggle('has-url',!!this.value.trim())">
+      <input class="combo-stripe${hasStripe?' has-stripe':''}" type="text" placeholder="price_1Abc…"
+        value="${(data.stripePrice||'').replace(/"/g,'&quot;')}"
+        oninput="updateCombo('${key.replace(/'/g,"\\'")}','stripePrice',this.value);this.classList.toggle('has-stripe',!!this.value.trim())">
       <input class="combo-price${hasPrice?' has-price':''}" type="number" step="0.01" min="0" placeholder="Prix"
         value="${data.price||''}"
         oninput="updateCombo('${key.replace(/'/g,"\\'")}','price',this.value);this.classList.toggle('has-price',!!this.value.trim())">
@@ -1514,12 +1521,12 @@ function renderComboLinks() {
 }
 
 window.updateCombo = (key, field, val) => {
-  if (!window.comboLinks[key]) window.comboLinks[key] = { url: '', price: '' };
+  if (!window.comboLinks[key]) window.comboLinks[key] = { url: '', price: '', oldPrice: '', stripePrice: '' };
   window.comboLinks[key][field] = val;
 };
 
 window.clearCombo = (key) => {
-  if (window.comboLinks[key]) { window.comboLinks[key] = { url: '', price: '', oldPrice: '' }; }
+  if (window.comboLinks[key]) { window.comboLinks[key] = { url: '', price: '', oldPrice: '', stripePrice: '' }; }
   renderComboLinks();
 };
 
