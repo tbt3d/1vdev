@@ -2986,6 +2986,14 @@ window.confirmDeleteUser = async () => {
 // ══════════════════════════════════════════════════════════════
 let _allCommandes = [], _cmdFilter = 'all', _editingCmdId = null;
 
+// Helper: normalise items/lineItems en tableau peu importe le format Firebase
+function toArr(val) {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'object') return Object.values(val);
+  return [];
+}
+
 const CMD_STATUS_CFG = {
   'initié':  { label:'Initié',  cls:'cs-init', color:'var(--orange)' },
   'payé':    { label:'Payé',    cls:'cs-paye', color:'var(--green)'  },
@@ -3008,8 +3016,6 @@ window.loadCommandes = async () => {
     const snap = await getDocs(q);
     _allCommandes = [];
     snap.forEach(d => _allCommandes.push({...d.data(), _id: d.id}));
-    // Only show confirmed orders (paid, shipped, cancelled) — not just "initiated"
-    _allCommandes = _allCommandes.filter(c => c.status === 'payé' || c.status === 'expédié' || c.status === 'annulé');
     renderCommandesBadge();
     renderCommandesStats();
     filterCommandes();
@@ -3070,7 +3076,7 @@ window.filterCommandes = () => {
     if(_cmdFilter !== 'all' && c.status !== _cmdFilter) return false;
     if(!q) return true;
     const clientName = ((c.client?.name||'') + ' ' + (c.client?.email||'')).toLowerCase();
-    const items = (c.items||[]).map(i=>i.name||'').join(' ').toLowerCase();
+    const items = toArr(c.items).map(i=>i.name||'').join(' ').toLowerCase();
     return clientName.includes(q) || items.includes(q) || (c._id||'').toLowerCase().includes(q);
   });
   renderCommandesList(filtered);
@@ -3088,8 +3094,8 @@ function renderCommandesList(commandes){
   }
   list.innerHTML = commandes.map(c => {
     const sc = CMD_STATUS_CFG[c.status] || CMD_STATUS_CFG['initié'];
-    const has3d = (c.items||[]).some(i => i.isDynamic || i.is3d);
-    const itemCount = (c.items||[]).length;
+    const has3d = toArr(c.items).some(i => i.isDynamic || i.is3d);
+    const itemCount = toArr(c.items).length;
     const clientName = c.client?.name || c.client?.email || 'Client inconnu';
     const iconBg = has3d ? 'rgba(155,114,255,.12)' : 'rgba(255,107,53,.1)';
     const iconColor = has3d ? 'var(--purple)' : 'var(--accent)';
@@ -3117,7 +3123,7 @@ window.openCmdModal = (id) => {
   if(!c) return;
   _editingCmdId = id;
   const modal = document.getElementById('cmdModal');
-  const has3d = (c.items||[]).some(i => i.isDynamic || i.is3d);
+  const has3d = toArr(c.items).some(i => i.isDynamic || i.is3d);
   const sc = CMD_STATUS_CFG[c.status] || CMD_STATUS_CFG['initié'];
 
   // Icon
@@ -3168,7 +3174,7 @@ function buildCmdModalBody(c){
 
   // ── ARTICLES ──
   html += `<div class="cmd-section-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg> Articles commandés</div>`;
-  (c.items||[]).forEach(item => {
+  (toArr(c.items).length ? toArr(c.items) : toArr(c.lineItems)).forEach(item => {
     const is3d = item.isDynamic || item.is3d;
     html += `<div class="cmd-item-row">`;
     html += `<div class="cmd-item-name">${esc(item.name||'Article')} ${is3d ? '<span class="cmd-3d-badge">IMPRESSION 3D</span>' : ''}</div>`;
@@ -3277,7 +3283,7 @@ window.saveCmdNote = async () => {
 window.printBL = () => {
   const c = _allCommandes.find(x => x._id === _editingCmdId);
   if(!c) return;
-  const items = c.items || [];
+  const items = toArr(c.items).length ? toArr(c.items) : toArr(c.lineItems);
   const date = new Date().toLocaleDateString('fr-FR', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const orderId = c.orderId || c._id || '—';
   const itemsHtml = items.map(item => `
