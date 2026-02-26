@@ -87,8 +87,9 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .btn-checkout:hover { opacity: .85; transform: translateY(-1px); }
 .btn-checkout svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-.btn-continue { width: 100%; padding: 12px 20px; background: transparent; color: var(--text); border: 1.5px solid var(--border); font-family: var(--font); font-size: 13px; border-radius: var(--r); cursor: pointer; transition: border-color .2s; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
-.btn-continue:hover { border-color: var(--text); }
+.btn-continue { width: 100%; padding: 15px 20px; background: transparent; color: var(--text); border: 1.5px solid var(--border); font-family: var(--font); font-size: 14px; font-weight: 500; border-radius: var(--r); cursor: pointer; transition: border-color .2s, background .2s; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-continue:hover { border-color: var(--text); background: var(--bg); }
+.btn-continue svg { width: 16px; height: 16px; }
 
 .summary-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 14px; line-height: 1.6; }
 
@@ -371,53 +372,46 @@ function openCheckout() {
   document.getElementById('coTotal').textContent = TBTCart.total().toFixed(2) + ' €';
 
   // Déterminer le mode de paiement
-  const itemsWithStripeId  = items.filter(i => i.stripePrice && i.stripePrice.startsWith('price_'));
-  const itemsWithDirectUrl = items.filter(i => i.paymentUrl && !i.stripePrice);
-  const itemsWithNothing   = items.filter(i => !i.stripePrice && !i.paymentUrl);
-  const allHaveStripeId    = items.length > 0 && items.every(i => i.stripePrice && i.stripePrice.startsWith('price_'));
+  // Un article est "Stripe-compatible" s'il a un stripePrice OU isDynamic:true
+  const stripeItems   = items.filter(i => (i.stripePrice && i.stripePrice.startsWith('price_')) || i.isDynamic === true);
+  const directItems   = items.filter(i => !i.stripePrice && !i.isDynamic && i.paymentUrl);
+  const nothingItems  = items.filter(i => !i.stripePrice && !i.isDynamic && !i.paymentUrl);
+  const allStripe     = stripeItems.length === items.length;
 
   let btnsHtml = '';
 
-  if (allHaveStripeId) {
-    // ✅ Tous les produits ont un Price ID → checkout Stripe unifié
-    btnsHtml = `
-      <button class="co-btn-pay" id="stripeCheckoutBtn" onclick="stripeCheckout()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Payer en une fois
-      </button>
-      <p style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px">🔒 Paiement sécurisé via Stripe</p>`;
-
-  } else if (itemsWithStripeId.length > 0 && itemsWithDirectUrl.length === 0 && itemsWithNothing.length === 0) {
-    // Tous ont un Price ID (même cas)
+  if (allStripe) {
+    // ✅ Tout passe par Stripe (lampes fixes + pièces sur mesure)
     btnsHtml = `
       <button class="co-btn-pay" id="stripeCheckoutBtn" onclick="stripeCheckout()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         Payer en une fois — ${TBTCart.total().toFixed(2)} €
-      </button>`;
+      </button>
+      <p style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px">🔒 Paiement sécurisé via Stripe</p>`;
 
   } else {
-    // Mix ou liens directs → un bouton par article
-    if (itemsWithStripeId.length > 0) {
+    // Mix : certains articles ont un paiement direct ou sont sans lien
+    if (stripeItems.length > 0) {
       btnsHtml += `
         <button class="co-btn-pay" id="stripeCheckoutBtn" onclick="stripeCheckoutPartial()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Payer les articles Stripe (${itemsWithStripeId.length})
+          Payer via Stripe (${stripeItems.length} article${stripeItems.length>1?'s':''})
         </button>`;
     }
-    if (itemsWithDirectUrl.length > 0) {
+    if (directItems.length > 0) {
       if (btnsHtml) btnsHtml += '<div class="co-sep"><span>et</span></div>';
       btnsHtml += `<p class="co-links-title">Payer séparément :</p>` +
-        itemsWithDirectUrl.map(item => `
+        directItems.map(item => `
           <a class="co-link-btn" href="${item.paymentUrl}" target="_blank" rel="noopener">
             <span>${item.name}${item.variant ? ' · ' + item.variant : ''} — ${(parseFloat(item.price) * item.qty).toFixed(2)} €</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>`).join('');
     }
-    if (itemsWithNothing.length > 0) {
+    if (nothingItems.length > 0) {
       if (btnsHtml) btnsHtml += '<div class="co-sep"><span>et</span></div>';
       btnsHtml += `
         <a class="co-link-btn" href="/contact.html">
-          <span>Commander ${itemsWithNothing.map(i=>i.name).join(', ')} par message</span>
+          <span>Commander ${nothingItems.map(i=>i.name).join(', ')} par message</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         </a>`;
     }
@@ -428,7 +422,27 @@ function openCheckout() {
   document.body.style.overflow = 'hidden';
 }
 
-// ── Checkout Stripe unifié (tous les items ont un Price ID) ──
+// ── Prépare les items pour le Worker (gère stripePrice ET isDynamic) ──
+function buildWorkerItems(items) {
+  return items.map(item => {
+    if (item.stripePrice && item.stripePrice.startsWith('price_')) {
+      return { stripePrice: item.stripePrice, qty: item.qty };
+    }
+    if (item.isDynamic) {
+      return {
+        isDynamic: true,
+        name:  item.name,
+        variant: item.variant || '',
+        note:  item._note || '',
+        price: item.price,
+        qty:   item.qty,
+      };
+    }
+    return null;
+  }).filter(Boolean);
+}
+
+// ── Checkout Stripe unifié (tous les items passent par le Worker) ──
 async function stripeCheckout() {
   const btn = document.getElementById('stripeCheckoutBtn');
   btn.disabled = true;
@@ -439,7 +453,7 @@ async function stripeCheckout() {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ cancelUrl: 'https://tbt3d.fr/panier.html?cancelled=1', items: buildWorkerItems(items) }),
     });
 
     const data = await res.json();
@@ -448,13 +462,11 @@ async function stripeCheckout() {
       throw new Error(data.error || 'Erreur serveur');
     }
 
-    // NE PAS vider le panier ici — seulement après confirmation réelle du paiement
     window.location.href = data.url;
 
   } catch (err) {
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Réessayer';
-    // Afficher l'erreur sous le bouton
     const errEl = document.createElement('p');
     errEl.style.cssText = 'font-size:11px;color:#e11d48;text-align:center;margin-top:8px';
     errEl.textContent = '⚠ ' + err.message;
@@ -463,9 +475,10 @@ async function stripeCheckout() {
   }
 }
 
-// ── Checkout partiel (seulement les items avec Price ID) ──
+// ── Checkout partiel (seulement les items Stripe-compatibles) ──
 async function stripeCheckoutPartial() {
-  const items = TBTCart.load().filter(i => i.stripePrice && i.stripePrice.startsWith('price_'));
+  const allItems = TBTCart.load();
+  const stripeItems = allItems.filter(i => (i.stripePrice && i.stripePrice.startsWith('price_')) || i.isDynamic === true);
   const btn = document.getElementById('stripeCheckoutBtn');
   btn.disabled = true;
   btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Redirection…';
@@ -474,7 +487,7 @@ async function stripeCheckoutPartial() {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ cancelUrl: 'https://tbt3d.fr/panier.html?cancelled=1', items: buildWorkerItems(stripeItems) }),
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || 'Erreur serveur');
@@ -501,7 +514,6 @@ renderCart();
 (function() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('cancelled') === '1') {
-    // Le panier est intact — juste afficher un message
     const container = document.querySelector('.page-inner');
     if (!container) return;
     const banner = document.createElement('div');
