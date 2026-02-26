@@ -67,3 +67,6 @@ const TBTCart = (() => {
 
   return { load, add, remove, updateQty, clear, count, total };
 })();
+
+// Exposition globale explicite (accès depuis n'importe quelle page)
+window.TBTCart = TBTCart;
