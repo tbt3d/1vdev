@@ -3190,10 +3190,12 @@ function buildCmdModalBody(c){
         html += `</div>`;
         html += `<div style="margin-top:10px;padding:10px 14px;background:rgba(155,114,255,.05);border:1px solid rgba(155,114,255,.2);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:10px">`;
         html += `<div><div style="font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--purple);margin-bottom:3px">Fichier 3D</div><div style="font-size:12px;font-weight:600;font-family:var(--mono)">${esc(item.fileName)}</div></div>`;
-        if(item.fileDataUrl){
+        if(item.fileUrl){
+          html += `<a href="${item.fileUrl}" target="_blank" download="${esc(item.fileName)}" class="cmd-dl-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Télécharger STL</a>`;
+        } else if(item.fileDataUrl){
           html += `<a href="${item.fileDataUrl}" download="${esc(item.fileName)}" class="cmd-dl-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Télécharger STL</a>`;
         } else {
-          html += `<div style="font-size:10px;font-family:var(--mono);color:var(--muted);background:var(--bg3);padding:6px 10px;border-radius:6px;border:1px solid var(--border2)">Fichier non stocké</div>`;
+          html += `<div style="font-size:10px;font-family:var(--mono);color:var(--muted);background:var(--bg3);padding:6px 10px;border-radius:6px;border:1px solid var(--border2)">⏳ Fichier en cours d'upload…</div>`;
         }
         html += `</div>`;
         html += `<div class="cmd-item-specs" style="margin-top:8px">`;
@@ -3221,6 +3223,11 @@ function buildCmdModalBody(c){
   html += `<button onclick="saveCmdNote()" class="btn btn-g" style="font-size:11px">💾 Enregistrer la note</button>`;
   html += `<button onclick="deleteCmdConfirm()" style="padding:7px 12px;background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.2);color:var(--red);border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:11px;font-weight:600;transition:all .15s">Supprimer la commande</button>`;
   html += `</div>`;
+  html += `</div>`;
+
+  // ── BL IMPRIMABLE ──
+  html += `<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">`;
+  html += `<button onclick="printBL()" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:rgba(46,204,138,.08);border:1px solid rgba(46,204,138,.3);color:var(--green);border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;transition:all .15s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimer le bon de livraison</button>`;
   html += `</div>`;
 
   return html;
@@ -3255,6 +3262,104 @@ window.saveCmdNote = async () => {
     if(idx !== -1) _allCommandes[idx].adminNote = note;
     toast('Note enregistrée');
   } catch(e){ toast('Erreur : '+e.message, true); }
+};
+
+window.printBL = () => {
+  const c = _allCommandes.find(x => x._id === _editingCmdId);
+  if(!c) return;
+  const items = c.items || [];
+  const date = new Date().toLocaleDateString('fr-FR', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const orderId = c.orderId || c._id || '—';
+  const itemsHtml = items.map(item => `
+    <tr>
+      <td style="padding:10px 8px;border-bottom:1px solid #e8e8e8;font-size:13px">${item.name||'Article'}${item.variant ? '<br><span style="font-size:11px;color:#888">'+item.variant+'</span>' : ''}${item.fileName ? '<br><span style="font-size:10px;color:#9b72ff;font-family:monospace">📎 '+item.fileName+'</span>' : ''}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #e8e8e8;text-align:center;font-size:13px">${item.qty||1}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #e8e8e8;text-align:right;font-size:13px;font-weight:600">${item.price ? (parseFloat(item.price)*(item.qty||1)).toFixed(2)+' €' : '—'}</td>
+    </tr>`).join('');
+
+  const win = window.open('', '_blank', 'width=800,height=900');
+  win.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+  <title>BL — ${orderId}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Helvetica Neue',Arial,sans-serif;color:#111;padding:40px;max-width:700px;margin:0 auto;font-size:14px}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px;padding-bottom:24px;border-bottom:2px solid #111}
+    .logo{font-size:28px;font-weight:700;letter-spacing:-.02em}
+    .logo span{color:#ff6b35}
+    .header-right{text-align:right;font-size:12px;color:#555;line-height:1.8}
+    .badge{display:inline-block;background:#111;color:#fff;padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px}
+    .section{margin-bottom:28px}
+    .section-title{font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:#888;font-weight:700;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e8e8e8}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .info-box{background:#f9f9f9;border:1px solid #e8e8e8;border-radius:8px;padding:12px}
+    .info-box label{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:#888;display:block;margin-bottom:4px}
+    .info-box span{font-size:13px;font-weight:600}
+    table{width:100%;border-collapse:collapse}
+    th{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#888;padding:8px;text-align:left;border-bottom:2px solid #111}
+    th:last-child{text-align:right}
+    th:nth-child(2){text-align:center}
+    .total-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e8e8e8;font-size:13px;color:#555}
+    .total-main{display:flex;justify-content:space-between;padding:12px 0;font-size:16px;font-weight:700;border-top:2px solid #111;margin-top:4px}
+    .footer{margin-top:48px;padding-top:20px;border-top:1px solid #e8e8e8;text-align:center;font-size:11px;color:#999;line-height:1.8}
+    .checkbox-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #e8e8e8;border-radius:8px;margin-bottom:8px;font-size:12px}
+    .checkbox{width:16px;height:16px;border:2px solid #111;border-radius:3px;flex-shrink:0}
+    @media print{body{padding:20px}.no-print{display:none}}
+  </style></head><body>
+  <div class="header">
+    <div>
+      <div class="badge">Bon de livraison</div>
+      <div class="logo">TBT<span>3D</span></div>
+      <div style="font-size:11px;color:#888;margin-top:4px">Atelier de fabrication — Lille, France</div>
+    </div>
+    <div class="header-right">
+      <div><strong>N° commande</strong></div>
+      <div style="font-family:monospace;font-size:15px;color:#ff6b35;font-weight:700">${orderId}</div>
+      <div style="margin-top:6px">${date}</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Client</div>
+    <div class="info-grid">
+      <div class="info-box"><label>Nom</label><span>${c.client?.name||c.customerName||'—'}</span></div>
+      <div class="info-box"><label>Email</label><span>${c.client?.email||c.customerEmail||'—'}</span></div>
+      ${c.client?.address||c.shippingAddress ? `<div class="info-box" style="grid-column:1/-1"><label>Adresse de livraison</label><span>${c.client?.address||(c.shippingAddress?.line1||'')+' '+(c.shippingAddress?.city||'')||'—'}</span></div>` : ''}
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Articles commandés</div>
+    <table>
+      <thead><tr><th>Article</th><th>Qté</th><th>Total</th></tr></thead>
+      <tbody>${itemsHtml}</tbody>
+    </table>
+    <div style="margin-top:16px">
+      <div class="total-row"><span>Sous-total</span><span>${parseFloat(c.total||0).toFixed(2)} €</span></div>
+      <div class="total-row"><span>Livraison</span><span>Offerte</span></div>
+      <div class="total-main"><span>Total payé</span><span>${parseFloat(c.total||0).toFixed(2)} €</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Checklist expédition</div>
+    <div class="checkbox-row"><div class="checkbox"></div><span>Article(s) emballé(s) soigneusement</span></div>
+    <div class="checkbox-row"><div class="checkbox"></div><span>Bon de livraison glissé dans le colis</span></div>
+    <div class="checkbox-row"><div class="checkbox"></div><span>Adresse de livraison vérifiée</span></div>
+    <div class="checkbox-row"><div class="checkbox"></div><span>Colis déposé / remis au transporteur</span></div>
+    <div class="checkbox-row"><div class="checkbox"></div><span>N° de suivi envoyé au client</span></div>
+  </div>
+
+  <div class="footer">
+    TBT3D — tbt3d.fr — contact@tbt3d.fr<br>
+    Fabrication artisanale à Lille · Délai 7 à 30 jours
+  </div>
+
+  <div class="no-print" style="text-align:center;margin-top:32px">
+    <button onclick="window.print()" style="padding:12px 32px;background:#111;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">🖨️ Imprimer</button>
+  </div>
+  <scr' + 'ipt>window.onload = () => window.print();</scr' + 'ipt>
+  </body></html>`);
+  win.document.close();
 };
 
 window.deleteCmdConfirm = async () => {

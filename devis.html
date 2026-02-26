@@ -1364,7 +1364,8 @@ let _devisFirebaseDb = null;
 async function saveDevisOrderToFirebase(orderData) {
   try {
     const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const { getFirestore, collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { getFirestore, collection, addDoc, doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { getStorage, ref: storageRef, uploadBytes, getDownloadURL } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js');
     const fbCfg = {
       apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
       authDomain: "tbt3d-a0f04.firebaseapp.com",
@@ -1375,8 +1376,32 @@ async function saveDevisOrderToFirebase(orderData) {
     const apps = getApps();
     const app = apps.length ? apps[0] : initializeApp(fbCfg);
     const db = getFirestore(app);
+
+    // 1. Sauvegarder la commande d'abord
     const ref = await addDoc(collection(db, 'commandes'), orderData);
     localStorage.setItem('tbt3d_lastOrderId', ref.id);
+
+    // 2. Uploader le fichier STL si présent
+    if (S.file && S.file.name && S.file.name.toLowerCase().endsWith('.stl')) {
+      try {
+        const storage = getStorage(app);
+        const timestamp = Date.now();
+        const safeName = S.file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const filePath = `stl/${ref.id}_${timestamp}_${safeName}`;
+        const fileRef = storageRef(storage, filePath);
+        await uploadBytes(fileRef, S.file);
+        const downloadUrl = await getDownloadURL(fileRef);
+        // Mettre à jour la commande avec l'URL du fichier
+        await updateDoc(doc(db, 'commandes', ref.id), {
+          'items.0.fileUrl': downloadUrl,
+          'items.0.filePath': filePath,
+        });
+        console.log('✓ STL uploadé :', downloadUrl);
+      } catch(uploadErr) {
+        console.warn('STL upload failed (commande sauvegardée quand même):', uploadErr);
+      }
+    }
+
     return ref.id;
   } catch(e) {
     console.warn('Firebase order save failed:', e);
