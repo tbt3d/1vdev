@@ -443,6 +443,11 @@ tr:hover td{background:rgba(255,255,255,.01)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
     Commandes<span class="nb nb-p" id="cmdBadge" style="display:none">0</span>
   </button>
+  <button class="nav-item" onclick="goPage('users',this)" id="navUsers2">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Utilisateurs
+    <span class="nb nb-b" id="usersBadge2" style="display:none">0</span>
+  </button>
 
   <div class="sb-section">Site</div>
   <a href="index.html" target="_blank" class="nav-item">
@@ -473,12 +478,6 @@ tr:hover td{background:rgba(255,255,255,.01)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
     Produit
   </a>
-
-  <button class="nav-item" onclick="goPage('users',this)" id="navUsers">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    Utilisateurs
-    <span class="sb-badge" id="usersBadge" style="display:none">0</span>
-  </button>
 
   <div class="sb-section">Outils</div>
   <a href="https://dashboard.stripe.com" target="_blank" class="nav-item">
@@ -924,7 +923,6 @@ tr:hover td{background:rgba(255,255,255,.01)}
       <!-- Filtres -->
       <div class="cmd-filter-bar">
         <button class="cmd-chip on" onclick="setCmdFilter('all',this)">Toutes</button>
-        <button class="cmd-chip" onclick="setCmdFilter('initié',this)">⏳ Initié</button>
         <button class="cmd-chip" onclick="setCmdFilter('payé',this)">✓ Payé</button>
         <button class="cmd-chip" onclick="setCmdFilter('expédié',this)">📦 Expédié</button>
         <button class="cmd-chip" onclick="setCmdFilter('annulé',this)">✕ Annulé</button>
@@ -1041,6 +1039,30 @@ tr:hover td{background:rgba(255,255,255,.01)}
               <div class="field">
                 <label>Délai de production (jours)</label>
                 <input type="number" id="dcfgDelay" placeholder="5" min="1">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fsec" style="margin-bottom:22px">
+          <div class="fsec-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span class="fsec-title">Miniatures — Accueil &amp; Boutique</span>
+          </div>
+          <div class="fsec-body">
+            <div class="fhint" style="margin-bottom:16px">Images de fond pour les cartes "Sur mesure / Impression sur mesure" sur la page d'accueil et la boutique.</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);margin-bottom:8px">Carte Accueil</div>
+                <div id="dcfgHomeImgPreview" style="width:100%;aspect-ratio:3/4;border-radius:10px;border:1.5px dashed var(--border2);background:var(--bg3);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:8px">📷</div>
+                <input type="file" id="dcfgHomeImgInput" accept="image/*" style="display:none" onchange="uploadDevisThumb('home',this)">
+                <button class="btn btn-g" style="width:100%;font-size:11px;justify-content:center" onclick="document.getElementById('dcfgHomeImgInput').click()">↑ Changer</button>
+              </div>
+              <div>
+                <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);margin-bottom:8px">Carte Boutique</div>
+                <div id="dcfgBoutImgPreview" style="width:100%;aspect-ratio:3/4;border-radius:10px;border:1.5px dashed var(--border2);background:var(--bg3);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:8px">📷</div>
+                <input type="file" id="dcfgBoutImgInput" accept="image/*" style="display:none" onchange="uploadDevisThumb('bout',this)">
+                <button class="btn btn-g" style="width:100%;font-size:11px;justify-content:center" onclick="document.getElementById('dcfgBoutImgInput').click()">↑ Changer</button>
               </div>
             </div>
           </div>
@@ -2322,7 +2344,7 @@ window.loadUsers = async () => {
       const db2=b.createdAt?.toDate?.()||new Date(b.createdAt||0);
       return db2-da;
     });
-    const badge=document.getElementById('usersBadge');
+    const badge=document.getElementById('usersBadge2');
     if(badge){badge.textContent=_allUsers.length;badge.style.display=_allUsers.length?'':'';}
     renderUsersList(_allUsers);
   } catch(e){
@@ -2482,7 +2504,7 @@ window.confirmDeleteUser = async () => {
   try {
     await deleteDoc(doc(db,'users',_editingUserId));
     _allUsers=_allUsers.filter(u=>u.uid!==_editingUserId);
-    const badge=document.getElementById('usersBadge');
+    const badge=document.getElementById('usersBadge2');
     if(badge){badge.textContent=_allUsers.length;badge.style.display=_allUsers.length?'':'';}
     closeUserModal();
     renderUsersList(_allUsers);
@@ -2517,6 +2539,8 @@ window.loadCommandes = async () => {
     const snap = await getDocs(q);
     _allCommandes = [];
     snap.forEach(d => _allCommandes.push({...d.data(), _id: d.id}));
+    // Only show confirmed orders (paid, shipped, cancelled) — not just "initiated"
+    _allCommandes = _allCommandes.filter(c => c.status === 'payé' || c.status === 'expédié' || c.status === 'annulé');
     renderCommandesBadge();
     renderCommandesStats();
     filterCommandes();
@@ -2530,7 +2554,7 @@ window.loadCommandes = async () => {
 function renderCommandesBadge(){
   const badge = document.getElementById('cmdBadge');
   if(!badge) return;
-  const count = _allCommandes.filter(c => c.status === 'initié' || c.status === 'payé').length;
+  const count = _allCommandes.filter(c => c.status === 'payé').length;
   badge.textContent = count;
   badge.style.display = count ? '' : 'none';
 }
@@ -2554,12 +2578,12 @@ function renderCommandesStats(){
       <div style="font-size:28px;font-weight:800;font-family:var(--mono);letter-spacing:-.03em;color:var(--accent)">${totalCA.toFixed(2)} €</div>
     </div>
     <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:14px 16px">
-      <div style="font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">En attente paiement</div>
-      <div style="font-size:28px;font-weight:800;font-family:var(--mono);letter-spacing:-.03em;color:var(--orange)">${counts['initié']||0}</div>
+      <div style="font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">Payées</div>
+      <div style="font-size:28px;font-weight:800;font-family:var(--mono);letter-spacing:-.03em;color:var(--green)">${counts['payé']||0}</div>
     </div>
     <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:14px 16px">
-      <div style="font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">Payées / Expédiées</div>
-      <div style="font-size:28px;font-weight:800;font-family:var(--mono);letter-spacing:-.03em;color:var(--green)">${(counts['payé']||0) + (counts['expédié']||0)}</div>
+      <div style="font-size:9px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:8px">Expédiées</div>
+      <div style="font-size:28px;font-weight:800;font-family:var(--mono);letter-spacing:-.03em;color:var(--blue)">${counts['expédié']||0}</div>
     </div>
   `;
 }
@@ -2808,7 +2832,37 @@ window.loadDevisCfg = async () => {
     document.getElementById('dcfgSlaRate').value = cfg.slaRate ?? DCFG_DEFAULTS.slaRate;
     document.getElementById('dcfgMinPrice').value = cfg.minPrice ?? DCFG_DEFAULTS.minPrice;
     document.getElementById('dcfgDelay').value = cfg.delay ?? DCFG_DEFAULTS.delay;
+    // Thumbnails
+    const hp = document.getElementById('dcfgHomeImgPreview');
+    const bt = document.getElementById('dcfgBoutImgPreview');
+    if(cfg.homeThumb && hp) hp.innerHTML = `<img src="${cfg.homeThumb}" style="width:100%;height:100%;object-fit:cover">`;
+    if(cfg.boutThumb && bt) bt.innerHTML = `<img src="${cfg.boutThumb}" style="width:100%;height:100%;object-fit:cover">`;
   } catch(e){ console.log('Config devis not found, using defaults'); }
+};
+
+window.uploadDevisThumb = async (which, input) => {
+  const file = input.files[0];
+  if(!file) return;
+  toast('Upload en cours…');
+  try {
+    const blob = await compressImage(file, 1200, 0.85);
+    const fd = new FormData();
+    fd.append('file', blob, 'thumb.jpg');
+    fd.append('upload_preset', CLOUDINARY_PRESET);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {method:'POST',body:fd});
+    const data = await res.json();
+    if(!res.ok || data.error) throw new Error(data.error?.message || 'Erreur upload');
+    const url = data.secure_url;
+    const prevEl = document.getElementById(which === 'home' ? 'dcfgHomeImgPreview' : 'dcfgBoutImgPreview');
+    if(prevEl) prevEl.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
+    // Save immediately to Firebase
+    const existing = await fbGetConfig('devis') || {};
+    await fbSetConfig('devis', { ...existing, [which === 'home' ? 'homeThumb' : 'boutThumb']: url, updatedAt: new Date() });
+    toast('Miniature mise à jour ✓');
+  } catch(e) {
+    toast('Erreur: ' + e.message, true);
+  }
+  input.value = '';
 };
 
 window.saveDevisCfg = async () => {
@@ -2818,6 +2872,8 @@ window.saveDevisCfg = async () => {
   btn.innerHTML = '<div class="spin"></div> Enregistrement…';
   fb.style.display = 'none';
   try {
+    // Preserve existing thumbnails
+    const existing = await fbGetConfig('devis') || {};
     const cfg = {
       workerUrl:   document.getElementById('dcfgWorkerUrl').value.trim(),
       fallbackUrl: document.getElementById('dcfgFallbackUrl').value.trim(),
@@ -2827,6 +2883,8 @@ window.saveDevisCfg = async () => {
       slaRate:     parseFloat(document.getElementById('dcfgSlaRate').value) || DCFG_DEFAULTS.slaRate,
       minPrice:    parseFloat(document.getElementById('dcfgMinPrice').value) || DCFG_DEFAULTS.minPrice,
       delay:       parseInt(document.getElementById('dcfgDelay').value) || DCFG_DEFAULTS.delay,
+      homeThumb:   existing.homeThumb || null,
+      boutThumb:   existing.boutThumb || null,
       updatedAt:   new Date(),
     };
     await fbSetConfig('devis', cfg);

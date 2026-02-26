@@ -1376,6 +1376,7 @@ async function saveDevisOrderToFirebase(orderData) {
     const app = apps.length ? apps[0] : initializeApp(fbCfg);
     const db = getFirestore(app);
     const ref = await addDoc(collection(db, 'commandes'), orderData);
+    localStorage.setItem('tbt3d_lastOrderId', ref.id);
     return ref.id;
   } catch(e) {
     console.warn('Firebase order save failed:', e);
@@ -1440,6 +1441,7 @@ async function goToPayment() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         cancelUrl: 'https://tbt3d.fr/devis.html?cancelled=1',
+        successUrl: 'https://tbt3d.fr/devis.html?success=1',
         items: [{
           isDynamic: true,
           name:     'Impression sur mesure — ' + (S.file ? S.file.name : 'STL'),
@@ -1473,7 +1475,57 @@ async function goToPayment() {
     setTimeout(() => errEl.remove(), 4000);
   }
 }
-</script>
+// ── Retour depuis Stripe ──────────────────────────────────────────
+(async function() {
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.get('success') === '1') {
+    // Marquer commande comme payée
+    const orderId = localStorage.getItem('tbt3d_lastOrderId');
+    if (orderId) {
+      try {
+        const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+        const { getFirestore, doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        const fbCfg = { apiKey:"AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",authDomain:"tbt3d-a0f04.firebaseapp.com",projectId:"tbt3d-a0f04",storageBucket:"tbt3d-a0f04.firebasestorage.app",appId:"1:10842592812:web:f06cbd6c6892f29a6ca389" };
+        const apps = getApps();
+        const app = apps.length ? apps[0] : initializeApp(fbCfg);
+        const db = getFirestore(app);
+        await updateDoc(doc(db, 'commandes', orderId), { status: 'payé', paidAt: new Date() });
+        localStorage.removeItem('tbt3d_lastOrderId');
+      } catch(e) { console.warn('Could not update order status:', e); }
+    }
+    // Afficher message de succès
+    const panel = document.querySelector('.prod-panel');
+    if (panel) {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:#f0fdf4;border:1.5px solid #86efac;border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:14px;margin-bottom:24px';
+      banner.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" style="width:24px;height:24px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+        <div>
+          <strong style="font-size:15px;color:#15803d;display:block;margin-bottom:2px">Paiement confirmé !</strong>
+          <span style="font-size:12px;color:#166534">Merci ! Thibault va valider votre fichier et lancer l'impression. Vous recevrez un suivi par email.</span>
+        </div>`;
+      panel.prepend(banner);
+    }
+    window.history.replaceState({}, '', '/devis.html');
+  }
+
+  if (params.get('cancelled') === '1') {
+    const panel = document.querySelector('.prod-panel');
+    if (panel) {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:#fff7ed;border:1.5px solid #fed7aa;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:12px;margin-bottom:24px';
+      banner.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" style="width:22px;height:22px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div>
+          <strong style="font-size:14px;color:#c2410c;display:block;margin-bottom:2px">Paiement annulé</strong>
+          <span style="font-size:12px;color:#9a3412">Votre devis a été conservé. Vous pouvez reprendre à tout moment.</span>
+        </div>`;
+      panel.prepend(banner);
+    }
+    window.history.replaceState({}, '', '/devis.html');
+  }
+})();</script>
 <script src="/search.js"></script>
 </body>
 </html>

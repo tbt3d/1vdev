@@ -500,7 +500,7 @@ async function stripeCheckout() {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cancelUrl: 'https://tbt3d.fr/panier.html?cancelled=1', items: buildWorkerItems(items) }),
+      body: JSON.stringify({ cancelUrl: 'https://tbt3d.fr/panier.html?cancelled=1', successUrl: 'https://tbt3d.fr/panier.html?success=1', items: buildWorkerItems(items) }),
     });
 
     const data = await res.json();
@@ -537,7 +537,7 @@ async function stripeCheckoutPartial() {
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cancelUrl: 'https://tbt3d.fr/panier.html?cancelled=1', items: buildWorkerItems(stripeItems) }),
+      body: JSON.stringify({ cancelUrl: 'https://tbt3d.fr/panier.html?cancelled=1', successUrl: 'https://tbt3d.fr/panier.html?success=1', items: buildWorkerItems(stripeItems) }),
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || 'Erreur serveur');
@@ -560,11 +560,41 @@ document.addEventListener('keydown', e => {
 window.addEventListener('cart:updated', renderCart);
 renderCart();
 
-// Détecter retour depuis Stripe après annulation
-(function() {
+// Détecter retour depuis Stripe après annulation ou succès
+(async function() {
   const params = new URLSearchParams(window.location.search);
+  const container = document.querySelector('.page-inner');
+
+  if (params.get('success') === '1') {
+    // Marquer la commande comme payée dans Firebase
+    const orderId = localStorage.getItem('tbt3d_lastOrderId');
+    if (orderId) {
+      try {
+        const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+        const { getFirestore, doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        const fbCfg = { apiKey:"AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",authDomain:"tbt3d-a0f04.firebaseapp.com",projectId:"tbt3d-a0f04",storageBucket:"tbt3d-a0f04.firebasestorage.app",appId:"1:10842592812:web:f06cbd6c6892f29a6ca389" };
+        const apps = getApps();
+        const app = apps.length ? apps[0] : initializeApp(fbCfg);
+        const db = getFirestore(app);
+        await updateDoc(doc(db, 'commandes', orderId), { status: 'payé', paidAt: new Date() });
+        localStorage.removeItem('tbt3d_lastOrderId');
+      } catch(e) { console.warn('Could not update order status:', e); }
+    }
+    // Vider le panier
+    try { TBTCart.clear(); } catch(e){}
+    // Afficher bannière succès
+    if (container) {
+      const banner = document.createElement('div');
+      banner.className = 'success-banner';
+      banner.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        <div><strong>Paiement confirmé !</strong><span>Merci pour votre commande. Vous recevrez une confirmation par email. Thibault s'occupe du reste !</span></div>`;
+      container.prepend(banner);
+    }
+    window.history.replaceState({}, '', '/panier.html');
+  }
+
   if (params.get('cancelled') === '1') {
-    const container = document.querySelector('.page-inner');
     if (!container) return;
     const banner = document.createElement('div');
     banner.className = 'cancel-banner';
