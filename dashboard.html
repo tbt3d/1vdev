@@ -992,13 +992,58 @@ tr:hover td{background:rgba(255,255,255,.01)}
               <div class="fhint">L'URL de ton Worker Cloudflare qui crée les sessions Stripe. Utilisée par le panier et le bouton "Acheter maintenant" de la boutique.</div>
             </div>
             <div class="field" style="margin-top:14px">
-              <label>Mode Stripe</label>
-              <select id="pcfgStripeMode" style="width:100%;padding:10px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none">
-                <option value="test">🧪 Mode TEST — utiliser pour les développements (cartes fictives)</option>
-                <option value="live">✅ Mode LIVE — paiements réels</option>
-              </select>
-              <div class="fhint">En mode TEST, les price_id Stripe doivent être des IDs test (créés dans le dashboard Stripe avec le toggle "Mode test" activé). En mode LIVE, utiliser les IDs live.</div>
+              <label>Lien de paiement Stripe direct (fallback — Acheter maintenant)</label>
+              <input type="url" id="pcfgStripeMode" placeholder="https://buy.stripe.com/xxxxx">
+              <div class="fhint">
+                🔗 Où trouver ce lien : <strong>dashboard.stripe.com</strong> → <strong>Payment Links</strong> → crée un lien pour ton produit → copie l'URL <code>buy.stripe.com/...</code>.<br>
+                Ce lien sera utilisé comme bouton "Acheter maintenant" si le Worker ne répond pas. En mode TEST, utiliser un lien test (toggle "Mode test" activé sur Stripe).
+              </div>
             </div>
+          </div>
+        </div>
+
+        <div class="fsec" style="margin-bottom:16px">
+          <div class="fsec-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+            <span class="fsec-title">Clé Stripe — Changer test ↔ live</span>
+          </div>
+          <div class="fsec-body">
+            <div style="background:rgba(255,107,53,.07);border:1px solid rgba(255,107,53,.2);border-radius:8px;padding:12px;font-size:11px;color:var(--soft);margin-bottom:14px;line-height:1.7">
+              ⚡ Change la clé Stripe de ton Worker Cloudflare directement depuis ici. La clé est envoyée via l'API Cloudflare et jamais stockée dans Firebase.
+            </div>
+            <div class="field">
+              <label>Clé Stripe (sk_test_... ou sk_live_...)</label>
+              <div style="display:flex;gap:8px">
+                <input type="password" id="pcfgStripeKey" placeholder="sk_test_... ou sk_live_..." style="flex:1">
+                <button onclick="toggleStripeKeyVis()" style="padding:10px 12px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--soft);border-radius:var(--r);cursor:pointer;font-size:18px">👁</button>
+              </div>
+              <div class="fhint">
+                Où trouver : <a href="https://dashboard.stripe.com/apikeys" target="_blank" style="color:var(--accent)">dashboard.stripe.com → Developers → API Keys</a><br>
+                • <code>sk_test_...</code> = mode test &nbsp;•&nbsp; <code>sk_live_...</code> = vrais paiements
+              </div>
+            </div>
+            <div class="frow" style="margin-top:14px">
+              <div class="field">
+                <label>Cloudflare API Token</label>
+                <input type="password" id="pcfgCfApiToken" placeholder="Token API Cloudflare...">
+                <div class="fhint"><a href="https://dash.cloudflare.com/profile/api-tokens" target="_blank" style="color:var(--accent)">dash.cloudflare.com → My Profile → API Tokens</a> → Create Token → template <strong>"Edit Cloudflare Workers"</strong></div>
+              </div>
+              <div class="field">
+                <label>Account ID Cloudflare</label>
+                <input type="text" id="pcfgCfAccountId" placeholder="abc123def456...">
+                <div class="fhint"><a href="https://dash.cloudflare.com" target="_blank" style="color:var(--accent)">dash.cloudflare.com</a> → ton Worker → barre droite → <strong>Account ID</strong></div>
+              </div>
+            </div>
+            <div class="field" style="margin-top:14px">
+              <label>Nom du Worker</label>
+              <input type="text" id="pcfgCfWorkerName" placeholder="tbt3d-checkout">
+              <div class="fhint">Le nom exact de ton Worker (visible dans Cloudflare → Workers & Pages)</div>
+            </div>
+            <div id="pcfgStripeKeyFeedback" style="display:none;margin-top:10px;border-radius:8px;padding:10px;font-size:12px;text-align:center"></div>
+            <button onclick="applyStripeKey()" id="btnApplyStripeKey" style="margin-top:12px;width:100%;padding:11px;background:var(--accent);color:#fff;border:none;font-family:var(--font);font-size:13px;font-weight:600;border-radius:var(--r);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Appliquer la clé sur le Worker
+            </button>
           </div>
         </div>
 
@@ -2899,19 +2944,79 @@ document.addEventListener('keydown', e => {
 // ══════════════════════════════════════════════════════════════
 const PCFG_DEFAULTS = {
   workerUrl:  'https://tbt3d-checkout.optionpdg.workers.dev',
-  stripeMode: 'test',
+  stripeDirectLink: '',
   successUrl: 'https://tbt3d.fr/panier.html?success=1',
   cancelUrl:  'https://tbt3d.fr/panier.html?cancelled=1',
   successUrlDirect: 'https://tbt3d.fr/boutique.html?success=1',
   cancelUrlDirect:  'https://tbt3d.fr/boutique.html?cancelled=1',
 };
 
+window.toggleStripeKeyVis = () => {
+  const el = document.getElementById('pcfgStripeKey');
+  el.type = el.type === 'password' ? 'text' : 'password';
+};
+
+window.applyStripeKey = async () => {
+  const btn  = document.getElementById('btnApplyStripeKey');
+  const fb   = document.getElementById('pcfgStripeKeyFeedback');
+  const key  = document.getElementById('pcfgStripeKey').value.trim();
+  const token     = document.getElementById('pcfgCfApiToken').value.trim();
+  const accountId = document.getElementById('pcfgCfAccountId').value.trim();
+  const workerName = document.getElementById('pcfgCfWorkerName').value.trim();
+
+  if (!key || !token || !accountId || !workerName) {
+    fb.style.cssText = 'display:block;color:#e11d48;background:rgba(225,29,72,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center';
+    fb.textContent = '⚠ Remplis tous les champs (clé Stripe, token Cloudflare, Account ID, nom du Worker)';
+    return;
+  }
+  if (!key.startsWith('sk_test_') && !key.startsWith('sk_live_')) {
+    fb.style.cssText = 'display:block;color:#e11d48;background:rgba(225,29,72,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center';
+    fb.textContent = '⚠ La clé Stripe doit commencer par sk_test_ ou sk_live_';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Envoi vers Cloudflare…';
+  fb.style.display = 'none';
+
+  try {
+    const res = await fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountId}/workers/scripts/${workerName}/secrets`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: 'STRIPE_SECRET_KEY', text: key, type: 'secret_text' }),
+      }
+    );
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      const msg = data.errors?.[0]?.message || 'Erreur Cloudflare';
+      throw new Error(msg);
+    }
+    const mode = key.startsWith('sk_live_') ? '✅ Mode LIVE activé' : '🧪 Mode TEST activé';
+    fb.style.cssText = 'display:block;color:#16a34a;background:rgba(22,163,74,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center';
+    fb.textContent = `${mode} — Clé appliquée sur le Worker avec succès !`;
+    toast('Clé Stripe mise à jour ✓');
+    document.getElementById('pcfgStripeKey').value = '';
+    document.getElementById('pcfgCfApiToken').value = '';
+  } catch(e) {
+    fb.style.cssText = 'display:block;color:#e11d48;background:rgba(225,29,72,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center';
+    fb.textContent = '⚠ Erreur : ' + e.message;
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Appliquer la clé sur le Worker';
+};
+
+
 window.loadPanierCfg = async () => {
   try {
     const data = await fbGetConfig('panier');
     const cfg = data || PCFG_DEFAULTS;
     document.getElementById('pcfgWorkerUrl').value       = cfg.workerUrl || PCFG_DEFAULTS.workerUrl;
-    document.getElementById('pcfgStripeMode').value      = cfg.stripeMode || 'test';
+    document.getElementById('pcfgStripeMode').value      = cfg.stripeDirectLink || '';
     document.getElementById('pcfgSuccessUrl').value      = cfg.successUrl || PCFG_DEFAULTS.successUrl;
     document.getElementById('pcfgCancelUrl').value       = cfg.cancelUrl || PCFG_DEFAULTS.cancelUrl;
     document.getElementById('pcfgSuccessUrlDirect').value = cfg.successUrlDirect || PCFG_DEFAULTS.successUrlDirect;
@@ -2928,7 +3033,7 @@ window.savePanierCfg = async () => {
   try {
     const cfg = {
       workerUrl:        document.getElementById('pcfgWorkerUrl').value.trim(),
-      stripeMode:       document.getElementById('pcfgStripeMode').value,
+      stripeDirectLink: document.getElementById('pcfgStripeMode').value.trim(),
       successUrl:       document.getElementById('pcfgSuccessUrl').value.trim(),
       cancelUrl:        document.getElementById('pcfgCancelUrl').value.trim(),
       successUrlDirect: document.getElementById('pcfgSuccessUrlDirect').value.trim(),
