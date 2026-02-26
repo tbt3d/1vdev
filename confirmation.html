@@ -326,9 +326,9 @@ function displayConfirmation(data, orderId) {
       <div class="item-row">
         <div>
           <div class="item-name">${item.name || 'Article'}</div>
-          <div class="item-detail">Qté : ${item.qty}</div>
+          <div class="item-detail">Qté : ${item.quantity || item.qty || 1}</div>
         </div>
-        <div class="item-price">${item.price ? (item.price * item.qty / 100).toFixed(2) + ' €' : '—'}</div>
+        <div class="item-price">${item.amount ? (item.amount / 100).toFixed(2) + ' €' : item.price ? (item.price * (item.quantity || item.qty || 1) / 100).toFixed(2) + ' €' : '—'}</div>
       </div>
     `).join('');
   } else {
