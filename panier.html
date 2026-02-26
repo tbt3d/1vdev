@@ -492,7 +492,9 @@ async function saveOrderToFirebase(items, source) {
       price: parseFloat(i.price||0),
       isDynamic: !!i.isDynamic,
       is3d: !!i.isDynamic,
-      fileName: i._note ? (i._note.match(/Fichier\s*:\s*([^\s|]+)/)?.[1]||'') : '',
+      fileName: i.fileName || (i._note ? (i._note.match(/Fichier\s*:\s*([^\s|]+)/)?.[1]||'') : ''),
+      fileUrl: i.fileUrl || null,
+      dims: i.dims || null,
       note: i._note || '',
       image: i.image || null,
     }));

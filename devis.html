@@ -1234,7 +1234,7 @@ function price() {
 function R(id,l,v){ document.getElementById(id).innerHTML='<span>'+l+'</span><span>'+v+'</span>'; }
 
 // ── AJOUTER AU PANIER ────────────────────────────────────────────────────────
-function addDevisToCart() {
+async function addDevisToCart() {
   if (!S.vol || !S.file) return;
   const m   = TARIFS[S.tech].materiaux[S.mat];
   const ttc = parseFloat(document.getElementById('priceDisplay').textContent.replace(/[^0-9.]/g,''));
@@ -1244,10 +1244,32 @@ function addDevisToCart() {
   const fillLabel = S.tech === 'fdm' ? ' · ' + S.fill + '% remplissage' : '';
   const variant   = techLabel + fillLabel + ' · Couleur ' + S.color;
 
+  // Upload STL sur Cloudinary avant d'ajouter au panier
+  let stlUrl = null;
+  let stlFileName = S.file.name;
+  try {
+    const btn = document.getElementById('btnAddCart');
+    btn.disabled = true;
+    btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#111;border-radius:50%;animation:spin .6s linear infinite"></div> Upload…';
+    const fd = new FormData();
+    fd.append('file', S.file, S.file.name);
+    fd.append('upload_preset', 'umjs9csb');
+    fd.append('resource_type', 'raw');
+    fd.append('folder', 'stl');
+    const cloudRes = await fetch('https://api.cloudinary.com/v1_1/dfcrqwbee/raw/upload', { method: 'POST', body: fd });
+    const cloudData = await cloudRes.json();
+    if (cloudData.secure_url) {
+      stlUrl = cloudData.secure_url;
+      console.log('✓ STL uploadé :', stlUrl);
+    }
+  } catch(e) {
+    console.warn('STL upload failed, ajout au panier sans URL:', e);
+  }
+
   // isDynamic = true → le Worker Stripe crée le prix au moment du checkout
   TBTCart.add({
     id:          'devis-' + Date.now(),
-    name:        'Impression sur mesure — ' + S.file.name,
+    name:        'Impression sur mesure — ' + stlFileName,
     price:       ttc,
     oldPrice:    null,
     image:       null,
@@ -1255,7 +1277,10 @@ function addDevisToCart() {
     isDynamic:   true,
     paymentUrl:  null,
     stripePrice: null,
-    _note:       'Fichier : ' + S.file.name + ' | Dims : ' + (S.dims ? S.dims.x+'×'+S.dims.y+'×'+S.dims.z+' mm' : '?'),
+    fileName:    stlFileName,
+    fileUrl:     stlUrl,
+    dims:        S.dims || null,
+    _note:       'Fichier : ' + stlFileName + ' | Dims : ' + (S.dims ? S.dims.x+'×'+S.dims.y+'×'+S.dims.z+' mm' : '?'),
     qty:         S.qty,
   });
 
@@ -1429,6 +1454,28 @@ async function goToPayment() {
   // Afficher un état de chargement dans la modal
   const payBtn = document.querySelector('#modalFooter .btn-primary');
   payBtn.disabled = true;
+  payBtn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Upload fichier…';
+
+  // ── Upload STL sur Cloudinary ──
+  let stlUrl = null;
+  if (S.file && S.file.name.toLowerCase().endsWith('.stl')) {
+    try {
+      const fd = new FormData();
+      fd.append('file', S.file, S.file.name);
+      fd.append('upload_preset', 'umjs9csb');
+      fd.append('resource_type', 'raw');
+      fd.append('folder', 'stl');
+      const cloudRes = await fetch('https://api.cloudinary.com/v1_1/dfcrqwbee/raw/upload', { method: 'POST', body: fd });
+      const cloudData = await cloudRes.json();
+      if (cloudData.secure_url) {
+        stlUrl = cloudData.secure_url;
+        console.log('✓ STL uploadé :', stlUrl);
+      }
+    } catch(e) {
+      console.warn('STL upload failed, on continue quand même:', e);
+    }
+  }
+
   payBtn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Création du paiement…';
 
   // ── Sauvegarde Firebase ──
@@ -1454,6 +1501,7 @@ async function goToPayment() {
       fill: S.tech === 'fdm' ? S.fill : null,
       dims: S.dims || null,
       fileName: S.file ? S.file.name : null,
+      fileUrl: stlUrl,
       note: note,
     }],
     total: parseFloat((ttc * S.qty).toFixed(2)),

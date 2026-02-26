@@ -258,21 +258,57 @@ async function verifyAndDisplay(sessionId) {
 }
 
 async function saveOrderIfNew(sessionId, stripeData) {
-  // Vérifier si cette session a déjà été enregistrée (rechargement page)
+  const { updateDoc, doc: fsDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+
+  // Chercher une commande existante par lastOrderId (panier) ou stripeSessionId
+  const lastOrderId = localStorage.getItem('tbt3d_lastOrderId');
   const existing = await getDocs(
     query(collection(db, 'commandes'), where('stripeSessionId', '==', sessionId))
   );
 
+  const clientData = {
+    name: stripeData.customerName || '',
+    email: stripeData.customerEmail || '',
+    address: stripeData.shippingAddress ? 
+      (stripeData.shippingAddress.line1||'') + ' ' + (stripeData.shippingAddress.city||'') : '',
+    country: stripeData.shippingAddress?.country || '',
+  };
+
   if (!existing.empty) {
-    return existing.docs[0].data().orderId;
+    // Mettre à jour le client info sur la commande existante
+    const docRef = existing.docs[0].ref;
+    await updateDoc(docRef, { client: clientData, status: 'payé', paidAt: new Date(), stripeSessionId: sessionId });
+    return existing.docs[0].data().orderId || existing.docs[0].id;
   }
 
-  // Nouvelle commande → enregistrer
+  // Chercher par lastOrderId (commande créée depuis panier avant paiement)
+  if (lastOrderId) {
+    try {
+      const { getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      const snap = await getDoc(fsDoc(db, 'commandes', lastOrderId));
+      if (snap.exists()) {
+        const orderId = snap.data().orderId || ('TBT-' + Date.now().toString(36).toUpperCase());
+        await updateDoc(fsDoc(db, 'commandes', lastOrderId), {
+          client: clientData,
+          status: 'payé',
+          paidAt: new Date(),
+          stripeSessionId: sessionId,
+          orderId: orderId,
+        });
+        localStorage.removeItem('tbt3d_lastOrderId');
+        console.log('✓ Commande mise à jour :', orderId);
+        return orderId;
+      }
+    } catch(e) { console.warn('Could not update existing order:', e); }
+  }
+
+  // Créer une nouvelle commande si rien trouvé
   const orderId = 'TBT-' + Date.now().toString(36).toUpperCase();
   await addDoc(collection(db, 'commandes'), {
     orderId,
     stripeSessionId: sessionId,
-    status: 'paid',
+    status: 'payé',
+    client: clientData,
     customerEmail: stripeData.customerEmail,
     customerName: stripeData.customerName,
     shippingAddress: stripeData.shippingAddress,
@@ -280,6 +316,7 @@ async function saveOrderIfNew(sessionId, stripeData) {
     currency: stripeData.currency,
     lineItems: stripeData.lineItems,
     createdAt: new Date(),
+    paidAt: new Date(),
   });
 
   console.log('✓ Commande enregistrée :', orderId);
