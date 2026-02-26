@@ -3,305 +3,107 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Paiement Réussi — TBT3D</title>
+  <title>Commande confirmée — TBT3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="/cart.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --white: #fff;
-      --black: #111;
-      --bg: #f9f9f9;
-      --border: #e8e8e8;
-      --text: #111;
-      --muted: #888;
-      --soft: #555;
+      --white: #fff; --black: #111; --bg: #f9f9f9; --border: #e8e8e8;
+      --text: #111; --muted: #888; --soft: #555;
       --font: 'Inter', system-ui, sans-serif;
-      --nav-h: 70px;
-      --max: 1280px;
-      --success: #16a34a;
+      --nav-h: 70px; --max: 1280px; --r: 50px;
+      --green: #16a34a; --green-bg: #f0fdf4; --green-border: rgba(22,163,74,.2);
     }
-
     html { scroll-behavior: smooth; }
     body { font-family: var(--font); color: var(--text); background: var(--white); padding-top: var(--nav-h); font-size: 14px; line-height: 1.5; }
 
     /* NAVBAR */
-    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--white); border-bottom: 1px solid var(--border); transition: box-shadow .2s; }
-    #navbar.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,.06); }
-    .nav-inner { max-width: var(--max); margin: 0 auto; height: var(--nav-h); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
-    .nav-logo { font-size: 16px; font-weight: 600; text-decoration: none; color: var(--black); }
-    .nav-status { font-size: 13px; color: var(--success); font-weight: 600; }
+    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--white); border-bottom: 1px solid var(--border); }
+    .nav-inner { max-width: var(--max); margin: 0 auto; height: var(--nav-h); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; }
+    .nav-inner a { text-decoration: none; }
+    .nav-logo img { height: 44px; width: auto; object-fit: contain; }
+    .nav-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--green); font-weight: 600; }
+    .nav-status span { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-    .container {
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 80px 32px;
-    }
-
-    @media(max-width: 768px) {
-      .container { padding: 40px 20px; }
-    }
-
-    .confirmation {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 60px;
-      align-items: center;
-    }
-
-    @media(max-width: 960px) {
-      .confirmation { grid-template-columns: 1fr; gap: 40px; }
-    }
-
-    .conf-visual {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-
-    .conf-icon {
-      width: 120px;
-      height: 120px;
-      background: linear-gradient(135deg, var(--success), #15803d);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 24px;
-      animation: scaleIn 0.5s cubic-bezier(0.34,1.4,0.64,1);
-    }
-
-    .conf-icon svg {
-      width: 60px;
-      height: 60px;
-      color: white;
-      stroke-width: 2;
-    }
-
-    .conf-title {
-      font-size: 36px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--black);
-    }
-
-    .conf-subtitle {
-      font-size: 15px;
-      color: var(--soft);
-      line-height: 1.6;
-      max-width: 380px;
-    }
-
-    .conf-details {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .detail-box {
-      background: var(--bg);
-      border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      transition: border-color .2s;
-    }
-
-    .detail-box:hover { border-color: var(--success); }
-
-    .detail-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 12px;
-    }
-
-    .order-number {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .order-number-icon {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, var(--success), #15803d);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      flex-shrink: 0;
-    }
-
-    .order-number-text strong {
-      display: block;
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--success);
-      font-family: 'Courier New', monospace;
-    }
-
-    .order-number-text small {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .product-info {
-      flex: 1;
-    }
-
-    .product-name {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .product-meta {
-      font-size: 13px;
-      color: var(--soft);
-      line-height: 1.6;
-    }
-
-    .product-variants {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-      font-size: 12px;
-    }
-
-    .variant-item {
-      display: flex;
-      justify-content: space-between;
-      color: var(--muted);
-    }
-
-    .variant-item strong { color: var(--text); }
-
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .price-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
-    }
-
-    .price-row.total {
-      grid-column: 1 / -1;
-      background: linear-gradient(135deg, var(--success), #15803d);
-      color: white;
-      border: none;
-      font-weight: 600;
-      font-size: 15px;
-    }
-
-    .price-row strong { font-weight: 600; }
-
-    .actions {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .btn {
-      padding: 14px 24px;
-      border: none;
-      border-radius: 12px;
-      font-family: var(--font);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all .2s;
-    }
-
-    .btn-primary {
-      background: var(--black);
-      color: white;
-    }
-
-    .btn-primary:hover {
-      opacity: 0.85;
-      transform: translateY(-1px);
-    }
-
-    .btn-secondary {
-      background: var(--bg);
-      color: var(--text);
-      border: 1.5px solid var(--border);
-    }
-
-    .btn-secondary:hover { border-color: var(--text); }
-
-    .info-banner {
-      background: #f0fdf4;
-      border: 1px solid rgba(22, 163, 74, 0.2);
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 32px;
-      font-size: 13px;
-      color: var(--text);
-      text-align: center;
-    }
-
-    .info-banner strong { color: var(--success); }
-
-    .loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
-      gap: 16px;
-      color: var(--muted);
-    }
-
-    .spinner {
-      width: 36px;
-      height: 36px;
-      border: 2px solid var(--border);
-      border-top-color: var(--black);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-    }
-
-    .error-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--soft);
-    }
-
-    .error-state h2 {
-      font-size: 24px;
-      margin-bottom: 12px;
-      color: var(--black);
-    }
-
+    /* LOADING */
+    .loading-wrap { min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; color: var(--muted); }
+    .spinner { width: 40px; height: 40px; border: 2.5px solid var(--border); border-top-color: var(--black); border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes scaleIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .loading-wrap p { font-size: 14px; }
 
-    .confirmation { animation: slideUp 0.6s ease-out; }
+    /* ERROR */
+    .error-wrap { min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 40px 20px; }
+    .error-icon { width: 72px; height: 72px; background: #fef2f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+    .error-wrap h2 { font-size: 22px; font-weight: 400; color: var(--black); }
+    .error-wrap p { font-size: 14px; color: var(--soft); max-width: 400px; }
+    .error-wrap a { margin-top: 8px; padding: 12px 28px; background: var(--black); color: var(--white); text-decoration: none; border-radius: var(--r); font-size: 13px; font-weight: 500; }
+
+    /* CONTAINER */
+    .container { max-width: 860px; margin: 0 auto; padding: 60px 32px 100px; }
+    @media(max-width:600px) { .container { padding: 32px 16px 80px; } }
+
+    /* SUCCESS HEADER */
+    .success-header { text-align: center; margin-bottom: 48px; animation: slideUp .5s ease-out; }
+    .success-icon { width: 80px; height: 80px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; animation: scaleIn .5s cubic-bezier(.34,1.4,.64,1); }
+    .success-icon svg { width: 40px; height: 40px; color: #fff; stroke-width: 2.5; }
+    .success-header h1 { font-size: 32px; font-weight: 400; letter-spacing: -.02em; margin-bottom: 10px; }
+    .success-header p { font-size: 15px; color: var(--soft); max-width: 480px; margin: 0 auto; line-height: 1.7; }
+    @media(max-width:600px) { .success-header h1 { font-size: 26px; } }
+
+    /* GRID */
+    .conf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    @media(max-width:700px) { .conf-grid { grid-template-columns: 1fr; } }
+
+    /* CARDS */
+    .card { background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 24px; }
+    .card-label { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+    .card.full { grid-column: 1 / -1; }
+
+    /* ORDER ID */
+    .order-id { font-size: 17px; font-weight: 600; color: var(--green); font-family: 'Courier New', monospace; letter-spacing: .04em; margin-bottom: 4px; }
+    .order-date { font-size: 12px; color: var(--muted); }
+
+    /* ITEMS */
+    .item-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .item-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .item-row:first-child { padding-top: 0; }
+    .item-name { font-size: 14px; font-weight: 500; flex: 1; }
+    .item-detail { font-size: 12px; color: var(--muted); }
+    .item-price { font-size: 14px; font-weight: 500; white-space: nowrap; }
+
+    /* TOTAUX */
+    .total-rows { display: flex; flex-direction: column; gap: 0; }
+    .total-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--soft); }
+    .total-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .total-row.main { font-size: 16px; font-weight: 600; color: var(--black); padding-top: 14px; margin-top: 4px; border-top: 2px solid var(--black); border-bottom: none; }
+
+    /* CUSTOMER */
+    .customer-info { font-size: 13px; line-height: 1.8; color: var(--soft); }
+    .customer-info strong { color: var(--text); display: block; font-size: 15px; margin-bottom: 4px; }
+
+    /* ACTIONS */
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 32px; }
+    @media(max-width:500px) { .actions { grid-template-columns: 1fr; } }
+    .btn { padding: 14px 20px; border: none; border-radius: var(--r); font-family: var(--font); font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .2s; }
+    .btn-primary { background: var(--black); color: #fff; }
+    .btn-primary:hover { opacity: .85; transform: translateY(-1px); }
+    .btn-secondary { background: var(--white); color: var(--text); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--black); }
+    .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* EMAIL BANNER */
+    .email-banner { background: var(--green-bg); border: 1.5px solid var(--green-border); border-radius: 12px; padding: 16px 20px; margin-top: 20px; font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 12px; }
+    .email-banner svg { width: 18px; height: 18px; color: var(--green); flex-shrink: 0; }
+
+    /* LIVRAISON BANNER */
+    .delivery-banner { background: #fff7ed; border: 1.5px solid #fed7aa; border-radius: 12px; padding: 16px 20px; margin-top: 12px; font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 12px; }
+    .delivery-banner svg { width: 18px; height: 18px; color: #ea580c; flex-shrink: 0; }
+
+    @keyframes scaleIn { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   </style>
 </head>
 <body>
@@ -309,125 +111,101 @@
 <!-- NAVBAR -->
 <nav id="navbar">
   <div class="nav-inner">
-    <a href="/" class="nav-logo">TBT3D</a>
-    <div class="nav-status">✓ Paiement réussi</div>
+    <a href="/index.html" class="nav-logo">
+      <img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" alt="TBT3D">
+    </a>
+    <div class="nav-status">
+      <span></span>
+      Paiement sécurisé
+    </div>
   </div>
 </nav>
 
-<!-- LOADING STATE -->
-<div id="loadingState" class="container">
-  <div class="loading">
+<!-- LOADING -->
+<div id="stateLoading">
+  <div class="loading-wrap">
     <div class="spinner"></div>
-    <p>Finalisation de votre commande...</p>
+    <p>Vérification du paiement…</p>
   </div>
 </div>
 
-<!-- CONFIRMATION STATE -->
-<div class="container" id="confirmationState" style="display:none">
-  <div class="confirmation">
-
-    <!-- LEFT: Visual -->
-    <div class="conf-visual">
-      <div class="conf-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-      </div>
-      <h1 class="conf-title">Paiement réussi!</h1>
-      <p class="conf-subtitle">
-        Merci pour votre achat. Votre commande a été enregistrée et vous recevrez une confirmation par email.
-      </p>
-    </div>
-
-    <!-- RIGHT: Details -->
-    <div class="conf-details">
-
-      <!-- Order Number -->
-      <div class="detail-box">
-        <div class="detail-label">Numéro de commande</div>
-        <div class="order-number">
-          <div class="order-number-icon">📦</div>
-          <div class="order-number-text">
-            <strong id="orderNumber">ORD-0000000000</strong>
-            <small>Conservez ce numéro</small>
-          </div>
-        </div>
-      </div>
-
-      <!-- Product -->
-      <div class="detail-box">
-        <div class="detail-label">Produit</div>
-        <div class="product-info">
-          <div class="product-name" id="productName">Produit</div>
-          <div class="product-meta">
-            <div>Quantité: <strong id="productQty">1</strong></div>
-            <div>Prix unitaire: <strong id="productPrice">0,00 €</strong></div>
-          </div>
-          <div class="product-variants" id="variantsContainer"></div>
-        </div>
-      </div>
-
-      <!-- Pricing -->
-      <div class="detail-box">
-        <div class="detail-label">Récapitulatif</div>
-        <div class="pricing-grid">
-          <div class="price-row">
-            <span>Sous-total</span>
-            <strong id="subtotal">0,00 €</strong>
-          </div>
-          <div class="price-row">
-            <span>Frais</span>
-            <strong id="shipping">0,00 €</strong>
-          </div>
-          <div class="price-row">
-            <span>Taxes</span>
-            <strong id="tax">0,00 €</strong>
-          </div>
-          <div class="price-row total">
-            <span>TOTAL PAYÉ</span>
-            <strong id="total">0,00 €</strong>
-          </div>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="actions">
-        <a href="/" class="btn btn-primary">
-          <span>↖</span>
-          Retour à l'accueil
-        </a>
-        <a href="/contact.html" class="btn btn-secondary">
-          Vous avez une question?
-        </a>
-      </div>
-
-      <!-- Info -->
-      <div class="info-banner">
-        <strong>✓ Confirmation envoyée</strong> — Consultez votre email (même dossier spam)
-      </div>
-
-    </div>
-
+<!-- ERROR -->
+<div id="stateError" style="display:none">
+  <div class="error-wrap">
+    <div class="error-icon">⚠️</div>
+    <h2>Paiement non vérifié</h2>
+    <p id="errorMsg">Nous n'avons pas pu vérifier votre paiement. Si vous avez été débité, contactez-nous immédiatement.</p>
+    <a href="/panier.html">← Retour au panier</a>
   </div>
 </div>
 
-<!-- ERROR STATE -->
-<div id="errorState" style="display:none">
+<!-- CONFIRMATION -->
+<div id="stateSuccess" style="display:none">
   <div class="container">
-    <div class="error-state">
-      <h2>Erreur</h2>
-      <p id="errorMessage">Une erreur est survenue. Veuillez réessayer.</p>
-      <a href="/" style="margin-top: 24px; display: inline-block; padding: 14px 28px; background: var(--black); color: white; text-decoration: none; border-radius: 12px; font-weight: 600;">Retour à l'accueil</a>
+
+    <!-- Header -->
+    <div class="success-header">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h1>Merci pour votre commande !</h1>
+      <p>Votre paiement a été confirmé. Votre lampe est maintenant en cours de fabrication dans notre atelier à Lille.</p>
     </div>
+
+    <!-- Numéro de commande + Client -->
+    <div class="conf-grid">
+      <div class="card">
+        <div class="card-label">Numéro de commande</div>
+        <div class="order-id" id="orderId">—</div>
+        <div class="order-date" id="orderDate">—</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Client</div>
+        <div class="customer-info" id="customerInfo">—</div>
+      </div>
+    </div>
+
+    <!-- Articles -->
+    <div class="card full" style="margin-bottom:16px">
+      <div class="card-label">Articles commandés</div>
+      <div id="itemsList"></div>
+    </div>
+
+    <!-- Total -->
+    <div class="card full" style="margin-bottom:0">
+      <div class="card-label">Récapitulatif</div>
+      <div class="total-rows" id="totalRows"></div>
+    </div>
+
+    <!-- Banners -->
+    <div class="email-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span>Un email de confirmation a été envoyé à <strong id="customerEmail">votre adresse</strong> — Vérifiez vos spams si besoin.</span>
+    </div>
+    <div class="delivery-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <span>Fabrication artisanale — <strong>Délai de livraison : 7 à 30 jours</strong> depuis notre atelier lillois.</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <a href="/boutique.html" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Voir la boutique
+      </a>
+      <a href="/contact.html" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Une question ?
+      </a>
+    </div>
+
   </div>
 </div>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, collection, addDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-// MÊME CONFIG QUE TON PRODUIT.HTML
 const firebaseConfig = {
   apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
   authDomain: "tbt3d-a0f04.firebaseapp.com",
@@ -436,105 +214,154 @@ const firebaseConfig = {
   appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
 };
 
+const WORKER_URL = 'https://tbt3d-checkout.optionpdg.workers.dev';
 const db = getFirestore(initializeApp(firebaseConfig));
 
-// ──── INITIALISATION ────
-document.addEventListener('DOMContentLoaded', async function() {
-  try {
-    // Récupérer les données du panier
-    const orderData = sessionStorage.getItem('pendingOrder');
+// ── Récupérer le session_id depuis l'URL ──
+const params = new URLSearchParams(window.location.search);
+const sessionId = params.get('session_id');
 
-    if (!orderData) {
-      showError('Données de commande non trouvées');
+if (!sessionId) {
+  showError('Aucune session de paiement trouvée. Avez-vous été redirigé depuis Stripe ?');
+} else {
+  verifyAndDisplay(sessionId);
+}
+
+async function verifyAndDisplay(sessionId) {
+  try {
+    // 1. Vérifier le paiement auprès du Worker Cloudflare
+    const res = await fetch(`${WORKER_URL}/verify?session_id=${sessionId}`);
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error || 'Erreur de vérification');
+    }
+
+    if (!data.paid) {
+      showError(`Paiement non complété (statut : ${data.status}). Si le problème persiste, contactez-nous.`);
       return;
     }
 
-    const cartData = JSON.parse(orderData);
+    // 2. Paiement confirmé → enregistrer en Firestore (évite les doublons)
+    const orderId = await saveOrderIfNew(sessionId, data);
 
-    // Enregistrer dans Firestore
-    const orderId = await recordOrder(cartData);
+    // 3. Paiement confirmé → vider le panier maintenant
+    if (typeof TBTCart !== 'undefined') TBTCart.clear();
 
-    // Afficher les données
-    displayOrderInfo(cartData, orderId);
+    // 4. Afficher la confirmation
+    displayConfirmation(data, orderId);
 
-  } catch(error) {
-    console.error('Erreur:', error);
-    showError('Erreur: ' + error.message);
+  } catch (err) {
+    console.error('Erreur vérification:', err);
+    showError(err.message);
   }
-});
+}
 
-// ──── ENREGISTRER LA COMMANDE ────
-async function recordOrder(cartData) {
-  const orderId = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+async function saveOrderIfNew(sessionId, stripeData) {
+  // Vérifier si cette session a déjà été enregistrée (rechargement page)
+  const existing = await getDocs(
+    query(collection(db, 'commandes'), where('stripeSessionId', '==', sessionId))
+  );
 
-  const order = {
-    orderId: orderId,
-    status: 'completed',
-    product: {
-      name: cartData.product.name,
-      price: cartData.product.price,
-      quantity: cartData.product.quantity
-    },
-    variants: cartData.variants || [],
-    subtotal: cartData.subtotal,
-    shipping: cartData.shipping,
-    tax: cartData.tax,
-    total: cartData.total,
-    currency: 'EUR',
-    paymentMethod: 'payhip',
+  if (!existing.empty) {
+    return existing.docs[0].data().orderId;
+  }
+
+  // Nouvelle commande → enregistrer
+  const orderId = 'TBT-' + Date.now().toString(36).toUpperCase();
+  await addDoc(collection(db, 'commandes'), {
+    orderId,
+    stripeSessionId: sessionId,
+    status: 'paid',
+    customerEmail: stripeData.customerEmail,
+    customerName: stripeData.customerName,
+    shippingAddress: stripeData.shippingAddress,
+    amountTotal: stripeData.amountTotal,
+    currency: stripeData.currency,
+    lineItems: stripeData.lineItems,
     createdAt: new Date(),
-    updatedAt: new Date()
-  };
+  });
 
-  // Sauvegarder dans Firestore
-  await addDoc(collection(db, 'commandes'), order);
-  
-  console.log('✓ Commande enregistrée:', orderId);
+  console.log('✓ Commande enregistrée :', orderId);
   return orderId;
 }
 
-// ──── AFFICHER LES INFOS ────
-function displayOrderInfo(order, orderId) {
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('confirmationState').style.display = '';
+function displayConfirmation(data, orderId) {
+  // Masquer loading, afficher confirmation
+  document.getElementById('stateLoading').style.display = 'none';
+  document.getElementById('stateSuccess').style.display = '';
 
-  // N° de commande
-  document.getElementById('orderNumber').textContent = orderId;
+  // ID commande
+  document.getElementById('orderId').textContent = orderId;
+  document.getElementById('orderDate').textContent = new Date().toLocaleDateString('fr-FR', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
 
-  // Produit
-  document.getElementById('productName').textContent = order.product.name;
-  document.getElementById('productQty').textContent = order.product.quantity;
-  document.getElementById('productPrice').textContent = order.product.price.toFixed(2) + ' €';
-
-  // Variantes
-  if (order.variants && order.variants.length > 0) {
-    const variantsHTML = order.variants
-      .map(v => `<div class="variant-item"><strong>${v.groupName}:</strong> ${v.selectedValue}</div>`)
-      .join('');
-    document.getElementById('variantsContainer').innerHTML = variantsHTML;
+  // Client
+  const ci = document.getElementById('customerInfo');
+  if (data.customerName || data.customerEmail) {
+    ci.innerHTML = `
+      ${data.customerName ? `<strong>${data.customerName}</strong>` : ''}
+      ${data.customerEmail ? `<span>${data.customerEmail}</span>` : ''}
+      ${data.shippingAddress ? `
+        <span style="margin-top:8px;display:block">
+          ${data.shippingAddress.line1 || ''}${data.shippingAddress.line2 ? '<br>' + data.shippingAddress.line2 : ''}
+          <br>${data.shippingAddress.postal_code || ''} ${data.shippingAddress.city || ''}
+          <br>${data.shippingAddress.country || ''}
+        </span>` : ''}
+    `;
+  } else {
+    ci.textContent = 'Informations enregistrées par Stripe';
   }
 
-  // Prix
-  document.getElementById('subtotal').textContent = order.subtotal.toFixed(2) + ' €';
-  document.getElementById('shipping').textContent = order.shipping.toFixed(2) + ' €';
-  document.getElementById('tax').textContent = order.tax.toFixed(2) + ' €';
-  document.getElementById('total').textContent = order.total.toFixed(2) + ' €';
+  // Email
+  if (data.customerEmail) {
+    document.getElementById('customerEmail').textContent = data.customerEmail;
+  }
 
-  // Nettoyer sessionStorage
-  sessionStorage.removeItem('pendingOrder');
+  // Articles
+  const itemsList = document.getElementById('itemsList');
+  if (data.lineItems && data.lineItems.length > 0) {
+    itemsList.innerHTML = data.lineItems.map(item => `
+      <div class="item-row">
+        <div>
+          <div class="item-name">${item.name || 'Article'}</div>
+          <div class="item-detail">Qté : ${item.qty}</div>
+        </div>
+        <div class="item-price">${item.price ? (item.price * item.qty / 100).toFixed(2) + ' €' : '—'}</div>
+      </div>
+    `).join('');
+  } else {
+    itemsList.innerHTML = '<div class="item-row"><div class="item-name">Voir votre email de confirmation</div></div>';
+  }
 
-  // Scroll navbar
-  window.addEventListener('scroll', function() {
-    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
-  });
+  // Total
+  const totalRows = document.getElementById('totalRows');
+  const total = (data.amountTotal / 100).toFixed(2);
+  totalRows.innerHTML = `
+    <div class="total-row">
+      <span>Sous-total</span>
+      <span>${total} €</span>
+    </div>
+    <div class="total-row">
+      <span>Livraison</span>
+      <span>Offerte</span>
+    </div>
+    <div class="total-row main">
+      <span>Total payé</span>
+      <strong>${total} €</strong>
+    </div>
+  `;
+
+  // Nettoyer l'URL (supprimer session_id)
+  window.history.replaceState({}, '', '/confirmation.html');
 }
 
-// ──── AFFICHER ERREUR ────
-function showError(message) {
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('confirmationState').style.display = 'none';
-  document.getElementById('errorState').style.display = '';
-  document.getElementById('errorMessage').textContent = message;
+function showError(msg) {
+  document.getElementById('stateLoading').style.display = 'none';
+  document.getElementById('stateSuccess').style.display = 'none';
+  document.getElementById('stateError').style.display = '';
+  document.getElementById('errorMsg').textContent = msg;
 }
 </script>
 
