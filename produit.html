@@ -7,6 +7,7 @@
 <meta name="description" id="metaDesc" content="Lampe imprimée en 3D — TBT3D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="/cart.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -30,6 +31,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .nav-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; border-radius: 6px; color: var(--black); transition: background .15s; text-decoration: none; }
 .nav-icon:hover { background: var(--bg); }
 .nav-icon svg { width: 20px; height: 20px; }
+.cart-badge { position: absolute; top: 4px; right: 4px; background: var(--black); color: var(--white); font-size: 9px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: none; align-items: center; justify-content: center; padding: 0 4px; line-height: 1; }
 .nav-burger { display: none; }
 .search-bar { display: none; border-top: 1px solid var(--border); background: var(--white); padding: 12px 32px; }
 .search-bar.open { display: block; }
@@ -64,7 +66,8 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 /* ─── LAYOUT PRODUIT ─── */
 #productWrap { display: none; }
 .product-inner { max-width: var(--max); margin: 0 auto; padding: 28px 32px 80px; display: grid; grid-template-columns: 1fr 460px; gap: 64px; align-items: start; }
-@media(max-width:960px) { .product-inner { grid-template-columns: 1fr; gap: 36px; padding: 20px 20px 60px; } }
+@media(max-width:960px) { .product-inner { grid-template-columns: 1fr; gap: 0; padding: 0 0 60px; } }
+@media(min-width:601px) and (max-width:960px) { .prod-detail { padding: 28px 28px 0; } }
 
 /* ─── GALERIE GAUCHE ─── */
 .gallery { display: flex; gap: 12px; position: sticky; top: calc(var(--nav-h) + 20px); }
@@ -75,18 +78,40 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .gallery-main { flex: 1; position: relative; border-radius: 10px; overflow: hidden; background: var(--bg); height: calc(100vh - var(--nav-h) - 60px); max-height: 780px; }
 .gallery-main-img { width: 100%; height: 100%; object-fit: cover; object-position: center center; display: block; background: var(--bg); }
 .gallery-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 56px; background: var(--bg); }
-@media(max-width:960px) { .gallery-main { height: 60vw; max-height: 500px; } }
-@media(max-width:600px) { .gallery-main { height: 80vw; max-height: 380px; } }
-@media(max-width:600px) { .prod-detail { padding: 0 4px; } }
+@media(max-width:960px) { .gallery-main { height: 55vw; max-height: 480px; border-radius: 0; } }
+@media(max-width:600px) { .gallery-main { height: 100vw; max-height: 100vw; border-radius: 0; } }
 .gallery-nav { position: absolute; bottom: 14px; right: 14px; display: flex; gap: 6px; }
 .gallery-btn { width: 34px; height: 34px; background: rgba(255,255,255,.92); border: 1px solid rgba(0,0,0,.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
 .gallery-btn:hover { background: var(--white); }
 .gallery-btn svg { width: 14px; height: 14px; }
-@media(max-width:600px) { .gallery { flex-direction: column-reverse; } .gallery-thumbs { flex-direction: row; width: 100%; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; } .gallery-thumbs::-webkit-scrollbar { display: none; } .gallery-thumbs img { width: 56px; height: 56px; flex-shrink: 0; border-radius: 6px; } }
+
+/* Mobile gallery: thumbs below image */
+@media(max-width:600px) {
+  .gallery { flex-direction: column; gap: 0; }
+  .gallery-thumbs {
+    flex-direction: row;
+    width: 100%;
+    overflow-x: auto;
+    padding: 10px 16px 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    order: 2;
+  }
+  .gallery-thumbs::-webkit-scrollbar { display: none; }
+  .gallery-thumbs img { width: 60px; height: 60px; flex-shrink: 0; border-radius: 8px; opacity: .5; }
+  .gallery-thumbs img.active { opacity: 1; border-color: var(--black); }
+  .gallery-main { order: 1; border-radius: 0; }
+}
+
+/* Mobile product detail padding */
+@media(max-width:600px) {
+  .prod-detail { padding: 20px 20px 0; }
+}
 
 /* ─── DETAIL DROITE ─── */
 .prod-detail { display: flex; flex-direction: column; }
-.prod-badges { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.prod-badges { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
 .prod-badge { font-size: 10px; font-weight: 600; padding: 4px 12px; border-radius: 20px; letter-spacing: .06em; text-transform: uppercase; background: var(--black); color: var(--white); }
 .prod-name { font-size: 30px; font-weight: 400; letter-spacing: -.02em; margin-bottom: 8px; line-height: 1.15; }
 .prod-tagline { font-size: 14px; color: var(--soft); margin-bottom: 20px; line-height: 1.6; }
@@ -94,6 +119,11 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .prod-price { font-size: 28px; font-weight: 400; }
 .prod-old-price { font-size: 16px; color: var(--muted); text-decoration: line-through; }
 .prod-save { font-size: 11px; color: #16a34a; font-weight: 600; background: #f0fdf4; padding: 3px 9px; border-radius: 4px; }
+@media(max-width:600px) {
+  .prod-name { font-size: 26px; }
+  .prod-price { font-size: 24px; }
+  .prod-price-row { margin-bottom: 18px; }
+}
 .hr { height: 1px; background: var(--border); margin: 20px 0; }
 
 /* Variantes */
@@ -310,6 +340,10 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
       <a href="/compte.html" class="nav-icon" title="Mon compte">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </a>
+      <a href="/panier.html" class="nav-icon" title="Mon panier" style="position:relative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="cart-badge"></span>
+      </a>
       <button class="nav-icon nav-burger" onclick="toggleMobileNav()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
@@ -329,6 +363,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     <a href="/a-propos.html">À propos</a>
     <a href="/contact.html">Contact</a>
     <a href="/compte.html">Mon compte</a>
+    <a href="/panier.html">🛍 Mon panier</a>
   </div>
 </header>
 
@@ -412,11 +447,17 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
         Acheter maintenant
       </button>
 
-      <!-- Fallback si pas de lien PayHip configuré -->
-      <a href="/contact.html" class="btn-buy" id="btnNoPayhip" style="display:none">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        Commander — nous contacter
+      <!-- Lien de paiement direct (Stripe, autre) ou fallback contact -->
+      <a href="/contact.html" class="btn-buy" id="btnNoPayhip" style="display:none" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Acheter maintenant
       </a>
+
+      <!-- Bouton Ajouter au panier -->
+      <button id="btnAddCart" class="btn-contact" style="margin-top:4px" onclick="addToCart()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Ajouter au panier
+      </button>
 
       <!-- ─── POPUP PAIEMENT ─── -->
       <div id="payhipModal" onclick="if(event.target===this)closePayhipModal()">
@@ -681,13 +722,18 @@ function updateBuyButton() {
   const btnPayhip   = document.getElementById('btnPayhip');
   const btnNoPayhip = document.getElementById('btnNoPayhip');
 
-  if (url && url.includes('payhip.com')) {
+  if (url) {
+    // Lien Payhip ou Stripe → même popup de confirmation
     btnPayhip.style.display   = '';
     btnNoPayhip.style.display = 'none';
     btnPayhip._payhipUrl = url;
   } else {
+    // Aucun lien → bouton contact
     btnPayhip.style.display   = 'none';
     btnNoPayhip.style.display = '';
+    btnNoPayhip.href   = '/contact.html';
+    btnNoPayhip.target = '';
+    btnNoPayhip.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> Commander — nous contacter';
   }
 }
 
@@ -1035,5 +1081,78 @@ function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
 </script>
 
 <script src="/search.js"></script>
+<script>
+/* ─── PANIER ─── */
+function addToCart() {
+  if (!_art) return;
+
+  // Récupérer la variante sélectionnée
+  const variantParts = [];
+  if (_art.variants && _art.variants.length > 0) {
+    _art.variants.forEach((vg, gi) => {
+      const selected = document.querySelector(`#variantsWrap .opt-block:nth-child(${gi+1}) .chip.on, #variantsWrap .opt-block:nth-child(${gi+1}) .color-chip.on`);
+      if (selected) variantParts.push(selected.dataset.val);
+    });
+  }
+  const variantStr = variantParts.join(' · ');
+
+  // Récupérer l'URL de paiement du combo actuel
+  const comboKey = _currentComboKey();
+  const combo = (_art.comboLinks || {})[comboKey];
+  const paymentUrl = (combo && combo.url && combo.url.trim()) ? combo.url.trim() : (_art.payhip || '');
+
+  // Prix actuel
+  const price = (combo && combo.price) ? parseFloat(combo.price) : parseFloat(_art.price);
+  const oldPrice = (combo && combo.oldPrice) ? parseFloat(combo.oldPrice) : (parseFloat(_art.oldPrice) || null);
+
+  // Récupérer le stripePrice du combo ou de l'article de base
+  const stripePrice = (combo && combo.stripePrice && combo.stripePrice.trim())
+    ? combo.stripePrice.trim()
+    : (_art.stripePrice || null);
+
+  TBTCart.add({
+    id: _art.id || _art.slug,
+    name: _art.name,
+    price: price,
+    oldPrice: oldPrice && oldPrice > price ? oldPrice : null,
+    image: _photos[0] || null,
+    variant: variantStr || null,
+    paymentUrl: paymentUrl || null,
+    stripePrice: stripePrice || null,
+  });
+
+  // Feedback visuel sur le bouton
+  const btn = document.getElementById('btnAddCart');
+  const original = btn.innerHTML;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Ajouté !';
+  btn.style.borderColor = '#16a34a';
+  btn.style.color = '#16a34a';
+  setTimeout(() => {
+    btn.innerHTML = original;
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }, 1800);
+
+  // Toast
+  showCartToast(_art.name);
+}
+
+function showCartToast(name) {
+  let toast = document.getElementById('cartToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'cartToast';
+    toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:12px 22px;border-radius:30px;font-size:13px;font-weight:500;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,1.4,.64,1);z-index:9999;white-space:nowrap;display:flex;align-items:center;gap:10px;';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = '✓ Ajouté au panier · <a href="/panier.html" style="color:#fff;text-decoration:underline;text-underline-offset:3px">Voir le panier</a>';
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 3000);
+}
+</script>
 </body>
 </html>

@@ -75,12 +75,12 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 }
 
 .gallery-thumbs {
-  width: 80px;
-  padding: 16px 12px;
+  width: 112px;
+  padding: 20px 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   border-right: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -89,64 +89,70 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .dim-sidebar {
   display: none;
   flex-direction: column;
-  gap: 1px;
+  gap: 4px;
   width: 100%;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 .dim-sidebar.on { display: flex; }
 .dim-side-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 7px 4px;
-  border-radius: 8px;
+  padding: 9px 6px;
+  border-radius: 10px;
   background: var(--bg);
   text-align: center;
+  border: 1px solid transparent;
+  transition: border-color .15s;
 }
+.dim-side-item:hover { border-color: var(--border); }
 .dim-side-lbl {
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: .06em;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--muted);
-  margin-bottom: 2px;
+  margin-bottom: 3px;
 }
 .dim-side-val {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--black);
   line-height: 1;
+  letter-spacing: -.02em;
 }
 .dim-side-unit {
-  font-size: 8px;
+  font-size: 9px;
   color: var(--muted);
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .thumb-stl {
-  width: 56px;
-  height: 56px;
+  width: 84px;
+  height: 84px;
   background: var(--bg);
-  border-radius: 10px;
+  border-radius: 14px;
   border: 1.5px dashed var(--border);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   color: var(--muted);
   cursor: pointer;
-  gap: 4px;
+  gap: 6px;
   transition: all .2s;
+  letter-spacing: .04em;
 }
+.thumb-stl:hover { border-color: #aaa; background: #f0f0f0; }
 .thumb-stl.loaded {
   border-color: var(--black);
   border-style: solid;
   color: var(--black);
   background: var(--white);
 }
-.thumb-stl svg { width: 22px; height: 22px; }
+.thumb-stl svg { width: 30px; height: 30px; }
 
 .gallery-main {
   flex: 1;
@@ -661,8 +667,8 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
         <div class="dim-side-item"><div class="dim-side-lbl">L</div><div class="dim-side-val" id="sX">—</div><div class="dim-side-unit">mm</div></div>
         <div class="dim-side-item"><div class="dim-side-lbl">l</div><div class="dim-side-val" id="sY">—</div><div class="dim-side-unit">mm</div></div>
         <div class="dim-side-item"><div class="dim-side-lbl">H</div><div class="dim-side-val" id="sZ">—</div><div class="dim-side-unit">mm</div></div>
-        <div class="dim-side-item"><div class="dim-side-lbl">Vol</div><div class="dim-side-val" id="sVol" style="font-size:10px">—</div><div class="dim-side-unit">cm³</div></div>
-        <div class="dim-side-item"><div class="dim-side-lbl">~g</div><div class="dim-side-val" id="sMass" style="font-size:10px">—</div><div class="dim-side-unit">g</div></div>
+        <div class="dim-side-item"><div class="dim-side-lbl">Vol</div><div class="dim-side-val" id="sVol">—</div><div class="dim-side-unit">cm³</div></div>
+        <div class="dim-side-item"><div class="dim-side-lbl">~g</div><div class="dim-side-val" id="sMass">—</div><div class="dim-side-unit">g</div></div>
       </div>
     </div>
 

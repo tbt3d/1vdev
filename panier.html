@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon panier — TBT3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --white: #fff; --black: #111; --bg: #f9f9f9; --border: #e8e8e8;
+  --text: #111; --muted: #888; --soft: #555;
+  --font: 'Inter', system-ui, sans-serif;
+  --nav-h: 70px; --max: 1280px; --r: 50px;
+  --green: #16a34a; --green-bg: #f0fdf4;
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); color: var(--text); background: var(--white); padding-top: var(--nav-h); font-size: 14px; line-height: 1.5; }
+
+/* ─── NAVBAR ─── */
+#navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--white); border-bottom: 1px solid var(--border); transition: box-shadow .2s; }
+#navbar.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,.06); }
+.nav-inner { max-width: var(--max); margin: 0 auto; height: var(--nav-h); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+.nav-links { display: flex; align-items: center; }
+.nav-links a { text-decoration: none; color: var(--soft); font-size: 14px; padding: 8px 16px; border-radius: 6px; transition: color .15s, background .15s; white-space: nowrap; }
+.nav-links a:hover, .nav-links a.active { color: var(--black); }
+.nav-links a.active { font-weight: 500; }
+.nav-actions { display: flex; align-items: center; gap: 4px; }
+.nav-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; border-radius: 6px; color: var(--black); transition: background .15s; text-decoration: none; position: relative; }
+.nav-icon:hover { background: var(--bg); }
+.nav-icon svg { width: 20px; height: 20px; }
+.cart-badge { position: absolute; top: 4px; right: 4px; background: var(--black); color: var(--white); font-size: 9px; font-weight: 700; min-width: 16px; height: 16px; border-radius: 8px; display: none; align-items: center; justify-content: center; padding: 0 4px; line-height: 1; }
+.nav-burger { display: none; }
+.mobile-nav { display: none; flex-direction: column; padding: 16px 24px 20px; border-top: 1px solid var(--border); gap: 4px; }
+.mobile-nav.open { display: flex; }
+.mobile-nav a { text-decoration: none; color: var(--black); font-size: 15px; padding: 10px 12px; border-radius: 6px; transition: background .15s; }
+.mobile-nav a:hover { background: var(--bg); }
+@media(max-width:768px) { .nav-links { display: none; } .nav-burger { display: flex; } .nav-inner { padding: 0 20px; } }
+
+/* ─── PAGE ─── */
+.page-inner { max-width: 960px; margin: 0 auto; padding: 40px 32px 100px; }
+@media(max-width:600px) { .page-inner { padding: 24px 16px 80px; } }
+
+.page-title { font-size: 28px; font-weight: 400; letter-spacing: -.02em; margin-bottom: 6px; }
+.page-sub { font-size: 13px; color: var(--muted); margin-bottom: 40px; }
+
+/* ─── LAYOUT ─── */
+.cart-layout { display: grid; grid-template-columns: 1fr 320px; gap: 32px; align-items: start; }
+@media(max-width:768px) { .cart-layout { grid-template-columns: 1fr; gap: 24px; } }
+
+/* ─── ITEMS ─── */
+.cart-items { display: flex; flex-direction: column; gap: 0; border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; }
+
+.cart-item { display: flex; gap: 16px; padding: 20px; align-items: flex-start; border-bottom: 1px solid var(--border); transition: background .15s; }
+.cart-item:last-child { border-bottom: none; }
+.cart-item:hover { background: var(--bg); }
+
+.cart-item-img { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; background: var(--bg); flex-shrink: 0; }
+.cart-item-img-placeholder { width: 80px; height: 80px; border-radius: 10px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+
+.cart-item-body { flex: 1; min-width: 0; }
+.cart-item-name { font-size: 15px; font-weight: 500; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cart-item-variant { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+.cart-item-price { font-size: 15px; font-weight: 500; }
+.cart-item-oldprice { font-size: 12px; color: var(--muted); text-decoration: line-through; margin-left: 6px; }
+
+.cart-item-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.qty-wrap { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: 30px; overflow: hidden; }
+.qty-btn { width: 32px; height: 32px; border: none; background: transparent; font-size: 18px; cursor: pointer; color: var(--text); font-weight: 300; transition: background .15s; }
+.qty-btn:hover { background: var(--border); }
+.qty-num { width: 40px; text-align: center; border: none; border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border); font-family: var(--font); font-size: 13px; height: 32px; outline: none; background: transparent; }
+.btn-remove { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 11px; padding: 4px 8px; border-radius: 6px; transition: all .15s; display: flex; align-items: center; gap: 4px; }
+.btn-remove:hover { color: #e11d48; background: #fff1f2; }
+.btn-remove svg { width: 12px; height: 12px; }
+
+/* ─── RÉSUMÉ ─── */
+.cart-summary { border: 1.5px solid var(--border); border-radius: 16px; padding: 24px; position: sticky; top: calc(var(--nav-h) + 20px); }
+@media(max-width:768px) { .cart-summary { position: static; } }
+
+.summary-title { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+.summary-line { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 13px; color: var(--soft); border-bottom: 1px solid var(--border); }
+.summary-line:last-of-type { border-bottom: none; }
+.summary-total { display: flex; justify-content: space-between; align-items: center; padding: 16px 0 20px; font-size: 18px; font-weight: 500; border-top: 1.5px solid var(--border); margin-top: 4px; }
+
+.btn-checkout { width: 100%; padding: 15px 20px; background: var(--black); color: var(--white); border: none; font-family: var(--font); font-size: 14px; font-weight: 500; border-radius: var(--r); cursor: pointer; transition: opacity .2s, transform .15s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; margin-bottom: 10px; }
+.btn-checkout:hover { opacity: .85; transform: translateY(-1px); }
+.btn-checkout svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+.btn-continue { width: 100%; padding: 12px 20px; background: transparent; color: var(--text); border: 1.5px solid var(--border); font-family: var(--font); font-size: 13px; border-radius: var(--r); cursor: pointer; transition: border-color .2s; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-continue:hover { border-color: var(--text); }
+
+.summary-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 14px; line-height: 1.6; }
+
+/* ─── MULTI-LIENS ─── */
+.multi-checkout { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.multi-checkout-title { font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 4px; }
+.btn-item-checkout { width: 100%; padding: 11px 16px; background: var(--white); color: var(--text); border: 1.5px solid var(--border); font-family: var(--font); font-size: 12px; border-radius: 10px; cursor: pointer; transition: all .15s; text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.btn-item-checkout:hover { border-color: var(--black); background: var(--bg); }
+.btn-item-checkout span { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-item-checkout svg { width: 13px; height: 13px; flex-shrink: 0; color: var(--muted); }
+
+/* ─── PANIER VIDE ─── */
+.cart-empty { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 40vh; gap: 16px; text-align: center; padding: 60px 20px; }
+.cart-empty svg { width: 56px; height: 56px; color: var(--border); }
+.cart-empty h2 { font-size: 20px; font-weight: 400; color: var(--text); }
+.cart-empty p { font-size: 14px; color: var(--muted); }
+.cart-empty a { margin-top: 8px; padding: 12px 28px; background: var(--black); color: var(--white); text-decoration: none; border-radius: var(--r); font-size: 13px; font-weight: 500; transition: opacity .2s; }
+.cart-empty a:hover { opacity: .85; }
+
+/* ─── TOAST ─── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.success-banner { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 14px; padding: 20px 24px; display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+.success-banner svg { width: 24px; height: 24px; color: #16a34a; flex-shrink: 0; }
+.success-banner strong { font-size: 15px; color: #15803d; display: block; margin-bottom: 2px; }
+.success-banner span { font-size: 12px; color: #166534; }
+.cancel-banner { background: #fff7ed; border: 1.5px solid #fed7aa; border-radius: 14px; padding: 20px 24px; display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+.cancel-banner svg { width: 24px; height: 24px; color: #ea580c; flex-shrink: 0; }
+.cancel-banner strong { font-size: 15px; color: #c2410c; display: block; margin-bottom: 2px; }
+.cancel-banner span { font-size: 12px; color: #9a3412; }
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--black); color: var(--white); padding: 12px 22px; border-radius: 30px; font-size: 13px; font-weight: 500; opacity: 0; pointer-events: none; transition: all .3s cubic-bezier(.34,1.4,.64,1); z-index: 9999; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── MODAL CHECKOUT ─── */
+#checkoutModal { position: fixed; inset: 0; z-index: 8000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(8,8,8,.75); backdrop-filter: blur(14px); opacity: 0; pointer-events: none; transition: opacity .25s; }
+#checkoutModal.open { opacity: 1; pointer-events: all; }
+#checkoutBox { position: relative; width: 100%; max-width: 460px; background: var(--white); border-radius: 24px; padding: 40px 36px 32px; box-shadow: 0 0 0 1px rgba(0,0,0,.06), 0 24px 60px rgba(0,0,0,.18); }
+@keyframes boxIn { from { opacity:0; transform: translateY(24px) scale(.96); } to { opacity:1; transform: none; } }
+#checkoutModal.open #checkoutBox { animation: boxIn .32s cubic-bezier(.22,1,.36,1) forwards; }
+#checkoutModal h2 { font-size: 22px; font-weight: 400; margin-bottom: 6px; }
+#checkoutModal .sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+.checkout-items-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; max-height: 240px; overflow-y: auto; }
+.co-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 12px; }
+.co-item img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; background: var(--bg); }
+.co-item-info { flex: 1; min-width: 0; }
+.co-item-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.co-item-detail { font-size: 11px; color: var(--muted); }
+.co-item-price { font-size: 13px; font-weight: 500; flex-shrink: 0; }
+.co-total { display: flex; justify-content: space-between; font-size: 14px; font-weight: 500; padding: 14px 0; border-top: 1px solid var(--border); margin-bottom: 20px; }
+.co-btns { display: flex; flex-direction: column; gap: 8px; }
+.co-btn-pay { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 20px; background: var(--black); color: var(--white); border: none; border-radius: var(--r); font-family: var(--font); font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; transition: opacity .2s; }
+.co-btn-pay:hover { opacity: .85; }
+.co-btn-pay svg { width: 16px; height: 16px; }
+.co-sep { display: flex; align-items: center; gap: 10px; margin: 4px 0; }
+.co-sep::before, .co-sep::after { content:''; flex:1; height:1px; background: var(--border); }
+.co-sep span { font-size: 11px; color: var(--muted); }
+.co-links-title { font-size: 11px; color: var(--muted); margin-bottom: 8px; text-align: center; }
+.co-link-btn { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 11px 16px; border: 1.5px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); font-size: 13px; transition: all .15s; margin-bottom: 6px; }
+.co-link-btn:hover { border-color: var(--black); background: var(--bg); }
+.co-link-btn span { font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.co-link-btn svg { width: 13px; height: 13px; color: var(--muted); flex-shrink: 0; }
+.btn-modal-close { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; background: var(--bg); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--muted); transition: all .15s; }
+.btn-modal-close:hover { background: var(--border); color: var(--text); }
+.btn-modal-close svg { width: 14px; height: 14px; }
+</style>
+</head>
+<body>
+
+<!-- ─── NAVBAR ─── -->
+<header id="navbar">
+  <div class="nav-inner">
+    <a href="/index.html">
+      <img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" style="height:44px;width:auto;object-fit:contain;border-radius:6px" alt="TBT3D">
+    </a>
+    <nav class="nav-links">
+      <a href="/index.html" data-page="home">Home</a>
+      <a href="/boutique.html" data-page="boutique">Boutique</a>
+      <a href="/devis.html" data-page="devis">Devis STL</a>
+      <a href="/a-propos.html" data-page="apropos">À propos</a>
+      <a href="/contact.html" data-page="contact">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="nav-icon" onclick="toggleSearch ? toggleSearch() : null">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
+      <a href="/compte.html" class="nav-icon" title="Mon compte">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </a>
+      <a href="/panier.html" class="nav-icon" title="Mon panier" style="position:relative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="cart-badge" id="navCartBadge"></span>
+      </a>
+      <button class="nav-icon nav-burger" onclick="toggleMobileNav()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="/index.html">Home</a>
+    <a href="/boutique.html">Boutique</a>
+    <a href="/devis.html">Devis STL</a>
+    <a href="/a-propos.html">À propos</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/compte.html">Mon compte</a>
+    <a href="/panier.html">🛍 Mon panier</a>
+  </div>
+</header>
+
+<!-- ─── CONTENU ─── -->
+<div class="page-inner">
+
+  <!-- Panier vide -->
+  <div class="cart-empty" id="cartEmpty">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+    <h2>Votre panier est vide</h2>
+    <p>Découvrez nos créations et ajoutez vos favoris</p>
+    <a href="/boutique.html">Voir la boutique</a>
+  </div>
+
+  <!-- Panier rempli -->
+  <div id="cartFull" style="display:none">
+    <h1 class="page-title">Mon panier</h1>
+    <p class="page-sub" id="cartCount"></p>
+
+    <div class="cart-layout">
+
+      <!-- Liste articles -->
+      <div class="cart-items" id="cartItemsList"></div>
+
+      <!-- Résumé -->
+      <div class="cart-summary">
+        <div class="summary-title">Résumé</div>
+        <div id="summaryLines"></div>
+        <div class="summary-total">
+          <span>Total</span>
+          <span id="summaryTotal"></span>
+        </div>
+
+        <button class="btn-checkout" onclick="openCheckout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Commander
+        </button>
+
+        <a href="/boutique.html" class="btn-continue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+          Continuer mes achats
+        </a>
+
+        <p class="summary-note">🔒 Paiement sécurisé · Fabriqué à Lille</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── MODAL CHECKOUT ─── -->
+<div id="checkoutModal" onclick="if(event.target===this)closeCheckout()">
+  <div id="checkoutBox">
+    <button class="btn-modal-close" onclick="closeCheckout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <h2>Confirmer la commande</h2>
+    <p class="sub">Vérifiez vos articles avant de payer</p>
+    <div class="checkout-items-list" id="coItemsList"></div>
+    <div class="co-total">
+      <span>Total</span>
+      <span id="coTotal"></span>
+    </div>
+    <div class="co-btns" id="coBtns"></div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"></div>
+
+<script src="/cart.js"></script>
+<script>
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+});
+
+function toggleMobileNav() {
+  document.getElementById('mobileNav').classList.toggle('open');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+function renderCart() {
+  const items = TBTCart.load();
+  const empty = document.getElementById('cartEmpty');
+  const full  = document.getElementById('cartFull');
+
+  if (items.length === 0) {
+    empty.style.display = 'flex';
+    full.style.display  = 'none';
+    return;
+  }
+
+  empty.style.display = 'none';
+  full.style.display  = '';
+
+  const count = items.reduce((s, i) => s + i.qty, 0);
+  document.getElementById('cartCount').textContent =
+    count + ' article' + (count > 1 ? 's' : '');
+
+  // Liste articles
+  document.getElementById('cartItemsList').innerHTML = items.map(item => `
+    <div class="cart-item" data-key="${item.key}">
+      ${item.image
+        ? `<img class="cart-item-img" src="${item.image}" alt="${item.name}">`
+        : `<div class="cart-item-img-placeholder">🏮</div>`}
+      <div class="cart-item-body">
+        <div class="cart-item-name">${item.name}</div>
+        ${item.variant ? `<div class="cart-item-variant">${item.variant}</div>` : ''}
+        <div>
+          <span class="cart-item-price">${(parseFloat(item.price) * item.qty).toFixed(2)} €</span>
+          ${item.oldPrice ? `<span class="cart-item-oldprice">${(parseFloat(item.oldPrice) * item.qty).toFixed(2)} €</span>` : ''}
+        </div>
+        <div class="cart-item-actions">
+          <div class="qty-wrap">
+            <button class="qty-btn" onclick="changeQty('${item.key}', ${item.qty - 1})">−</button>
+            <input class="qty-num" type="number" value="${item.qty}" min="1" max="99"
+              onchange="changeQty('${item.key}', parseInt(this.value))" readonly>
+            <button class="qty-btn" onclick="changeQty('${item.key}', ${item.qty + 1})">+</button>
+          </div>
+          <button class="btn-remove" onclick="removeItem('${item.key}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            Supprimer
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Résumé lignes
+  document.getElementById('summaryLines').innerHTML = items.map(item => `
+    <div class="summary-line">
+      <span>${item.name}${item.variant ? ' · ' + item.variant : ''} × ${item.qty}</span>
+      <span>${(parseFloat(item.price) * item.qty).toFixed(2)} €</span>
+    </div>
+  `).join('');
+
+  document.getElementById('summaryTotal').textContent = TBTCart.total().toFixed(2) + ' €';
+}
+
+function changeQty(key, qty) {
+  if (qty < 1) { removeItem(key); return; }
+  TBTCart.updateQty(key, qty);
+  renderCart();
+}
+
+function removeItem(key) {
+  TBTCart.remove(key);
+  showToast('Article retiré du panier');
+  renderCart();
+}
+
+// ── URL de ton Cloudflare Worker (à mettre à jour après déploiement) ──
+const WORKER_URL = 'https://tbt3d-checkout.optionpdg.workers.dev';
+
+function openCheckout() {
+  const items = TBTCart.load();
+  if (items.length === 0) return;
+
+  // Remplir la liste des articles dans le modal
+  document.getElementById('coItemsList').innerHTML = items.map(item => `
+    <div class="co-item">
+      ${item.image ? `<img src="${item.image}" alt="${item.name}">` : '<div style="width:44px;height:44px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px">🏮</div>'}
+      <div class="co-item-info">
+        <div class="co-item-name">${item.name}</div>
+        <div class="co-item-detail">${item.variant ? item.variant + ' · ' : ''}Qté ${item.qty}</div>
+      </div>
+      <div class="co-item-price">${(parseFloat(item.price) * item.qty).toFixed(2)} €</div>
+    </div>
+  `).join('');
+
+  document.getElementById('coTotal').textContent = TBTCart.total().toFixed(2) + ' €';
+
+  // Déterminer le mode de paiement
+  const itemsWithStripeId  = items.filter(i => i.stripePrice && i.stripePrice.startsWith('price_'));
+  const itemsWithDirectUrl = items.filter(i => i.paymentUrl && !i.stripePrice);
+  const itemsWithNothing   = items.filter(i => !i.stripePrice && !i.paymentUrl);
+  const allHaveStripeId    = items.length > 0 && items.every(i => i.stripePrice && i.stripePrice.startsWith('price_'));
+
+  let btnsHtml = '';
+
+  if (allHaveStripeId) {
+    // ✅ Tous les produits ont un Price ID → checkout Stripe unifié
+    btnsHtml = `
+      <button class="co-btn-pay" id="stripeCheckoutBtn" onclick="stripeCheckout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Payer en une fois
+      </button>
+      <p style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px">🔒 Paiement sécurisé via Stripe</p>`;
+
+  } else if (itemsWithStripeId.length > 0 && itemsWithDirectUrl.length === 0 && itemsWithNothing.length === 0) {
+    // Tous ont un Price ID (même cas)
+    btnsHtml = `
+      <button class="co-btn-pay" id="stripeCheckoutBtn" onclick="stripeCheckout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Payer en une fois — ${TBTCart.total().toFixed(2)} €
+      </button>`;
+
+  } else {
+    // Mix ou liens directs → un bouton par article
+    if (itemsWithStripeId.length > 0) {
+      btnsHtml += `
+        <button class="co-btn-pay" id="stripeCheckoutBtn" onclick="stripeCheckoutPartial()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Payer les articles Stripe (${itemsWithStripeId.length})
+        </button>`;
+    }
+    if (itemsWithDirectUrl.length > 0) {
+      if (btnsHtml) btnsHtml += '<div class="co-sep"><span>et</span></div>';
+      btnsHtml += `<p class="co-links-title">Payer séparément :</p>` +
+        itemsWithDirectUrl.map(item => `
+          <a class="co-link-btn" href="${item.paymentUrl}" target="_blank" rel="noopener">
+            <span>${item.name}${item.variant ? ' · ' + item.variant : ''} — ${(parseFloat(item.price) * item.qty).toFixed(2)} €</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>`).join('');
+    }
+    if (itemsWithNothing.length > 0) {
+      if (btnsHtml) btnsHtml += '<div class="co-sep"><span>et</span></div>';
+      btnsHtml += `
+        <a class="co-link-btn" href="/contact.html">
+          <span>Commander ${itemsWithNothing.map(i=>i.name).join(', ')} par message</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </a>`;
+    }
+  }
+
+  document.getElementById('coBtns').innerHTML = btnsHtml;
+  document.getElementById('checkoutModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// ── Checkout Stripe unifié (tous les items ont un Price ID) ──
+async function stripeCheckout() {
+  const btn = document.getElementById('stripeCheckoutBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Redirection…';
+
+  try {
+    const items = TBTCart.load();
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      throw new Error(data.error || 'Erreur serveur');
+    }
+
+    // Vider le panier et rediriger
+    TBTCart.clear();
+    window.location.href = data.url;
+
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Réessayer';
+    // Afficher l'erreur sous le bouton
+    const errEl = document.createElement('p');
+    errEl.style.cssText = 'font-size:11px;color:#e11d48;text-align:center;margin-top:8px';
+    errEl.textContent = '⚠ ' + err.message;
+    btn.parentNode.appendChild(errEl);
+    setTimeout(() => errEl.remove(), 4000);
+  }
+}
+
+// ── Checkout partiel (seulement les items avec Price ID) ──
+async function stripeCheckoutPartial() {
+  const items = TBTCart.load().filter(i => i.stripePrice && i.stripePrice.startsWith('price_'));
+  const btn = document.getElementById('stripeCheckoutBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Redirection…';
+
+  try {
+    const res = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Erreur serveur');
+    window.location.href = data.url;
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = 'Réessayer';
+  }
+}
+
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeCheckout();
+});
+
+window.addEventListener('cart:updated', renderCart);
+renderCart();
+
+// Détecter retour depuis Stripe
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const container = document.querySelector('.page-inner');
+  if (params.get('success') === '1') {
+    TBTCart.clear();
+    const banner = document.createElement('div');
+    banner.className = 'success-banner';
+    banner.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      <div><strong>Paiement confirmé !</strong><span>Merci pour votre commande. Vous recevrez une confirmation par email.</span></div>`;
+    container.prepend(banner);
+    window.history.replaceState({}, '', '/panier.html');
+  } else if (params.get('cancel') === '1') {
+    const banner = document.createElement('div');
+    banner.className = 'cancel-banner';
+    banner.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div><strong>Paiement annulé</strong><span>Votre panier a été conservé. Vous pouvez relancer votre commande quand vous voulez.</span></div>`;
+    container.prepend(banner);
+    window.history.replaceState({}, '', '/panier.html');
+  }
+})();
+</script>
+</body>
+</html>
