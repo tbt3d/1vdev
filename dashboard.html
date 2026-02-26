@@ -470,6 +470,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
     Devis
   </a>
+  <button class="nav-item" onclick="goPage('panier-cfg',this)" id="navPanierCfg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    Config Panier
+  </button>
   <button class="nav-item" onclick="goPage('devis-cfg',this)" id="navDevisCfg">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
     Config Devis
@@ -959,6 +963,89 @@ tr:hover td{background:rgba(255,255,255,.01)}
   </div>
 
   <!-- ═══ CONFIG DEVIS ═══ -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <!-- ── PAGE CONFIG PANIER / BOUTIQUE ──────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════════ -->
+  <div class="page" id="page-panier-cfg">
+    <div class="topbar">
+      <div class="topbar-title">Configuration — Panier &amp; Boutique</div>
+      <div class="topbar-right">
+        <div class="sync-indicator"><div class="sync-dot"></div>Firebase Config</div>
+      </div>
+    </div>
+    <div class="ps" style="flex:1;overflow-y:auto">
+      <div class="dcfg-wrap">
+        <div class="dcfg-info">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Ces réglages s'appliquent au panier (panier.html) et aux achats directs depuis la boutique (produit.html).
+        </div>
+
+        <div class="fsec" style="margin-bottom:16px">
+          <div class="fsec-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <span class="fsec-title">Worker Stripe — Checkout</span>
+          </div>
+          <div class="fsec-body">
+            <div class="field">
+              <label>URL du Worker Cloudflare</label>
+              <input type="url" id="pcfgWorkerUrl" placeholder="https://tbt3d-checkout.xxx.workers.dev">
+              <div class="fhint">L'URL de ton Worker Cloudflare qui crée les sessions Stripe. Utilisée par le panier et le bouton "Acheter maintenant" de la boutique.</div>
+            </div>
+            <div class="field" style="margin-top:14px">
+              <label>Mode Stripe</label>
+              <select id="pcfgStripeMode" style="width:100%;padding:10px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none">
+                <option value="test">🧪 Mode TEST — utiliser pour les développements (cartes fictives)</option>
+                <option value="live">✅ Mode LIVE — paiements réels</option>
+              </select>
+              <div class="fhint">En mode TEST, les price_id Stripe doivent être des IDs test (créés dans le dashboard Stripe avec le toggle "Mode test" activé). En mode LIVE, utiliser les IDs live.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fsec" style="margin-bottom:16px">
+          <div class="fsec-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span class="fsec-title">URLs de redirection Stripe</span>
+          </div>
+          <div class="fsec-body">
+            <div class="frow">
+              <div class="field">
+                <label>URL de succès (panier)</label>
+                <input type="url" id="pcfgSuccessUrl" placeholder="https://tbt3d.fr/panier.html?success=1">
+                <div class="fhint">Redirection après paiement réussi depuis le panier</div>
+              </div>
+              <div class="field">
+                <label>URL d'annulation (panier)</label>
+                <input type="url" id="pcfgCancelUrl" placeholder="https://tbt3d.fr/panier.html?cancelled=1">
+                <div class="fhint">Redirection si le client annule depuis le panier</div>
+              </div>
+            </div>
+            <div class="frow" style="margin-top:12px">
+              <div class="field">
+                <label>URL de succès (boutique — Acheter maintenant)</label>
+                <input type="url" id="pcfgSuccessUrlDirect" placeholder="https://tbt3d.fr/boutique.html?success=1">
+                <div class="fhint">Redirection après achat direct depuis une fiche produit</div>
+              </div>
+              <div class="field">
+                <label>URL d'annulation (boutique)</label>
+                <input type="url" id="pcfgCancelUrlDirect" placeholder="https://tbt3d.fr/boutique.html?cancelled=1">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="pcfgFeedback" style="display:none;margin-bottom:12px"></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-g" onclick="loadPanierCfg()" style="font-size:12px">↺ Réinitialiser</button>
+          <button class="btn btn-a" onclick="savePanierCfg()" style="font-size:12px;flex:1;justify-content:center" id="btnSavePanierCfg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
+            Enregistrer la configuration
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="page" id="page-devis-cfg">
     <div class="topbar">
       <div class="topbar-title">Configuration — Page Devis</div>
@@ -1350,6 +1437,7 @@ window.goPage = (id, btn) => {
   if(id==='messages') loadMessages();
   if(id==='users') loadUsers();
   if(id==='commandes') loadCommandes();
+  if(id==='panier-cfg') loadPanierCfg();
   if(id==='devis-cfg') loadDevisCfg();
 };
 
@@ -2807,8 +2895,62 @@ document.addEventListener('keydown', e => {
 });
 
 // ══════════════════════════════════════════════════════════════
-// ── CONFIG DEVIS ──────────────────────────────────────────────
+// ── CONFIG PANIER / BOUTIQUE ──────────────────────────────────
 // ══════════════════════════════════════════════════════════════
+const PCFG_DEFAULTS = {
+  workerUrl:  'https://tbt3d-checkout.optionpdg.workers.dev',
+  stripeMode: 'test',
+  successUrl: 'https://tbt3d.fr/panier.html?success=1',
+  cancelUrl:  'https://tbt3d.fr/panier.html?cancelled=1',
+  successUrlDirect: 'https://tbt3d.fr/boutique.html?success=1',
+  cancelUrlDirect:  'https://tbt3d.fr/boutique.html?cancelled=1',
+};
+
+window.loadPanierCfg = async () => {
+  try {
+    const data = await fbGetConfig('panier');
+    const cfg = data || PCFG_DEFAULTS;
+    document.getElementById('pcfgWorkerUrl').value       = cfg.workerUrl || PCFG_DEFAULTS.workerUrl;
+    document.getElementById('pcfgStripeMode').value      = cfg.stripeMode || 'test';
+    document.getElementById('pcfgSuccessUrl').value      = cfg.successUrl || PCFG_DEFAULTS.successUrl;
+    document.getElementById('pcfgCancelUrl').value       = cfg.cancelUrl || PCFG_DEFAULTS.cancelUrl;
+    document.getElementById('pcfgSuccessUrlDirect').value = cfg.successUrlDirect || PCFG_DEFAULTS.successUrlDirect;
+    document.getElementById('pcfgCancelUrlDirect').value  = cfg.cancelUrlDirect || PCFG_DEFAULTS.cancelUrlDirect;
+  } catch(e){ console.log('Config panier not found, using defaults'); }
+};
+
+window.savePanierCfg = async () => {
+  const btn = document.getElementById('btnSavePanierCfg');
+  const fb  = document.getElementById('pcfgFeedback');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Enregistrement…';
+  fb.style.display = 'none';
+  try {
+    const cfg = {
+      workerUrl:        document.getElementById('pcfgWorkerUrl').value.trim(),
+      stripeMode:       document.getElementById('pcfgStripeMode').value,
+      successUrl:       document.getElementById('pcfgSuccessUrl').value.trim(),
+      cancelUrl:        document.getElementById('pcfgCancelUrl').value.trim(),
+      successUrlDirect: document.getElementById('pcfgSuccessUrlDirect').value.trim(),
+      cancelUrlDirect:  document.getElementById('pcfgCancelUrlDirect').value.trim(),
+      updatedAt: new Date(),
+    };
+    await fbSetConfig('panier', cfg);
+    fb.style.cssText = 'display:block;color:#16a34a;background:rgba(22,163,74,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center';
+    fb.textContent = '✓ Configuration enregistrée ! Le panier et la boutique utiliseront ces paramètres dès le prochain chargement.';
+    toast('Config Panier sauvegardée ✓');
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer la configuration';
+    setTimeout(() => fb.style.display='none', 5000);
+  } catch(e){
+    fb.style.cssText = 'display:block;color:#e11d48;background:rgba(225,29,72,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center';
+    fb.textContent = '⚠ Erreur : ' + e.message;
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer la configuration';
+  }
+};
+
+
 const DCFG_DEFAULTS = {
   workerUrl: 'https://tbt3d-checkout.optionpdg.workers.dev',
   fallbackUrl: '',

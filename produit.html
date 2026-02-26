@@ -499,10 +499,17 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
           <p id="payhipProductPrice"></p>
           <p id="payhipMsg">Vous allez être redirigé vers notre plateforme de paiement sécurisé pour finaliser votre commande.</p>
 
-          <a id="payhipGoBtn" href="#" target="_blank" rel="noopener" onclick="setTimeout(closePayhipModal,400)">
+          <!-- Mode lien externe (payhip) -->
+          <a id="payhipGoBtn" href="#" target="_blank" rel="noopener" onclick="setTimeout(closePayhipModal,400)" style="display:none">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             Procéder au paiement
           </a>
+          <!-- Mode Stripe direct (Worker) -->
+          <button id="stripeDirectBtn" onclick="stripeDirectCheckout()" style="display:none;width:100%;padding:15px 20px;background:#111;color:#fff;border:none;font-family:inherit;font-size:14px;font-weight:500;border-radius:12px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:8px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Procéder au paiement
+          </button>
+          <p id="stripeDirectErr" style="display:none;font-size:11px;color:#e11d48;text-align:center;margin-top:8px"></p>
 
           <div id="payhipTrust">
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Paiement sécurisé</span>
@@ -721,6 +728,7 @@ function updateBuyButton() {
   const combo = (_art.comboLinks || {})[comboKey];
 
   const url   = (combo && combo.url && combo.url.trim())   ? combo.url.trim()   : _art.payhip || '';
+  const stripePrice = (combo && combo.stripePrice && combo.stripePrice.trim()) ? combo.stripePrice.trim() : (_art.stripePrice || null);
   const price = (combo && combo.price && String(combo.price).trim()) ? parseFloat(combo.price) : parseFloat(_art.price);
   const priceStr = (isNaN(price) ? parseFloat(_art.price) : price).toFixed(2) + ' €';
 
@@ -743,11 +751,14 @@ function updateBuyButton() {
   const btnPayhip   = document.getElementById('btnPayhip');
   const btnNoPayhip = document.getElementById('btnNoPayhip');
 
-  if (url) {
+  if (url || stripePrice) {
     // Lien Payhip ou Stripe → même popup de confirmation
     btnPayhip.style.display   = '';
     btnNoPayhip.style.display = 'none';
-    btnPayhip._payhipUrl = url;
+    btnPayhip._payhipUrl   = url || '';
+    btnPayhip._isStripe    = !url && !!stripePrice;
+    btnPayhip._stripePrice = stripePrice || null;
+    btnPayhip._price       = price;
   } else {
     // Aucun lien → bouton contact
     btnPayhip.style.display   = 'none';
@@ -762,8 +773,24 @@ window.openPayhipModal = function() {
   if (!_art) return;
   document.getElementById('payhipProductName').textContent  = _art.name || '';
   document.getElementById('payhipProductPrice').textContent = parseFloat(_art.price).toFixed(2) + ' €';
-  const url = document.getElementById('btnPayhip')._payhipUrl || _art.payhip || '#';
-  document.getElementById('payhipGoBtn').href = url;
+  const url = document.getElementById('btnPayhip')._payhipUrl || _art.payhip || '';
+  const isStripe = document.getElementById('btnPayhip')._isStripe;
+  const goBtn = document.getElementById('payhipGoBtn');
+  const stripeBtn = document.getElementById('stripeDirectBtn');
+  const errEl = document.getElementById('stripeDirectErr');
+  if (isStripe) {
+    // Paiement Stripe via Worker
+    goBtn.style.display = 'none';
+    stripeBtn.style.display = 'flex';
+    stripeBtn.disabled = false;
+    stripeBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Procéder au paiement';
+    errEl.style.display = 'none';
+  } else {
+    // Lien externe (payhip ou autre)
+    goBtn.href = url || '#';
+    goBtn.style.display = 'flex';
+    stripeBtn.style.display = 'none';
+  }
   document.getElementById('payhipModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 };
@@ -771,6 +798,77 @@ window.openPayhipModal = function() {
 window.closePayhipModal = function() {
   document.getElementById('payhipModal').classList.remove('open');
   document.body.style.overflow = '';
+};
+
+// ── Checkout Stripe direct depuis la fiche produit ──────────────
+window.stripeDirectCheckout = async function() {
+  const btn = document.getElementById('stripeDirectBtn');
+  const errEl = document.getElementById('stripeDirectErr');
+  const btnPayhip = document.getElementById('btnPayhip');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Redirection…';
+
+  try {
+    // Charger config panier depuis Firebase
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const { getFirestore, doc, getDoc, addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const app = getApps().length ? getApps()[0] : initializeApp({
+      apiKey:"AIzaSyBmBmFqGXOCbFo_FqJ3aSEIRHIqQDGXirQ",
+      authDomain:"tbt3d-a0f04.firebaseapp.com",
+      projectId:"tbt3d-a0f04",
+      storageBucket:"tbt3d-a0f04.firebasestorage.app",
+      messagingSenderId:"439285162044",
+      appId:"1:439285162044:web:e04f226b62e82f76e4c3f1"
+    });
+    const db = getFirestore(app);
+
+    // Lire config panier
+    const cfgDoc = await getDoc(doc(db, 'config', 'panier'));
+    const cfg = cfgDoc.exists() ? cfgDoc.data() : {};
+    const workerUrl      = cfg.workerUrl || 'https://tbt3d-checkout.optionpdg.workers.dev';
+    const successUrl     = cfg.successUrlDirect || 'https://tbt3d.fr/boutique.html?success=1';
+    const cancelUrl      = cfg.cancelUrlDirect || 'https://tbt3d.fr/boutique.html?cancelled=1';
+
+    const stripePrice = btnPayhip._stripePrice;
+    const price       = btnPayhip._price || parseFloat(_art.price);
+    const qty         = 1;
+
+    // Construire l'item
+    let workerItem;
+    if (stripePrice && stripePrice.startsWith('price_')) {
+      workerItem = { stripePrice, qty };
+    } else {
+      // Prix dynamique
+      workerItem = { isDynamic: true, name: _art.name || 'Article', price, qty };
+    }
+
+    // Sauvegarder la commande dans Firebase avec status initié
+    const orderRef = await addDoc(collection(db, 'commandes'), {
+      source: 'boutique-direct',
+      status: 'initié',
+      createdAt: serverTimestamp(),
+      items: [{ name: _art.name, price, qty, stripePrice: stripePrice || null }],
+      total: price * qty,
+    });
+    localStorage.setItem('tbt3d_lastOrderId', orderRef.id);
+
+    // Appeler le Worker
+    const res = await fetch(workerUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ successUrl, cancelUrl, items: [workerItem] }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Erreur serveur');
+    window.location.href = data.url;
+
+  } catch(err) {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Réessayer';
+    errEl.textContent = '⚠ ' + err.message;
+    errEl.style.display = 'block';
+  }
 };
 
 document.addEventListener('keydown', function(e) {

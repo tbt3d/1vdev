@@ -351,7 +351,28 @@ function removeItem(key) {
 }
 
 // ── URL de ton Cloudflare Worker (à mettre à jour après déploiement) ──
-const WORKER_URL = 'https://tbt3d-checkout.optionpdg.workers.dev';
+const WORKER_URL_DEFAULT = 'https://tbt3d-checkout.optionpdg.workers.dev';
+let _panierCfg = null;
+
+async function getPanierCfg() {
+  if (_panierCfg) return _panierCfg;
+  try {
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const app = getApps().length ? getApps()[0] : initializeApp({
+      apiKey:"AIzaSyBmBmFqGXOCbFo_FqJ3aSEIRHIqQDGXirQ",
+      authDomain:"tbt3d-a0f04.firebaseapp.com",
+      projectId:"tbt3d-a0f04",
+      storageBucket:"tbt3d-a0f04.firebasestorage.app",
+      messagingSenderId:"439285162044",
+      appId:"1:439285162044:web:e04f226b62e82f76e4c3f1"
+    });
+    const db = getFirestore(app);
+    const d = await getDoc(doc(db, 'config', 'panier'));
+    _panierCfg = d.exists() ? d.data() : {};
+  } catch(e) { _panierCfg = {}; }
+  return _panierCfg;
+}
 
 function openCheckout() {
   const items = TBTCart.load();
@@ -493,14 +514,19 @@ async function stripeCheckout() {
   btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Redirection…';
 
   try {
+    const cfg = await getPanierCfg();
+    const workerUrl  = cfg.workerUrl  || WORKER_URL_DEFAULT;
+    const successUrl = cfg.successUrl || 'https://tbt3d.fr/panier.html?success=1';
+    const cancelUrl  = cfg.cancelUrl  || 'https://tbt3d.fr/panier.html?cancelled=1';
+
     const items = TBTCart.load();
     // Sauvegarde dans Firebase (async, sans bloquer)
     saveOrderToFirebase(items, 'panier');
 
-    const res = await fetch(WORKER_URL, {
+    const res = await fetch(workerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cancelUrl: 'https://tbt3d.fr/panier.html?cancelled=1', successUrl: 'https://tbt3d.fr/panier.html?success=1', items: buildWorkerItems(items) }),
+      body: JSON.stringify({ cancelUrl, successUrl, items: buildWorkerItems(items) }),
     });
 
     const data = await res.json();
@@ -522,7 +548,6 @@ async function stripeCheckout() {
   }
 }
 
-// ── Checkout partiel (seulement les items Stripe-compatibles) ──
 async function stripeCheckoutPartial() {
   const allItems = TBTCart.load();
   const stripeItems = allItems.filter(i => (i.stripePrice && i.stripePrice.startsWith('price_')) || i.isDynamic === true);
@@ -531,13 +556,18 @@ async function stripeCheckoutPartial() {
   btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Redirection…';
 
   try {
+    const cfg = await getPanierCfg();
+    const workerUrl  = cfg.workerUrl  || WORKER_URL_DEFAULT;
+    const successUrl = cfg.successUrl || 'https://tbt3d.fr/panier.html?success=1';
+    const cancelUrl  = cfg.cancelUrl  || 'https://tbt3d.fr/panier.html?cancelled=1';
+
     // Sauvegarde dans Firebase
     saveOrderToFirebase(stripeItems, 'panier');
 
-    const res = await fetch(WORKER_URL, {
+    const res = await fetch(workerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cancelUrl: 'https://tbt3d.fr/panier.html?cancelled=1', successUrl: 'https://tbt3d.fr/panier.html?success=1', items: buildWorkerItems(stripeItems) }),
+      body: JSON.stringify({ cancelUrl, successUrl, items: buildWorkerItems(stripeItems) }),
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || 'Erreur serveur');
