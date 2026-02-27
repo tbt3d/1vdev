@@ -859,11 +859,16 @@ window.stripeDirectCheckout = async function() {
     localStorage.setItem('tbt3d_lastOrderId', orderRef.id);
     localStorage.setItem('tbt3d_lastOrderTs', Date.now().toString());
 
+    // Injecter l'orderId dans la success URL pour éviter les doublons
+    const successUrlWithOrder = successUrl.includes('?')
+      ? successUrl + '&orderId=' + orderRef.id
+      : successUrl + '?orderId=' + orderRef.id;
+
     // Appeler le Worker
     const res = await fetch(workerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ successUrl, cancelUrl, items: [workerItem] }),
+      body: JSON.stringify({ successUrl: successUrlWithOrder, cancelUrl, items: [workerItem] }),
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || 'Erreur serveur');
@@ -1302,4 +1307,56 @@ function showCartToast(name) {
   <button class="btn-cart-icon" onclick="addToCart()" title="Ajouter au panier">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
   </button>
-  <button class="btn-buy" id="mobileBtnBuy"
+
+  <button class="btn-buy" id="mobileBtnBuy" onclick="buyNow()">
+    Acheter
+  </button>
+</div>
+
+<!-- ─── FOOTER ─── -->
+<footer id="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="/index.html">
+        <img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D">
+      </a>
+      <p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p>
+      <p class="footer-tagline">Made in France 🇫🇷</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Navigation</div>
+      <a href="/index.html">Home</a>
+      <a href="/boutique.html">Boutique</a>
+      <a href="/devis.html">Impression sur mesure</a>
+      <a href="/a-propos.html">À propos</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Légal</div>
+      <a href="/mentions-legales.html">Mentions légales</a>
+      <a href="/cgv.html">CGV</a>
+      <a href="/politique-confidentialite.html">Confidentialité</a>
+      <a href="/politique-retour.html">Retours</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Contact</div>
+      <a href="/cdn-cgi/l/email-protection#146076602624273a777b7a60757760547379757d783a777b79"><span class="__cf_email__" data-cfemail="dfabbdabedefecf1bcb0b1abbebcab9fb8b2beb6b3f1bcb0b2">[email&#160;protected]</span></a>
+      <a href="/contact.html">Formulaire</a>
+      <a href="/devis.html">Devis STL</a>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="https://www.tiktok.com/@tbt203_" aria-label="TikTok" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span>
+    <span class="footer-pay">
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#003087"/><text x="19" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="white" font-family="sans-serif">PayPal</text></svg>
+    </span>
+  </div>
+</footer>
+</body>
+</html>

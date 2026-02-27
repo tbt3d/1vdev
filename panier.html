@@ -97,6 +97,14 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .summary-line-muted { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
 .summary-line-muted:last-of-type { border-bottom: none; }
 .summary-sep { height: 1px; background: var(--border); margin: 4px 0; }
+.address-form-wrap { padding: 12px 0 10px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.address-form-title { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+.address-row { display: flex; gap: 8px; }
+.address-field { display: flex; flex-direction: column; gap: 4px; flex: 1; margin-bottom: 8px; }
+.address-field label { font-size: 11px; color: var(--muted); font-weight: 500; }
+.address-input { padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family: var(--font); font-size: 13px; color: var(--text); outline: none; transition: border-color .15s; background: var(--white); }
+.address-input:focus { border-color: var(--black); }
+.address-input.error { border-color: #e11d48; }
 .shipping-select-wrap { display: flex; flex-direction: column; gap: 6px; padding: 10px 0 6px; border-bottom: 1px solid var(--border); }
 .shipping-select-wrap label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
 .shipping-select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--font); font-size: 13px; background: var(--white); color: var(--text); cursor: pointer; outline: none; transition: border-color .15s; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
@@ -250,6 +258,40 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
       <div class="cart-summary">
         <div class="summary-title">Résumé</div>
         <div id="summaryLines"></div>
+
+        <!-- Adresse de livraison -->
+        <div class="address-form-wrap">
+          <div class="address-form-title">📦 Adresse de livraison</div>
+          <div class="address-row">
+            <div class="address-field">
+              <label>Prénom *</label>
+              <input type="text" id="addrFirstName" class="address-input" placeholder="Jean" oninput="validateAddress()">
+            </div>
+            <div class="address-field">
+              <label>Nom *</label>
+              <input type="text" id="addrLastName" class="address-input" placeholder="Dupont" oninput="validateAddress()">
+            </div>
+          </div>
+          <div class="address-field">
+            <label>Adresse *</label>
+            <input type="text" id="addrLine1" class="address-input" placeholder="12 rue de la Paix" oninput="validateAddress()">
+          </div>
+          <div class="address-row">
+            <div class="address-field" style="flex:0 0 100px">
+              <label>Code postal *</label>
+              <input type="text" id="addrZip" class="address-input" placeholder="75001" oninput="validateAddress()">
+            </div>
+            <div class="address-field">
+              <label>Ville *</label>
+              <input type="text" id="addrCity" class="address-input" placeholder="Paris" oninput="validateAddress()">
+            </div>
+          </div>
+          <div class="address-field">
+            <label>Téléphone (optionnel)</label>
+            <input type="tel" id="addrPhone" class="address-input" placeholder="+33 6 12 34 56 78">
+          </div>
+          <div id="addressError" style="display:none;font-size:11px;color:#e11d48;margin-top:4px">⚠ Veuillez remplir tous les champs obligatoires *</div>
+        </div>
 
         <!-- Livraison -->
         <div class="shipping-select-wrap">
@@ -569,6 +611,8 @@ function openCheckout() {
   document.getElementById('coBtns').innerHTML = btnsHtml;
   document.getElementById('checkoutModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  // Initialiser la validation (désactive Payer si adresse non remplie)
+  setTimeout(validateAddress, 50);
 }
 
 // ── Prépare les items pour le Worker (gère stripePrice ET isDynamic) ──
@@ -622,7 +666,7 @@ function buildWorkerItems(items, mode) {
 }
 
 // ── SAUVEGARDE COMMANDE FIREBASE ──────────────────────────────
-async function saveOrderToFirebase(items, source) {
+async function saveOrderToFirebase(items, source, addr) {
   try {
     const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
     const { getFirestore, collection, addDoc, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
@@ -676,7 +720,15 @@ async function saveOrderToFirebase(items, source) {
       createdAt: new Date(),
       status: 'initié',
       source: source || 'panier',
-      client: { name: '', email: '', address: '', city: '', zip: '', country: '', phone: '' },
+      client: addr ? {
+        name: (addr.firstName + ' ' + addr.lastName).trim(),
+        email: '',
+        address: addr.line1 || '',
+        city: addr.city || '',
+        zip: addr.zip || '',
+        country: document.getElementById('shippingCountry')?.value || '',
+        phone: addr.phone || '',
+      } : { name: '', email: '', address: '', city: '', zip: '', country: '', phone: '' },
       items: orderItems,
       total: parseFloat(total.toFixed(2)),
     };
@@ -689,8 +741,38 @@ async function saveOrderToFirebase(items, source) {
   }
 }
 
+// ── Validation adresse ────────────────────────────────────────────
+function getAddressData() {
+  return {
+    firstName: (document.getElementById('addrFirstName')?.value || '').trim(),
+    lastName:  (document.getElementById('addrLastName')?.value || '').trim(),
+    line1:     (document.getElementById('addrLine1')?.value || '').trim(),
+    zip:       (document.getElementById('addrZip')?.value || '').trim(),
+    city:      (document.getElementById('addrCity')?.value || '').trim(),
+    phone:     (document.getElementById('addrPhone')?.value || '').trim(),
+  };
+}
+
+function validateAddress() {
+  const a = getAddressData();
+  const valid = a.firstName && a.lastName && a.line1 && a.zip && a.city;
+  const btn = document.getElementById('stripeCheckoutBtn');
+  const errEl = document.getElementById('addressError');
+  const inputs = ['addrFirstName','addrLastName','addrLine1','addrZip','addrCity'];
+  inputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('error', !el.value.trim());
+  });
+  if (btn) btn.disabled = !valid;
+  if (errEl) errEl.style.display = valid ? 'none' : 'block';
+  return valid;
+}
+
 async function stripeCheckout() {
   const btn = document.getElementById('stripeCheckoutBtn');
+  // Valider l'adresse avant tout
+  if (!validateAddress()) return;
+
   btn.disabled = true;
   btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Redirection…';
 
@@ -701,14 +783,18 @@ async function stripeCheckout() {
     const successUrl = cfg.successUrl || 'https://tbt3d.fr/panier.html?success=1&session_id={CHECKOUT_SESSION_ID}';
     const cancelUrl  = cfg.cancelUrl  || 'https://tbt3d.fr/panier.html?cancelled=1';
 
+    const addr = getAddressData();
     const items = TBTCart.load();
-    // Sauvegarde dans Firebase (async, sans bloquer)
-    saveOrderToFirebase(items, 'panier');
+    // Sauvegarde dans Firebase AVANT de rediriger (on a besoin de l'orderId)
+    const orderId = await saveOrderToFirebase(items, 'panier', addr);
+    const successUrlFinal = orderId
+      ? (successUrl.includes('?') ? successUrl + '&orderId=' + orderId : successUrl + '?orderId=' + orderId)
+      : successUrl;
 
     const res = await fetch(workerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cancelUrl, successUrl, items: buildWorkerItems(items) }),
+      body: JSON.stringify({ cancelUrl, successUrl: successUrlFinal, items: buildWorkerItems(items) }),
     });
 
     const data = await res.json();
@@ -744,13 +830,16 @@ async function stripeCheckoutPartial() {
     const successUrl = cfg.successUrl || 'https://tbt3d.fr/panier.html?success=1&session_id={CHECKOUT_SESSION_ID}';
     const cancelUrl  = cfg.cancelUrl  || 'https://tbt3d.fr/panier.html?cancelled=1';
 
-    // Sauvegarde dans Firebase
-    saveOrderToFirebase(stripeItems, 'panier');
+    // Sauvegarde dans Firebase AVANT de rediriger
+    const orderId = await saveOrderToFirebase(stripeItems, 'panier');
+    const successUrlFinal = orderId
+      ? (successUrl.includes('?') ? successUrl + '&orderId=' + orderId : successUrl + '?orderId=' + orderId)
+      : successUrl;
 
     const res = await fetch(workerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cancelUrl, successUrl, items: buildWorkerItems(stripeItems, stripeMode) }),
+      body: JSON.stringify({ cancelUrl, successUrl: successUrlFinal, items: buildWorkerItems(stripeItems, stripeMode) }),
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || 'Erreur serveur');
@@ -779,7 +868,8 @@ renderCart();
   const container = document.querySelector('.page-inner');
 
   if (params.get('success') === '1') {
-    const orderId = localStorage.getItem('tbt3d_lastOrderId');
+    // Priorité : orderId dans l'URL (passé lors du checkout) → localStorage en fallback
+    const orderId = params.get('orderId') || localStorage.getItem('tbt3d_lastOrderId');
     if (orderId) {
       try {
         const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
@@ -861,22 +951,15 @@ renderCart();
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Navigation</div>
-      <a href="/index.html">Home</a>
-      <a href="/boutique.html">Boutique</a>
-      <a href="/devis.html">Impression sur mesure</a>
-      <a href="/a-propos.html">À propos</a>
-      <a href="/contact.html">Contact</a>
+      <a href="/index.html">Home</a><a href="/boutique.html">Boutique</a><a href="/devis.html">Impression sur mesure</a><a href="/a-propos.html">À propos</a><a href="/contact.html">Contact</a>
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Légal</div>
-      <a href="/mentions-legales.html">Mentions légales</a>
-      <a href="/cgv.html">CGV</a>
-      <a href="/politique-confidentialite.html">Confidentialité</a>
-      <a href="/politique-retour.html">Retours</a>
+      <a href="/mentions-legales.html">Mentions légales</a><a href="/cgv.html">CGV</a><a href="/politique-confidentialite.html">Confidentialité</a><a href="/politique-retour.html">Retours</a>
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="/cdn-cgi/l/email-protection#b6c2d4c284868598d5d9d8c2d7d5c2f6d1dbd7dfda98d5d9db"><span class="__cf_email__" data-cfemail="8ffbedfbbdbfbca1ece0e1fbeeecfbcfe8e2eee6e3a1ece0e2">[email&#160;protected]</span></a>
+      <a href="/cdn-cgi/l/email-protection#47332533757774692428293326243307202a262e2b6924282a"><span class="__cf_email__" data-cfemail="d8acbaaceae8ebf6bbb7b6acb9bbac98bfb5b9b1b4f6bbb7b5">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
@@ -889,4 +972,10 @@ renderCart();
     <span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span>
     <span class="footer-pay">
       <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
-      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#003087"/><text x="19" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="white" font-family="sans-serif">PayPal</text></svg>
+    </span>
+  </div>
+</footer>
+</body>
+</html>
