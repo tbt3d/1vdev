@@ -115,6 +115,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 .footer-pay{display:flex;gap:6px;align-items:center}
 @media(max-width:600px){.footer-bottom{padding:16px 20px}}
 </style>
+<script src="/cart.js"></script>
 </head>
 <body data-page="boutique">
 
@@ -209,7 +210,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#d5a1b7a1e7e5e6fbb6babba1b4b6a195b2b8b4bcb9fbb6bab8"><span class="__cf_email__" data-cfemail="5c283e286e6c6f723f3332283d3f281c3b313d3530723f3331">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a><a href="/devis.html">Devis STL</a>
       <div class="footer-social">
         <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -228,7 +229,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 </footer>
 
 <!-- ─── FIREBASE + LOGIQUE ─── -->
-<script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, doc, getDocs, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
@@ -347,9 +348,7 @@ function renderGrid() {
     const priceDisplay = a._displayPrice || (parseFloat(a.price).toFixed(2).replace('.', ',') + ' €');
     const fromSpan = a._from ? '<span class="price-from">À partir de</span>' : '';
 
-    const buyBtn = a.payhip
-      ? '<a href="' + esc(a.payhip) + '" target="_blank" rel="noopener" class="btn-buy" onclick="event.stopPropagation()">Acheter</a>'
-      : '<a href="' + prodUrl + '" class="btn-buy" onclick="event.stopPropagation()">Voir le produit</a>';
+    const buyBtn = '<button class="btn-buy" onclick="event.stopPropagation();addToCartAndGo(\'' + esc(a.slug || a.id) + '\',\'' + esc(a.name) + '\',' + parseFloat(a.price) + ',' + (a.oldPrice ? parseFloat(a.oldPrice) : 'null') + ',\'' + esc((a.photos && a.photos[0]) ? a.photos[0] : '') + '\',\'' + esc(a.stripePrice || '') + '\',\'' + esc(a.payhip || '') + '\')">Acheter</button>';
     const detailBtn = '<a href="' + prodUrl + '" class="btn-details" onclick="event.stopPropagation()">Détails</a>';
 
     card.innerHTML =
@@ -404,9 +403,28 @@ function toggleSearch() {
 function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('open');
 }
-document.getElementById('footerYear').textContent = new Date().getFullYear();
+function searchLive() {}
+function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
+
+// ── AJOUTER AU PANIER DEPUIS LA BOUTIQUE ──────────────────────────────────────
+function addToCartAndGo(id, name, price, oldPrice, image, stripePrice, paymentUrl) {
+  if (typeof TBTCart === 'undefined') {
+    window.location.href = '/panier.html';
+    return;
+  }
+  TBTCart.add({
+    id:          id,
+    name:        name,
+    price:       price,
+    oldPrice:    oldPrice && oldPrice > price ? oldPrice : null,
+    image:       image || null,
+    variant:     null,
+    stripePrice: stripePrice || null,
+    paymentUrl:  paymentUrl || null,
+  });
+  window.location.href = '/panier.html';
+}
 </script>
 
-<script src="/search.js"></script>
 </body>
 </html>
