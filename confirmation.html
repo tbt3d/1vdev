@@ -506,10 +506,8 @@ function displayConfirmation(data, orderId, fbData) {
 }
 
 function _showFactureBtn(urlOrHtml) {
-  if (urlOrHtml) {
-    if (urlOrHtml.startsWith('http')) window._factureDirectUrl = urlOrHtml;
-    else window._factureHtml = urlOrHtml;
-  }
+  if (!urlOrHtml) return; // Ne rien afficher si pas encore dispo
+  if (urlOrHtml.startsWith('http')) window._factureDirectUrl = urlOrHtml;
   document.getElementById('factureBtnWrap').style.display = 'block';
 }
 
@@ -517,7 +515,7 @@ window.downloadFacture = async function() {
   const btn = document.getElementById('facturePdfBtn');
   const lbl = document.getElementById('facturePdfBtnLabel');
 
-  // URL Firebase directe (PDF déjà généré par le dashboard) → téléchargement direct
+  // Télécharger uniquement depuis Firebase Storage (URL directe)
   if (window._factureDirectUrl) {
     const a = document.createElement('a');
     a.href = window._factureDirectUrl;
@@ -527,147 +525,10 @@ window.downloadFacture = async function() {
     return;
   }
 
+  // Pas encore disponible sur Firebase → message d'attente
+  lbl.textContent = 'Facture pas encore disponible…';
   btn.disabled = true;
-  lbl.textContent = 'Génération en cours…';
-
-  try {
-    // Charger html2pdf si absent
-    if (!window.html2pdf) {
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-        s.onload = res; s.onerror = rej;
-        document.head.appendChild(s);
-      });
-    }
-
-    // ── Collecter les données depuis la page ──
-    const orderId   = document.getElementById('orderId')?.textContent?.trim() || '—';
-    const orderDate = document.getElementById('orderDate')?.textContent?.trim() || '—';
-
-    // Refs
-    const shortId   = (window._confirmedFirestoreId || '').slice(-8).toUpperCase();
-    const factureNum = window._factureNum || '';
-    const blNum      = window._blNum || '';
-
-    // Client
-    const custEl = document.getElementById('customerInfo');
-    const custLines = custEl ? custEl.innerText.trim().split('\n').filter(l => l.trim()) : [];
-    const custHtml = custLines.map(l => `<div>${l.trim()}</div>`).join('');
-
-    // Articles
-    const itemRowsHtml = Array.from(document.querySelectorAll('.item-row')).map(row => {
-      const name   = row.querySelector('.item-name')?.textContent?.trim() || '';
-      const details = Array.from(row.querySelectorAll('.item-detail')).map(d => d.textContent?.trim()).filter(Boolean);
-      const price  = row.querySelector('.item-price')?.textContent?.trim() || '';
-      return `<tr>
-        <td style="padding:12px 10px;border-bottom:1px solid #eee;vertical-align:top">
-          <div style="font-weight:600;font-size:13px">${name}</div>
-          ${details.map(d => `<div style="font-size:11px;color:#777;margin-top:2px">${d}</div>`).join('')}
-        </td>
-        <td style="padding:12px 10px;border-bottom:1px solid #eee;text-align:right;font-weight:700;font-size:13px;white-space:nowrap;vertical-align:top">${price}</td>
-      </tr>`;
-    }).join('');
-
-    // Totaux
-    const totalRowsHtml = Array.from(document.querySelectorAll('.total-row')).map(row => {
-      const isMain = row.classList.contains('main');
-      const spans  = row.querySelectorAll('span, strong');
-      const label  = spans[0]?.textContent?.trim() || '';
-      const val    = (spans[1] || spans[0]?.nextElementSibling)?.textContent?.trim() || '';
-      return `<tr>
-        <td style="padding:${isMain?'14':'9'}px 10px;font-weight:${isMain?'700':'400'};font-size:${isMain?'14':'12'}px;color:${isMain?'#111':'#555'};${isMain?'border-top:2px solid #111':''}">${label}</td>
-        <td style="padding:${isMain?'14':'9'}px 10px;text-align:right;font-weight:${isMain?'700':'400'};font-size:${isMain?'14':'12'}px;color:${isMain?'#111':'#555'};${isMain?'border-top:2px solid #111':''}">${val}</td>
-      </tr>`;
-    }).join('');
-
-    // ── Construire le HTML de la facture ──
-    const factureHtml = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8">
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, Helvetica, sans-serif; color: #111; background: #fff; padding: 48px; font-size: 13px; line-height: 1.55; }
-  table { width: 100%; border-collapse: collapse; }
-</style>
-</head><body>
-  <!-- HEADER -->
-  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px;padding-bottom:24px;border-bottom:2px solid #111">
-    <div style="font-size:30px;font-weight:700;letter-spacing:-.03em">TBT<span style="color:#ff6b35">3D</span></div>
-    <div style="text-align:right">
-      <div style="font-size:20px;font-weight:700;letter-spacing:.05em;color:#111;margin-bottom:6px">FACTURE</div>
-      ${factureNum ? `<div style="font-family:monospace;font-size:15px;font-weight:700;color:#ff6b35">${factureNum}</div>` : ''}
-      ${blNum      ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:2px">BL : ${blNum}</div>` : ''}
-      ${shortId    ? `<div style="font-family:monospace;font-size:10px;color:#aaa;margin-top:2px">Réf. #${shortId}</div>` : ''}
-    </div>
-  </div>
-
-  <!-- INFOS VENDEUR / CLIENT -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:36px">
-    <div style="background:#f9f9f9;border-radius:8px;padding:18px 20px">
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#888;margin-bottom:10px">Vendeur</div>
-      <div style="font-weight:700;font-size:14px;margin-bottom:4px">TBT3D</div>
-      <div style="color:#555">Lambersart, France</div>
-      <div style="color:#555">tbt203.contact@gmail.com</div>
-      <div style="color:#555">tbt3d.fr</div>
-    </div>
-    <div style="background:#f9f9f9;border-radius:8px;padding:18px 20px">
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#888;margin-bottom:10px">Client</div>
-      ${custHtml || '<div style="color:#555">—</div>'}
-    </div>
-  </div>
-
-  <!-- DATE -->
-  <div style="margin-bottom:20px;font-size:12px;color:#888">Date : ${orderDate}</div>
-
-  <!-- ARTICLES -->
-  <table style="margin-bottom:0">
-    <thead>
-      <tr style="background:#111;color:#fff">
-        <th style="padding:11px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:600">Article</th>
-        <th style="padding:11px 10px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:600">Montant</th>
-      </tr>
-    </thead>
-    <tbody>${itemRowsHtml || '<tr><td colspan="2" style="padding:12px 10px;color:#888">—</td></tr>'}</tbody>
-    <tfoot style="border-top:1px solid #ddd">${totalRowsHtml}</tfoot>
-  </table>
-
-  <!-- FOOTER -->
-  <div style="margin-top:48px;padding-top:16px;border-top:1px solid #eee;font-size:10px;color:#aaa;text-align:center">
-    TBT3D — Lambersart, France — tbt203.contact@gmail.com — tbt3d.fr
-  </div>
-</body></html>`;
-
-    // ── Générer le PDF via iframe caché ──
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:794px;height:1123px;border:none;opacity:0;pointer-events:none';
-    document.body.appendChild(iframe);
-
-    await new Promise(res => {
-      iframe.onload = res;
-      iframe.srcdoc = factureHtml;
-    });
-
-    // Attendre que le rendu soit complet
-    await new Promise(r => setTimeout(r, 600));
-
-    await html2pdf().set({
-      margin:     [10, 10, 10, 10],
-      filename:   (factureNum || window._factureNum || 'facture-tbt3d') + '.pdf',
-      image:      { type: 'jpeg', quality: 0.98 },
-      html2canvas:{ scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
-      jsPDF:      { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).from(iframe.contentDocument.body).save();
-
-    document.body.removeChild(iframe);
-
-    lbl.textContent = '✓ Facture téléchargée';
-    setTimeout(() => { lbl.textContent = 'Télécharger ma facture PDF'; btn.disabled = false; }, 3000);
-
-  } catch(e) {
-    console.error('downloadFacture error:', e);
-    lbl.textContent = 'Erreur — réessayez';
-    btn.disabled = false;
-  }
+  setTimeout(() => { lbl.textContent = 'Télécharger ma facture PDF'; btn.disabled = false; }, 4000);
 }
 
 function showError(msg) {
