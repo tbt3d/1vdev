@@ -263,10 +263,18 @@ async function loadData() {
 
   const pubArts = arts.filter(a => a.status === 'published');
 
+  // Stocker les slots custom configurés (ex : impression sur mesure)
+  window.allCustomCards = [];
+
   if (cfg && cfg.slots && cfg.slots.length) {
     allArticles = [];
     cfg.slots.forEach(slot => {
       if (slot.hidden) return;
+      if (slot.type === 'custom') {
+        // Carte personnalisée (impression sur mesure, etc.)
+        window.allCustomCards.push(slot);
+        return;
+      }
       const art = pubArts.find(a => a.id === slot.articleId);
       if (!art) return;
       const a = { ...art };
@@ -387,7 +395,41 @@ function renderGrid() {
   if (activeFilter === 'all') addMesureCard(grid);
 }
 
-function addMesureCard(grid) {
+function addMesureCard(grid, customSlots) {
+  // Si des slots custom sont configurés dans le dashboard, les utiliser
+  const slots = customSlots || window.allCustomCards || [];
+  if (slots.length > 0) {
+    slots.forEach(slot => {
+      const card = document.createElement('a');
+      card.href = slot.customLink || '/devis.html';
+      card.className = 'product-card';
+      const dark = slot.customDark !== false; // dark par défaut
+      const custImg = slot.customImage || null;
+      const badge = slot.customBadge || 'Sur mesure';
+      const bStyle = slot.customBadgeStyle || 'white';
+      const badgeCSS = bStyle === 'white' ? 'background:#fff;color:#111' : 'background:#111;color:#fff';
+
+      const imgHtml = custImg
+        ? `<img src="${custImg}" alt="${slot.customLabel || 'Sur mesure'}" style="width:100%;height:100%;object-fit:cover;display:block">`
+        : `<div class="product-img-placeholder" style="${dark ? 'background:#111;color:rgba(255,255,255,.2);flex-direction:column;gap:12px' : ''}">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 3L3 11v18l17 8 17-8V11L20 3z" stroke="currentColor" stroke-width="1.4"/><path d="M20 3v26M3 11l17 8M37 11l-17 8" stroke="currentColor" stroke-width="1" opacity=".4"/></svg>
+            <span style="font-size:13px">Votre STL</span>
+          </div>`;
+
+      card.innerHTML =
+        `<div class="product-img" style="${!custImg && dark ? 'background:#111' : ''}">` +
+          imgHtml +
+          `<div class="product-badge white-badge" style="${badgeCSS}">${badge}</div>` +
+        '</div>' +
+        `<div class="product-name">${slot.customLabel || 'Impression sur mesure'}</div>` +
+        `<div class="product-tagline">${slot.customSub || 'Votre fichier STL · FDM ou résine · Prix instantané'}</div>` +
+        `<div class="product-price">${slot.customPrice || 'Prix calculé en ligne'}</div>`;
+      grid.appendChild(card);
+    });
+    return;
+  }
+
+  // Fallback hardcodé si aucun slot custom configuré
   const card = document.createElement('a');
   card.href = '/devis.html';
   card.className = 'product-card';

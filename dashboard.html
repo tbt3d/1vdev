@@ -1706,8 +1706,10 @@ window.resetHp = () => { if(!confirm('Réinitialiser ?'))return; hpSlots=HP_DEF.
 // ── BOUTIQUE ──
 function syncBoutSlots(){
   const pub=arts.filter(a=>a.status==='published');
+  // Ajouter les articles publiés qui ne sont pas encore dans les slots
   pub.forEach(a=>{ if(!boutSlots.find(s=>s.articleId===a.id)) boutSlots.push({type:'article',articleId:a.id,overrideBadge:a.badge||'',overrideBadgeStyle:'black',overridePrice:'',overrideFrom:true,hidden:false}); });
-  boutSlots=boutSlots.filter(s=>arts.find(a=>a.id===s.articleId));
+  // NE PAS supprimer les slots custom (type='custom') — garder seulement les slots article valides + tous les custom
+  boutSlots=boutSlots.filter(s=>s.type==='custom' || arts.find(a=>a.id===s.articleId));
 }
 window.loadBout = async () => {
   const sv = await fbGetConfig('boutique');

@@ -365,17 +365,22 @@ async function buildProductsGrid() {
 
       } else {
         // Carte personnalisée (ex : impression sur mesure)
-        const dark  = slot.customDark;
-        const badge = slot.customBadge;
-        const bStyle = slot.customBadgeStyle || 'white';
-        const link  = slot.customLink || '/devis.html';
+        const dark     = slot.customDark;
+        const badge    = slot.customBadge;
+        const bStyle   = slot.customBadgeStyle || 'white';
+        const link     = slot.customLink || '/devis.html';
+        const custImg  = slot.customImage || null;
 
-        return `<a href="${link}" class="product-card">
-          <div class="product-card-img" style="${dark?'background:#111':''}">
-            <div class="product-card-img-placeholder" style="${dark?'background:#111;color:rgba(255,255,255,.3);flex-direction:column;gap:10px':''}">
+        const imgContent = custImg
+          ? `<img src="${custImg}" alt="${slot.customLabel || 'Sur mesure'}" style="width:100%;height:100%;object-fit:cover">`
+          : `<div class="product-card-img-placeholder" style="${dark?'background:#111;color:rgba(255,255,255,.3);flex-direction:column;gap:10px':''}">
               ${dark ? `<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 4L4 12v16l16 8 16-8V12L20 4z" stroke="currentColor" stroke-width="1.5"/></svg>` : ''}
               ${slot.customLabel || ''}
-            </div>
+            </div>`;
+
+        return `<a href="${link}" class="product-card">
+          <div class="product-card-img" style="${!custImg && dark?'background:#111':''}">
+            ${imgContent}
             ${badge ? `<div class="product-badge ${bStyle==='white'?'white':''}" style="${bStyle==='white'?'background:#fff;color:#111':'background:#111;color:#fff'}">${badge}</div>` : ''}
           </div>
           <div class="product-name">${slot.customLabel || ''}</div>
