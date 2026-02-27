@@ -3508,7 +3508,8 @@ function buildFactureHtml(c, factureNum, dateStr, clientName, itemsRows, totalsH
 }
 
 // Génère le HTML de l'email de confirmation
-function buildEmailHtml(c, factureNum, dateStr, clientName, itemsRows, totalsHtml, total, logoB64, factureUrl) {
+function buildEmailHtml(c, factureNum, dateStr, clientName, itemsRows, totalsHtml, total, factureUrl) {
+  const logoUrl = 'https://tbt3d.fr/image/ChatGPT%20Image%2030%20juin%202025%2C%2014_57_42-Photoroom%20(1).png';
   return `<!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Confirmation commande ${factureNum}</title></head>
@@ -3519,7 +3520,7 @@ function buildEmailHtml(c, factureNum, dateStr, clientName, itemsRows, totalsHtm
   <!-- HEADER -->
   <div style="background:linear-gradient(135deg,#ff6b35 0%,#e8521f 100%);padding:32px 36px;display:flex;align-items:center;gap:18px">
     <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:8px;flex-shrink:0">
-      <img src="${logoB64}" alt="TBT3D" style="height:52px;width:auto;display:block;border-radius:6px;background:#fff">
+      <img src="https://tbt3d.fr/image/ChatGPT%20Image%2030%20juin%202025%2C%2014_57_42-Photoroom%20(1).png" alt="TBT3D" style="height:52px;width:auto;display:block;border-radius:6px;background:#fff">
     </div>
     <div>
       <div style="color:#fff;font-size:22px;font-weight:800;letter-spacing:-.01em;line-height:1.2">Merci pour votre commande !</div>
@@ -3609,7 +3610,7 @@ function buildEmailHtml(c, factureNum, dateStr, clientName, itemsRows, totalsHtm
 
   <!-- FOOTER -->
   <div style="background:#111;padding:24px 36px;text-align:center">
-    <img src="${logoB64}" alt="TBT3D" style="height:36px;width:auto;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto">
+    <img src="https://tbt3d.fr/image/ChatGPT%20Image%2030%20juin%202025%2C%2014_57_42-Photoroom%20(1).png" alt="TBT3D" style="height:36px;width:auto;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto">
     <div style="font-size:12px;color:#aaa;line-height:2">
       TBT3D · Fabrication additive artisanale · Lambersart, France
     </div>
@@ -3765,7 +3766,7 @@ window.sendConfirmationEmail = async (c) => {
   }
 
   // ── 2. Construire et envoyer l'email ──
-  const emailHtml = buildEmailHtml(c, factureNum, dateStr, clientName, emailItemsRows, emailTotalsHtml, total, logoB64, factureUrl);
+  const emailHtml = buildEmailHtml(c, factureNum, dateStr, clientName, emailItemsRows, emailTotalsHtml, total, factureUrl);
 
   try {
     await emailjs.send(EMAILJS_SERVICE, EMAILJS_TPL_CLIENT_CONF, {
