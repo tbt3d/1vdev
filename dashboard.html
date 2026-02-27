@@ -3689,17 +3689,13 @@ window.sendConfirmationEmail = async (c) => {
     ${_ts.shipping!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Frais de livraison</span><span>${_ts.shipping.toFixed(2)} €</span></div>`:''}
   ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${total.toFixed(2)} €</span></div>`;
 
-  toast('Génération de la facture PDF…');
-
-  // ── 1. Générer le PDF via html2pdf, l'uploader sur Firebase Storage ──
-  let factureUrl = c.factureUrl || null; // réutiliser si déjà générée
+  // ── 1. Préparer les données HTML ──
+  let factureUrl = c.factureUrl || null;
   let factureHtml = c.factureHtml || null;
   let blHtml = c.blHtml || null;
 
-  // Générer le HTML de la facture et du BL
   factureHtml = buildFactureHtml(c, factureNum, dateStr, clientName, factureItemsRows, factureTotalsHtml, total, logoB64);
 
-  // Générer HTML du BL (on réutilise le même système)
   const _sortedBL = [..._allCommandes].sort((a,b)=>{
     const ta=a.paidAt?.seconds?a.paidAt.seconds*1000:(a.paidAt||0);
     const tb=b.paidAt?.seconds?b.paidAt.seconds*1000:(b.paidAt||0);
@@ -3708,64 +3704,15 @@ window.sendConfirmationEmail = async (c) => {
   const _blIndex = _sortedBL.findIndex(x=>x._id===c._id);
   const blNum = 'BL-' + date.getFullYear() + '-' + String(_blIndex>=0?_blIndex+1:1).padStart(4,'0');
 
-  // Sauvegarder HTML dans Firestore maintenant (avant upload PDF)
+  // Sauvegarder HTML Firestore
   try {
-    await updateDoc(doc(db,'commandes',c._id), {
-      factureNum,
-      factureHtml,
-      blNum,
-      htmlSavedAt: new Date(),
-    });
+    await updateDoc(doc(db,'commandes',c._id), { factureNum, factureHtml, blNum, htmlSavedAt: new Date() });
     const idx = _allCommandes.findIndex(x=>x._id===c._id);
     if(idx!==-1){ _allCommandes[idx].factureHtml=factureHtml; _allCommandes[idx].blNum=blNum; }
-    console.log('HTML sauvegardé dans Firestore ✓');
   } catch(e){ console.warn('Erreur sauvegarde HTML Firestore:', e); }
 
-  // Générer PDF avec html2pdf
-  try {
-    if(typeof html2pdf === 'undefined') {
-      // Charger html2pdf dynamiquement
-      await new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-        s.onload = resolve; s.onerror = reject;
-        document.head.appendChild(s);
-      });
-    }
-    toast('Conversion en PDF…');
-    // Créer un div temporaire pour html2pdf
-    const tmpDiv = document.createElement('div');
-    tmpDiv.innerHTML = factureHtml;
-    tmpDiv.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff';
-    document.body.appendChild(tmpDiv);
-
-    const pdfBlob = await html2pdf().set({
-      margin: 0,
-      filename: factureNum + '.pdf',
-      image: { type: 'jpeg', quality: 0.92 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: 'avoid-all' }
-    }).from(tmpDiv).outputPdf('blob');
-    document.body.removeChild(tmpDiv);
-
-    toast('Upload sur Firebase Storage…');
-    // Upload sur Firebase Storage
-    const pdfRef = storageRef(storage, 'factures/' + c._id + '/' + factureNum + '.pdf');
-    await uploadBytes(pdfRef, pdfBlob, { contentType: 'application/pdf' });
-    factureUrl = await getDownloadURL(pdfRef);
-
-    // Mettre à jour Firestore avec l'URL du PDF
-    await updateDoc(doc(db,'commandes',c._id), { factureUrl, factureNum });
-    const idx2 = _allCommandes.findIndex(x=>x._id===c._id);
-    if(idx2!==-1) _allCommandes[idx2].factureUrl = factureUrl;
-    console.log('PDF uploadé ✓', factureUrl);
-  } catch(e) {
-    console.warn('Erreur génération/upload PDF (l\'email sera envoyé sans lien PDF):', e);
-    toast('PDF non disponible, envoi email sans lien…');
-  }
-
-  // ── 2. Construire et envoyer l'email ──
+  // ── 2. Envoyer l'email EN PREMIER (sans attendre le PDF) ──
+  toast('Envoi de l\'email de confirmation…');
   const emailHtml = buildEmailHtml(c, factureNum, dateStr, clientName, emailItemsRows, emailTotalsHtml, total, factureUrl);
 
   try {
@@ -3787,17 +3734,72 @@ window.sendConfirmationEmail = async (c) => {
     const idx3 = _allCommandes.findIndex(x=>x._id===c._id);
     if(idx3!==-1) _allCommandes[idx3].confirmationEmailSent = true;
 
-    toast('✓ Email envoyé à ' + email + (factureUrl ? ' avec lien facture PDF' : ''));
+    toast('✓ Email envoyé à ' + email);
 
     // Rafraîchir le modal
-    const updatedC = _allCommandes.find(x=>x._id===c._id);
-    if(updatedC && document.getElementById('cmdModal').classList.contains('open')) {
-      document.getElementById('cmdModalBody').innerHTML = buildCmdModalBody(updatedC);
+    const updatedC0 = _allCommandes.find(x=>x._id===c._id);
+    if(updatedC0 && document.getElementById('cmdModal').classList.contains('open')) {
+      document.getElementById('cmdModalBody').innerHTML = buildCmdModalBody(updatedC0);
     }
   } catch(e) {
     toast('Erreur envoi email : ' + e.message, true);
-    console.error(e);
+    console.error('EmailJS error:', e);
+    return; // Stop ici si l'email échoue
   }
+
+  // ── 3. Générer le PDF en arrière-plan (n'empêche pas l'email) ──
+  (async () => {
+    try {
+      if(typeof html2pdf === 'undefined') {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+          s.onload = resolve; s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+
+      // Div visible mais masqué (html2canvas ne gèle pas)
+      const tmpDiv = document.createElement('div');
+      const bodyMatch = factureHtml.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+      tmpDiv.innerHTML = bodyMatch ? bodyMatch[1] : factureHtml;
+      tmpDiv.style.cssText = 'position:absolute;left:0;top:0;width:794px;background:#fff;z-index:-1;visibility:hidden';
+      document.body.appendChild(tmpDiv);
+
+      const pdfBlob = await Promise.race([
+        html2pdf().set({
+          margin: 0,
+          filename: factureNum + '.pdf',
+          image: { type: 'jpeg', quality: 0.92 },
+          html2canvas: { scale: 2, useCORS: true, logging: false, width: 794 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: 'avoid-all' }
+        }).from(tmpDiv).outputPdf('blob'),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout PDF 30s')), 30000))
+      ]);
+
+      if(document.body.contains(tmpDiv)) document.body.removeChild(tmpDiv);
+
+      const pdfRef = storageRef(storage, 'factures/' + c._id + '/' + factureNum + '.pdf');
+      await uploadBytes(pdfRef, pdfBlob, { contentType: 'application/pdf' });
+      factureUrl = await getDownloadURL(pdfRef);
+
+      await updateDoc(doc(db,'commandes',c._id), { factureUrl, factureNum });
+      const idx2 = _allCommandes.findIndex(x=>x._id===c._id);
+      if(idx2!==-1) _allCommandes[idx2].factureUrl = factureUrl;
+
+      toast('✓ Facture PDF disponible');
+      console.log('PDF uploadé ✓', factureUrl);
+
+      // Rafraîchir le modal si encore ouvert
+      const updatedC = _allCommandes.find(x=>x._id===c._id);
+      if(updatedC && document.getElementById('cmdModal').classList.contains('open')) {
+        document.getElementById('cmdModalBody').innerHTML = buildCmdModalBody(updatedC);
+      }
+    } catch(e) {
+      console.warn('PDF non généré (email déjà envoyé avec succès):', e.message);
+    }
+  })();
 };
 // ────────────────────────────────────────────────────────────────────────────
 
