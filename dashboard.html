@@ -3524,8 +3524,7 @@ function buildFactureHtml(c, factureNum, dateStr, clientName, itemsRows, totalsH
   <!-- Mention légale -->
   <div style="margin-top:40px;padding-top:20px;border-top:1px solid #e8e8e8;font-size:10px;color:#aaa;line-height:1.8;text-align:center">
     Facture acquittée — Paiement reçu le ${dateStr}<br>
-    TBT3D — Fabrication artisanale à Lambersart · tbt3d.fr<br>
-    TVA non applicable selon article 293B du CGI (à adapter selon votre régime)
+    TBT3D — Fabrication artisanale à Lambersart · tbt3d.fr
   </div>
 </div>
 </body></html>`;
@@ -3546,8 +3545,8 @@ function buildEmailHtml(c, factureNum, dateStr, clientName, itemsRows, totalsHtm
 <div style="max-width:580px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08)">
 
   <!-- Header -->
-  <div style="background:#111;padding:20px 32px;text-align:center">
-    <img src="https://tbt3d.fr/image/ChatGPT%20Image%2030%20juin%202025%2C%2014_57_42-Photoroom%20(1).png" alt="TBT3D" style="height:40px;width:auto;max-width:160px;display:inline-block">
+  <div style="background:#111;padding:16px 32px;text-align:center">
+    <span style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em">TBT<span style="color:#ff6b35">3D</span></span>
   </div>
 
   <!-- Body -->
@@ -3586,8 +3585,8 @@ function buildEmailHtml(c, factureNum, dateStr, clientName, itemsRows, totalsHtm
 
       <!-- Bouton télécharger facture -->
       <tr><td style="padding:0 0 24px;text-align:center">
-        <a href="mailto:tbt203.contact@gmail.com?subject=Facture%20${factureNum}&body=Bonjour%2C%20je%20souhaite%20t%C3%A9l%C3%A9charger%20la%20facture%20de%20ma%20commande%20${factureNum}." style="display:inline-block;background:#ff6b35;color:#fff;text-decoration:none;padding:13px 32px;border-radius:8px;font-size:13px;font-weight:700;letter-spacing:.02em">⬇ Télécharger ma facture</a>
-        <p style="margin:10px 0 0;font-size:11px;color:#aaa">Ou <a href="mailto:tbt203.contact@gmail.com?subject=Facture%20${factureNum}" style="color:#ff6b35;text-decoration:none">cliquez ici</a> pour demander votre facture par email · Réf. <strong>${factureNum}</strong></p>
+        <a href="https://tbt3d.fr/facture.html?id=${c._id}" style="display:inline-block;background:#ff6b35;color:#fff;text-decoration:none;padding:13px 32px;border-radius:8px;font-size:13px;font-weight:700;letter-spacing:.02em">⬇ Télécharger ma facture</a>
+        <p style="margin:10px 0 0;font-size:11px;color:#aaa">Lien direct vers votre facture · Réf. <strong>${factureNum}</strong></p>
       </td></tr>
 
       <!-- Infos -->
@@ -4115,8 +4114,7 @@ window.printFacture = () => {
 
   <div class="legal">
     Facture acquittée — Paiement reçu le ${dateStr}<br>
-    TBT3D — Fabrication artisanale à Lambersart · tbt3d.fr<br>
-    TVA non applicable selon article 293B du CGI (à adapter selon votre régime)
+    TBT3D — Fabrication artisanale à Lambersart · tbt3d.fr
   </div>
 
   <div class="no-print" style="text-align:center;margin-top:32px">
