@@ -809,9 +809,9 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     <!-- Breakdown -->
     <div class="bk" id="bk">
       <div class="bk-row" id="rFab"><span>Fabrication</span><span>—</span></div>
-      <div class="bk-row" id="rTVA"><span>TVA 20%</span><span>—</span></div>
-      <div class="bk-row" id="rPort"><span>Frais de port</span><span>—</span></div>
-      <div class="bk-row" id="rTot"><span>Total TTC</span><span>—</span></div>
+      <div class="bk-row" id="rTVA" style="display:none"><span>TVA 20%</span><span>—</span></div>
+      <div class="bk-row" id="rPort" style="display:none"><span>Frais de port</span><span>—</span></div>
+      <div class="bk-row" id="rTot"><span>Total HT</span><span>—</span></div>
     </div>
 
     <!-- Bouton commander -->
@@ -1236,7 +1236,7 @@ function price() {
   R('rFab','Fabrication ('+fabLabel+')',(totHT).toFixed(2)+' € HT');
   R('rTVA','TVA 20%',tva.toFixed(2)+' €');
   R('rPort','Frais de port'+((massAffichee*qty)>500?' · colis':' · relais'),port.toFixed(2)+' €');
-  R('rTot','Total TTC'+(qty>1?' (×'+qty+')':''),ttc.toFixed(2)+' €');
+  R('rTot','Total HT'+(qty>1?' (×'+qty+')':')'),(totHT*qty).toFixed(2)+' €');
   document.getElementById('note').textContent='Estimation indicative — prix confirmé avant tout lancement.';
   if (!S._slaBlocked) {
     document.getElementById('btnOrder').disabled=false;

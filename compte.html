@@ -885,15 +885,21 @@ window.doRegister = async () => {
   const prenom=document.getElementById('rPrenom').value.trim(), nom=document.getElementById('rNom').value.trim();
   const email=document.getElementById('rEmail').value.trim(), pwd=document.getElementById('rPwd').value, pwd2=document.getElementById('rPwd2').value;
   const err=document.getElementById('registerErr'); err.style.display='none';
+  const btn=document.querySelector('#tabRegister .btn-auth');
+  if(!email){err.textContent='Veuillez entrer votre email.';err.style.display='block';return;}
   if(!prenom){err.textContent='Veuillez entrer votre prenom.';err.style.display='block';return;}
   if(pwd!==pwd2){err.textContent='Les mots de passe ne correspondent pas.';err.style.display='block';return;}
   if(pwd.length<8){err.textContent='Mot de passe trop court (min. 8 caracteres).';err.style.display='block';return;}
+  if(btn) btn.textContent='Création en cours…';
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, pwd);
-    await updateProfile(cred.user, {displayName: (prenom+' '+nom).trim()});
-    await setDoc(doc(db,'users',cred.user.uid),{prenom,nom,email,role:'user',createdAt:new Date().toISOString()});
-    await cred.user.reload();
-  } catch(e){err.textContent=errFr(e);err.style.display='block';}
+    try { await updateProfile(cred.user, {displayName: (prenom+' '+nom).trim()}); } catch(_){}
+    try { await setDoc(doc(db,'users',cred.user.uid),{prenom,nom,email,role:'user',createdAt:new Date().toISOString()}); } catch(_){}
+    // onAuthStateChanged se déclenche automatiquement et affiche le dashboard
+  } catch(e){
+    err.textContent=errFr(e);err.style.display='block';
+    if(btn) btn.textContent='Créer mon compte →';
+  }
 };
 window.doGoogle = async () => {
   try {

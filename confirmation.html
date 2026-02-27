@@ -208,11 +208,11 @@
 
     <!-- Bouton facture PDF (affiché dynamiquement) -->
     <div id="factureBtnWrap" style="display:none;margin-top:20px">
-      <a id="facturePdfBtn" href="#" target="_blank"
+      <a id="facturePdfBtn" href="/compte.html" target="_blank"
         style="display:flex;align-items:center;justify-content:center;gap:10px;padding:15px 28px;background:#111;color:#fff;text-decoration:none;border-radius:50px;font-family:var(--font);font-size:14px;font-weight:600;transition:opacity .2s;width:100%"
         onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Télécharger ma facture PDF
+        <span id="facturePdfBtnLabel">Accéder à ma facture</span>
       </a>
     </div>
 
@@ -417,7 +417,7 @@ function displayConfirmation(data, orderId, fbData) {
           ${item.variant ? `<div class="item-detail">${item.variant}</div>` : ''}
           <div class="item-detail">Qté : ${item.qty || 1}</div>
         </div>
-        <div class="item-price">${(parseFloat(item.price||0) * parseInt(item.qty||1)).toFixed(2)} €</div>
+        <div class="item-price">${(parseFloat(item.price||0) * parseInt(item.qty||1)).toFixed(2)} € HT</div>
       </div>
     `).join('');
   } else if (data.lineItems && data.lineItems.length > 0) {
@@ -462,11 +462,14 @@ function displayConfirmation(data, orderId, fbData) {
   window.history.replaceState({}, '', '/confirmation.html');
 
   // ── Bouton facture PDF ──
-  // Si le PDF est déjà dans fbData, l'afficher immédiatement
+  // Afficher le bouton immédiatement (lien vers compte.html par défaut)
+  _showFactureBtn('/compte.html');
+
   if (fbData?.factureUrl) {
+    // PDF déjà généré → mettre le lien direct
     _showFactureBtn(fbData.factureUrl);
   } else if (window._confirmedFirestoreId) {
-    // Polling toutes les 6s pendant 60s (le dashboard génère le PDF en tâche de fond)
+    // Polling toutes les 6s pendant 90s pour détecter la génération du PDF
     let _pollCount = 0;
     const _pollInterval = setInterval(async () => {
       _pollCount++;
@@ -475,7 +478,7 @@ function displayConfirmation(data, orderId, fbData) {
         const url = snap.data()?.factureUrl;
         if (url) { clearInterval(_pollInterval); _showFactureBtn(url); }
       } catch(e) {}
-      if (_pollCount >= 10) clearInterval(_pollInterval);
+      if (_pollCount >= 15) clearInterval(_pollInterval); // 90s max
     }, 6000);
   }
 
@@ -488,7 +491,18 @@ function displayConfirmation(data, orderId, fbData) {
 
 function _showFactureBtn(url) {
   const btn = document.getElementById('facturePdfBtn');
-  if (btn) { btn.href = url; document.getElementById('factureBtnWrap').style.display = 'block'; }
+  const wrap = document.getElementById('factureBtnWrap');
+  const lbl = document.getElementById('facturePdfBtnLabel');
+  if (btn) {
+    if (url && url !== '/compte.html') {
+      btn.href = url;
+      btn.setAttribute('download', '');
+      if (lbl) lbl.textContent = 'Télécharger ma facture PDF';
+    } else {
+      btn.href = '/compte.html';
+    }
+    wrap.style.display = 'block';
+  }
 }
 
 function showError(msg) {
