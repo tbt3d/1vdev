@@ -3194,7 +3194,7 @@ function renderCommandesList(commandes){
       </div>
       <div class="cmd-info">
         <div class="cmd-title">${esc(clientName)}${has3d?' <span style="font-size:9px;background:rgba(155,114,255,.12);color:var(--purple);border:1px solid rgba(155,114,255,.25);padding:2px 7px;border-radius:10px;font-family:var(--mono);font-weight:700;letter-spacing:.04em;margin-left:4px">IMPRESSION 3D</span>':''}</div>
-        <div class="cmd-sub">${itemCount} article${itemCount>1?'s':''} · ${esc(c.source||'boutique')} · #${(c._id||'').slice(-6).toUpperCase()}</div>
+        <div class="cmd-sub">${itemCount} article${itemCount>1?'s':''} · ${esc(c.source||'boutique')} · #${(c._id||'').slice(-8).toUpperCase()}</div>
       </div>
       <div class="cmd-right">
         <div class="cmd-price">${getTotal(c).toFixed(2)} €</div>
@@ -3221,7 +3221,10 @@ window.openCmdModal = (id) => {
     : `<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" style="width:22px;height:22px"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>`;
 
   document.getElementById('cmdModalTitle').textContent = (c.client?.name || c.customerName || c.client?.email || 'Commande anonyme') + ' — ' + getTotal(c).toFixed(2) + ' €';
-  document.getElementById('cmdModalSub').textContent = '#' + id.slice(-8).toUpperCase() + ' · ' + fmtCmdDate(c.createdAt) + ' · ' + (c.source||'boutique');
+  const refParts = ['#' + id.slice(-8).toUpperCase(), fmtCmdDate(c.createdAt), c.source||'boutique'];
+  if(c.factureNum) refParts.push(c.factureNum);
+  if(c.blNum) refParts.push(c.blNum);
+  document.getElementById('cmdModalSub').textContent = refParts.join(' · ');
 
   // Status select
   const sel = document.getElementById('cmdModalStatus');
@@ -3237,6 +3240,16 @@ window.openCmdModal = (id) => {
 
 function buildCmdModalBody(c){
   let html = '';
+
+  // ── RÉFÉRENCES ──
+  html += `<div class="cmd-section-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg> Références</div>`;
+  html += `<div class="cmd-detail-grid" style="margin-bottom:20px">`;
+  html += `<div class="cmd-detail-box"><label>ID Firebase</label><span style="font-family:var(--mono);font-size:11px;cursor:pointer" onclick="navigator.clipboard.writeText('${esc(c._id)}').then(()=>toast('ID copié ✓'))" title="Cliquer pour copier">${esc(c._id||'—')}</span></div>`;
+  html += `<div class="cmd-detail-box"><label>Réf courte</label><span style="font-family:var(--mono);font-weight:700">#${(c._id||'').slice(-8).toUpperCase()}</span></div>`;
+  html += `<div class="cmd-detail-box"><label>N° Facture</label><span style="font-family:var(--mono);color:var(--accent);font-weight:700">${esc(c.factureNum||'—')}</span></div>`;
+  html += `<div class="cmd-detail-box"><label>N° Bon de livraison</label><span style="font-family:var(--mono);color:var(--green);font-weight:700">${esc(c.blNum||'—')}</span></div>`;
+  if(c.orderId) html += `<div class="cmd-detail-box"><label>ID Stripe</label><span style="font-family:var(--mono);font-size:10px;cursor:pointer" onclick="navigator.clipboard.writeText('${esc(c.orderId)}').then(()=>toast('ID Stripe copié ✓'))" title="Cliquer pour copier">${esc(c.orderId)}</span></div>`;
+  html += `</div>`;
 
   // ── CLIENT ──
   html += `<div class="cmd-section-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Informations client</div>`;

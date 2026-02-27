@@ -171,12 +171,13 @@
       <p>Votre paiement a été confirmé. Votre lampe est maintenant en cours de fabrication dans notre atelier à Lille.</p>
     </div>
 
-    <!-- Numéro de commande + Client -->
+    <!-- Références + Client -->
     <div class="conf-grid">
       <div class="card">
-        <div class="card-label">Numéro de commande</div>
+        <div class="card-label">Références</div>
         <div class="order-id" id="orderId">—</div>
         <div class="order-date" id="orderDate">—</div>
+        <div id="refDetails" style="margin-top:10px;display:flex;flex-direction:column;gap:5px"></div>
       </div>
       <div class="card">
         <div class="card-label">Client</div>
@@ -206,14 +207,14 @@
       <span>Fabrication artisanale — <strong>Délai de livraison : 7 à 30 jours</strong> depuis notre atelier lillois.</span>
     </div>
 
-    <!-- Bouton facture PDF (affiché dynamiquement) -->
+    <!-- Bouton téléchargement facture PDF -->
     <div id="factureBtnWrap" style="display:none;margin-top:20px">
-      <a id="facturePdfBtn" href="/compte.html" target="_blank"
-        style="display:flex;align-items:center;justify-content:center;gap:10px;padding:15px 28px;background:#111;color:#fff;text-decoration:none;border-radius:50px;font-family:var(--font);font-size:14px;font-weight:600;transition:opacity .2s;width:100%"
+      <button id="facturePdfBtn" onclick="downloadFacture()"
+        style="display:flex;align-items:center;justify-content:center;gap:10px;padding:15px 28px;background:#111;color:#fff;border:none;border-radius:50px;font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s;width:100%"
         onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <span id="facturePdfBtnLabel">Accéder à ma facture</span>
-      </a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span id="facturePdfBtnLabel">Télécharger ma facture PDF</span>
+      </button>
     </div>
 
     <!-- Bannière compte (si pas connecté) -->
@@ -378,6 +379,27 @@ function displayConfirmation(data, orderId, fbData) {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
+  // ── Références (shortId, factureNum, blNum) ──
+  window._factureDirectUrl = null;
+  window._factureHtml     = null;
+  window._factureNum      = null;
+
+  function _updateRefDetails(d) {
+    const el = document.getElementById('refDetails');
+    if (!el) return;
+    let html = '';
+    const shortId = (window._confirmedFirestoreId || orderId || '').slice(-8).toUpperCase();
+    if (shortId) html += `<div style="font-size:11px;color:var(--muted)">Réf. <span style="font-family:'Courier New',monospace;font-weight:700;color:var(--text)">#${shortId}</span></div>`;
+    if (d?.factureNum) html += `<div style="font-size:11px;color:var(--muted)">Facture <span style="font-family:'Courier New',monospace;font-weight:700;color:var(--green)">${d.factureNum}</span></div>`;
+    if (d?.blNum)      html += `<div style="font-size:11px;color:var(--muted)">Bon de livraison <span style="font-family:'Courier New',monospace;font-weight:700;color:var(--text)">${d.blNum}</span></div>`;
+    el.innerHTML = html;
+    if (d?.factureNum) window._factureNum = d.factureNum;
+    if (d?.factureUrl) window._factureDirectUrl = d.factureUrl;
+    if (d?.factureHtml) window._factureHtml = d.factureHtml;
+  }
+  _updateRefDetails(fbData);
+  _showFactureBtn(fbData?.factureUrl || fbData?.factureHtml || null);
+
   // Données client : priorité Firebase (adresse, téléphone saisis dans le form)
   const fb = fbData?.client || {};
   const name    = fb.name    || data.customerName  || '';
@@ -458,50 +480,109 @@ function displayConfirmation(data, orderId, fbData) {
     <div class="total-row main"><span>Total payé</span><strong>${totalTTC.toFixed(2)} €</strong></div>
   `;
 
-  // Nettoyer l'URL (supprimer session_id)
+  // Nettoyer l'URL
   window.history.replaceState({}, '', '/confirmation.html');
 
-  // ── Bouton facture PDF ──
-  // Afficher le bouton immédiatement (lien vers compte.html par défaut)
-  _showFactureBtn('/compte.html');
-
-  if (fbData?.factureUrl) {
-    // PDF déjà généré → mettre le lien direct
-    _showFactureBtn(fbData.factureUrl);
-  } else if (window._confirmedFirestoreId) {
-    // Polling toutes les 6s pendant 90s pour détecter la génération du PDF
-    let _pollCount = 0;
-    const _pollInterval = setInterval(async () => {
-      _pollCount++;
+  // ── Polling unifié : refs + facture ──
+  if (window._confirmedFirestoreId) {
+    let _poll = 0;
+    const _interval = setInterval(async () => {
+      _poll++;
       try {
         const snap = await getDoc(doc(db, 'commandes', window._confirmedFirestoreId));
-        const url = snap.data()?.factureUrl;
-        if (url) { clearInterval(_pollInterval); _showFactureBtn(url); }
+        const d = snap.data();
+        _updateRefDetails(d);
+        if (d?.factureUrl || d?.factureHtml) _showFactureBtn(d.factureUrl || d.factureHtml);
+        if (d?.factureNum && d?.blNum && (d?.factureUrl || d?.factureHtml)) clearInterval(_interval);
       } catch(e) {}
-      if (_pollCount >= 15) clearInterval(_pollInterval); // 90s max
-    }, 6000);
+      if (_poll >= 20) clearInterval(_interval);
+    }, 5000);
   }
 
   // ── Bannière compte ──
   onAuthStateChanged(auth, user => {
     if (!user) document.getElementById('accountBanner').style.display = 'block';
-    // Si connecté → pas besoin de la bannière, il a déjà son espace
   });
 }
 
-function _showFactureBtn(url) {
+function _showFactureBtn(urlOrHtml) {
+  if (urlOrHtml) {
+    if (urlOrHtml.startsWith('http')) window._factureDirectUrl = urlOrHtml;
+    else window._factureHtml = urlOrHtml;
+  }
+  document.getElementById('factureBtnWrap').style.display = 'block';
+}
+
+window.downloadFacture = async function() {
   const btn = document.getElementById('facturePdfBtn');
-  const wrap = document.getElementById('factureBtnWrap');
   const lbl = document.getElementById('facturePdfBtnLabel');
-  if (btn) {
-    if (url && url !== '/compte.html') {
-      btn.href = url;
-      btn.setAttribute('download', '');
-      if (lbl) lbl.textContent = 'Télécharger ma facture PDF';
-    } else {
-      btn.href = '/compte.html';
+
+  // URL Firebase directe → téléchargement direct
+  if (window._factureDirectUrl) {
+    const a = document.createElement('a');
+    a.href = window._factureDirectUrl;
+    a.download = (window._factureNum || 'facture-tbt3d') + '.pdf';
+    a.target = '_blank';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    return;
+  }
+
+  // Sinon → générer PDF depuis HTML Firestore ou récap minimal
+  btn.disabled = true;
+  lbl.textContent = 'Génération en cours…';
+  try {
+    if (!window.html2pdf) {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
     }
-    wrap.style.display = 'block';
+    let htmlContent = window._factureHtml;
+    if (!htmlContent) {
+      const orderId  = document.getElementById('orderId')?.textContent || '';
+      const orderDate= document.getElementById('orderDate')?.textContent || '';
+      const custHtml = document.getElementById('customerInfo')?.innerHTML || '';
+      const itemsHtml= document.getElementById('itemsList')?.innerHTML || '';
+      const totalHtml= document.getElementById('totalRows')?.innerHTML || '';
+      htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+        <style>body{font-family:Inter,sans-serif;color:#111;padding:40px;font-size:13px;line-height:1.6}
+        .logo{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:32px}.logo span{color:#ff6b35}
+        h2{font-size:18px;font-weight:500;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #111}
+        .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e8e8e8;font-size:13px}
+        .row.main{font-weight:700;font-size:15px;border-top:2px solid #111;border-bottom:none;padding-top:12px;margin-top:4px}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px}
+        .label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:6px}
+        .val{font-size:14px}.ref{font-size:16px;font-weight:700;color:#16a34a;font-family:monospace}</style>
+      </head><body>
+        <div class="logo">TBT<span>3D</span></div>
+        <div class="grid">
+          <div><div class="label">Commande</div><div class="ref">${orderId}</div><div style="color:#888;font-size:12px">${orderDate}</div></div>
+          <div><div class="label">Client</div><div class="val">${custHtml}</div></div>
+        </div>
+        <h2>Articles</h2>${itemsHtml}
+        <div style="margin-top:20px">${totalHtml}</div>
+        <p style="margin-top:40px;font-size:11px;color:#888;border-top:1px solid #e8e8e8;padding-top:16px">TBT3D — Lambersart, France — tbt203.contact@gmail.com</p>
+      </body></html>`;
+    }
+    const container = document.createElement('div');
+    container.innerHTML = htmlContent;
+    container.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm';
+    document.body.appendChild(container);
+    await html2pdf().set({
+      margin: 0, filename: (window._factureNum || 'facture-tbt3d') + '.pdf',
+      image: { type: 'jpeg', quality: 0.97 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(container).save();
+    document.body.removeChild(container);
+    lbl.textContent = '✓ Facture téléchargée';
+    setTimeout(() => { lbl.textContent = 'Télécharger ma facture PDF'; btn.disabled = false; }, 3000);
+  } catch(e) {
+    console.error(e);
+    lbl.textContent = 'Erreur — réessayez';
+    btn.disabled = false;
   }
 }
 

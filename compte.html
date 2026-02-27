@@ -869,8 +869,18 @@ window.toggleMsg = (el) => el.classList.toggle('open');
 window.showPanel = (id, btn) => {
   document.querySelectorAll('.a-panel').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('on'));
-  document.getEle=='register' ? '' : 'none';
-  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('on',(i===0&&tab==='login')||(i===1&&tab==='register')));
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.add('on');
+  if (btn) btn.classList.add('on');
+};
+window.switchTab = (tab) => {
+  const tabLogin    = document.getElementById('tabLogin');
+  const tabRegister = document.getElementById('tabRegister');
+  if (tabLogin)    tabLogin.style.display    = tab === 'login'    ? '' : 'none';
+  if (tabRegister) tabRegister.style.display = tab === 'register' ? '' : 'none';
+  document.querySelectorAll('.auth-tab').forEach((t, i) => {
+    t.classList.toggle('on', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+  });
 };
 
 // ── Auth ──
