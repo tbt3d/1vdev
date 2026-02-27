@@ -258,8 +258,28 @@ async function loadData() {
   const arts = [];
   snap.forEach(d => arts.push({ ...d.data(), id: d.id }));
 
-  const cfgDoc = await getDoc(doc(db, 'config', 'boutique'));
+  // Charger les deux configs en parallèle
+  const [cfgDoc, hpDoc] = await Promise.all([
+    getDoc(doc(db, 'config', 'boutique')),
+    getDoc(doc(db, 'config', 'homepage'))
+  ]);
   const cfg = cfgDoc.exists() ? cfgDoc.data() : null;
+  const hpCfg = hpDoc.exists() ? hpDoc.data() : null;
+
+  // Récupérer les images des slots custom depuis homepage (source de vérité pour les images)
+  const hpCustomImages = {};
+  if (hpCfg && hpCfg.slots) {
+    hpCfg.slots.forEach(slot => {
+      if (slot.type === 'custom' && slot.customImage) {
+        // Indexer par label pour matcher avec les slots boutique
+        const key = slot.customLabel || 'default';
+        hpCustomImages[key] = slot.customImage;
+      }
+    });
+    // Aussi garder la première image custom disponible comme fallback
+    const firstCustom = hpCfg.slots.find(s => s.type === 'custom' && s.customImage);
+    if (firstCustom) hpCustomImages['_fallback'] = firstCustom.customImage;
+  }
 
   const pubArts = arts.filter(a => a.status === 'published');
 
@@ -271,7 +291,11 @@ async function loadData() {
     cfg.slots.forEach(slot => {
       if (slot.hidden) return;
       if (slot.type === 'custom') {
-        // Carte personnalisée (impression sur mesure, etc.)
+        // Récupérer l'image depuis homepage si elle n'est pas dans boutique
+        if (!slot.customImage) {
+          const key = slot.customLabel || 'default';
+          slot.customImage = hpCustomImages[key] || hpCustomImages['_fallback'] || null;
+        }
         window.allCustomCards.push(slot);
         return;
       }
@@ -285,6 +309,14 @@ async function loadData() {
     });
     pubArts.forEach(a => { if (!allArticles.find(r => r.id === a.id)) allArticles.push(a); });
   } else {
+    // Pas de config boutique → utiliser les slots custom de homepage comme fallback
+    if (hpCfg && hpCfg.slots) {
+      hpCfg.slots.forEach(slot => {
+        if (slot.type === 'custom' && !slot.hidden) {
+          window.allCustomCards.push(slot);
+        }
+      });
+    }
     allArticles = pubArts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
 
