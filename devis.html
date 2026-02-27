@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="/cart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -591,6 +592,13 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .modal-trust svg { width: 11px; height: 11px; opacity: .7; }
 
 /* ─── FOOTER ─── */
+
+/* ── TOAST ───────────────────────────────────────────────────────── */
+#cartToast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px); background: #111; color: #fff; padding: 12px 20px; border-radius: 50px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 9px; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; z-index: 9999; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+#cartToast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+#cartToast svg { width: 15px; height: 15px; flex-shrink: 0; }
+#cartToast a { color: #a5f3b4; text-decoration: underline; margin-left: 8px; font-weight: 600; }
+
 #footer { background: #111; color: rgba(255,255,255,.7); margin-top: 0; }
 .footer-inner { max-width: var(--max); margin: 0 auto; padding: 60px 32px 40px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
 @media(max-width:900px){ .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; } }
@@ -696,7 +704,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
           </svg>
         </div>
         <div class="drop-title">Déposez votre fichier STL ici</div>
-        <div class="drop-sub">Format .STL uniquement · Max 50 Mo</div>
+        <div class="drop-sub">Format .STL uniquement · Compression ZIP automatique si &gt; 50 Mo</div>
         <button class="drop-cta" onclick="event.stopPropagation();document.getElementById('fileInput').click()">Choisir un fichier</button>
       </div>
 
@@ -807,7 +815,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     </div>
 
     <!-- Bouton commander -->
-    <button class="btn-primary" id="btnOrder" disabled onclick="openOrderModal()">
+    <button class="btn-primary" id="btnOrder" disabled onclick="addDevisToCartAndPay()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px;flex-shrink:0"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
       Commander cette pièce
     </button>
@@ -925,6 +933,13 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 </div>
 
 <!-- ─── FOOTER ─── -->
+<!-- ── TOAST PANIER ── -->
+<div id="cartToast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="cartToastMsg">Article ajouté au panier</span>
+  <a href="/panier.html">Voir le panier →</a>
+</div>
+
 <footer id="footer">
   <div class="footer-inner">
     <div class="footer-brand">
@@ -949,7 +964,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#f7839583c5c7c4d994989983969483b7909a969e9bd994989a"><span class="__cf_email__" data-cfemail="86f2e4f2b4b6b5a8e5e9e8f2e7e5f2c6e1ebe7efeaa8e5e9eb">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
             <div class="footer-social">
@@ -968,7 +983,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── Navbar ────────────────────────────────────────────────────────────────
 document.querySelectorAll('.nav-links a').forEach(a => {
   if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
@@ -1231,6 +1246,48 @@ function price() {
 function R(id,l,v){ document.getElementById(id).innerHTML='<span>'+l+'</span><span>'+v+'</span>'; }
 
 // ── AJOUTER AU PANIER ────────────────────────────────────────────────────────
+// ── HELPER : upload STL vers Cloudinary (avec compression ZIP si > 50 Mo) ──────
+async function uploadStlToCloudinary(file, onProgress) {
+  const MAX_DIRECT = 50 * 1024 * 1024; // 50 Mo
+  let uploadFile = file;
+  let uploadName = file.name;
+
+  if (file.size > MAX_DIRECT) {
+    if (onProgress) onProgress('Compression ZIP…');
+    try {
+      const zip = new JSZip();
+      zip.file(file.name, file);
+      const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+      uploadFile = new File([blob], file.name.replace(/\.stl$/i, '.zip'), { type: 'application/zip' });
+      console.log(`✓ Compressé : ${(file.size/1024/1024).toFixed(1)} Mo → ${(uploadFile.size/1024/1024).toFixed(1)} Mo`);
+    } catch(e) {
+      console.warn('Compression échouée, envoi direct:', e);
+      uploadFile = file;
+      uploadName = file.name;
+    }
+  }
+
+  if (onProgress) onProgress('Upload fichier…');
+  const fd = new FormData();
+  fd.append('file', uploadFile, uploadName || uploadFile.name);
+  fd.append('upload_preset', 'umjs9csb');
+  fd.append('resource_type', 'raw');
+  fd.append('folder', 'stl');
+  const res = await fetch('https://api.cloudinary.com/v1_1/dfcrqwbee/raw/upload', { method: 'POST', body: fd });
+  const data = await res.json();
+  if (data.secure_url) return data.secure_url;
+  throw new Error(data.error?.message || 'Upload échoué');
+}
+
+// ── HELPER : toast panier ──────────────────────────────────────────────────
+function showCartToast(msg) {
+  const toast = document.getElementById('cartToast');
+  document.getElementById('cartToastMsg').textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
 async function addDevisToCart() {
   if (!S.vol || !S.file) return;
   const m   = TARIFS[S.tech].materiaux[S.mat];
@@ -1241,24 +1298,17 @@ async function addDevisToCart() {
   const fillLabel = S.tech === 'fdm' ? ' · ' + S.fill + '% remplissage' : '';
   const variant   = techLabel + fillLabel + ' · Couleur ' + S.color;
 
-  // Upload STL sur Cloudinary avant d'ajouter au panier
+  // Upload STL sur Cloudinary (compression ZIP automatique si > 50 Mo)
   let stlUrl = null;
   let stlFileName = S.file.name;
+  const cartBtn = document.getElementById('btnAddCart');
+  cartBtn.disabled = true;
+  cartBtn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#111;border-radius:50%;animation:spin .6s linear infinite"></div> Upload…';
   try {
-    const btn = document.getElementById('btnAddCart');
-    btn.disabled = true;
-    btn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#111;border-radius:50%;animation:spin .6s linear infinite"></div> Upload…';
-    const fd = new FormData();
-    fd.append('file', S.file, S.file.name);
-    fd.append('upload_preset', 'umjs9csb');
-    fd.append('resource_type', 'raw');
-    fd.append('folder', 'stl');
-    const cloudRes = await fetch('https://api.cloudinary.com/v1_1/dfcrqwbee/raw/upload', { method: 'POST', body: fd });
-    const cloudData = await cloudRes.json();
-    if (cloudData.secure_url) {
-      stlUrl = cloudData.secure_url;
-      console.log('✓ STL uploadé :', stlUrl);
-    }
+    stlUrl = await uploadStlToCloudinary(S.file, (msg) => {
+      cartBtn.innerHTML = '<div style="width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#111;border-radius:50%;animation:spin .6s linear infinite"></div> ' + msg;
+    });
+    console.log('✓ STL uploadé :', stlUrl);
   } catch(e) {
     console.warn('STL upload failed, ajout au panier sans URL:', e);
   }
@@ -1281,17 +1331,72 @@ async function addDevisToCart() {
     qty:         S.qty,
   });
 
-  // Feedback bouton + redirection panier
+  // Feedback bouton — toast, pas de redirection
   const btn = document.getElementById('btnAddCart');
-  btn.disabled = true;
   btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Ajouté !';
   btn.style.borderColor = '#16a34a';
   btn.style.color = '#16a34a';
+  updateCartBadge();
 
-  // Redirection vers le panier après un court délai (pour voir le feedback)
+  // Toast notification
+  showCartToast('Article ajouté au panier !');
+
+  // Réactiver le bouton après 2s
   setTimeout(() => {
-    window.location.href = '/panier.html';
-  }, 600);
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px;flex-shrink:0"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Ajouter au panier';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }, 2000);
+}
+
+// ── COMMANDER = AJOUTER AU PANIER + REDIRECTION PANIER ────────────────────────
+async function addDevisToCartAndPay() {
+  if (!S.vol || !S.file) return;
+  const m = TARIFS[S.tech].materiaux[S.mat];
+  const ttc = parseFloat(document.getElementById('priceDisplay').textContent.replace(/[^0-9.]/g,''));
+  if (!ttc || isNaN(ttc)) return;
+
+  const techLabel = S.tech.toUpperCase() + ' · ' + m.label;
+  const fillLabel = S.tech === 'fdm' ? ' · ' + S.fill + '% remplissage' : '';
+  const variant   = techLabel + fillLabel + ' · Couleur ' + S.color;
+
+  const btn = document.getElementById('btnOrder');
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Upload…';
+
+  // Upload STL avec compression si > 50 Mo
+  let stlUrl = null;
+  try {
+    stlUrl = await uploadStlToCloudinary(S.file, (msg) => {
+      btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> ' + msg;
+    });
+  } catch(e) {
+    console.warn('Upload échoué, on continue quand même:', e);
+  }
+
+  btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Ajout au panier…';
+
+  // Ajouter au panier
+  TBTCart.add({
+    id:         'devis-' + Date.now(),
+    name:       'Impression sur mesure — ' + S.file.name,
+    price:      ttc,
+    oldPrice:   null,
+    image:      null,
+    variant:    variant,
+    isDynamic:  true,
+    paymentUrl: null,
+    stripePrice:null,
+    fileName:   S.file.name,
+    fileUrl:    stlUrl,
+    dims:       S.dims || null,
+    _note:      'Fichier : ' + S.file.name + ' | Dims : ' + (S.dims ? S.dims.x+'×'+S.dims.y+'×'+S.dims.z+' mm' : '?'),
+    qty:        S.qty,
+  });
+
+  // Redirection vers le panier
+  window.location.href = '/panier.html';
 }
 
 // ── BADGE PANIER ──────────────────────────────────────────────────────────────
@@ -1386,20 +1491,9 @@ async function saveDevisOrderToFirebase(orderData) {
     // 2. Uploader le fichier STL sur Cloudinary si présent
     if (S.file && S.file.name && S.file.name.toLowerCase().endsWith('.stl')) {
       try {
-        const fd = new FormData();
-        fd.append('file', S.file, S.file.name);
-        fd.append('upload_preset', 'umjs9csb');
-        fd.append('resource_type', 'raw');
-        fd.append('folder', 'stl');
-        const cloudRes = await fetch('https://api.cloudinary.com/v1_1/dfcrqwbee/raw/upload', { method: 'POST', body: fd });
-        const cloudData = await cloudRes.json();
-        if (cloudData.secure_url) {
-          await updateDoc(doc(db, 'commandes', ref.id), {
-            'items.0.fileUrl': cloudData.secure_url,
-            'items.0.filePath': cloudData.public_id,
-          });
-          console.log('✓ STL uploadé sur Cloudinary :', cloudData.secure_url);
-        }
+        const fileUrl = await uploadStlToCloudinary(S.file);
+        await updateDoc(doc(db, 'commandes', ref.id), { 'items.0.fileUrl': fileUrl });
+        console.log('✓ STL uploadé :', fileUrl);
       } catch(uploadErr) {
         console.warn('STL upload failed (commande sauvegardée quand même):', uploadErr);
       }
@@ -1434,21 +1528,13 @@ async function goToPayment() {
   payBtn.disabled = true;
   payBtn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Upload fichier…';
 
-  // ── Upload STL sur Cloudinary ──
+  // ── Upload STL sur Cloudinary (avec compression ZIP si > 50 Mo) ──
   let stlUrl = null;
-  if (S.file && S.file.name.toLowerCase().endsWith('.stl')) {
+  if (S.file) {
     try {
-      const fd = new FormData();
-      fd.append('file', S.file, S.file.name);
-      fd.append('upload_preset', 'umjs9csb');
-      fd.append('resource_type', 'raw');
-      fd.append('folder', 'stl');
-      const cloudRes = await fetch('https://api.cloudinary.com/v1_1/dfcrqwbee/raw/upload', { method: 'POST', body: fd });
-      const cloudData = await cloudRes.json();
-      if (cloudData.secure_url) {
-        stlUrl = cloudData.secure_url;
-        console.log('✓ STL uploadé :', stlUrl);
-      }
+      stlUrl = await uploadStlToCloudinary(S.file, (msg) => {
+        payBtn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> ' + msg;
+      });
     } catch(e) {
       console.warn('STL upload failed, on continue quand même:', e);
     }
@@ -1570,13 +1656,14 @@ async function goToPayment() {
         <svg viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2" style="width:22px;height:22px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         <div>
           <strong style="font-size:14px;color:#c2410c;display:block;margin-bottom:2px">Paiement annulé</strong>
-          <span style="font-size:12px;color:#9a3412">Votre devis a été conservé. Vous pouvez reprendre à tout moment.</span>
+          <span style="font-size:12px;color:#9a3412">Votre panier a été conservé. Relancez votre commande quand vous voulez.</span>
         </div>`;
       panel.prepend(banner);
     }
     window.history.replaceState({}, '', '/devis.html');
   }
-})();</script>
-<script src="/search.js"></script>
+})();
+</script>
+
 </body>
 </html>
