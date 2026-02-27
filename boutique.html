@@ -348,7 +348,7 @@ function renderGrid() {
     const priceDisplay = a._displayPrice || (parseFloat(a.price).toFixed(2).replace('.', ',') + ' €');
     const fromSpan = a._from ? '<span class="price-from">À partir de</span>' : '';
 
-    const buyBtn = '<button class="btn-buy" onclick="event.stopPropagation();addToCartAndGo(\'' + esc(a.slug||a.id) + '\',\'' + esc(a.name) + '\',' + parseFloat(a.price) + ',' + (a.oldPrice ? parseFloat(a.oldPrice) : 'null') + ',\'' + esc((a.photos&&a.photos[0])||'') + '\',\'' + esc(a.stripePrice||'') + '\',\'' + esc(a.payhip||'') + '\')">Acheter</button>';
+    const buyBtn = '<button class="btn-buy" onclick="event.stopPropagation();event.preventDefault();addToCartAndGo(\'' + esc(a.slug||a.id) + '\',\'' + esc(a.name) + '\',' + parseFloat(a.price) + ',' + (a.oldPrice ? parseFloat(a.oldPrice) : 'null') + ',\'' + esc((a.photos&&a.photos[0])||'') + '\',\'' + esc(a.stripePrice||'') + '\',\'' + esc(a.payhip||'') + '\')">Acheter</button>';
     const detailBtn = '<a href="' + prodUrl + '" class="btn-details" onclick="event.stopPropagation()">Détails</a>';
 
     card.innerHTML =
@@ -406,7 +406,7 @@ function toggleMobileNav() {
 function searchLive() {}
 function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
 
-function addToCartAndGo(id, name, price, oldPrice, image, stripePrice, paymentUrl) {
+window.addToCartAndGo = function(id, name, price, oldPrice, image, stripePrice, paymentUrl) {
   TBTCart.add({
     id:          id,
     name:        name,
