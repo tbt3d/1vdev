@@ -3430,7 +3430,8 @@ function buildCmdModalBody(c){
     </button>`;
   }
   html += `<div style="display:flex;gap:8px">`;
-  html += `<button onclick="printFacture()" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.3);color:#6366f1;border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;transition:all .15s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Imprimer la facture</button>`;
+  html += `<button onclick="downloadFacturePdf('${esc(c._id)}')" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.4);color:#6366f1;border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;transition:all .15s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>⬇ Facture PDF</button>`;
+  html += `<button onclick="printFacture()" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.3);color:#6366f1;border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;transition:all .15s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Imprimer</button>`;
   html += `<button onclick="printBL()" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:rgba(46,204,138,.08);border:1px solid rgba(46,204,138,.3);color:var(--green);border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;transition:all .15s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimer le bon de livraison</button>`;
   html += `</div></div>`;
 
@@ -3531,120 +3532,85 @@ function buildFactureHtml(c, factureNum, dateStr, clientName, itemsRows, totalsH
 }
 
 // Génère le HTML de l'email de confirmation
-function buildEmailHtml(c, factureNum, dateStr, clientName, itemsRows, totalsHtml, total, factureUrl) {
-  const logoUrl = 'https://tbt3d.fr/image/ChatGPT%20Image%2030%20juin%202025%2C%2014_57_42-Photoroom%20(1).png';
+function buildEmailHtml(c, factureNum, dateStr, clientName, itemsRows, totalsHtml, total) {
+  const addr = c.client;
+  const addrBlock = (addr?.address || addr?.city) ? `
+    <tr><td style="padding:0 0 20px">
+      <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888">📦 Adresse de livraison</p>
+      <p style="margin:0;font-size:13px;color:#333;line-height:1.8">${addr?.name||''}<br>${addr?.address||''}<br>${((addr?.zip||'')+' '+(addr?.city||'')).trim()}<br>${addr?.country||''}</p>
+    </td></tr>` : '';
+
   return `<!DOCTYPE html>
-<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Confirmation commande ${factureNum}</title></head>
-<body style="margin:0;padding:0;background:#f0f0f0;font-family:'Helvetica Neue',Arial,sans-serif">
+<html lang="fr"><head><meta charset="UTF-8"><title>Confirmation ${factureNum}</title></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif">
+<div style="max-width:580px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08)">
 
-<div style="max-width:620px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.10)">
-
-  <!-- HEADER -->
-  <div style="background:linear-gradient(135deg,#ff6b35 0%,#e8521f 100%);padding:32px 36px;display:flex;align-items:center;gap:18px">
-    <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:8px;flex-shrink:0">
-      <img src="https://tbt3d.fr/image/ChatGPT%20Image%2030%20juin%202025%2C%2014_57_42-Photoroom%20(1).png" alt="TBT3D" style="height:52px;width:auto;display:block;border-radius:6px;background:#fff">
-    </div>
-    <div>
-      <div style="color:#fff;font-size:22px;font-weight:800;letter-spacing:-.01em;line-height:1.2">Merci pour votre commande !</div>
-      <div style="color:rgba(255,255,255,.85);font-size:13px;margin-top:6px">
-        Commande <strong style="color:#fff">${factureNum}</strong> · ${dateStr}
-      </div>
-    </div>
+  <!-- Header -->
+  <div style="background:#111;padding:28px 32px;text-align:center">
+    <img src="https://tbt3d.fr/image/ChatGPT%20Image%2030%20juin%202025%2C%2014_57_42-Photoroom%20(1).png" alt="TBT3D" style="height:48px;width:auto">
   </div>
 
-  <!-- INTRO -->
-  <div style="padding:32px 36px 0">
-    <p style="margin:0 0 8px;font-size:16px;font-weight:700;color:#111">Bonjour ${clientName},</p>
-    <p style="margin:0 0 28px;font-size:14px;color:#555;line-height:1.7">
-      Nous avons bien reçu votre commande et elle est maintenant <strong style="color:#111">en cours de préparation</strong>. 
-      Vous trouverez ci-dessous le récapitulatif complet de votre achat.
-      Vous recevrez un nouvel email dès que votre colis sera expédié.
-    </p>
+  <!-- Body -->
+  <div style="padding:32px">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr><td style="padding:0 0 8px"><p style="margin:0;font-size:16px;font-weight:700;color:#111">Bonjour ${clientName},</p></td></tr>
+      <tr><td style="padding:0 0 24px"><p style="margin:0;font-size:14px;color:#555;line-height:1.7">
+        Nous avons bien reçu votre commande <strong style="color:#111">${factureNum}</strong> du ${dateStr} et elle est maintenant <strong>en cours de préparation</strong>.<br>
+        Vous recevrez un email dès que votre colis sera expédié.
+      </p></td></tr>
 
-    <!-- BADGE STATUT -->
-    <div style="display:inline-flex;align-items:center;gap:8px;background:#fff7f4;border:1.5px solid #ffd4c2;border-radius:10px;padding:10px 16px;margin-bottom:28px">
-      <div style="width:8px;height:8px;border-radius:50%;background:#ff6b35;flex-shrink:0"></div>
-      <span style="font-size:13px;font-weight:700;color:#ff6b35">En cours de préparation</span>
-    </div>
+      <!-- Statut -->
+      <tr><td style="padding:0 0 24px">
+        <div style="background:#fff7f4;border:1.5px solid #ffd4c2;border-radius:8px;padding:12px 16px;display:inline-block">
+          <span style="font-size:13px;font-weight:700;color:#ff6b35">● En cours de préparation</span>
+        </div>
+      </td></tr>
 
-    <!-- RECAP ARTICLES -->
-    <div style="border:1px solid #e8e8e8;border-radius:12px;overflow:hidden;margin-bottom:24px">
-      <div style="background:#111;padding:12px 16px;display:flex;justify-content:space-between">
-        <span style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#fff;font-weight:700">Articles commandés</span>
-        <span style="font-size:11px;color:#999">${c.items?.length||1} article${(c.items?.length||1)>1?'s':''}</span>
-      </div>
-      <table style="width:100%;border-collapse:collapse">
-        <tbody>${itemsRows}</tbody>
-        <tfoot>
+      <!-- Articles -->
+      <tr><td style="padding:0 0 24px">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e8e8;border-radius:8px;overflow:hidden">
+          <tr style="background:#111">
+            <td style="padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#fff;font-weight:700">Articles commandés</td>
+            <td style="padding:10px 14px;font-size:11px;color:#999;text-align:right">${c.items?.length||1} article${(c.items?.length||1)>1?'s':''}</td>
+          </tr>
+          ${itemsRows}
           ${totalsHtml}
           <tr style="background:#111">
-            <td colspan="2" style="padding:14px 16px;font-size:14px;font-weight:800;color:#fff">Total TTC payé</td>
-            <td style="padding:14px 16px;text-align:right;font-size:18px;font-weight:800;color:#ff6b35">${total.toFixed(2)} €</td>
+            <td colspan="2" style="padding:12px 14px;font-size:14px;font-weight:700;color:#fff">Total TTC payé</td>
+            <td style="padding:12px 14px;text-align:right;font-size:16px;font-weight:800;color:#ff6b35">${total.toFixed(2)} €</td>
           </tr>
-        </tfoot>
-      </table>
-    </div>
+        </table>
+      </td></tr>
 
-    <!-- ADRESSE -->
-    ${(c.client?.address||c.client?.city) ? `
-    <div style="border:1px solid #e8e8e8;border-radius:12px;padding:20px;margin-bottom:24px">
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#888;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px">
-        <span style="display:inline-block;width:16px;height:16px;background:#f0f0f0;border-radius:4px;text-align:center;line-height:16px">📦</span>
-        Adresse de livraison
-      </div>
-      <div style="font-size:13px;color:#333;line-height:2">
-        <strong>${c.client?.name||''}</strong><br>
-        ${c.client?.address||''}<br>
-        ${((c.client?.zip||'')+' '+(c.client?.city||'')).trim()}<br>
-        ${c.client?.country ? countryName(c.client.country) : ''}
-      </div>
-    </div>` : ''}
+      ${addrBlock}
 
-    <!-- BOUTON FACTURE PDF -->
-    ${factureUrl ? `
-    <div style="text-align:center;margin-bottom:28px">
-      <a href="${factureUrl}" target="_blank" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 32px;border-radius:10px;font-size:14px;font-weight:700;letter-spacing:.01em">
-        📄 Télécharger ma facture PDF
-      </a>
-      <div style="font-size:11px;color:#aaa;margin-top:8px">Disponible pendant 1 an</div>
-    </div>` : ''}
-
-    <!-- INFOS UTILES -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px">
-      <div style="background:#f9f9f9;border-radius:10px;padding:16px">
-        <div style="font-size:12px;font-weight:700;color:#111;margin-bottom:4px">⏱ Délai de fabrication</div>
-        <div style="font-size:12px;color:#666;line-height:1.6">7 à 30 jours ouvrés selon la commande</div>
-      </div>
-      <div style="background:#f9f9f9;border-radius:10px;padding:16px">
-        <div style="font-size:12px;font-weight:700;color:#111;margin-bottom:4px">📬 Suivi de livraison</div>
-        <div style="font-size:12px;color:#666;line-height:1.6">Un email avec votre numéro de suivi vous sera envoyé</div>
-      </div>
-      <div style="background:#f9f9f9;border-radius:10px;padding:16px">
-        <div style="font-size:12px;font-weight:700;color:#111;margin-bottom:4px">💬 Une question ?</div>
-        <div style="font-size:12px;color:#666;line-height:1.6"><a href="mailto:tbt203.contact@gmail.com" style="color:#ff6b35;text-decoration:none">tbt203.contact@gmail.com</a></div>
-      </div>
-      <div style="background:#f9f9f9;border-radius:10px;padding:16px">
-        <div style="font-size:12px;font-weight:700;color:#111;margin-bottom:4px">🌐 Votre compte</div>
-        <div style="font-size:12px;color:#666;line-height:1.6"><a href="https://tbt3d.fr" style="color:#ff6b35;text-decoration:none">tbt3d.fr</a></div>
-      </div>
-    </div>
+      <!-- Infos -->
+      <tr><td style="padding:0 0 8px;border-top:1px solid #f0f0f0;padding-top:20px">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding:0 8px 0 0;vertical-align:top;width:50%">
+              <div style="background:#f9f9f9;border-radius:8px;padding:14px">
+                <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#111">⏱ Délai de fabrication</p>
+                <p style="margin:0;font-size:12px;color:#666">7 à 30 jours ouvrés selon la commande</p>
+              </div>
+            </td>
+            <td style="padding:0 0 0 8px;vertical-align:top;width:50%">
+              <div style="background:#f9f9f9;border-radius:8px;padding:14px">
+                <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#111">💬 Une question ?</p>
+                <p style="margin:0;font-size:12px;color:#666"><a href="mailto:tbt203.contact@gmail.com" style="color:#ff6b35;text-decoration:none">tbt203.contact@gmail.com</a></p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
   </div>
 
-  <!-- FOOTER -->
-  <div style="background:#111;padding:24px 36px;text-align:center">
-    <img src="https://tbt3d.fr/image/ChatGPT%20Image%2030%20juin%202025%2C%2014_57_42-Photoroom%20(1).png" alt="TBT3D" style="height:36px;width:auto;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto">
-    <div style="font-size:12px;color:#aaa;line-height:2">
-      TBT3D · Fabrication additive artisanale · Lambersart, France
-    </div>
-    <div style="font-size:12px;color:#666;margin-top:4px">
-      <a href="https://tbt3d.fr" style="color:#ff6b35;text-decoration:none">tbt3d.fr</a> · 
-      <a href="mailto:tbt203.contact@gmail.com" style="color:#ff6b35;text-decoration:none">tbt203.contact@gmail.com</a>
-    </div>
-    <div style="font-size:10px;color:#444;margin-top:12px;border-top:1px solid #222;padding-top:12px">
-      Vous recevez cet email car vous avez passé une commande sur tbt3d.fr.<br>
-      Commande ${factureNum} du ${dateStr}
-    </div>
+  <!-- Footer -->
+  <div style="background:#111;padding:20px 32px;text-align:center">
+    <p style="margin:0 0 4px;font-size:12px;color:#aaa">TBT3D · Fabrication additive artisanale · Lambersart, France</p>
+    <p style="margin:0;font-size:12px"><a href="https://tbt3d.fr" style="color:#ff6b35;text-decoration:none">tbt3d.fr</a> · <a href="mailto:tbt203.contact@gmail.com" style="color:#ff6b35;text-decoration:none">tbt203.contact@gmail.com</a></p>
+    <p style="margin:8px 0 0;font-size:10px;color:#444;border-top:1px solid #222;padding-top:8px">Commande ${factureNum} du ${dateStr}</p>
   </div>
 
 </div>
@@ -3656,6 +3622,79 @@ window.sendConfirmationEmailById = (id) => {
   const c = _allCommandes.find(x => x._id === id);
   if(!c){ toast('Commande introuvable', true); return; }
   window.sendConfirmationEmail(c);
+};
+
+// ── TÉLÉCHARGEMENT PDF LOCAL (sans Firebase Storage) ──────────────────────
+window.downloadFacturePdf = async (id) => {
+  const c = _allCommandes.find(x => x._id === id);
+  if(!c) return;
+
+  const items = getItems(c);
+  const _ts = getTaxShipping(c);
+  const total = getTotal(c);
+  const date = new Date((c.paidAt?.seconds ? c.paidAt.seconds*1000 : c.paidAt) || Date.now());
+  const dateStr = date.toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric'});
+  const clientName = c.client?.name || c.customerName || 'Client';
+  const _sortedByDate = [..._allCommandes].sort((a,b) => {
+    const ta = a.paidAt?.seconds ? a.paidAt.seconds*1000 : (a.paidAt||0);
+    const tb = b.paidAt?.seconds ? b.paidAt.seconds*1000 : (b.paidAt||0);
+    return ta - tb;
+  });
+  const _cmdIndex = _sortedByDate.findIndex(x => x._id === c._id);
+  const factureNum = c.factureNum || ('FAC-' + date.getFullYear() + '-' + String(_cmdIndex >= 0 ? _cmdIndex + 1 : 1).padStart(4,'0'));
+
+  const factureItemsRows = items.map(item => {
+    const puHT = parseFloat(item.price||0);
+    const qty = parseInt(item.qty||1);
+    return `<tr>
+      <td style="padding:10px 8px;border-bottom:1px solid #e8e8e8;font-size:13px">${item.name||'Article'}${item.variant?'<br><span style="font-size:11px;color:#888">'+item.variant+'</span>':''}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #e8e8e8;text-align:center;font-size:13px">${qty}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #e8e8e8;text-align:right;font-size:13px">${puHT.toFixed(2)} €</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #e8e8e8;text-align:center;font-size:13px">20%</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #e8e8e8;text-align:right;font-size:13px;font-weight:600">${(puHT*1.2*qty).toFixed(2)} €</td>
+    </tr>`;
+  }).join('');
+
+  const factureTotalsHtml = _ts.subtotal !== null ? `
+    <div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total HT</span><span>${_ts.subtotal.toFixed(2)} €</span></div>
+    ${_ts.tva!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>TVA (20%)</span><span>${_ts.tva.toFixed(2)} €</span></div>`:''}
+    ${_ts.shipping!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Frais de livraison</span><span>${_ts.shipping.toFixed(2)} €</span></div>`:''}
+  ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${total.toFixed(2)} €</span></div>`;
+
+  const factureHtml = buildFactureHtml(c, factureNum, dateStr, clientName, factureItemsRows, factureTotalsHtml, total);
+
+  toast('⏳ Génération du PDF…');
+  try {
+    if(typeof html2pdf === 'undefined') {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        s.onload = resolve; s.onerror = () => reject(new Error('html2pdf indispo'));
+        document.head.appendChild(s);
+      });
+    }
+    const tmpDiv = document.createElement('div');
+    const bodyMatch = factureHtml.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    tmpDiv.innerHTML = bodyMatch ? bodyMatch[1] : factureHtml;
+    tmpDiv.style.cssText = 'position:absolute;left:0;top:0;width:794px;background:#fff;z-index:-1;visibility:hidden';
+    document.body.appendChild(tmpDiv);
+    await html2pdf().set({
+      margin: 0,
+      filename: factureNum + '.pdf',
+      image: { type: 'jpeg', quality: 0.92 },
+      html2canvas: { scale: 2, useCORS: true, logging: false, width: 794 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: 'avoid-all' }
+    }).from(tmpDiv).save();
+    if(document.body.contains(tmpDiv)) document.body.removeChild(tmpDiv);
+    toast('✓ PDF téléchargé : ' + factureNum + '.pdf');
+  } catch(e) {
+    // Fallback : ouvrir dans un nouvel onglet pour impression
+    const win = window.open('', '_blank');
+    win.document.write(factureHtml);
+    win.document.close();
+    toast('PDF ouvert → Ctrl+P → Enregistrer en PDF');
+  }
 };
 
 window.sendConfirmationEmail = async (c) => {
@@ -3742,7 +3781,7 @@ window.sendConfirmationEmail = async (c) => {
 
   // ── 2. Envoyer l'email EN PREMIER (sans attendre le PDF) ──
   toast('Envoi de l\'email de confirmation…');
-  const emailHtml = buildEmailHtml(c, factureNum, dateStr, clientName, emailItemsRows, emailTotalsHtml, total, factureUrl);
+  const emailHtml = buildEmailHtml(c, factureNum, dateStr, clientName, emailItemsRows, emailTotalsHtml, total);
 
   try {
     await emailjs.send(window.EMAILJS_SERVICE, window.EMAILJS_TPL_CLIENT_CONF, {
@@ -3777,59 +3816,6 @@ window.sendConfirmationEmail = async (c) => {
     return; // Stop ici si l'email échoue
   }
 
-  // ── 3. Générer le PDF en arrière-plan (n'empêche pas l'email) ──
-  (async () => {
-    try {
-      if(typeof html2pdf === 'undefined') {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-          s.onload = resolve; s.onerror = reject;
-          document.head.appendChild(s);
-        });
-      }
-
-      // Div visible mais masqué (html2canvas ne gèle pas)
-      const tmpDiv = document.createElement('div');
-      const bodyMatch = factureHtml.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-      tmpDiv.innerHTML = bodyMatch ? bodyMatch[1] : factureHtml;
-      tmpDiv.style.cssText = 'position:absolute;left:0;top:0;width:794px;background:#fff;z-index:-1;visibility:hidden';
-      document.body.appendChild(tmpDiv);
-
-      const pdfBlob = await Promise.race([
-        html2pdf().set({
-          margin: 0,
-          filename: factureNum + '.pdf',
-          image: { type: 'jpeg', quality: 0.92 },
-          html2canvas: { scale: 2, useCORS: true, logging: false, width: 794 },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: 'avoid-all' }
-        }).from(tmpDiv).outputPdf('blob'),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout PDF 30s')), 30000))
-      ]);
-
-      if(document.body.contains(tmpDiv)) document.body.removeChild(tmpDiv);
-
-      const pdfRef = storageRef(storage, 'factures/' + c._id + '/' + factureNum + '.pdf');
-      await uploadBytes(pdfRef, pdfBlob, { contentType: 'application/pdf' });
-      factureUrl = await getDownloadURL(pdfRef);
-
-      await updateDoc(doc(db,'commandes',c._id), { factureUrl, factureNum });
-      const idx2 = _allCommandes.findIndex(x=>x._id===c._id);
-      if(idx2!==-1) _allCommandes[idx2].factureUrl = factureUrl;
-
-      toast('✓ Facture PDF disponible');
-      console.log('PDF uploadé ✓', factureUrl);
-
-      // Rafraîchir le modal si encore ouvert
-      const updatedC = _allCommandes.find(x=>x._id===c._id);
-      if(updatedC && document.getElementById('cmdModal').classList.contains('open')) {
-        document.getElementById('cmdModalBody').innerHTML = buildCmdModalBody(updatedC);
-      }
-    } catch(e) {
-      console.warn('PDF non généré (email déjà envoyé avec succès):', e.message);
-    }
-  })();
 };
 // ────────────────────────────────────────────────────────────────────────────
 
