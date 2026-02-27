@@ -534,16 +534,6 @@ window.downloadFacture = async function() {
   lbl.textContent = 'Génération en cours…';
 
   try {
-    // Charger html2pdf si absent
-    if (!window.html2pdf) {
-      await new Promise((res, rej) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-        s.onload = res; s.onerror = rej;
-        document.head.appendChild(s);
-      });
-    }
-
     const factureNum = window._factureNum || 'Facture';
 
     // ── CAS 2 : HTML généré par le dashboard (même template que l'impression) ──
@@ -610,7 +600,13 @@ window.downloadFacture = async function() {
 
       factureHtml = `<!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Facture ${factureNum} — TBT3D</title></head>
+<title>Facture ${factureNum} — TBT3D</title>
+<style>
+  @media print {
+    @page { margin: 10mm; size: A4; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style></head>
 <body style="margin:0;padding:40px;background:#fff;font-family:'Helvetica Neue',Arial,sans-serif;color:#111">
 <div style="max-width:700px;margin:0 auto">
 
@@ -683,35 +679,28 @@ window.downloadFacture = async function() {
 </body></html>`;
     } // end fallback
 
-    // ── Générer le PDF via un overlay plein-écran (seule méthode fiable avec html2canvas) ──
-    // Extraire le contenu du body
-    const bodyMatch = factureHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-    const bodyContent = bodyMatch ? bodyMatch[1] : factureHtml;
+    // ── Générer le PDF via impression native (window.print) — méthode 100% fiable ──
+    // Ouvrir la facture dans un nouvel onglet et déclencher l'impression
+    const win = window.open('', '_blank');
+    if (!win) {
+      alert('Autorisez les popups pour télécharger la facture.');
+      lbl.textContent = 'Télécharger ma facture PDF';
+      btn.disabled = false;
+      return;
+    }
+    win.document.open();
+    win.document.write(factureHtml);
+    win.document.close();
 
-    // Créer un overlay blanc qui couvre tout l'écran depuis le haut
-    const overlay = document.createElement('div');
-    overlay.style.cssText = [
-      'position:fixed', 'top:0', 'left:0', 'z-index:999999',
-      'width:794px', 'background:#fff', 'color:#111',
-      'font-family:"Helvetica Neue",Arial,sans-serif',
-      'padding:40px', 'box-sizing:border-box',
-      'min-height:100vh'
-    ].join(';');
-    overlay.innerHTML = bodyContent;
-    document.body.appendChild(overlay);
-
-    // Laisser le navigateur rendre
-    await new Promise(r => setTimeout(r, 500));
-
-    await html2pdf().set({
-      margin:      0,
-      filename:    factureNum + '.pdf',
-      image:       { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0 },
-      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).from(overlay).save();
-
-    document.body.removeChild(overlay);
+    // Attendre le chargement complet puis imprimer
+    win.onload = function() {
+      setTimeout(() => {
+        win.focus();
+        win.print();
+        lbl.textContent = 'Télécharger ma facture PDF';
+        btn.disabled = false;
+      }, 400);
+    };
 
     lbl.textContent = '✓ Facture téléchargée';
     setTimeout(() => { lbl.textContent = 'Télécharger ma facture PDF'; btn.disabled = false; }, 3000);
