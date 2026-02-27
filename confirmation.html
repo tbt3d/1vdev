@@ -7,6 +7,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="/cart.js"></script>
+  <!-- EMAILJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    const CONF_EMAILJS_SERVICE  = 'service_f73dvuk';
+    const CONF_EMAILJS_TEMPLATE = 'template_q5h5f0v';
+    const CONF_EMAILJS_KEY      = 'Hz2TaEfDTVW8Usv6Q';
+    emailjs.init(CONF_EMAILJS_KEY);
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -293,7 +301,12 @@ async function verifyAndDisplay(sessionId) {
     // 3. Paiement confirmé → vider le panier maintenant
     if (typeof TBTCart !== 'undefined') TBTCart.clear();
 
-    // 4. Afficher la confirmation — priorité aux données Firebase (adresse, téléphone)
+    // 4. Envoyer l'email de confirmation automatiquement (si pas déjà envoyé)
+    if (!fbData?.confirmationEmailSent) {
+      sendAutoConfirmationEmail(data, fbData, orderId).catch(e => console.warn('Email auto error:', e));
+    }
+
+    // 5. Afficher la confirmation — priorité aux données Firebase (adresse, téléphone)
     displayConfirmation(data, orderId, fbData);
 
   } catch (err) {
@@ -367,6 +380,173 @@ async function saveOrderIfNew(sessionId, stripeData) {
   window._confirmedFirestoreId = orderId;
   return { id: orderId, fbData: null };
 }
+
+// ── ENVOI AUTO EMAIL DE CONFIRMATION APRÈS PAIEMENT ───────────────────────
+async function sendAutoConfirmationEmail(stripeData, fbData, orderId) {
+  const email = fbData?.client?.email || stripeData?.customerEmail;
+  if (!email) return;
+
+  // Construire les données client
+  const fb = fbData?.client || {};
+  const clientName = fb.name || stripeData?.customerName || 'Client';
+  const items = fbData?.items || stripeData?.lineItems || [];
+  const totalTTC = stripeData?.amountTotal
+    ? stripeData.amountTotal / 100
+    : (fbData?.total || 0);
+
+  // Date
+  const paidAt = fbData?.paidAt?.seconds
+    ? new Date(fbData.paidAt.seconds * 1000)
+    : new Date();
+  const dateStr = paidAt.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
+
+  // Numéro de facture (simple, basé sur l'orderId)
+  const factureNum = fbData?.factureNum || ('FAC-' + paidAt.getFullYear() + '-' + orderId.slice(-4).toUpperCase());
+
+  // Lignes articles
+  const itemsRows = items.map(item => {
+    const pu = parseFloat(item.price || (item.amount ? item.amount / 100 : 0));
+    const qty = parseInt(item.qty || item.quantity || 1);
+    return `<tr>
+      <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;font-size:13px;color:#111">${item.name || 'Article'}${item.variant ? '<br><span style="font-size:11px;color:#888">' + item.variant + '</span>' : ''}</td>
+      <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;text-align:center;font-size:13px;color:#555">×${qty}</td>
+      <td style="padding:12px 16px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:13px;font-weight:700;color:#111">${(pu * qty).toFixed(2)} €</td>
+    </tr>`;
+  }).join('');
+
+  // Totaux
+  const allItems = stripeData?.lineItems || fbData?.lineItems || [];
+  let tvaAmt = null, shippingAmt = null, subtotalAmt = null;
+  allItems.forEach(it => {
+    const n = (it.name || '').toLowerCase();
+    const a = it.amount != null ? it.amount / 100 : null;
+    if (n.includes('tva') || n.includes('tax')) tvaAmt = a;
+    else if (n.includes('livraison') || n.includes('shipping') || n.includes('frais')) shippingAmt = a;
+  });
+  if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt || 0) - (shippingAmt || 0);
+
+  const totalsHtml = subtotalAmt !== null ? `
+    <tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">Sous-total HT</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${subtotalAmt.toFixed(2)} €</td></tr>
+    ${tvaAmt !== null ? `<tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">TVA (20%)</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${tvaAmt.toFixed(2)} €</td></tr>` : ''}
+    ${shippingAmt !== null ? `<tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">Livraison</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${shippingAmt.toFixed(2)} €</td></tr>` : ''}
+  ` : '';
+
+  // Adresse livraison
+  const addr = fb;
+  const addrBlock = (addr?.address || addr?.city) ? `
+    <tr><td style="padding:0 0 20px">
+      <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888">📦 Adresse de livraison</p>
+      <p style="margin:0;font-size:13px;color:#333;line-height:1.8">${addr.name || ''}<br>${addr.address || ''}<br>${((addr.zip || '') + ' ' + (addr.city || '')).trim()}<br>${addr.country || ''}</p>
+    </td></tr>` : '';
+
+  // Construire le HTML de l'email (même template que buildEmailHtml dans dashboard)
+  const emailHtml = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><title>Confirmation ${factureNum}</title></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif">
+<div style="max-width:580px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08)">
+
+  <!-- Header -->
+  <div style="background:#111;padding:20px 32px;text-align:center">
+    <img src="https://tbt3d.fr/image/ChatGPT%20Image%2030%20juin%202025%2C%2014_57_42-Photoroom%20(1).png" alt="TBT3D" style="height:40px;width:auto;max-width:160px;display:inline-block">
+  </div>
+
+  <!-- Body -->
+  <div style="padding:32px">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr><td style="padding:0 0 8px"><p style="margin:0;font-size:16px;font-weight:700;color:#111">Bonjour ${clientName},</p></td></tr>
+      <tr><td style="padding:0 0 24px"><p style="margin:0;font-size:14px;color:#555;line-height:1.7">
+        Nous avons bien reçu votre commande <strong style="color:#111">${factureNum}</strong> du ${dateStr} et elle est maintenant <strong>en cours de préparation</strong>.<br>
+        Vous recevrez un email dès que votre colis sera expédié.
+      </p></td></tr>
+
+      <!-- Statut -->
+      <tr><td style="padding:0 0 24px">
+        <div style="background:#fff7f4;border:1.5px solid #ffd4c2;border-radius:8px;padding:12px 16px;display:inline-block">
+          <span style="font-size:13px;font-weight:700;color:#ff6b35">● En cours de préparation</span>
+        </div>
+      </td></tr>
+
+      <!-- Articles -->
+      <tr><td style="padding:0 0 24px">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e8e8;border-radius:8px;overflow:hidden">
+          <tr style="background:#111">
+            <td style="padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#fff;font-weight:700">Articles commandés</td>
+            <td style="padding:10px 14px;font-size:11px;color:#999;text-align:right">${items.length || 1} article${(items.length || 1) > 1 ? 's' : ''}</td>
+          </tr>
+          ${itemsRows}
+          ${totalsHtml}
+          <tr style="background:#111">
+            <td colspan="2" style="padding:12px 14px;font-size:14px;font-weight:700;color:#fff">Total TTC payé</td>
+            <td style="padding:12px 14px;text-align:right;font-size:16px;font-weight:800;color:#ff6b35">${totalTTC.toFixed(2)} €</td>
+          </tr>
+        </table>
+      </td></tr>
+
+      ${addrBlock}
+
+      <!-- Bouton télécharger facture -->
+      <tr><td style="padding:0 0 24px;text-align:center">
+        <a href="mailto:tbt203.contact@gmail.com?subject=Facture%20${factureNum}&body=Bonjour%2C%20je%20souhaite%20t%C3%A9l%C3%A9charger%20la%20facture%20de%20ma%20commande%20${factureNum}." style="display:inline-block;background:#ff6b35;color:#fff;text-decoration:none;padding:13px 32px;border-radius:8px;font-size:13px;font-weight:700;letter-spacing:.02em">⬇ Télécharger ma facture</a>
+        <p style="margin:10px 0 0;font-size:11px;color:#aaa">Ou <a href="mailto:tbt203.contact@gmail.com?subject=Facture%20${factureNum}" style="color:#ff6b35;text-decoration:none">cliquez ici</a> pour demander votre facture par email · Réf. <strong>${factureNum}</strong></p>
+      </td></tr>
+
+      <!-- Infos -->
+      <tr><td style="padding:0 0 8px;border-top:1px solid #f0f0f0;padding-top:20px">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding:0 8px 0 0;vertical-align:top;width:50%">
+              <div style="background:#f9f9f9;border-radius:8px;padding:14px">
+                <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#111">⏱ Délai de fabrication</p>
+                <p style="margin:0;font-size:12px;color:#666">7 à 30 jours ouvrés selon la commande</p>
+              </div>
+            </td>
+            <td style="padding:0 0 0 8px;vertical-align:top;width:50%">
+              <div style="background:#f9f9f9;border-radius:8px;padding:14px">
+                <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#111">💬 Une question ?</p>
+                <p style="margin:0;font-size:12px;color:#666"><a href="mailto:tbt203.contact@gmail.com" style="color:#ff6b35;text-decoration:none">tbt203.contact@gmail.com</a></p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+  </div>
+
+  <!-- Footer -->
+  <div style="background:#111;padding:20px 32px;text-align:center">
+    <p style="margin:0 0 4px;font-size:12px;color:#aaa">TBT3D · Fabrication additive artisanale · Lambersart, France</p>
+    <p style="margin:0;font-size:12px"><a href="https://tbt3d.fr" style="color:#ff6b35;text-decoration:none">tbt3d.fr</a> · <a href="mailto:tbt203.contact@gmail.com" style="color:#ff6b35;text-decoration:none">tbt203.contact@gmail.com</a></p>
+    <p style="margin:8px 0 0;font-size:10px;color:#444;border-top:1px solid #222;padding-top:8px">Commande ${factureNum} du ${dateStr}</p>
+  </div>
+
+</div>
+</body></html>`;
+
+  // Envoyer via EmailJS
+  await emailjs.send(CONF_EMAILJS_SERVICE, CONF_EMAILJS_TEMPLATE, {
+    to_email:   email,
+    to_name:    clientName,
+    facture_num: factureNum,
+    order_date: dateStr,
+    total_ttc:  totalTTC.toFixed(2) + ' €',
+    facture_url: '',
+    message_html: emailHtml,
+  });
+
+  // Marquer comme envoyé dans Firestore pour éviter le double envoi depuis le dashboard
+  if (window._confirmedFirestoreId) {
+    try {
+      const { updateDoc, doc: fsDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      await updateDoc(fsDoc(db, 'commandes', window._confirmedFirestoreId), {
+        confirmationEmailSent: true,
+        confirmationEmailSentAt: new Date(),
+      });
+    } catch(e) { console.warn('Could not mark email sent:', e); }
+  }
+
+  console.log('✓ Email de confirmation envoyé automatiquement à', email);
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 function displayConfirmation(data, orderId, fbData) {
   // Stocker globalement pour downloadFacture
