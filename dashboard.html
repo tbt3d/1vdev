@@ -3188,10 +3188,10 @@ function buildCmdModalBody(c){
   html += `<div class="cmd-detail-grid" style="margin-bottom:20px">`;
   html += `<div class="cmd-detail-box"><label>Nom</label><span>${esc(c.client?.name||'—')}</span></div>`;
   html += `<div class="cmd-detail-box"><label>Email</label><span>${esc(c.client?.email||'—')}</span></div>`;
-  if(c.client?.phone) html += `<div class="cmd-detail-box"><label>Téléphone</label><span>${esc(c.client.phone)}</span></div>`;
-  if(c.client?.address) html += `<div class="cmd-detail-box"><label>Adresse</label><span>${esc(c.client.address)}</span></div>`;
-  if(c.client?.zip||c.client?.city) html += `<div class="cmd-detail-box"><label>Ville</label><span>${esc((c.client?.zip||'') + ' ' + (c.client?.city||''))}</span></div>`;
-  if(c.client?.country) html += `<div class="cmd-detail-box"><label>Pays</label><span>${esc(c.client.country)}</span></div>`;
+  html += `<div class="cmd-detail-box"><label>Téléphone</label><span>${esc(c.client?.phone||'—')}</span></div>`;
+  html += `<div class="cmd-detail-box"><label>Adresse</label><span>${esc(c.client?.address||'—')}</span></div>`;
+  html += `<div class="cmd-detail-box"><label>Ville</label><span>${esc(((c.client?.zip||'') + ' ' + (c.client?.city||'')).trim()||'—')}</span></div>`;
+  html += `<div class="cmd-detail-box"><label>Pays</label><span>${esc(c.client?.country||'—')}</span></div>`;
   html += `</div>`;
 
   // ── LIVRAISON ──
@@ -3210,9 +3210,10 @@ function buildCmdModalBody(c){
     const is3d = item.isDynamic || item.is3d;
     html += `<div class="cmd-item-row">`;
     html += `<div class="cmd-item-name">${esc(item.name||'Article')} ${is3d ? '<span class="cmd-3d-badge">IMPRESSION 3D</span>' : ''}</div>`;
-    html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">`;
-    html += `<div style="font-size:11px;color:var(--muted)">${esc(item.variant||'')}</div>`;
-    html += `<div style="font-size:13px;font-weight:700;font-family:var(--mono);color:var(--accent)">${(parseFloat(item.price||0)*parseInt(item.qty||1)).toFixed(2)} €</div>`;
+    const variantStr = esc(item.variant||'');
+    html += `<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-top:6px;gap:8px">`;
+    html += variantStr ? `<div style="font-size:11px;color:var(--muted);line-height:1.5">${variantStr}</div>` : `<div></div>`;
+    html += `<div style="font-size:14px;font-weight:700;font-family:var(--mono);color:var(--accent);flex-shrink:0">${(parseFloat(item.price||0)*parseInt(item.qty||1)).toFixed(2)} €</div>`;
     html += `</div>`;
     html += `<div class="cmd-item-specs">`;
     html += `<span class="cmd-spec-tag" style="background:var(--bg);border:1px solid var(--border2);color:var(--soft)">Qté : ${item.qty||1}</span>`;

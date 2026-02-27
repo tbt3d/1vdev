@@ -97,14 +97,29 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .summary-line-muted { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
 .summary-line-muted:last-of-type { border-bottom: none; }
 .summary-sep { height: 1px; background: var(--border); margin: 4px 0; }
-.address-form-wrap { padding: 12px 0 10px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
-.address-form-title { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
-.address-row { display: flex; gap: 8px; }
-.address-field { display: flex; flex-direction: column; gap: 4px; flex: 1; margin-bottom: 8px; }
-.address-field label { font-size: 11px; color: var(--muted); font-weight: 500; }
-.address-input { padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family: var(--font); font-size: 13px; color: var(--text); outline: none; transition: border-color .15s; background: var(--white); }
-.address-input:focus { border-color: var(--black); }
-.address-input.error { border-color: #e11d48; }
+.address-form-wrap { padding: 16px 0 14px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+.address-form-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.address-form-header svg { width: 14px; height: 14px; color: var(--black); flex-shrink: 0; }
+.address-form-header span { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text); }
+.address-row { display: flex; gap: 10px; }
+.address-field { display: flex; flex-direction: column; gap: 5px; flex: 1; margin-bottom: 10px; }
+.address-field label { font-size: 10.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.address-field label .req { color: #e11d48; margin-left: 1px; }
+.address-input { padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--font); font-size: 13px; color: var(--text); outline: none; transition: border-color .2s, box-shadow .2s, background .2s; background: var(--white); }
+.address-input:focus { border-color: var(--black); box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
+.address-input.error { border-color: #e11d48; background: #fff8f8; }
+.address-input.filled { border-color: #22c55e; }
+.address-error-msg { display: none; font-size: 11px; color: #e11d48; margin-top: 2px; padding: 8px 10px; background: rgba(225,29,72,.06); border: 1px solid rgba(225,29,72,.2); border-radius: 8px; }
+.btn-checkout:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+@keyframes shakeForm {
+  0%,100% { transform: translateX(0); }
+  15%      { transform: translateX(-6px); }
+  30%      { transform: translateX(6px); }
+  45%      { transform: translateX(-5px); }
+  60%      { transform: translateX(5px); }
+  75%      { transform: translateX(-3px); }
+  90%      { transform: translateX(3px); }
+}
 .shipping-select-wrap { display: flex; flex-direction: column; gap: 6px; padding: 10px 0 6px; border-bottom: 1px solid var(--border); }
 .shipping-select-wrap label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
 .shipping-select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--font); font-size: 13px; background: var(--white); color: var(--text); cursor: pointer; outline: none; transition: border-color .15s; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
@@ -260,37 +275,40 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
         <div id="summaryLines"></div>
 
         <!-- Adresse de livraison -->
-        <div class="address-form-wrap">
-          <div class="address-form-title">📦 Adresse de livraison</div>
+        <div class="address-form-wrap" id="addressFormWrap">
+          <div class="address-form-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Adresse de livraison</span>
+          </div>
           <div class="address-row">
             <div class="address-field">
-              <label>Prénom *</label>
-              <input type="text" id="addrFirstName" class="address-input" placeholder="Jean" oninput="validateAddress()">
+              <label>Prénom<span class="req">*</span></label>
+              <input type="text" id="addrFirstName" class="address-input" placeholder="Jean" oninput="validateAddress()" autocomplete="given-name">
             </div>
             <div class="address-field">
-              <label>Nom *</label>
-              <input type="text" id="addrLastName" class="address-input" placeholder="Dupont" oninput="validateAddress()">
+              <label>Nom<span class="req">*</span></label>
+              <input type="text" id="addrLastName" class="address-input" placeholder="Dupont" oninput="validateAddress()" autocomplete="family-name">
             </div>
           </div>
           <div class="address-field">
-            <label>Adresse *</label>
-            <input type="text" id="addrLine1" class="address-input" placeholder="12 rue de la Paix" oninput="validateAddress()">
+            <label>Adresse<span class="req">*</span></label>
+            <input type="text" id="addrLine1" class="address-input" placeholder="12 rue de la Paix" oninput="validateAddress()" autocomplete="street-address">
           </div>
           <div class="address-row">
-            <div class="address-field" style="flex:0 0 100px">
-              <label>Code postal *</label>
-              <input type="text" id="addrZip" class="address-input" placeholder="75001" oninput="validateAddress()">
+            <div class="address-field" style="flex:0 0 110px">
+              <label>Code postal<span class="req">*</span></label>
+              <input type="text" id="addrZip" class="address-input" placeholder="75001" oninput="validateAddress()" autocomplete="postal-code">
             </div>
             <div class="address-field">
-              <label>Ville *</label>
-              <input type="text" id="addrCity" class="address-input" placeholder="Paris" oninput="validateAddress()">
+              <label>Ville<span class="req">*</span></label>
+              <input type="text" id="addrCity" class="address-input" placeholder="Paris" oninput="validateAddress()" autocomplete="address-level2">
             </div>
           </div>
-          <div class="address-field">
-            <label>Téléphone (optionnel)</label>
-            <input type="tel" id="addrPhone" class="address-input" placeholder="+33 6 12 34 56 78">
+          <div class="address-field" style="margin-bottom:0">
+            <label>Téléphone <span style="font-weight:400;text-transform:none;letter-spacing:0">(optionnel)</span></label>
+            <input type="tel" id="addrPhone" class="address-input" placeholder="+33 6 12 34 56 78" autocomplete="tel">
           </div>
-          <div id="addressError" style="display:none;font-size:11px;color:#e11d48;margin-top:4px">⚠ Veuillez remplir tous les champs obligatoires *</div>
+          <div class="address-error-msg" id="addressError">⚠ Veuillez remplir tous les champs marqués *</div>
         </div>
 
         <!-- Livraison -->
@@ -542,6 +560,19 @@ function openCheckout() {
   const items = TBTCart.load();
   if (items.length === 0) return;
 
+  // Vérifier l'adresse avant d'ouvrir le modal
+  if (!validateAddress()) {
+    const wrap = document.getElementById('addressFormWrap');
+    if (wrap) {
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      wrap.style.animation = 'none';
+      setTimeout(() => {
+        wrap.style.animation = 'shakeForm .4s ease';
+      }, 10);
+    }
+    return;
+  }
+
   // Remplir la liste des articles dans le modal
   document.getElementById('coItemsList').innerHTML = items.map(item => `
     <div class="co-item">
@@ -756,14 +787,24 @@ function getAddressData() {
 function validateAddress() {
   const a = getAddressData();
   const valid = a.firstName && a.lastName && a.line1 && a.zip && a.city;
-  const btn = document.getElementById('stripeCheckoutBtn');
+  const stripeBtn = document.getElementById('stripeCheckoutBtn');
+  const cmdBtn = document.querySelector('.btn-checkout');
   const errEl = document.getElementById('addressError');
-  const inputs = ['addrFirstName','addrLastName','addrLine1','addrZip','addrCity'];
-  inputs.forEach(id => {
+  const fieldMap = {
+    addrFirstName: a.firstName,
+    addrLastName:  a.lastName,
+    addrLine1:     a.line1,
+    addrZip:       a.zip,
+    addrCity:      a.city,
+  };
+  Object.entries(fieldMap).forEach(([id, val]) => {
     const el = document.getElementById(id);
-    if (el) el.classList.toggle('error', !el.value.trim());
+    if (!el) return;
+    el.classList.toggle('error', !val);
+    el.classList.toggle('filled', !!val);
   });
-  if (btn) btn.disabled = !valid;
+  if (stripeBtn) stripeBtn.disabled = !valid;
+  if (cmdBtn) cmdBtn.disabled = !valid;
   if (errEl) errEl.style.display = valid ? 'none' : 'block';
   return valid;
 }
@@ -861,6 +902,8 @@ document.addEventListener('keydown', e => {
 
 window.addEventListener('cart:updated', renderCart);
 renderCart();
+// Valider l'adresse dès le chargement pour désactiver le btn Commander
+validateAddress();
 
 // Détecter retour depuis Stripe après annulation ou succès
 (async function() {
