@@ -316,7 +316,7 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
         </div>
         <div>
           <div class="info-label">Email direct</div>
-          <div class="info-value"><a href="mailto:tbt203.contact@gmail.com"</a></div>
+          <div class="info-value"><a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a></div>
         </div>
       </div>
       <div class="info-item">
@@ -343,7 +343,7 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
         </div>
         <div>
           <div class="info-label">Réseaux sociaux</div>
-          <div class="info-value"><a href="#">Instagram</a> &nbsp;·&nbsp; <a href="#">TikTok</a></div>
+          <div class="info-value"><a href="https://www.instagram.com/tbt3d_/" target="_blank" rel="noopener">Instagram</a> &nbsp;·&nbsp; <a href="https://www.tiktok.com/@tbt203_" target="_blank" rel="noopener">TikTok</a></div>
         </div>
       </div>
     </div>
@@ -481,7 +481,7 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com"</a>
+      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
       <a href="/contact.html">Formulaire</a>
             <div class="footer-social">
         <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -494,200 +494,25 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
   </div>
 </footer>
 
-<!-- FIREBASE + EMAILJS -->
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
-  authDomain: "tbt3d-a0f04.firebaseapp.com",
-  projectId: "tbt3d-a0f04",
-  storageBucket: "tbt3d-a0f04.firebasestorage.app",
-  appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
-};
-
-const EMAILJS_SERVICE          = 'service_f73dvuk';
-const EMAILJS_TEMPLATE_ADMIN   = 'template_8a89xmr';
-const EMAILJS_TEMPLATE_CLIENT  = 'template_h2is8un';
-const EMAILJS_PUBLIC_KEY       = 'Hz2TaEfDTVW8Usv6Q';
-emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-
-const CLOUDINARY_CLOUD_NAME    = 'dfcrqwbee';
-const CLOUDINARY_UPLOAD_PRESET = 'tbt3d_contact';
-
-async function uploadToCloudinary(file) {
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-  fd.append('folder', 'contact_attachments');
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, { method: 'POST', body: fd });
-  if (!res.ok) throw new Error('Cloudinary upload failed');
-  const data = await res.json();
-  return { url: data.secure_url, publicId: data.public_id, format: data.format, resourceType: data.resource_type, bytes: data.bytes };
-}
-
-const app  = initializeApp(firebaseConfig);
-const db   = getFirestore(app);
-const auth = getAuth(app);
-
-let currentUser = null;
-let selectedSubject = 'commande';
-let attachedFile = null;
-
-onAuthStateChanged(auth, user => {
-  currentUser = user;
-  if (user) {
-    document.getElementById('fPrenom').value = user.displayName?.split(' ')[0] || '';
-    document.getElementById('fNom').value    = user.displayName?.split(' ').slice(1).join(' ') || '';
-    document.getElementById('fEmail').value  = user.email || '';
-    document.getElementById('fEmail').readOnly = true;
-    document.getElementById('fEmail').style.background = '#f5f5f5';
-    document.getElementById('userHintTxt').textContent = `Connecté en tant que ${user.email}`;
-    document.getElementById('userHint').classList.add('show');
-  }
+<script>
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+document.querySelectorAll('.nav-links a').forEach(function(a) {
+  if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
 });
-
-document.querySelectorAll('.s-chip').forEach(chip => {
-  chip.onclick = () => {
-    document.querySelectorAll('.s-chip').forEach(c => c.classList.remove('on'));
-    chip.classList.add('on');
-    selectedSubject = chip.dataset.v;
-    document.getElementById('orderField').style.display = selectedSubject === 'commande' ? '' : 'none';
-  };
+window.addEventListener('scroll', function() {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
 });
-
-window.updateCounter = (el) => {
-  const len = el.value.length;
-  const el2 = document.getElementById('charCounter');
-  el2.textContent = `${len} / 2000`;
-  el2.classList.toggle('warn', len > 1800);
-};
-
-window.dragOver  = (e) => { e.preventDefault(); document.getElementById('fileDrop').classList.add('dragover'); };
-window.dragLeave = ()  => { document.getElementById('fileDrop').classList.remove('dragover'); };
-window.dropFile  = (e) => { e.preventDefault(); document.getElementById('fileDrop').classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) setFile(f); };
-window.handleFile = (f) => { if (f) setFile(f); };
-
-function setFile(file) {
-  if (file.size > 10 * 1024 * 1024) { alert('Fichier trop lourd (max 10 Mo)'); return; }
-  attachedFile = file;
-  document.getElementById('fileList').innerHTML =
-    `<div class="file-item">📄 <span>${file.name}</span><span class="file-rm" onclick="removeFile()">×</span></div>`;
+function toggleSearch() {
+  var b = document.getElementById('searchBar');
+  b.classList.toggle('open');
+  if (b.classList.contains('open')) setTimeout(function(){ document.getElementById('searchInput').focus(); }, 50);
 }
-window.removeFile = () => {
-  attachedFile = null;
-  document.getElementById('fileList').innerHTML = '';
-  document.getElementById('fileInput').value = '';
-};
-
-window.sendContact = async () => {
-  const prenom = document.getElementById('fPrenom').value.trim();
-  const nom    = document.getElementById('fNom').value.trim();
-  const email  = document.getElementById('fEmail').value.trim();
-  const tel    = document.getElementById('fTel').value.trim();
-  const order  = document.getElementById('fOrder').value.trim();
-  const msg    = document.getElementById('fMsg').value.trim();
-
-  if (!prenom)                    { shake('fPrenom'); return; }
-  if (!email || !email.includes('@')) { shake('fEmail'); return; }
-  if (!msg || msg.length < 10)    { shake('fMsg'); return; }
-
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.innerHTML = `<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Envoi en cours…`;
-
-  let fileData = null;
-  if (attachedFile) {
-    btn.innerHTML = `<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Upload fichier…`;
-    try { fileData = await uploadToCloudinary(attachedFile); }
-    catch(e) { console.warn('Cloudinary upload failed', e); fileData = { url: null, publicId: null, format: null }; }
-  }
-
-  const msgData = {
-    prenom, nom, email,
-    tel: tel || null,
-    sujet: selectedSubject,
-    orderRef: order || null,
-    message: msg,
-    fileName: attachedFile?.name || null,
-    fileUrl: fileData?.url || null,
-    filePublicId: fileData?.publicId || null,
-    fileFormat: fileData?.format || null,
-    status: 'nouveau',
-    userId: currentUser?.uid || null,
-    createdAt: serverTimestamp(),
-    repliedAt: null,
-    reply: null,
-  };
-
-  btn.innerHTML = `<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Enregistrement…`;
-
-  try {
-    const docRef = await addDoc(collection(db, 'messages'), msgData);
-
-    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_ADMIN, {
-      to_email: 'tbt203.contact@gmail.com',
-      from_name: `${prenom} ${nom}`.trim(),
-      from_email: email,
-      sujet: selectedSubject,
-      message: msg,
-      tel: tel || '—',
-      order_ref: order || '—',
-      file_name: attachedFile?.name || '—',
-      file_url: fileData?.url || '—',
-      doc_id: docRef.id,
-    }, EMAILJS_PUBLIC_KEY);
-
-    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_CLIENT, {
-      to_email: email,
-      to_name: prenom,
-      sujet: selectedSubject,
-      message: msg,
-    }, EMAILJS_PUBLIC_KEY);
-
-    document.getElementById('formContent').style.display = 'none';
-    document.getElementById('successScreen').style.display = 'block';
-
-  } catch (err) {
-    console.error(err);
-    if (err?.text?.includes('service_id') || err?.status === 400) {
-      document.getElementById('formContent').style.display = 'none';
-      document.getElementById('successScreen').style.display = 'block';
-    } else {
-      btn.disabled = false;
-      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Envoyer le message`;
-      alert('Erreur lors de l\'envoi. Réessayez ou contactez-nous directement par email.');
-    }
-  }
-};
-
-window.resetForm = () => {
-  document.getElementById('formContent').style.display = '';
-  document.getElementById('successScreen').style.display = 'none';
-  ['fPrenom','fNom','fTel','fOrder','fMsg'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el && !el.readOnly) el.value = '';
-  });
-  if (!currentUser) document.getElementById('fEmail').value = '';
-  attachedFile = null;
-  document.getElementById('fileList').innerHTML = '';
-  document.getElementById('charCounter').textContent = '0 / 2000';
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = false;
-  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Envoyer le message`;
-};
-
-function shake(id) {
-  const el = document.getElementById(id);
-  el.style.borderColor = '#e33';
-  el.style.animation = 'shake .3s';
-  el.focus();
-  setTimeout(() => { el.style.animation = ''; el.style.borderColor = ''; }, 600);
+function toggleMobileNav() {
+  document.getElementById('mobileNav').classList.toggle('open');
 }
-
-window.toggleSearch = () => { const b = document.getElementById('searchBar'); b.classList.toggle('open'); if(b.classList.contains('open')) setTimeout(()=>document.getElementById('searchInput').focus(),50); };
-window.toggleMobileNav = () => document.getElementById('mobileNav').classList.toggle('open');
-window.addEventListener('scr
+window.addEventListener('resize', function(){
+  if (window.innerWidth > 768) document.getElementById('mobileNav').classList.remove('open');
+});
+</script>
+</body>
+</html>

@@ -117,7 +117,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
   <div class="legal-section">
     <h2>1. Vendeur</h2>
     <p>Les présentes CGV régissent les ventes réalisées sur le site TBT3D par Thibault Frappart, particulier domicilié au 27 rue des Soupirants, 62100 Calais.</p>
-    <p>Email : <a href="mailto:tbt203.contact@gmail.com"</a> — Téléphone : 07 86 85 76 71</p>
+    <p>Email : <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a> — Téléphone : 07 86 85 76 71</p>
   </div>
 
   <div class="legal-section">
@@ -147,7 +147,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
   <div class="legal-section">
     <h2>6. Livraison</h2>
     <p>Les commandes sont expédiées depuis Calais (France) via Colissimo ou transporteur équivalent. Les délais de livraison sont indicatifs et peuvent varier selon les aléas postaux.</p>
-    <p>En cas de colis endommagé ou perdu, contactez-nous dans les 7 jours suivant la réception : <a href="mailto:tbt203.contact@gmail.com"</a>.</p>
+    <p>En cas de colis endommagé ou perdu, contactez-nous dans les 7 jours suivant la réception : <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>.</p>
   </div>
 
   <div class="legal-section">
@@ -164,7 +164,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 
   <div class="legal-section">
     <h2>9. Contact</h2>
-    <p>Pour toute question relative à une commande : <a href="mailto:tbt203.contact@gmail.com"</a> ou via le <a href="/contact.html">formulaire de contact</a>.</p>
+    <p>Pour toute question relative à une commande : <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a> ou via le <a href="/contact.html">formulaire de contact</a>.</p>
   </div>
 </div>
 
@@ -188,7 +188,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com"</a>
+      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
       <a href="/contact.html">Formulaire</a><a href="/devis.html">Devis STL</a>
             <div class="footer-social">
         <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -202,4 +202,28 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
       <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
       <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
     </span>
-  <
+</div>
+</footer>
+
+<script>
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+document.querySelectorAll('.nav-links a').forEach(function(a) {
+  if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
+});
+window.addEventListener('scroll', function() {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+});
+function toggleSearch() {
+  var b = document.getElementById('searchBar');
+  b.classList.toggle('open');
+  if (b.classList.contains('open')) setTimeout(function(){ document.getElementById('searchInput').focus(); }, 50);
+}
+function toggleMobileNav() {
+  document.getElementById('mobileNav').classList.toggle('open');
+}
+window.addEventListener('resize', function(){
+  if (window.innerWidth > 768) document.getElementById('mobileNav').classList.remove('open');
+});
+</script>
+</body>
+</html>

@@ -283,7 +283,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com"</a>
+      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
       <a href="/contact.html">Formulaire</a><a href="/devis.html">Devis STL</a>
             <div class="footer-social">
         <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -301,23 +301,25 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-document.querySelectorAll('.nav-links a').forEach(a => {
+<script>
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+document.querySelectorAll('.nav-links a').forEach(function(a) {
   if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
 });
-window.addEventListener('scroll', () => {
+window.addEventListener('scroll', function() {
   document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
 });
 function toggleSearch() {
-  const b = document.getElementById('searchBar');
+  var b = document.getElementById('searchBar');
   b.classList.toggle('open');
-  if (b.classList.contains('open')) setTimeout(() => document.getElementById('searchInput').focus(), 50);
+  if (b.classList.contains('open')) setTimeout(function(){ document.getElementById('searchInput').focus(); }, 50);
 }
 function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('open');
 }
-document.getElementById('footerYear').textContent = new Date().getFullYear();
-
-// Fade-in au scroll
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(
+window.addEventListener('resize', function(){
+  if (window.innerWidth > 768) document.getElementById('mobileNav').classList.remove('open');
+});
+</script>
+</body>
+</html>

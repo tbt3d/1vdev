@@ -121,7 +121,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
     <p>Le site TBT3D est édité par Thibault Frappart, particulier.</p>
     <p>27 rue des Soupirants, 62100 Calais, France</p>
     <p>Téléphone : 07 86 85 76 71</p>
-    <p>Email : <a href="mailto:tbt203.contact@gmail.com"</a></p>
+    <p>Email : <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a></p>
     <p>Activité exercée en tant que particulier — pas de numéro SIRET enregistré à ce jour.</p>
   </div>
 
@@ -147,7 +147,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 
   <div class="legal-section">
     <h2>Contact</h2>
-    <p>Pour toute question relative aux mentions légales, contactez-nous à : <a href="mailto:tbt203.contact@gmail.com"</a></p>
+    <p>Pour toute question relative aux mentions légales, contactez-nous à : <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a></p>
   </div>
 </div>
 
@@ -171,7 +171,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com"</a>
+      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
       <a href="/contact.html">Formulaire</a><a href="/devis.html">Devis STL</a>
             <div class="footer-social">
         <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -188,5 +188,25 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-document.ge
+<script>
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+document.querySelectorAll('.nav-links a').forEach(function(a) {
+  if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
+});
+window.addEventListener('scroll', function() {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+});
+function toggleSearch() {
+  var b = document.getElementById('searchBar');
+  b.classList.toggle('open');
+  if (b.classList.contains('open')) setTimeout(function(){ document.getElementById('searchInput').focus(); }, 50);
+}
+function toggleMobileNav() {
+  document.getElementById('mobileNav').classList.toggle('open');
+}
+window.addEventListener('resize', function(){
+  if (window.innerWidth > 768) document.getElementById('mobileNav').classList.remove('open');
+});
+</script>
+</body>
+</html>

@@ -126,7 +126,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
   <div class="legal-section">
     <h2>Produit défectueux ou non conforme</h2>
     <div class="info-box">
-      <p><strong>Contactez-nous dans les 14 jours suivant la réception</strong> à <a href="mailto:tbt203.contact@gmail.com"</a> en joignant des photos du problème constaté.</p>
+      <p><strong>Contactez-nous dans les 14 jours suivant la réception</strong> à <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a> en joignant des photos du problème constaté.</p>
     </div>
     <p>Un produit est considéré défectueux en cas de : cassure lors de la livraison, défaut d'impression majeur (couches manquantes, déformation importante), non-conformité flagrante avec la description.</p>
     <p>Après vérification, nous proposerons au choix : un remplacement de la pièce ou un remboursement intégral.</p>
@@ -146,14 +146,14 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 
   <div class="legal-section">
     <h2>Procédure de retour</h2>
-    <p>1. Envoyez un email à <a href="mailto:tbt203.contact@gmail.com"</a> avec votre numéro de commande et des photos.</p>
+    <p>1. Envoyez un email à <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a> avec votre numéro de commande et des photos.</p>
     <p>2. Nous vous répondons sous 48h ouvrées et vous indiquons la marche à suivre.</p>
     <p>3. Si un retour physique est nécessaire, nous vous communiquons l'adresse et prenons en charge les frais de retour.</p>
   </div>
 
   <div class="legal-section">
     <h2>Contact</h2>
-    <p>Pour toute demande de retour ou réclamation : <a href="mailto:tbt203.contact@gmail.com"</a> — 07 86 85 76 71</p>
+    <p>Pour toute demande de retour ou réclamation : <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a> — 07 86 85 76 71</p>
     <p>Ou via le <a href="/contact.html">formulaire de contact</a>.</p>
   </div>
 </div>
@@ -178,7 +178,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com"</a>
+      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
       <a href="/contact.html">Formulaire</a><a href="/devis.html">Devis STL</a>
             <div class="footer-social">
         <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -192,4 +192,28 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
       <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
       <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
     </span>
-  <
+</div>
+</footer>
+
+<script>
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+document.querySelectorAll('.nav-links a').forEach(function(a) {
+  if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
+});
+window.addEventListener('scroll', function() {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+});
+function toggleSearch() {
+  var b = document.getElementById('searchBar');
+  b.classList.toggle('open');
+  if (b.classList.contains('open')) setTimeout(function(){ document.getElementById('searchInput').focus(); }, 50);
+}
+function toggleMobileNav() {
+  document.getElementById('mobileNav').classList.toggle('open');
+}
+window.addEventListener('resize', function(){
+  if (window.innerWidth > 768) document.getElementById('mobileNav').classList.remove('open');
+});
+</script>
+</body>
+</html>
