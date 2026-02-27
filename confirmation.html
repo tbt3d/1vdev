@@ -206,8 +206,30 @@
       <span>Fabrication artisanale — <strong>Délai de livraison : 7 à 30 jours</strong> depuis notre atelier lillois.</span>
     </div>
 
+    <!-- Bouton facture PDF (affiché dynamiquement) -->
+    <div id="factureBtnWrap" style="display:none;margin-top:20px">
+      <a id="facturePdfBtn" href="#" target="_blank"
+        style="display:flex;align-items:center;justify-content:center;gap:10px;padding:15px 28px;background:#111;color:#fff;text-decoration:none;border-radius:50px;font-family:var(--font);font-size:14px;font-weight:600;transition:opacity .2s;width:100%"
+        onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Télécharger ma facture PDF
+      </a>
+    </div>
+
+    <!-- Bannière compte (si pas connecté) -->
+    <div id="accountBanner" style="display:none;margin-top:14px;background:linear-gradient(135deg,rgba(255,107,53,.07),rgba(255,107,53,.03));border:1.5px solid rgba(255,107,53,.18);border-radius:14px;padding:18px 22px">
+      <div style="font-size:13px;font-weight:600;color:#111;margin-bottom:5px;display:flex;align-items:center;gap:8px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ff6b35" stroke-width="2" width="15" height="15"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Retrouvez vos factures à tout moment
+      </div>
+      <div style="font-size:12px;color:#666;margin-bottom:14px;line-height:1.65">Créez un compte avec la même adresse email pour accéder à toutes vos commandes et factures depuis votre espace client.</div>
+      <a href="/compte.html" style="display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:#ff6b35;color:#fff;border-radius:50px;text-decoration:none;font-size:13px;font-weight:700;box-shadow:0 4px 14px rgba(255,107,53,.28);transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        Créer mon compte →
+      </a>
+    </div>
+
     <!-- Actions -->
-    <div class="actions">
+    <div class="actions" style="margin-top:16px">
       <a href="/boutique.html" class="btn btn-primary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Voir la boutique
@@ -223,7 +245,8 @@
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, collection, addDoc, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, collection, addDoc, query, where, getDocs, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
@@ -234,7 +257,9 @@ const firebaseConfig = {
 };
 
 const WORKER_URL = 'https://tbt3d-checkout.optionpdg.workers.dev';
-const db = getFirestore(initializeApp(firebaseConfig));
+const _fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(_fbApp);
+const auth = getAuth(_fbApp);
 
 // ── Récupérer le session_id depuis l'URL ──
 const params = new URLSearchParams(window.location.search);
@@ -294,7 +319,7 @@ async function saveOrderIfNew(sessionId, stripeData) {
           lineItems: stripeData.lineItems || [],
         });
         console.log('✓ Commande mise à jour depuis URL orderId :', urlOrderId);
-        // Retourner les données Firebase (adresse, téléphone, etc.)
+        window._confirmedFirestoreId = urlOrderId;
         return { id: urlOrderId, fbData: snap.data() };
       }
     } catch(e) { console.warn('Could not update by orderId:', e); }
@@ -313,6 +338,7 @@ async function saveOrderIfNew(sessionId, stripeData) {
       lineItems: stripeData.lineItems || [],
     });
     console.log('✓ Commande mise à jour (stripeSessionId):', fbDoc.id);
+    window._confirmedFirestoreId = fbDoc.id;
     return { id: fbDoc.id, fbData: fbDoc.data() };
   }
 
@@ -337,6 +363,7 @@ async function saveOrderIfNew(sessionId, stripeData) {
     paidAt: new Date(),
   });
   console.log('✓ Commande créée (fallback):', orderId);
+  window._confirmedFirestoreId = orderId;
   return { id: orderId, fbData: null };
 }
 
@@ -433,6 +460,35 @@ function displayConfirmation(data, orderId, fbData) {
 
   // Nettoyer l'URL (supprimer session_id)
   window.history.replaceState({}, '', '/confirmation.html');
+
+  // ── Bouton facture PDF ──
+  // Si le PDF est déjà dans fbData, l'afficher immédiatement
+  if (fbData?.factureUrl) {
+    _showFactureBtn(fbData.factureUrl);
+  } else if (window._confirmedFirestoreId) {
+    // Polling toutes les 6s pendant 60s (le dashboard génère le PDF en tâche de fond)
+    let _pollCount = 0;
+    const _pollInterval = setInterval(async () => {
+      _pollCount++;
+      try {
+        const snap = await getDoc(doc(db, 'commandes', window._confirmedFirestoreId));
+        const url = snap.data()?.factureUrl;
+        if (url) { clearInterval(_pollInterval); _showFactureBtn(url); }
+      } catch(e) {}
+      if (_pollCount >= 10) clearInterval(_pollInterval);
+    }, 6000);
+  }
+
+  // ── Bannière compte ──
+  onAuthStateChanged(auth, user => {
+    if (!user) document.getElementById('accountBanner').style.display = 'block';
+    // Si connecté → pas besoin de la bannière, il a déjà son espace
+  });
+}
+
+function _showFactureBtn(url) {
+  const btn = document.getElementById('facturePdfBtn');
+  if (btn) { btn.href = url; document.getElementById('factureBtnWrap').style.display = 'block'; }
 }
 
 function showError(msg) {
