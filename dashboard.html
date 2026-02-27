@@ -929,8 +929,6 @@ tr:hover td{background:rgba(255,255,255,.01)}
     </div>
   </div>
 
-</div>
-
   <!-- ═══ COMMANDES ═══ -->
   <div class="page" id="page-commandes" style="overflow:hidden">
     <div class="topbar">
@@ -1454,8 +1452,7 @@ tr:hover td{background:rgba(255,255,255,.01)}
     </div>
   </div>
 
->
-
+</div><!-- /#appMain -->
 
 <div class="toast" id="toast"><div class="tdot" id="tdot"></div><span id="toastTxt"></span></div>
 
@@ -3000,6 +2997,7 @@ function toArr(val) {
 
 // Unifie le format items (panier/devis) et lineItems (Stripe) en un seul format
 function getItems(c) {
+  if (c._mergedItems) return c._mergedItems;
   const items = toArr(c.items);
   const lineItems = toArr(c.lineItems);
   if (items.length > 0) return items;
@@ -3041,6 +3039,51 @@ function fmtCmdDate(raw){
   }catch{ return '—'; }
 }
 
+// ── DÉDUPLICATION COMMANDES ──────────────────────────────────
+// Fusionne les commandes doublons (même total, créées dans les 3 minutes)
+// qui proviennent de chemins de paiement différents (boutique + panier)
+function deduplicateCommandes(list) {
+  const used = new Set();
+  const result = [];
+  for (let i = 0; i < list.length; i++) {
+    if (used.has(i)) continue;
+    const a = list[i];
+    const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt||0).getTime();
+    let merged = false;
+    for (let j = i + 1; j < list.length; j++) {
+      if (used.has(j)) continue;
+      const b = list[j];
+      const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt||0).getTime();
+      const sameTotal = Math.abs(getTotal(a) - getTotal(b)) < 0.01;
+      const closeInTime = Math.abs(aTime - bTime) < 3 * 60 * 1000; // 3 minutes
+      if (sameTotal && closeInTime) {
+        // Garder le plus complet (avec infos client)
+        const aHasClient = !!(a.client?.name || a.client?.email);
+        const bHasClient = !!(b.client?.name || b.client?.email);
+        const aItems = getItems(a).length;
+        const bItems = getItems(b).length;
+        const keep = (aHasClient && !bHasClient) || (aItems >= bItems) ? a : b;
+        // Fusionner : prendre le meilleur des deux
+        const winner = {...keep};
+        if (!winner.client?.name && (aHasClient || bHasClient)) {
+          winner.client = aHasClient ? a.client : b.client;
+        }
+        if (getItems(a).length !== getItems(b).length) {
+          winner._mergedItems = [...getItems(a), ...getItems(b).filter(bi => !getItems(a).find(ai => ai.name === bi.name))];
+        }
+        winner._wasDuplicate = true;
+        winner._duplicateSources = [a.source || 'boutique', b.source || 'panier'];
+        result.push(winner);
+        used.add(i); used.add(j);
+        merged = true;
+        break;
+      }
+    }
+    if (!merged) { result.push(a); used.add(i); }
+  }
+  return result;
+}
+
 window.loadCommandes = async () => {
   document.getElementById('cmdList').innerHTML = '<div class="cmd-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Chargement…</div></div>';
   try {
@@ -3050,6 +3093,8 @@ window.loadCommandes = async () => {
     snap.forEach(d => _allCommandes.push({...d.data(), _id: d.id}));
     // Only show confirmed orders (paid, shipped, cancelled) — not just "initiated"
     _allCommandes = _allCommandes.filter(c => c.status === 'payé' || c.status === 'expédié' || c.status === 'annulé');
+    // ── DÉDUPLICATION ──
+    _allCommandes = deduplicateCommandes(_allCommandes);
     renderCommandesBadge();
     renderCommandesStats();
     filterCommandes();
@@ -3142,7 +3187,7 @@ function renderCommandesList(commandes){
       </div>
       <div class="cmd-info">
         <div class="cmd-title">${esc(clientName)}${has3d?' <span style="font-size:9px;background:rgba(155,114,255,.12);color:var(--purple);border:1px solid rgba(155,114,255,.25);padding:2px 7px;border-radius:10px;font-family:var(--mono);font-weight:700;letter-spacing:.04em;margin-left:4px">IMPRESSION 3D</span>':''}</div>
-        <div class="cmd-sub">${itemCount} article${itemCount>1?'s':''} · ${esc(c.source||'boutique')} · #${(c._id||'').slice(-6).toUpperCase()}</div>
+        <div class="cmd-sub">${itemCount} article${itemCount>1?'s':''} · ${esc(c.source||'boutique')} · #${(c._id||'').slice(-6).toUpperCase()}${c._wasDuplicate ? ` <span style="font-size:8px;background:rgba(77,166,255,.12);color:var(--blue);border:1px solid rgba(77,166,255,.25);padding:1px 5px;border-radius:8px;font-family:var(--mono);font-weight:700">FUSIONNÉ</span>` : ""}</div>
       </div>
       <div class="cmd-right">
         <div class="cmd-price">${getTotal(c).toFixed(2)} €</div>
