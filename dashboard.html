@@ -393,7 +393,9 @@ tr:hover td{background:rgba(255,255,255,.01)}
 /* ── DEVIS CONFIG PAGE ── */
 .dcfg-wrap{max-width:100%;padding:0 4px}
 .dcfg-info{background:rgba(155,114,255,.07);border:1px solid rgba(155,114,255,.2);border-radius:var(--r);padding:11px 15px;margin-bottom:22px;font-size:11px;color:rgba(155,114,255,.9);display:flex;align-items:center;gap:8px;font-family:var(--mono)}
+.cart-badge{position:absolute;top:4px;right:4px;background:#e11d48;width:9px;height:9px;border-radius:50%;display:none;border:1.5px solid #fff}
 </style>
+<script src="/cart.js"></script>
 </head>
 <body>
 
@@ -2986,13 +2988,41 @@ window.confirmDeleteUser = async () => {
 // ══════════════════════════════════════════════════════════════
 let _allCommandes = [], _cmdFilter = 'all', _editingCmdId = null;
 
-// Helper: normalise items/lineItems en tableau peu importe le format Firebase
+// Convertit n'importe quel format Firebase (objet ou tableau) en tableau
 function toArr(val) {
   if (!val) return [];
   if (Array.isArray(val)) return val;
   if (typeof val === 'object') return Object.values(val);
   return [];
 }
+
+// Unifie le format items (panier/devis) et lineItems (Stripe) en un seul format
+function getItems(c) {
+  const items = toArr(c.items);
+  const lineItems = toArr(c.lineItems);
+  if (items.length > 0) return items;
+  if (lineItems.length > 0) return lineItems.map(li => ({
+    name: li.description || li.name || 'Article',
+    variant: '',
+    qty: li.quantity || li.qty || 1,
+    price: li.amount != null ? (li.amount / 100) / (li.quantity || 1)
+           : li.unit_amount != null ? li.unit_amount / 100
+           : parseFloat(li.price || 0),
+    isDynamic: false, is3d: false,
+  }));
+  return [];
+}
+
+// Total réel (euros), fallback amountTotal (centimes Stripe)
+function getTotal(c) {
+  if (c.total && parseFloat(c.total) > 0) return parseFloat(c.total);
+  if (c.amountTotal && c.amountTotal > 0) return c.amountTotal / 100;
+  const items = getItems(c);
+  if (items.length > 0) return items.reduce((s, i) => s + parseFloat(i.price||0) * parseInt(i.qty||1), 0);
+  return 0;
+}
+
+
 
 const CMD_STATUS_CFG = {
   'initié':  { label:'Initié',  cls:'cs-init', color:'var(--orange)' },
@@ -3016,6 +3046,8 @@ window.loadCommandes = async () => {
     const snap = await getDocs(q);
     _allCommandes = [];
     snap.forEach(d => _allCommandes.push({...d.data(), _id: d.id}));
+    // Only show confirmed orders (paid, shipped, cancelled) — not just "initiated"
+    _allCommandes = _allCommandes.filter(c => c.status === 'payé' || c.status === 'expédié' || c.status === 'annulé');
     renderCommandesBadge();
     renderCommandesStats();
     filterCommandes();
@@ -3041,7 +3073,7 @@ function renderCommandesStats(){
   let totalCA = 0;
   _allCommandes.forEach(c => {
     counts[c.status] = (counts[c.status]||0) + 1;
-    if(c.status === 'payé' || c.status === 'expédié') totalCA += parseFloat(c.total||0);
+    if(c.status === 'payé' || c.status === 'expédié') totalCA += getTotal(c);
   });
   el.innerHTML = `
     <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:14px 16px">
@@ -3076,7 +3108,7 @@ window.filterCommandes = () => {
     if(_cmdFilter !== 'all' && c.status !== _cmdFilter) return false;
     if(!q) return true;
     const clientName = ((c.client?.name||'') + ' ' + (c.client?.email||'')).toLowerCase();
-    const items = toArr(c.items).map(i=>i.name||'').join(' ').toLowerCase();
+    const items = getItems(c).map(i=>i.name||'').join(' ').toLowerCase();
     return clientName.includes(q) || items.includes(q) || (c._id||'').toLowerCase().includes(q);
   });
   renderCommandesList(filtered);
@@ -3094,8 +3126,9 @@ function renderCommandesList(commandes){
   }
   list.innerHTML = commandes.map(c => {
     const sc = CMD_STATUS_CFG[c.status] || CMD_STATUS_CFG['initié'];
-    const has3d = toArr(c.items).some(i => i.isDynamic || i.is3d);
-    const itemCount = toArr(c.items).length;
+    const _citems = getItems(c);
+    const has3d = _citems.some(i => i.isDynamic || i.is3d);
+    const itemCount = _citems.length;
     const clientName = c.client?.name || c.client?.email || 'Client inconnu';
     const iconBg = has3d ? 'rgba(155,114,255,.12)' : 'rgba(255,107,53,.1)';
     const iconColor = has3d ? 'var(--purple)' : 'var(--accent)';
@@ -3110,7 +3143,7 @@ function renderCommandesList(commandes){
         <div class="cmd-sub">${itemCount} article${itemCount>1?'s':''} · ${esc(c.source||'boutique')} · #${(c._id||'').slice(-6).toUpperCase()}</div>
       </div>
       <div class="cmd-right">
-        <div class="cmd-price">${parseFloat(c.total||0).toFixed(2)} €</div>
+        <div class="cmd-price">${getTotal(c).toFixed(2)} €</div>
         <div class="cmd-date">${fmtCmdDate(c.createdAt)}</div>
         <div class="cmd-status ${sc.cls}">${sc.label}</div>
       </div>
@@ -3123,7 +3156,7 @@ window.openCmdModal = (id) => {
   if(!c) return;
   _editingCmdId = id;
   const modal = document.getElementById('cmdModal');
-  const has3d = toArr(c.items).some(i => i.isDynamic || i.is3d);
+  const has3d = getItems(c).some(i => i.isDynamic || i.is3d);
   const sc = CMD_STATUS_CFG[c.status] || CMD_STATUS_CFG['initié'];
 
   // Icon
@@ -3133,7 +3166,7 @@ window.openCmdModal = (id) => {
     ? `<svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8" style="width:22px;height:22px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`
     : `<svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" style="width:22px;height:22px"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>`;
 
-  document.getElementById('cmdModalTitle').textContent = (c.client?.name || c.client?.email || 'Commande anonyme') + ' — ' + parseFloat(c.total||0).toFixed(2) + ' €';
+  document.getElementById('cmdModalTitle').textContent = (c.client?.name || c.customerName || c.client?.email || 'Commande anonyme') + ' — ' + getTotal(c).toFixed(2) + ' €';
   document.getElementById('cmdModalSub').textContent = '#' + id.slice(-8).toUpperCase() + ' · ' + fmtCmdDate(c.createdAt) + ' · ' + (c.source||'boutique');
 
   // Status select
@@ -3174,7 +3207,7 @@ function buildCmdModalBody(c){
 
   // ── ARTICLES ──
   html += `<div class="cmd-section-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg> Articles commandés</div>`;
-  (toArr(c.items).length ? toArr(c.items) : toArr(c.lineItems)).forEach(item => {
+  getItems(c).forEach(item => {
     const is3d = item.isDynamic || item.is3d;
     html += `<div class="cmd-item-row">`;
     html += `<div class="cmd-item-name">${esc(item.name||'Article')} ${is3d ? '<span class="cmd-3d-badge">IMPRESSION 3D</span>' : ''}</div>`;
@@ -3226,9 +3259,9 @@ function buildCmdModalBody(c){
 
   // ── TOTAUX ──
   html += `<div style="margin-top:16px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">`;
-  html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>Sous-total</span><span style="font-family:var(--mono)">${parseFloat(c.total||0).toFixed(2)} €</span></div>`;
+  html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>Sous-total</span><span style="font-family:var(--mono)">${getTotal(c).toFixed(2)} €</span></div>`;
   if(c.shipping?.cost) html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>Livraison</span><span style="font-family:var(--mono)">${parseFloat(c.shipping.cost).toFixed(2)} €</span></div>`;
-  html += `<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;border-top:1px solid var(--border2);padding-top:10px;margin-top:4px"><span>Total TTC</span><span style="font-family:var(--mono);color:var(--accent)">${parseFloat(c.total||0).toFixed(2)} €</span></div>`;
+  html += `<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;border-top:1px solid var(--border2);padding-top:10px;margin-top:4px"><span>Total TTC</span><span style="font-family:var(--mono);color:var(--accent)">${getTotal(c).toFixed(2)} €</span></div>`;
   html += `</div>`;
 
   // ── NOTE INTERNE ──
@@ -3283,7 +3316,7 @@ window.saveCmdNote = async () => {
 window.printBL = () => {
   const c = _allCommandes.find(x => x._id === _editingCmdId);
   if(!c) return;
-  const items = toArr(c.items).length ? toArr(c.items) : toArr(c.lineItems);
+  const items = getItems(c);
   const date = new Date().toLocaleDateString('fr-FR', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const orderId = c.orderId || c._id || '—';
   const itemsHtml = items.map(item => `
@@ -3350,9 +3383,9 @@ window.printBL = () => {
       <tbody>${itemsHtml}</tbody>
     </table>
     <div style="margin-top:16px">
-      <div class="total-row"><span>Sous-total</span><span>${parseFloat(c.total||0).toFixed(2)} €</span></div>
+      <div class="total-row"><span>Sous-total</span><span>${getTotal(c).toFixed(2)} €</span></div>
       <div class="total-row"><span>Livraison</span><span>Offerte</span></div>
-      <div class="total-main"><span>Total payé</span><span>${parseFloat(c.total||0).toFixed(2)} €</span></div>
+      <div class="total-main"><span>Total payé</span><span>${getTotal(c).toFixed(2)} €</span></div>
     </div>
   </div>
 

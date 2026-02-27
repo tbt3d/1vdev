@@ -242,7 +242,9 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
   0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+.cart-badge{position:absolute;top:4px;right:4px;background:#e11d48;width:9px;height:9px;border-radius:50%;display:none;border:1.5px solid #fff}
 </style>
+<script src="/cart.js"></script>
 </head>
 <body data-page="contact">
 
@@ -264,6 +266,10 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
       <a href="/compte.html" class="nav-icon" id="navCompteBtn" title="Mon compte">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </a>
+      <a href="/panier.html" class="nav-icon" title="Mon panier" style="position:relative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="cart-badge" id="navCartBadge"></span>
+      </a>
       <button class="nav-icon nav-burger" onclick="toggleMobileNav()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
@@ -283,6 +289,7 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
     <a href="/a-propos.html">À propos</a>
     <a href="/contact.html">Contact</a>
     <a href="/compte.html">Mon compte</a>
+      <a href="/panier.html">🛍 Mon panier</a>
   </div>
 </header>
 
@@ -309,7 +316,7 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
         </div>
         <div>
           <div class="info-label">Email direct</div>
-          <div class="info-value"><a href="mailto:contact@tbt3d.fr">contact@tbt3d.fr</a></div>
+          <div class="info-value"><a href="mailto:tbt203.contact@gmail.com"</a></div>
         </div>
       </div>
       <div class="info-item">
@@ -474,15 +481,11 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:contact@tbt3d.fr">contact@tbt3d.fr</a>
+      <a href="mailto:tbt203.contact@gmail.com"</a>
       <a href="/contact.html">Formulaire</a>
-      <div class="footer-social">
-        <a href="#" aria-label="Instagram">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-        </a>
-        <a href="#" aria-label="TikTok">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg>
-        </a>
+            <div class="footer-social">
+        <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="https://www.tiktok.com/@tbt203_" aria-label="TikTok" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a>
       </div>
     </div>
   </div>
@@ -492,7 +495,7 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
 </footer>
 
 <!-- FIREBASE + EMAILJS -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -687,11 +690,4 @@ function shake(id) {
 
 window.toggleSearch = () => { const b = document.getElementById('searchBar'); b.classList.toggle('open'); if(b.classList.contains('open')) setTimeout(()=>document.getElementById('searchInput').focus(),50); };
 window.toggleMobileNav = () => document.getElementById('mobileNav').classList.toggle('open');
-window.addEventListener('scroll', () => document.getElementById('navbar').classList.toggle('scrolled', scrollY > 10));
-document.getElementById('footerYear').textContent = new Date().getFullYear();
-document.querySelectorAll('.nav-links a').forEach(a => { if(a.dataset.page===document.body.dataset.page) a.classList.add('active'); });
-</script>
-
-<script src="/search.js"></script>
-</body>
-</html>
+window.addEventListener('scr

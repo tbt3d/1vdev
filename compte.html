@@ -205,7 +205,9 @@
 .loading-spinner{display:flex;align-items:center;justify-content:center;padding:60px;gap:12px;color:#bbb;font-size:12px;font-family:'JetBrains Mono',monospace}
 .spin{width:28px;height:28px;border:2.5px solid #eee;border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.cart-badge{position:absolute;top:4px;right:4px;background:#e11d48;width:9px;height:9px;border-radius:50%;display:none;border:1.5px solid #fff}
 </style>
+<script src="/cart.js"></script>
 </head>
 <body data-page="compte">
 
@@ -227,6 +229,10 @@
       <a href="/compte.html" class="nav-icon" id="navCompteBtn" title="Mon compte">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </a>
+      <a href="/panier.html" class="nav-icon" title="Mon panier" style="position:relative">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        <span class="cart-badge" id="navCartBadge"></span>
+      </a>
       <button class="nav-icon nav-burger" onclick="toggleMobileNav()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
@@ -243,6 +249,7 @@
     <a href="/index.html">Home</a><a href="/boutique.html">Boutique</a>
     <a href="/devis.html">Devis STL</a><a href="/a-propos.html">À propos</a>
     <a href="/contact.html">Contact</a><a href="/compte.html">Mon compte</a>
+      <a href="/panier.html">🛍 Mon panier</a>
   </div>
 </header>
 
@@ -458,7 +465,7 @@
     </div>
     <div class="footer-col"><div class="footer-col-title">Navigation</div><a href="/index.html">Home</a><a href="/boutique.html">Boutique</a><a href="/devis.html">Impression sur mesure</a><a href="/a-propos.html">À propos</a><a href="/contact.html">Contact</a></div>
     <div class="footer-col"><div class="footer-col-title">Légal</div><a href="/mentions-legales.html">Mentions légales</a><a href="/cgv.html">CGV</a><a href="/politique-confidentialite.html">Confidentialité</a></div>
-    <div class="footer-col"><div class="footer-col-title">Contact</div><a href="/cdn-cgi/l/email-protection#354157410705061b565a5b41545641755258545c591b565a58"><span class="__cf_email__" data-cfemail="eb9f899fd9dbd8c58884859f8a889fab8c868a8287c5888486">[email&#160;protected]</span></a><a href="/contact.html">Formulaire</a></div>
+    <div class="footer-col"><div class="footer-col-title">Contact</div><a href="mailto:tbt203.contact@gmail.com"</a><a href="/contact.html">Formulaire</a></div>
   </div>
   <div class="footer-bottom"><span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span></div>
 </footer>
