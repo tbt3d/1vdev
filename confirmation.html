@@ -261,14 +261,14 @@ async function verifyAndDisplay(sessionId) {
       return;
     }
 
-    // 2. Paiement confirmé → enregistrer en Firestore (évite les doublons)
-    const orderId = await saveOrderIfNew(sessionId, data);
+    // 2. Paiement confirmé → mettre à jour en Firestore
+    const { id: orderId, fbData } = await saveOrderIfNew(sessionId, data);
 
     // 3. Paiement confirmé → vider le panier maintenant
     if (typeof TBTCart !== 'undefined') TBTCart.clear();
 
-    // 4. Afficher la confirmation
-    displayConfirmation(data, orderId);
+    // 4. Afficher la confirmation — priorité aux données Firebase (adresse, téléphone)
+    displayConfirmation(data, orderId, fbData);
 
   } catch (err) {
     console.error('Erreur vérification:', err);
@@ -277,86 +277,70 @@ async function verifyAndDisplay(sessionId) {
 }
 
 async function saveOrderIfNew(sessionId, stripeData) {
-  const { updateDoc, doc: fsDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+  const { updateDoc, getDoc, doc: fsDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
 
-  // Chercher une commande existante par lastOrderId (panier) ou stripeSessionId
-  const lastOrderId = localStorage.getItem('tbt3d_lastOrderId');
-  const existing = await getDocs(
-    query(collection(db, 'commandes'), where('stripeSessionId', '==', sessionId))
-  );
-
-  const clientData = {
-    name: stripeData.customerName || '',
-    email: stripeData.customerEmail || '',
-    address: stripeData.shippingAddress ? 
-      (stripeData.shippingAddress.line1||'') + ' ' + (stripeData.shippingAddress.city||'') : '',
-    country: stripeData.shippingAddress?.country || '',
-  };
-
-  if (!existing.empty) {
-    // Mettre à jour le client info sur la commande existante
-    const docRef = existing.docs[0].ref;
-    await updateDoc(docRef, { 
-      client: clientData, 
-      status: 'payé', 
-      paidAt: new Date(), 
-      stripeSessionId: sessionId,
-      lineItems: stripeData.lineItems || [],
-      total: stripeData.amountTotal ? stripeData.amountTotal / 100 : 0,
-      customerName: stripeData.customerName || '',
-      customerEmail: stripeData.customerEmail || '',
-    });
-    return existing.docs[0].data().orderId || existing.docs[0].id;
-  }
-
-  // Chercher par lastOrderId (commande créée depuis panier avant paiement)
-  if (lastOrderId) {
+  // 1. Chercher par orderId dans l'URL (injecté par panier.html)
+  const urlOrderId = new URLSearchParams(window.location.search).get('orderId');
+  if (urlOrderId) {
     try {
-      const { getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-      const snap = await getDoc(fsDoc(db, 'commandes', lastOrderId));
+      const snap = await getDoc(fsDoc(db, 'commandes', urlOrderId));
       if (snap.exists()) {
-        const orderId = snap.data().orderId || ('TBT-' + Date.now().toString(36).toUpperCase());
-        await updateDoc(fsDoc(db, 'commandes', lastOrderId), {
-          client: clientData,
+        // Juste ajouter l'email Stripe (la commande a déjà toutes les infos)
+        await updateDoc(fsDoc(db, 'commandes', urlOrderId), {
           status: 'payé',
           paidAt: new Date(),
           stripeSessionId: sessionId,
-          orderId: orderId,
-          total: stripeData.amountTotal ? stripeData.amountTotal / 100 : 0,
-          customerName: stripeData.customerName || '',
-          customerEmail: stripeData.customerEmail || '',
+          'client.email': stripeData.customerEmail || '',
           lineItems: stripeData.lineItems || [],
         });
-        localStorage.removeItem('tbt3d_lastOrderId');
-        console.log('✓ Commande mise à jour :', orderId);
-        return orderId;
+        console.log('✓ Commande mise à jour depuis URL orderId :', urlOrderId);
+        // Retourner les données Firebase (adresse, téléphone, etc.)
+        return { id: urlOrderId, fbData: snap.data() };
       }
-    } catch(e) { console.warn('Could not update existing order:', e); }
+    } catch(e) { console.warn('Could not update by orderId:', e); }
   }
 
-  // Créer une nouvelle commande si rien trouvé
+  // 2. Fallback : chercher par stripeSessionId
+  const existing = await getDocs(
+    query(collection(db, 'commandes'), where('stripeSessionId', '==', sessionId))
+  );
+  if (!existing.empty) {
+    const fbDoc = existing.docs[0];
+    await updateDoc(fbDoc.ref, {
+      status: 'payé',
+      paidAt: new Date(),
+      'client.email': stripeData.customerEmail || '',
+      lineItems: stripeData.lineItems || [],
+    });
+    console.log('✓ Commande mise à jour (stripeSessionId):', fbDoc.id);
+    return { id: fbDoc.id, fbData: fbDoc.data() };
+  }
+
+  // 3. Dernier recours : créer un nouveau doc
   const orderId = 'TBT-' + Date.now().toString(36).toUpperCase();
   await addDoc(collection(db, 'commandes'), {
     orderId,
     stripeSessionId: sessionId,
     status: 'payé',
-    client: clientData,
-    customerEmail: stripeData.customerEmail,
-    customerName: stripeData.customerName,
-    shippingAddress: stripeData.shippingAddress,
-    amountTotal: stripeData.amountTotal,
-    currency: stripeData.currency,
-    lineItems: stripeData.lineItems,
+    client: {
+      name: stripeData.customerName || '',
+      email: stripeData.customerEmail || '',
+      address: stripeData.shippingAddress?.line1 || '',
+      city: stripeData.shippingAddress?.city || '',
+      zip: stripeData.shippingAddress?.postal_code || '',
+      country: stripeData.shippingAddress?.country || '',
+      phone: '',
+    },
+    lineItems: stripeData.lineItems || [],
     total: stripeData.amountTotal ? stripeData.amountTotal / 100 : 0,
     createdAt: new Date(),
     paidAt: new Date(),
   });
-
-  console.log('✓ Commande enregistrée :', orderId);
-  return orderId;
+  console.log('✓ Commande créée (fallback):', orderId);
+  return { id: orderId, fbData: null };
 }
 
-function displayConfirmation(data, orderId) {
+function displayConfirmation(data, orderId, fbData) {
   // Masquer loading, afficher confirmation
   document.getElementById('stateLoading').style.display = 'none';
   document.getElementById('stateSuccess').style.display = '';
@@ -367,57 +351,65 @@ function displayConfirmation(data, orderId) {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
+  // Données client : priorité Firebase (adresse, téléphone saisis dans le form)
+  const fb = fbData?.client || {};
+  const name    = fb.name    || data.customerName  || '';
+  const email   = fb.email   || data.customerEmail || '';
+  const address = fb.address || data.shippingAddress?.line1 || '';
+  const city    = fb.city    || data.shippingAddress?.city  || '';
+  const zip     = fb.zip     || data.shippingAddress?.postal_code || '';
+  const country = fb.country || data.shippingAddress?.country || '';
+  const phone   = fb.phone   || '';
+
   // Client
   const ci = document.getElementById('customerInfo');
-  if (data.customerName || data.customerEmail) {
-    ci.innerHTML = `
-      ${data.customerName ? `<strong>${data.customerName}</strong>` : ''}
-      ${data.customerEmail ? `<span>${data.customerEmail}</span>` : ''}
-      ${data.shippingAddress ? `
-        <span style="margin-top:8px;display:block">
-          ${data.shippingAddress.line1 || ''}${data.shippingAddress.line2 ? '<br>' + data.shippingAddress.line2 : ''}
-          <br>${data.shippingAddress.postal_code || ''} ${data.shippingAddress.city || ''}
-          <br>${data.shippingAddress.country || ''}
-        </span>` : ''}
-    `;
-  } else {
-    ci.textContent = 'Informations enregistrées par Stripe';
-  }
+  ci.innerHTML = `
+    ${name    ? `<strong>${name}</strong>` : ''}
+    ${email   ? `<span>${email}</span>` : ''}
+    ${phone   ? `<span>📞 ${phone}</span>` : ''}
+    ${address ? `<span style="margin-top:8px;display:block">
+      ${address}<br>${zip} ${city}<br>${country}
+    </span>` : ''}
+  `;
 
   // Email
-  if (data.customerEmail) {
-    document.getElementById('customerEmail').textContent = data.customerEmail;
+  if (email) {
+    document.getElementById('customerEmail').textContent = email;
   }
 
-  // Articles
+  // Articles — priorité aux items Firebase (avec variante), fallback lineItems Stripe
   const itemsList = document.getElementById('itemsList');
-  if (data.lineItems && data.lineItems.length > 0) {
+  const fbItems = fbData?.items || [];
+  if (fbItems.length > 0) {
+    itemsList.innerHTML = fbItems.map(item => `
+      <div class="item-row">
+        <div>
+          <div class="item-name">${item.name || 'Article'}</div>
+          ${item.variant ? `<div class="item-detail">${item.variant}</div>` : ''}
+          <div class="item-detail">Qté : ${item.qty || 1}</div>
+        </div>
+        <div class="item-price">${(parseFloat(item.price||0) * parseInt(item.qty||1)).toFixed(2)} €</div>
+      </div>
+    `).join('');
+  } else if (data.lineItems && data.lineItems.length > 0) {
     itemsList.innerHTML = data.lineItems.map(item => `
       <div class="item-row">
         <div>
           <div class="item-name">${item.name || 'Article'}</div>
           <div class="item-detail">Qté : ${item.quantity || item.qty || 1}</div>
         </div>
-        <div class="item-price">${item.amount ? (item.amount / 100).toFixed(2) + ' €' : item.price ? (item.price * (item.quantity || item.qty || 1) / 100).toFixed(2) + ' €' : '—'}</div>
+        <div class="item-price">${item.amount ? (item.amount / 100).toFixed(2) + ' €' : '—'}</div>
       </div>
     `).join('');
   } else {
     itemsList.innerHTML = '<div class="item-row"><div class="item-name">Voir votre email de confirmation</div></div>';
   }
 
-  // Total
+  // Total — depuis Firebase si dispo
   const totalRows = document.getElementById('totalRows');
-  const total = (data.amountTotal / 100).toFixed(2);
+  const total = fbData?.total ? fbData.total.toFixed(2) : data.amountTotal ? (data.amountTotal / 100).toFixed(2) : '0.00';
   totalRows.innerHTML = `
     <div class="total-row">
-      <span>Sous-total</span>
-      <span>${total} €</span>
-    </div>
-    <div class="total-row">
-      <span>Livraison</span>
-      <span>Offerte</span>
-    </div>
-    <div class="total-row main">
       <span>Total payé</span>
       <strong>${total} €</strong>
     </div>
@@ -459,7 +451,7 @@ function showError(msg) {
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#dca8bea8eeeceff2bfb3b2a8bdbfa89cbbb1bdb5b0f2bfb3b1"><span class="__cf_email__" data-cfemail="7b0f190f494b48551814150f1a180f3b1c161a121755181416">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
@@ -473,6 +465,7 @@ function showError(msg) {
     <span class="footer-pay">
       <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
       <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#003087"/><text x="19" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="white" font-family="sans-serif">PayPal</text></svg>
     </span>
   </div>
 </footer>

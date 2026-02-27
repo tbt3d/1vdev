@@ -3372,7 +3372,10 @@ window.printBL = () => {
     <div class="info-grid">
       <div class="info-box"><label>Nom</label><span>${c.client?.name||c.customerName||'—'}</span></div>
       <div class="info-box"><label>Email</label><span>${c.client?.email||c.customerEmail||'—'}</span></div>
-      ${c.client?.address||c.shippingAddress ? `<div class="info-box" style="grid-column:1/-1"><label>Adresse de livraison</label><span>${c.client?.address||(c.shippingAddress?.line1||'')+' '+(c.shippingAddress?.city||'')||'—'}</span></div>` : ''}
+      ${c.client?.phone ? `<div class="info-box"><label>Téléphone</label><span>${c.client.phone}</span></div>` : ''}
+      ${(c.client?.zip||c.client?.city) ? `<div class="info-box"><label>Ville</label><span>${((c.client?.zip||'')+' '+(c.client?.city||'')).trim()}</span></div>` : ''}
+      ${c.client?.country ? `<div class="info-box"><label>Pays</label><span>${c.client.country}</span></div>` : ''}
+      ${(c.client?.address||c.shippingAddress) ? `<div class="info-box" style="grid-column:1/-1"><label>Adresse de livraison</label><span>${c.client?.address||(c.shippingAddress?.line1||'')+' '+(c.shippingAddress?.city||'')||'—'}</span></div>` : ''}
     </div>
   </div>
 

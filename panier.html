@@ -698,9 +698,15 @@ function buildWorkerItems(items, mode) {
 
 // ── SAUVEGARDE COMMANDE FIREBASE ──────────────────────────────
 async function saveOrderToFirebase(items, source, addr) {
-  // ── On ne crée PAS encore le doc Firebase ici.
-  // On sauvegarde tout dans localStorage, le doc sera créé APRÈS confirmation Stripe.
+  // Crée le doc Firebase MAINTENANT avec statut "initié" + adresse complète.
+  // Sur la page de succès on mettra juste à jour le statut en "payé".
   try {
+    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    const { getFirestore, addDoc, collection } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const fbCfg = { apiKey:"AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",authDomain:"tbt3d-a0f04.firebaseapp.com",projectId:"tbt3d-a0f04",storageBucket:"tbt3d-a0f04.firebasestorage.app",appId:"1:10842592812:web:f06cbd6c6892f29a6ca389" };
+    const app = getApps().length ? getApps()[0] : initializeApp(fbCfg);
+    const db = getFirestore(app);
+
     const total = items.reduce((s,i) => s + parseFloat(i.price||0)*parseInt(i.qty||1), 0);
     const orderItems = items.map(i => ({
       id: i.id || '',
@@ -721,11 +727,11 @@ async function saveOrderToFirebase(items, source, addr) {
       note: i._note || '',
       image: i.image || null,
     }));
-    const pending = {
+
+    const orderDoc = {
+      createdAt: new Date(),
+      status: 'initié',
       source: source || 'panier',
-      ts: Date.now(),
-      items: orderItems,
-      total: parseFloat(total.toFixed(2)),
       client: addr ? {
         name: (addr.firstName + ' ' + addr.lastName).trim(),
         email: '',
@@ -734,13 +740,16 @@ async function saveOrderToFirebase(items, source, addr) {
         zip: addr.zip || '',
         country: document.getElementById('shippingCountry')?.value || '',
         phone: addr.phone || '',
-      } : null,
+      } : { name:'', email:'', address:'', city:'', zip:'', country:'', phone:'' },
+      items: orderItems,
+      total: parseFloat(total.toFixed(2)),
     };
-    localStorage.setItem('tbt3d_pendingOrder', JSON.stringify(pending));
-    localStorage.removeItem('tbt3d_lastOrderId');
-    return 'pending'; // signale que tout est prêt, pas d'ID Firebase encore
+
+    const ref = await addDoc(collection(db, 'commandes'), orderDoc);
+    console.info('📦 Commande initiée:', ref.id);
+    return ref.id; // ID réel Firebase
   } catch(e) {
-    console.warn('Could not save pending order:', e);
+    console.warn('Could not save order to Firebase:', e);
     return null;
   }
 }
@@ -903,72 +912,47 @@ validateAddress();
   const container = document.querySelector('.page-inner');
 
   if (params.get('success') === '1') {
-    // ── Créer l'unique doc Firebase maintenant que le paiement est confirmé ──
+    // ── Mettre à jour le doc Firebase existant en "payé" ──
     try {
       const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-      const { getFirestore, doc, addDoc, collection, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      const { getFirestore, doc, updateDoc, getDoc, collection } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
       const fbCfg = { apiKey:"AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",authDomain:"tbt3d-a0f04.firebaseapp.com",projectId:"tbt3d-a0f04",storageBucket:"tbt3d-a0f04.firebasestorage.app",appId:"1:10842592812:web:f06cbd6c6892f29a6ca389" };
       const app = getApps().length ? getApps()[0] : initializeApp(fbCfg);
       const db = getFirestore(app);
 
-      // Récupérer données de commande en attente
-      let pending = null;
-      try { pending = JSON.parse(localStorage.getItem('tbt3d_pendingOrder') || 'null'); } catch(e){}
-
-      // Récupérer infos client depuis Stripe
+      const orderId  = params.get('orderId');
       const sessionId = params.get('session_id');
-      let stripeClient = null;
-      if (sessionId) {
-        try {
-          const cfgSnap = await getDoc(doc(db, 'config', 'panier'));
-          const cfg = cfgSnap.exists() ? cfgSnap.data() : {};
-          const workerUrl = cfg.workerUrl || 'https://tbt3d-checkout.optionpdg.workers.dev';
-          const res = await fetch(`${workerUrl}/session?id=${sessionId}`);
-          if (res.ok) {
-            const session = await res.json();
-            const cd = session.customer_details || {};
-            const addr = cd.address || {};
-            stripeClient = {
-              name:    cd.name         || '',
-              email:   cd.email        || '',
-              phone:   cd.phone        || '',
-              address: addr.line1      || '',
-              city:    addr.city       || '',
-              zip:     addr.postal_code|| '',
-              country: addr.country    || '',
-            };
-          }
-        } catch(e) { console.info('Session Stripe non récupérée:', e.message); }
+
+      if (orderId) {
+        // Récupérer l'email depuis Stripe pour compléter le client
+        let stripeEmail = '';
+        if (sessionId) {
+          try {
+            const cfgSnap = await getDoc(doc(db, 'config', 'panier'));
+            const cfg = cfgSnap.exists() ? cfgSnap.data() : {};
+            const workerUrl = cfg.workerUrl || 'https://tbt3d-checkout.optionpdg.workers.dev';
+            const res = await fetch(`${workerUrl}/session?id=${sessionId}`);
+            if (res.ok) {
+              const session = await res.json();
+              stripeEmail = session.customer_details?.email || '';
+            }
+          } catch(e) { console.info('Session Stripe:', e.message); }
+        }
+
+        // Mettre à jour le doc : statut payé + email + stripeSessionId
+        const updateData = {
+          status: 'payé',
+          paidAt: new Date(),
+          stripeSessionId: sessionId || null,
+        };
+        if (stripeEmail) updateData['client.email'] = stripeEmail;
+
+        await updateDoc(doc(db, 'commandes', orderId), updateData);
+        console.info('✅ Commande payée:', orderId);
+      } else {
+        console.warn('⚠ Pas d\'orderId dans l\'URL, commande non mise à jour');
       }
-
-      // Fusionner : les infos saisies dans le form (pending.client) priment sur Stripe
-      const localClient = pending?.client || null;
-      const finalClient = {
-        name:    localClient?.name    || stripeClient?.name    || '',
-        email:   stripeClient?.email  || localClient?.email    || '',
-        phone:   localClient?.phone   || stripeClient?.phone   || '',
-        address: localClient?.address || stripeClient?.address || '',
-        city:    localClient?.city    || stripeClient?.city    || '',
-        zip:     localClient?.zip     || stripeClient?.zip     || '',
-        country: localClient?.country || stripeClient?.country || '',
-      };
-
-      // Créer le doc unique Firebase
-      const orderDoc = {
-        createdAt: new Date(),
-        paidAt: new Date(),
-        status: 'payé',
-        source: pending?.source || 'panier',
-        client: finalClient,
-        items: pending?.items || [],
-        total: pending?.total || 0,
-        stripeSessionId: sessionId || null,
-      };
-      const ref = await addDoc(collection(db, 'commandes'), orderDoc);
-      console.info('✅ Commande créée:', ref.id);
-      localStorage.removeItem('tbt3d_pendingOrder');
-      localStorage.removeItem('tbt3d_lastOrderId');
-    } catch(e) { console.warn('Could not create order:', e); }
+    } catch(e) { console.warn('Could not update order:', e); }
 
     // Vider le panier
     try { TBTCart.clear(); } catch(e){}
