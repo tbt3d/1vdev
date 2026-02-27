@@ -3093,6 +3093,42 @@ function fmtCmdDate(raw){
   }catch{ return '—'; }
 }
 
+// ── Auto-assign factureNum + blNum aux commandes payées qui n'en ont pas ──
+async function autoAssignNums() {
+  // Trier par date de paiement croissante pour avoir les bons numéros séquentiels
+  const sorted = [..._allCommandes].sort((a, b) => {
+    const ta = a.paidAt?.seconds ? a.paidAt.seconds*1000 : (typeof a.paidAt==='string'?new Date(a.paidAt).getTime():(a.paidAt||0));
+    const tb = b.paidAt?.seconds ? b.paidAt.seconds*1000 : (typeof b.paidAt==='string'?new Date(b.paidAt).getTime():(b.paidAt||0));
+    return ta - tb;
+  });
+
+  const updates = [];
+  sorted.forEach((c, idx) => {
+    const year = new Date((c.paidAt?.seconds ? c.paidAt.seconds*1000 : c.paidAt) || Date.now()).getFullYear();
+    const seq  = String(idx + 1).padStart(4, '0');
+    const factureNum = c.factureNum || ('FAC-' + year + '-' + seq);
+    const blNum      = c.blNum      || ('BL-'  + year + '-' + seq);
+    if (!c.factureNum || !c.blNum) {
+      updates.push({ id: c._id, factureNum, blNum });
+      // Mise à jour en mémoire immédiatement
+      c.factureNum = factureNum;
+      c.blNum      = blNum;
+    }
+  });
+
+  if (updates.length === 0) return;
+
+  // Sauvegarder dans Firestore en parallèle (silencieux)
+  await Promise.all(updates.map(u =>
+    updateDoc(doc(db, 'commandes', u.id), { factureNum: u.factureNum, blNum: u.blNum })
+      .catch(e => console.warn('autoAssignNums error for', u.id, e))
+  ));
+
+  // Rafraîchir l'affichage
+  filterCommandes();
+  console.log(`✓ autoAssignNums: ${updates.length} commande(s) numérotée(s)`);
+}
+
 window.loadCommandes = async () => {
   document.getElementById('cmdList').innerHTML = '<div class="cmd-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Chargement…</div></div>';
   try {
@@ -3106,6 +3142,8 @@ window.loadCommandes = async () => {
     renderCommandesStats();
     filterCommandes();
     toast('Commandes chargées ✓');
+    // Assigner automatiquement factureNum/blNum aux commandes qui n'en ont pas
+    autoAssignNums();
   } catch(e) {
     document.getElementById('cmdList').innerHTML = '<div class="cmd-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/></svg><div style="font-size:13px;font-weight:600;color:var(--red);margin-bottom:4px">Erreur de chargement</div><div style="font-size:11px;color:var(--muted)">' + esc(e.message) + '</div></div>';
     toast('Erreur : '+e.message, true);
@@ -3678,7 +3716,7 @@ window.sendConfirmationEmail = async (c) => {
       htmlSavedAt: new Date(),
     });
     const idx = _allCommandes.findIndex(x=>x._id===c._id);
-    if(idx!==-1){ _allCommandes[idx].factureHtml=factureHtml; _allCommandes[idx].blNum=blNum; _allCommandes[idx].factureNum=factureNum; }
+    if(idx!==-1){ _allCommandes[idx].factureHtml=factureHtml; _allCommandes[idx].blNum=blNum; }
     console.log('HTML sauvegardé dans Firestore ✓');
   } catch(e){ console.warn('Erreur sauvegarde HTML Firestore:', e); }
 
@@ -3717,7 +3755,7 @@ window.sendConfirmationEmail = async (c) => {
     factureUrl = await getDownloadURL(pdfRef);
 
     // Mettre à jour Firestore avec l'URL du PDF
-    await updateDoc(doc(db,'commandes',c._id), { factureUrl, factureNum, blNum });
+    await updateDoc(doc(db,'commandes',c._id), { factureUrl, factureNum });
     const idx2 = _allCommandes.findIndex(x=>x._id===c._id);
     if(idx2!==-1) _allCommandes[idx2].factureUrl = factureUrl;
     console.log('PDF uploadé ✓', factureUrl);
@@ -3775,6 +3813,8 @@ window.updateCmdStatus = async () => {
     renderCommandesStats();
     filterCommandes();
     toast('Statut mis à jour → ' + newStatus);
+    // Si passage en payé → assigner factureNum/blNum immédiatement si pas encore fait
+    if(newStatus === 'payé') await autoAssignNums();
     // Auto-send confirmation email on first transition to 'payé' or 'expédié'
     if((newStatus === 'payé' || newStatus === 'expédié') && !c?.confirmationEmailSent) {
       const updatedC = _allCommandes.find(x => x._id === _editingCmdId);
