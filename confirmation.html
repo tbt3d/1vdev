@@ -358,7 +358,9 @@ function displayConfirmation(data, orderId, fbData) {
   const address = fb.address || data.shippingAddress?.line1 || '';
   const city    = fb.city    || data.shippingAddress?.city  || '';
   const zip     = fb.zip     || data.shippingAddress?.postal_code || '';
-  const country = fb.country || data.shippingAddress?.country || '';
+  const countryCode = fb.country || data.shippingAddress?.country || '';
+  const COUNTRY_NAMES = { FR:'France', BE:'Belgique', CH:'Suisse', DE:'Allemagne', ES:'Espagne', IT:'Italie', GB:'Royaume-Uni', US:'États-Unis', NL:'Pays-Bas', PT:'Portugal', LU:'Luxembourg', AT:'Autriche', FI:'Finlande', SE:'Suède', NO:'Norvège', DK:'Danemark', CA:'Canada', AU:'Australie', JP:'Japon' };
+  const country = COUNTRY_NAMES[countryCode?.toUpperCase()] || countryCode || '';
   const phone   = fb.phone   || '';
 
   // Client
@@ -405,14 +407,27 @@ function displayConfirmation(data, orderId, fbData) {
     itemsList.innerHTML = '<div class="item-row"><div class="item-name">Voir votre email de confirmation</div></div>';
   }
 
-  // Total — depuis Firebase si dispo
+  // Total — décomposé TVA + livraison depuis lineItems Stripe
   const totalRows = document.getElementById('totalRows');
-  const total = fbData?.total ? fbData.total.toFixed(2) : data.amountTotal ? (data.amountTotal / 100).toFixed(2) : '0.00';
-  totalRows.innerHTML = `
-    <div class="total-row">
-      <span>Total payé</span>
-      <strong>${total} €</strong>
-    </div>
+  const totalTTC = fbData?.total ? fbData.total : data.amountTotal ? data.amountTotal / 100 : 0;
+  const allLineItems = data.lineItems || fbData?.lineItems || [];
+  let tvaAmt = null, shippingAmt = null, subtotalAmt = null;
+  allLineItems.forEach(item => {
+    const n = (item.name||'').toLowerCase();
+    const a = item.amount != null ? item.amount / 100 : null;
+    if (n.includes('tva') || n.includes('tax')) tvaAmt = a;
+    else if (n.includes('livraison') || n.includes('shipping') || n.includes('frais')) shippingAmt = a;
+  });
+  if (tvaAmt !== null || shippingAmt !== null) {
+    subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0);
+  }
+  totalRows.innerHTML = subtotalAmt !== null ? `
+    <div class="total-row"><span>Sous-total HT</span><span>${subtotalAmt.toFixed(2)} €</span></div>
+    ${tvaAmt !== null ? `<div class="total-row"><span>TVA (20%)</span><span>${tvaAmt.toFixed(2)} €</span></div>` : ''}
+    ${shippingAmt !== null ? `<div class="total-row"><span>Livraison</span><span>${shippingAmt.toFixed(2)} €</span></div>` : ''}
+    <div class="total-row main"><span>Total TTC payé</span><strong>${totalTTC.toFixed(2)} €</strong></div>
+  ` : `
+    <div class="total-row main"><span>Total payé</span><strong>${totalTTC.toFixed(2)} €</strong></div>
   `;
 
   // Nettoyer l'URL (supprimer session_id)

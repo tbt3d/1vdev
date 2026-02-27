@@ -3021,6 +3021,28 @@ function getTotal(c) {
   return 0;
 }
 
+// Extrait TVA et livraison depuis lineItems Stripe
+function getTaxShipping(c) {
+  const li = Array.isArray(c.lineItems) ? c.lineItems : [];
+  let tva = null, shipping = null, subtotal = null;
+  li.forEach(item => {
+    const name = (item.name||'').toLowerCase();
+    const amt = item.amount != null ? item.amount / 100 : null;
+    if (name.includes('tva') || name.includes('tax')) tva = amt;
+    else if (name.includes('livraison') || name.includes('shipping') || name.includes('frais')) shipping = amt;
+  });
+  // Sous-total HT = total - TVA - livraison
+  const total = getTotal(c);
+  if (tva !== null || shipping !== null) {
+    subtotal = total - (tva||0) - (shipping||0);
+  }
+  return { tva, shipping, subtotal };
+}
+
+// Convertit un code pays en nom complet
+const COUNTRY_NAMES = { FR:'France', BE:'Belgique', CH:'Suisse', DE:'Allemagne', ES:'Espagne', IT:'Italie', GB:'Royaume-Uni', US:'États-Unis', NL:'Pays-Bas', PT:'Portugal', LU:'Luxembourg', AT:'Autriche', FI:'Finlande', SE:'Suède', NO:'Norvège', DK:'Danemark', PL:'Pologne', CZ:'Tchéquie', HU:'Hongrie', RO:'Roumanie', CA:'Canada', AU:'Australie', JP:'Japon' };
+function countryName(code) { return code ? (COUNTRY_NAMES[code.toUpperCase()] || code) : '—'; }
+
 
 
 const CMD_STATUS_CFG = {
@@ -3191,7 +3213,7 @@ function buildCmdModalBody(c){
   html += `<div class="cmd-detail-box"><label>Téléphone</label><span>${esc(c.client?.phone||'—')}</span></div>`;
   html += `<div class="cmd-detail-box"><label>Adresse</label><span>${esc(c.client?.address||'—')}</span></div>`;
   html += `<div class="cmd-detail-box"><label>Ville</label><span>${esc(((c.client?.zip||'') + ' ' + (c.client?.city||'')).trim()||'—')}</span></div>`;
-  html += `<div class="cmd-detail-box"><label>Pays</label><span>${esc(c.client?.country||'—')}</span></div>`;
+  html += `<div class="cmd-detail-box"><label>Pays</label><span>${esc(countryName(c.client?.country)||'—')}</span></div>`;
   html += `</div>`;
 
   // ── LIVRAISON ──
@@ -3258,9 +3280,16 @@ function buildCmdModalBody(c){
   });
 
   // ── TOTAUX ──
+  const _ts = getTaxShipping(c);
   html += `<div style="margin-top:16px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:14px 16px">`;
-  html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>Sous-total</span><span style="font-family:var(--mono)">${getTotal(c).toFixed(2)} €</span></div>`;
-  if(c.shipping?.cost) html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>Livraison</span><span style="font-family:var(--mono)">${parseFloat(c.shipping.cost).toFixed(2)} €</span></div>`;
+  if(_ts.subtotal !== null) {
+    html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>Sous-total HT</span><span style="font-family:var(--mono)">${_ts.subtotal.toFixed(2)} €</span></div>`;
+    if(_ts.tva !== null) html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>TVA (20%)</span><span style="font-family:var(--mono)">${_ts.tva.toFixed(2)} €</span></div>`;
+    if(_ts.shipping !== null) html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>Livraison</span><span style="font-family:var(--mono)">${_ts.shipping.toFixed(2)} €</span></div>`;
+  } else {
+    html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>Sous-total</span><span style="font-family:var(--mono)">${getTotal(c).toFixed(2)} €</span></div>`;
+    if(c.shipping?.cost) html += `<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-bottom:8px"><span>Livraison</span><span style="font-family:var(--mono)">${parseFloat(c.shipping.cost).toFixed(2)} €</span></div>`;
+  }
   html += `<div style="display:flex;justify-content:space-between;font-size:15px;font-weight:800;border-top:1px solid var(--border2);padding-top:10px;margin-top:4px"><span>Total TTC</span><span style="font-family:var(--mono);color:var(--accent)">${getTotal(c).toFixed(2)} €</span></div>`;
   html += `</div>`;
 
@@ -3374,7 +3403,7 @@ window.printBL = () => {
       <div class="info-box"><label>Email</label><span>${c.client?.email||c.customerEmail||'—'}</span></div>
       ${c.client?.phone ? `<div class="info-box"><label>Téléphone</label><span>${c.client.phone}</span></div>` : ''}
       ${(c.client?.zip||c.client?.city) ? `<div class="info-box"><label>Ville</label><span>${((c.client?.zip||'')+' '+(c.client?.city||'')).trim()}</span></div>` : ''}
-      ${c.client?.country ? `<div class="info-box"><label>Pays</label><span>${c.client.country}</span></div>` : ''}
+      ${c.client?.country ? `<div class="info-box"><label>Pays</label><span>${countryName(c.client.country)}</span></div>` : ''}
       ${(c.client?.address||c.shippingAddress) ? `<div class="info-box" style="grid-column:1/-1"><label>Adresse de livraison</label><span>${c.client?.address||(c.shippingAddress?.line1||'')+' '+(c.shippingAddress?.city||'')||'—'}</span></div>` : ''}
     </div>
   </div>
@@ -3386,9 +3415,14 @@ window.printBL = () => {
       <tbody>${itemsHtml}</tbody>
     </table>
     <div style="margin-top:16px">
-      <div class="total-row"><span>Sous-total</span><span>${getTotal(c).toFixed(2)} €</span></div>
-      <div class="total-row"><span>Livraison</span><span>Offerte</span></div>
-      <div class="total-main"><span>Total payé</span><span>${getTotal(c).toFixed(2)} €</span></div>
+      ${(()=>{ const _t=getTaxShipping(c); return _t.subtotal!==null ? `
+        <div class="total-row"><span>Sous-total HT</span><span>${_t.subtotal.toFixed(2)} €</span></div>
+        ${_t.tva!==null?`<div class="total-row"><span>TVA (20%)</span><span>${_t.tva.toFixed(2)} €</span></div>`:''}
+        ${_t.shipping!==null?`<div class="total-row"><span>Livraison</span><span>${_t.shipping.toFixed(2)} €</span></div>`:''}
+      ` : `
+        <div class="total-row"><span>Sous-total</span><span>${getTotal(c).toFixed(2)} €</span></div>
+      `; })()}
+      <div class="total-main"><span>Total TTC payé</span><span>${getTotal(c).toFixed(2)} €</span></div>
     </div>
   </div>
 
