@@ -625,7 +625,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#146076602624273a777b7a60757760547379757d783a777b79"><span class="__cf_email__" data-cfemail="dfabbdabedefecf1bcb0b1abbebcab9fb8b2beb6b3f1bcb0b2">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
             <div class="footer-social">
@@ -645,7 +645,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 </footer>
 
 <!-- ─── FIREBASE + LOGIQUE PRODUIT ─── -->
-<script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
@@ -857,6 +857,7 @@ window.stripeDirectCheckout = async function() {
       total: price * qty,
     });
     localStorage.setItem('tbt3d_lastOrderId', orderRef.id);
+    localStorage.setItem('tbt3d_lastOrderTs', Date.now().toString());
 
     // Appeler le Worker
     const res = await fetch(workerUrl, {
@@ -1301,11 +1302,4 @@ function showCartToast(name) {
   <button class="btn-cart-icon" onclick="addToCart()" title="Ajouter au panier">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
   </button>
-  <button class="btn-buy" id="mobileBtnBuy" onclick="buyNow()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-    Acheter maintenant
-  </button>
-</div>
-
-</body>
-</html>
+  <button class="btn-buy" id="mobileBtnBuy"

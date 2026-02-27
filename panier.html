@@ -625,7 +625,7 @@ function buildWorkerItems(items, mode) {
 async function saveOrderToFirebase(items, source) {
   try {
     const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const { getFirestore, collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { getFirestore, collection, addDoc, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
     const fbCfg = {
       apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
       authDomain: "tbt3d-a0f04.firebaseapp.com",
@@ -636,6 +636,22 @@ async function saveOrderToFirebase(items, source) {
     const apps = getApps();
     const app = apps.length ? apps[0] : initializeApp(fbCfg);
     const db = getFirestore(app);
+
+    // ── Si produit.html a déjà créé un doc pour cette commande, on le réutilise
+    // au lieu d'en créer un deuxième (sinon 2 cartes dans le dashboard)
+    const existingId = localStorage.getItem('tbt3d_lastOrderId');
+    const existingTs = parseInt(localStorage.getItem('tbt3d_lastOrderTs') || '0');
+    const isFresh    = Date.now() - existingTs < 10 * 60 * 1000; // moins de 10 min
+    if (existingId && isFresh) {
+      try {
+        const snap = await getDoc(doc(db, 'commandes', existingId));
+        if (snap.exists() && snap.data().status === 'initié') {
+          console.info('Réutilisation du doc Firebase existant :', existingId);
+          return existingId;
+        }
+      } catch(e) { /* doc inexistant ou erreur réseau, on en crée un nouveau */ }
+    }
+
     const total = items.reduce((s,i) => s + parseFloat(i.price||0)*parseInt(i.qty||1), 0);
     const orderItems = items.map(i => ({
       id: i.id || '',
@@ -645,9 +661,14 @@ async function saveOrderToFirebase(items, source) {
       price: parseFloat(i.price||0),
       isDynamic: !!i.isDynamic,
       is3d: !!i.isDynamic,
+      tech: i.tech || null,
+      material: i.material || null,
+      color: i.color || null,
+      fill: i.fill || null,
+      dims: i.dims || null,
+      volume: i.volume || null,
       fileName: i.fileName || (i._note ? (i._note.match(/Fichier\s*:\s*([^\s|]+)/)?.[1]||'') : ''),
       fileUrl: i.fileUrl || null,
-      dims: i.dims || null,
       note: i._note || '',
       image: i.image || null,
     }));
@@ -655,7 +676,7 @@ async function saveOrderToFirebase(items, source) {
       createdAt: new Date(),
       status: 'initié',
       source: source || 'panier',
-      client: { name: '', email: '' },
+      client: { name: '', email: '', address: '', city: '', zip: '', country: '', phone: '' },
       items: orderItems,
       total: parseFloat(total.toFixed(2)),
     };
@@ -677,7 +698,7 @@ async function stripeCheckout() {
     const cfg = await getPanierCfg();
     const workerUrl  = cfg.workerUrl  || WORKER_URL_DEFAULT;
     const stripeMode = cfg.stripeMode || 'test';
-    const successUrl = cfg.successUrl || 'https://tbt3d.fr/panier.html?success=1';
+    const successUrl = cfg.successUrl || 'https://tbt3d.fr/panier.html?success=1&session_id={CHECKOUT_SESSION_ID}';
     const cancelUrl  = cfg.cancelUrl  || 'https://tbt3d.fr/panier.html?cancelled=1';
 
     const items = TBTCart.load();
@@ -720,7 +741,7 @@ async function stripeCheckoutPartial() {
     const cfg = await getPanierCfg();
     const workerUrl  = cfg.workerUrl  || WORKER_URL_DEFAULT;
     const stripeMode = cfg.stripeMode || 'test';
-    const successUrl = cfg.successUrl || 'https://tbt3d.fr/panier.html?success=1';
+    const successUrl = cfg.successUrl || 'https://tbt3d.fr/panier.html?success=1&session_id={CHECKOUT_SESSION_ID}';
     const cancelUrl  = cfg.cancelUrl  || 'https://tbt3d.fr/panier.html?cancelled=1';
 
     // Sauvegarde dans Firebase
@@ -758,18 +779,46 @@ renderCart();
   const container = document.querySelector('.page-inner');
 
   if (params.get('success') === '1') {
-    // Marquer la commande comme payée dans Firebase
     const orderId = localStorage.getItem('tbt3d_lastOrderId');
     if (orderId) {
       try {
         const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-        const { getFirestore, doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        const { getFirestore, doc, updateDoc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
         const fbCfg = { apiKey:"AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",authDomain:"tbt3d-a0f04.firebaseapp.com",projectId:"tbt3d-a0f04",storageBucket:"tbt3d-a0f04.firebasestorage.app",appId:"1:10842592812:web:f06cbd6c6892f29a6ca389" };
         const apps = getApps();
         const app = apps.length ? apps[0] : initializeApp(fbCfg);
         const db = getFirestore(app);
-        await updateDoc(doc(db, 'commandes', orderId), { status: 'payé', paidAt: new Date() });
+
+        const updateData = { status: 'payé', paidAt: new Date() };
+
+        // Récupérer les infos client depuis la session Stripe
+        const sessionId = params.get('session_id');
+        if (sessionId) {
+          try {
+            const cfgSnap = await getDoc(doc(db, 'config', 'panier'));
+            const cfg = cfgSnap.exists() ? cfgSnap.data() : {};
+            const workerUrl = cfg.workerUrl || 'https://tbt3d-checkout.optionpdg.workers.dev';
+            const res = await fetch(`${workerUrl}/session?id=${sessionId}`);
+            if (res.ok) {
+              const session = await res.json();
+              const cd = session.customer_details || {};
+              const addr = cd.address || {};
+              updateData.client = {
+                name:    cd.name            || '',
+                email:   cd.email           || '',
+                phone:   cd.phone           || '',
+                address: addr.line1         || '',
+                city:    addr.city          || '',
+                zip:     addr.postal_code   || '',
+                country: addr.country       || '',
+              };
+            }
+          } catch(e) { console.info('Session Stripe non récupérée :', e.message); }
+        }
+
+        await updateDoc(doc(db, 'commandes', orderId), updateData);
         localStorage.removeItem('tbt3d_lastOrderId');
+        localStorage.removeItem('tbt3d_lastOrderTs');
       } catch(e) { console.warn('Could not update order status:', e); }
     }
     // Vider le panier
@@ -827,7 +876,7 @@ renderCart();
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#b6c2d4c284868598d5d9d8c2d7d5c2f6d1dbd7dfda98d5d9db"><span class="__cf_email__" data-cfemail="8ffbedfbbdbfbca1ece0e1fbeeecfbcfe8e2eee6e3a1ece0e2">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
@@ -840,9 +889,4 @@ renderCart();
     <span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span>
     <span class="footer-pay">
       <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
-      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
-    </span>
-  </div>
-</footer>
-</body>
-</html>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/>
