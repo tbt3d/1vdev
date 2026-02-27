@@ -210,7 +210,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="/cdn-cgi/l/email-protection#d5a1b7a1e7e5e6fbb6babba1b4b6a195b2b8b4bcb9fbb6bab8"><span class="__cf_email__" data-cfemail="5c283e286e6c6f723f3332283d3f281c3b313d3530723f3331">[email&#160;protected]</span></a>
+      <a href="/cdn-cgi/l/email-protection#6e1a0c1a5c5e5d400d01001a0f0d1a2e09030f0702400d0103"><span class="__cf_email__" data-cfemail="552137216765667b363a3b21343621153238343c397b363a38">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a><a href="/devis.html">Devis STL</a>
       <div class="footer-social">
         <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -348,7 +348,7 @@ function renderGrid() {
     const priceDisplay = a._displayPrice || (parseFloat(a.price).toFixed(2).replace('.', ',') + ' €');
     const fromSpan = a._from ? '<span class="price-from">À partir de</span>' : '';
 
-    const buyBtn = '<button class="btn-buy" onclick="event.stopPropagation();addToCartAndGo(\'' + esc(a.slug || a.id) + '\',\'' + esc(a.name) + '\',' + parseFloat(a.price) + ',' + (a.oldPrice ? parseFloat(a.oldPrice) : 'null') + ',\'' + esc((a.photos && a.photos[0]) ? a.photos[0] : '') + '\',\'' + esc(a.stripePrice || '') + '\',\'' + esc(a.payhip || '') + '\')">Acheter</button>';
+    const buyBtn = '<button class="btn-buy" onclick="event.stopPropagation();addToCartAndGo(\'' + esc(a.slug||a.id) + '\',\'' + esc(a.name) + '\',' + parseFloat(a.price) + ',' + (a.oldPrice ? parseFloat(a.oldPrice) : 'null') + ',\'' + esc((a.photos&&a.photos[0])||'') + '\',\'' + esc(a.stripePrice||'') + '\',\'' + esc(a.payhip||'') + '\')">Acheter</button>';
     const detailBtn = '<a href="' + prodUrl + '" class="btn-details" onclick="event.stopPropagation()">Détails</a>';
 
     card.innerHTML =
@@ -406,17 +406,12 @@ function toggleMobileNav() {
 function searchLive() {}
 function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
 
-// ── AJOUTER AU PANIER DEPUIS LA BOUTIQUE ──────────────────────────────────────
 function addToCartAndGo(id, name, price, oldPrice, image, stripePrice, paymentUrl) {
-  if (typeof TBTCart === 'undefined') {
-    window.location.href = '/panier.html';
-    return;
-  }
   TBTCart.add({
     id:          id,
     name:        name,
     price:       price,
-    oldPrice:    oldPrice && oldPrice > price ? oldPrice : null,
+    oldPrice:    (oldPrice && oldPrice > price) ? oldPrice : null,
     image:       image || null,
     variant:     null,
     stripePrice: stripePrice || null,

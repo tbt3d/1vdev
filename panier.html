@@ -351,15 +351,14 @@ function computeTotals() {
 }
 
 function updateSummaryTotals() {
-  const { subtotal, tva, shipping } = computeTotals();
-  const stripeTotal = subtotal + shipping;
+  const { subtotal, tva, shipping, total } = computeTotals();
   document.getElementById('summaryExtras').innerHTML = `
     <div class="summary-line-muted">
       <span>Sous-total HT</span>
       <span>${subtotal.toFixed(2)} €</span>
     </div>
-    <div class="summary-line-muted" style="font-style:italic;opacity:.7">
-      <span>TVA 20% (info)</span>
+    <div class="summary-line-muted">
+      <span>TVA (20%)</span>
       <span>${tva.toFixed(2)} €</span>
     </div>
     <div class="summary-line-muted">
@@ -367,7 +366,7 @@ function updateSummaryTotals() {
       <span>${shipping.toFixed(2)} €</span>
     </div>
   `;
-  document.getElementById('summaryTotal').textContent = stripeTotal.toFixed(2) + ' €';
+  document.getElementById('summaryTotal').textContent = total.toFixed(2) + ' €';
 }
 
 window.addEventListener('scroll', () => {
@@ -496,13 +495,12 @@ function openCheckout() {
   `).join('');
 
   const { subtotal, tva, shipping, total } = computeTotals();
-  const stripeTotal = subtotal + shipping; // TVA affichée uniquement, non encaissée par Stripe
   document.getElementById('coSummaryLines').innerHTML = `
     <div class="summary-line-muted"><span>Sous-total HT</span><span>${subtotal.toFixed(2)} €</span></div>
-    <div class="summary-line-muted" style="color:var(--muted);font-style:italic"><span>TVA 20% (info)</span><span>${tva.toFixed(2)} €</span></div>
+    <div class="summary-line-muted"><span>TVA (20%)</span><span>${tva.toFixed(2)} €</span></div>
     <div class="summary-line-muted"><span>Livraison</span><span>${shipping.toFixed(2)} €</span></div>
   `;
-  document.getElementById('coTotal').textContent = stripeTotal.toFixed(2) + ' €';
+  document.getElementById('coTotal').textContent = total.toFixed(2) + ' €';
 
   // Déterminer le mode de paiement
   // Un article est "Stripe-compatible" s'il a un stripePrice OU isDynamic:true
@@ -514,12 +512,13 @@ function openCheckout() {
   let btnsHtml = '';
 
   if (allStripe) {
+    // ✅ Tout passe par Stripe (lampes fixes + pièces sur mesure)
     btnsHtml = `
       <button class="co-btn-pay" id="stripeCheckoutBtn" onclick="stripeCheckout()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Payer — ${stripeTotal.toFixed(2)} €
+        Payer en une fois — ${total.toFixed(2)} €
       </button>
-      <p style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px">🔒 Paiement sécurisé via Stripe · Livraison incluse</p>`;
+      <p style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px">🔒 Paiement sécurisé via Stripe · TVA et livraison incluses</p>`;
 
   } else {
     // Mix : certains articles ont un paiement direct ou sont sans lien
@@ -579,7 +578,15 @@ function buildWorkerItems(items, mode) {
     return null;
   }).filter(Boolean);
 
-  // ⚠️ TVA affichée sur le site uniquement — PAS envoyée à Stripe (prix HT, pas d'entreprise)
+  // Ajouter TVA comme ligne dynamique
+  workerItems.push({
+    isDynamic: true,
+    name: 'TVA (20%)',
+    variant: '',
+    note: '',
+    price: tva,
+    qty: 1,
+  });
 
   // Ajouter livraison comme ligne dynamique
   const country = getShippingCountry();
