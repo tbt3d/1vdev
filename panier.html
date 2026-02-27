@@ -97,28 +97,30 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .summary-line-muted { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
 .summary-line-muted:last-of-type { border-bottom: none; }
 .summary-sep { height: 1px; background: var(--border); margin: 4px 0; }
-.address-form-wrap { padding: 16px 0 14px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
-.address-form-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-.address-form-header svg { width: 14px; height: 14px; color: var(--black); flex-shrink: 0; }
-.address-form-header span { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text); }
-.address-row { display: flex; gap: 10px; }
-.address-field { display: flex; flex-direction: column; gap: 5px; flex: 1; margin-bottom: 10px; }
-.address-field label { font-size: 10.5px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
-.address-field label .req { color: #e11d48; margin-left: 1px; }
-.address-input { padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--font); font-size: 13px; color: var(--text); outline: none; transition: border-color .2s, box-shadow .2s, background .2s; background: var(--white); }
-.address-input:focus { border-color: var(--black); box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
-.address-input.error { border-color: #e11d48; background: #fff8f8; }
-.address-input.filled { border-color: #22c55e; }
-.address-error-msg { display: none; font-size: 11px; color: #e11d48; margin-top: 2px; padding: 8px 10px; background: rgba(225,29,72,.06); border: 1px solid rgba(225,29,72,.2); border-radius: 8px; }
-.btn-checkout:disabled { opacity: .4; cursor: not-allowed; transform: none !important; }
+.address-form-wrap { margin: 0 -18px; padding: 18px 18px 14px; background: #f8f8f8; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 0; }
+.address-form-header { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; }
+.address-form-header svg { width: 13px; height: 13px; color: #555; flex-shrink: 0; }
+.address-form-header span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #555; }
+.address-row { display: flex; gap: 8px; }
+.address-field { display: flex; flex-direction: column; gap: 4px; flex: 1; margin-bottom: 8px; }
+.address-field label { font-size: 10px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+.address-field label .req { color: #e11d48; margin-left: 1px; font-weight: 700; }
+.address-input { padding: 9px 11px; border: 1.5px solid #e0e0e0; border-radius: 9px; font-family: var(--font); font-size: 13px; color: var(--text); outline: none; transition: border-color .18s, box-shadow .18s, background .18s; background: #fff; }
+.address-input::placeholder { color: #bbb; }
+.address-input:focus { border-color: #111; box-shadow: 0 0 0 3px rgba(0,0,0,.07); background: #fff; }
+.address-input.error { border-color: #e11d48 !important; background: #fff8f8; }
+.address-input.filled:not(:focus) { border-color: #d1fae5; background: #f0fdf4; }
+.address-error-msg { display: none; font-size: 11px; color: #e11d48; margin-top: 6px; padding: 8px 11px; background: rgba(225,29,72,.05); border: 1px solid rgba(225,29,72,.18); border-radius: 8px; }
+.btn-checkout { transition: opacity .2s, transform .15s, background .15s !important; }
+.btn-checkout:disabled { opacity: .38 !important; cursor: not-allowed !important; transform: none !important; pointer-events: none; }
 @keyframes shakeForm {
   0%,100% { transform: translateX(0); }
-  15%      { transform: translateX(-6px); }
-  30%      { transform: translateX(6px); }
-  45%      { transform: translateX(-5px); }
-  60%      { transform: translateX(5px); }
-  75%      { transform: translateX(-3px); }
-  90%      { transform: translateX(3px); }
+  15%      { transform: translateX(-5px); }
+  30%      { transform: translateX(5px); }
+  45%      { transform: translateX(-4px); }
+  60%      { transform: translateX(4px); }
+  75%      { transform: translateX(-2px); }
+  90%      { transform: translateX(2px); }
 }
 .shipping-select-wrap { display: flex; flex-direction: column; gap: 6px; padding: 10px 0 6px; border-bottom: 1px solid var(--border); }
 .shipping-select-wrap label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
@@ -277,38 +279,38 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
         <!-- Adresse de livraison -->
         <div class="address-form-wrap" id="addressFormWrap">
           <div class="address-form-header">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             <span>Adresse de livraison</span>
           </div>
           <div class="address-row">
             <div class="address-field">
-              <label>Prénom<span class="req">*</span></label>
+              <label>Prénom<span class="req"> *</span></label>
               <input type="text" id="addrFirstName" class="address-input" placeholder="Jean" oninput="validateAddress()" autocomplete="given-name">
             </div>
             <div class="address-field">
-              <label>Nom<span class="req">*</span></label>
+              <label>Nom<span class="req"> *</span></label>
               <input type="text" id="addrLastName" class="address-input" placeholder="Dupont" oninput="validateAddress()" autocomplete="family-name">
             </div>
           </div>
           <div class="address-field">
-            <label>Adresse<span class="req">*</span></label>
-            <input type="text" id="addrLine1" class="address-input" placeholder="12 rue de la Paix" oninput="validateAddress()" autocomplete="street-address">
+            <label>Adresse<span class="req"> *</span></label>
+            <input type="text" id="addrLine1" class="address-input" placeholder="12 rue de la Paix, apt. 3B…" oninput="validateAddress()" autocomplete="street-address">
           </div>
           <div class="address-row">
-            <div class="address-field" style="flex:0 0 110px">
-              <label>Code postal<span class="req">*</span></label>
-              <input type="text" id="addrZip" class="address-input" placeholder="75001" oninput="validateAddress()" autocomplete="postal-code">
+            <div class="address-field" style="flex:0 0 100px;min-width:0">
+              <label>Code postal<span class="req"> *</span></label>
+              <input type="text" id="addrZip" class="address-input" placeholder="75001" oninput="validateAddress()" autocomplete="postal-code" inputmode="numeric">
             </div>
             <div class="address-field">
-              <label>Ville<span class="req">*</span></label>
+              <label>Ville<span class="req"> *</span></label>
               <input type="text" id="addrCity" class="address-input" placeholder="Paris" oninput="validateAddress()" autocomplete="address-level2">
             </div>
           </div>
-          <div class="address-field" style="margin-bottom:0">
-            <label>Téléphone <span style="font-weight:400;text-transform:none;letter-spacing:0">(optionnel)</span></label>
+          <div class="address-field" style="margin-bottom:4px">
+            <label>Téléphone <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:9px;color:#aaa">(optionnel)</span></label>
             <input type="tel" id="addrPhone" class="address-input" placeholder="+33 6 12 34 56 78" autocomplete="tel">
           </div>
-          <div class="address-error-msg" id="addressError">⚠ Veuillez remplir tous les champs marqués *</div>
+          <div class="address-error-msg" id="addressError">Veuillez remplir tous les champs obligatoires pour continuer</div>
         </div>
 
         <!-- Livraison -->
@@ -560,15 +562,13 @@ function openCheckout() {
   const items = TBTCart.load();
   if (items.length === 0) return;
 
-  // Vérifier l'adresse avant d'ouvrir le modal
-  if (!validateAddress()) {
+  // Vérifier l'adresse avant d'ouvrir le modal (affiche les erreurs)
+  if (!validateAddress(true)) {
     const wrap = document.getElementById('addressFormWrap');
     if (wrap) {
       wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
       wrap.style.animation = 'none';
-      setTimeout(() => {
-        wrap.style.animation = 'shakeForm .4s ease';
-      }, 10);
+      setTimeout(() => { wrap.style.animation = 'shakeForm .4s ease'; }, 10);
     }
     return;
   }
@@ -698,35 +698,9 @@ function buildWorkerItems(items, mode) {
 
 // ── SAUVEGARDE COMMANDE FIREBASE ──────────────────────────────
 async function saveOrderToFirebase(items, source, addr) {
+  // ── On ne crée PAS encore le doc Firebase ici.
+  // On sauvegarde tout dans localStorage, le doc sera créé APRÈS confirmation Stripe.
   try {
-    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const { getFirestore, collection, addDoc, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-    const fbCfg = {
-      apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
-      authDomain: "tbt3d-a0f04.firebaseapp.com",
-      projectId: "tbt3d-a0f04",
-      storageBucket: "tbt3d-a0f04.firebasestorage.app",
-      appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
-    };
-    const apps = getApps();
-    const app = apps.length ? apps[0] : initializeApp(fbCfg);
-    const db = getFirestore(app);
-
-    // ── Si produit.html a déjà créé un doc pour cette commande, on le réutilise
-    // au lieu d'en créer un deuxième (sinon 2 cartes dans le dashboard)
-    const existingId = localStorage.getItem('tbt3d_lastOrderId');
-    const existingTs = parseInt(localStorage.getItem('tbt3d_lastOrderTs') || '0');
-    const isFresh    = Date.now() - existingTs < 10 * 60 * 1000; // moins de 10 min
-    if (existingId && isFresh) {
-      try {
-        const snap = await getDoc(doc(db, 'commandes', existingId));
-        if (snap.exists() && snap.data().status === 'initié') {
-          console.info('Réutilisation du doc Firebase existant :', existingId);
-          return existingId;
-        }
-      } catch(e) { /* doc inexistant ou erreur réseau, on en crée un nouveau */ }
-    }
-
     const total = items.reduce((s,i) => s + parseFloat(i.price||0)*parseInt(i.qty||1), 0);
     const orderItems = items.map(i => ({
       id: i.id || '',
@@ -747,10 +721,11 @@ async function saveOrderToFirebase(items, source, addr) {
       note: i._note || '',
       image: i.image || null,
     }));
-    const orderDoc = {
-      createdAt: new Date(),
-      status: 'initié',
+    const pending = {
       source: source || 'panier',
+      ts: Date.now(),
+      items: orderItems,
+      total: parseFloat(total.toFixed(2)),
       client: addr ? {
         name: (addr.firstName + ' ' + addr.lastName).trim(),
         email: '',
@@ -759,15 +734,13 @@ async function saveOrderToFirebase(items, source, addr) {
         zip: addr.zip || '',
         country: document.getElementById('shippingCountry')?.value || '',
         phone: addr.phone || '',
-      } : { name: '', email: '', address: '', city: '', zip: '', country: '', phone: '' },
-      items: orderItems,
-      total: parseFloat(total.toFixed(2)),
+      } : null,
     };
-    const ref = await addDoc(collection(db, 'commandes'), orderDoc);
-    localStorage.setItem('tbt3d_lastOrderId', ref.id);
-    return ref.id;
+    localStorage.setItem('tbt3d_pendingOrder', JSON.stringify(pending));
+    localStorage.removeItem('tbt3d_lastOrderId');
+    return 'pending'; // signale que tout est prêt, pas d'ID Firebase encore
   } catch(e) {
-    console.warn('Firebase order save failed:', e);
+    console.warn('Could not save pending order:', e);
     return null;
   }
 }
@@ -784,7 +757,10 @@ function getAddressData() {
   };
 }
 
-function validateAddress() {
+// Champs que l'utilisateur a commencé à remplir
+const _touchedFields = new Set();
+
+function validateAddress(showErrors) {
   const a = getAddressData();
   const valid = a.firstName && a.lastName && a.line1 && a.zip && a.city;
   const stripeBtn = document.getElementById('stripeCheckoutBtn');
@@ -800,19 +776,34 @@ function validateAddress() {
   Object.entries(fieldMap).forEach(([id, val]) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.classList.toggle('error', !val);
+    // Afficher l'erreur seulement si le champ a déjà été touché OU si showErrors=true (au clic)
+    if (showErrors || _touchedFields.has(id)) {
+      el.classList.toggle('error', !val);
+    } else {
+      el.classList.remove('error');
+    }
     el.classList.toggle('filled', !!val);
   });
   if (stripeBtn) stripeBtn.disabled = !valid;
-  if (cmdBtn) cmdBtn.disabled = !valid;
-  if (errEl) errEl.style.display = valid ? 'none' : 'block';
+  if (cmdBtn) { cmdBtn.disabled = !valid; cmdBtn.style.opacity = valid ? '' : '.45'; }
+  if (errEl) errEl.style.display = (showErrors && !valid) ? 'block' : 'none';
   return valid;
 }
+
+// Marquer un champ comme touché quand l'user le quitte
+['addrFirstName','addrLastName','addrLine1','addrZip','addrCity','addrPhone'].forEach(id => {
+  document.addEventListener('DOMContentLoaded', () => {});
+  // Utiliser event delegation car les inputs sont dans la page statique
+  setTimeout(() => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('blur', () => { _touchedFields.add(id); validateAddress(); });
+  }, 100);
+});
 
 async function stripeCheckout() {
   const btn = document.getElementById('stripeCheckoutBtn');
   // Valider l'adresse avant tout
-  if (!validateAddress()) return;
+  if (!validateAddress(true)) return;
 
   btn.disabled = true;
   btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Redirection…';
@@ -911,49 +902,73 @@ validateAddress();
   const container = document.querySelector('.page-inner');
 
   if (params.get('success') === '1') {
-    // Priorité : orderId dans l'URL (passé lors du checkout) → localStorage en fallback
-    const orderId = params.get('orderId') || localStorage.getItem('tbt3d_lastOrderId');
-    if (orderId) {
-      try {
-        const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-        const { getFirestore, doc, updateDoc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-        const fbCfg = { apiKey:"AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",authDomain:"tbt3d-a0f04.firebaseapp.com",projectId:"tbt3d-a0f04",storageBucket:"tbt3d-a0f04.firebasestorage.app",appId:"1:10842592812:web:f06cbd6c6892f29a6ca389" };
-        const apps = getApps();
-        const app = apps.length ? apps[0] : initializeApp(fbCfg);
-        const db = getFirestore(app);
+    // ── Créer l'unique doc Firebase maintenant que le paiement est confirmé ──
+    try {
+      const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+      const { getFirestore, doc, addDoc, collection, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      const fbCfg = { apiKey:"AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",authDomain:"tbt3d-a0f04.firebaseapp.com",projectId:"tbt3d-a0f04",storageBucket:"tbt3d-a0f04.firebasestorage.app",appId:"1:10842592812:web:f06cbd6c6892f29a6ca389" };
+      const app = getApps().length ? getApps()[0] : initializeApp(fbCfg);
+      const db = getFirestore(app);
 
-        const updateData = { status: 'payé', paidAt: new Date() };
+      // Récupérer données de commande en attente
+      let pending = null;
+      try { pending = JSON.parse(localStorage.getItem('tbt3d_pendingOrder') || 'null'); } catch(e){}
 
-        // Récupérer les infos client depuis la session Stripe
-        const sessionId = params.get('session_id');
-        if (sessionId) {
-          try {
-            const cfgSnap = await getDoc(doc(db, 'config', 'panier'));
-            const cfg = cfgSnap.exists() ? cfgSnap.data() : {};
-            const workerUrl = cfg.workerUrl || 'https://tbt3d-checkout.optionpdg.workers.dev';
-            const res = await fetch(`${workerUrl}/session?id=${sessionId}`);
-            if (res.ok) {
-              const session = await res.json();
-              const cd = session.customer_details || {};
-              const addr = cd.address || {};
-              updateData.client = {
-                name:    cd.name            || '',
-                email:   cd.email           || '',
-                phone:   cd.phone           || '',
-                address: addr.line1         || '',
-                city:    addr.city          || '',
-                zip:     addr.postal_code   || '',
-                country: addr.country       || '',
-              };
-            }
-          } catch(e) { console.info('Session Stripe non récupérée :', e.message); }
-        }
+      // Récupérer infos client depuis Stripe
+      const sessionId = params.get('session_id');
+      let stripeClient = null;
+      if (sessionId) {
+        try {
+          const cfgSnap = await getDoc(doc(db, 'config', 'panier'));
+          const cfg = cfgSnap.exists() ? cfgSnap.data() : {};
+          const workerUrl = cfg.workerUrl || 'https://tbt3d-checkout.optionpdg.workers.dev';
+          const res = await fetch(`${workerUrl}/session?id=${sessionId}`);
+          if (res.ok) {
+            const session = await res.json();
+            const cd = session.customer_details || {};
+            const addr = cd.address || {};
+            stripeClient = {
+              name:    cd.name         || '',
+              email:   cd.email        || '',
+              phone:   cd.phone        || '',
+              address: addr.line1      || '',
+              city:    addr.city       || '',
+              zip:     addr.postal_code|| '',
+              country: addr.country    || '',
+            };
+          }
+        } catch(e) { console.info('Session Stripe non récupérée:', e.message); }
+      }
 
-        await updateDoc(doc(db, 'commandes', orderId), updateData);
-        localStorage.removeItem('tbt3d_lastOrderId');
-        localStorage.removeItem('tbt3d_lastOrderTs');
-      } catch(e) { console.warn('Could not update order status:', e); }
-    }
+      // Fusionner : les infos saisies dans le form (pending.client) priment sur Stripe
+      const localClient = pending?.client || null;
+      const finalClient = {
+        name:    localClient?.name    || stripeClient?.name    || '',
+        email:   stripeClient?.email  || localClient?.email    || '',
+        phone:   localClient?.phone   || stripeClient?.phone   || '',
+        address: localClient?.address || stripeClient?.address || '',
+        city:    localClient?.city    || stripeClient?.city    || '',
+        zip:     localClient?.zip     || stripeClient?.zip     || '',
+        country: localClient?.country || stripeClient?.country || '',
+      };
+
+      // Créer le doc unique Firebase
+      const orderDoc = {
+        createdAt: new Date(),
+        paidAt: new Date(),
+        status: 'payé',
+        source: pending?.source || 'panier',
+        client: finalClient,
+        items: pending?.items || [],
+        total: pending?.total || 0,
+        stripeSessionId: sessionId || null,
+      };
+      const ref = await addDoc(collection(db, 'commandes'), orderDoc);
+      console.info('✅ Commande créée:', ref.id);
+      localStorage.removeItem('tbt3d_pendingOrder');
+      localStorage.removeItem('tbt3d_lastOrderId');
+    } catch(e) { console.warn('Could not create order:', e); }
+
     // Vider le panier
     try { TBTCart.clear(); } catch(e){}
     // Afficher bannière succès
@@ -965,7 +980,6 @@ validateAddress();
         <div><strong>Paiement confirmé !</strong><span>Merci pour votre commande. Vous recevrez une confirmation par email. Thibault s'occupe du reste !</span></div>`;
       container.prepend(banner);
     }
-    // Rediriger vers confirmation si session_id disponible
     const sessionId = params.get('session_id');
     if (sessionId) {
       setTimeout(() => window.location.replace('https://tbt3d.fr/confirmation.html?session_id=' + sessionId), 1500);

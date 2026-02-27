@@ -807,9 +807,9 @@ window.stripeDirectCheckout = async function() {
   btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Redirection…';
 
   try {
-    // Charger config panier depuis Firebase
+    // Charger config panier depuis Firebase (lecture seule — on ne crée PAS de doc ici)
     const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const { getFirestore, doc, getDoc, addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
     const app = getApps().length ? getApps()[0] : initializeApp({
       apiKey:"AIzaSyBmBmFqGXOCbFo_FqJ3aSEIRHIqQDGXirQ",
       authDomain:"tbt3d-a0f04.firebaseapp.com",
@@ -840,35 +840,37 @@ window.stripeDirectCheckout = async function() {
       workerItem = { isDynamic: true, name: _art.name || 'Article', price, qty };
     }
 
-    // Sauvegarder la commande dans Firebase avec status initié
-    const orderRef = await addDoc(collection(db, 'commandes'), {
+    // ── Stocker les données de commande dans localStorage SEULEMENT.
+    // Le doc Firebase sera créé UNE SEULE FOIS dans le success handler après confirmation Stripe.
+    // Collecter toutes les options sélectionnées (ex: "Blanc · Origine · Noir · Noir")
+    const selectedVariants = [];
+    document.querySelectorAll('.opt-block').forEach(block => {
+      const active = block.querySelector('.chip.on, .color-chip.on');
+      if (active) selectedVariants.push(active.dataset.val || active.textContent.trim());
+    });
+    const variantStr = selectedVariants.join(' · ') || null;
+
+    const pendingOrder = {
       source: 'boutique-direct',
-      status: 'initié',
-      createdAt: serverTimestamp(),
-      client: { name: '', email: '' },
-      items: [{ 
-        name: _art.name, 
-        price, 
-        qty, 
+      ts: Date.now(),
+      items: [{
+        name: _art.name,
+        price,
+        qty,
         stripePrice: stripePrice || null,
-        variant: (document.querySelector('.variant-option.active')?.textContent || '').trim() || null,
+        variant: variantStr,
         image: _art.image || null,
       }],
       total: price * qty,
-    });
-    localStorage.setItem('tbt3d_lastOrderId', orderRef.id);
-    localStorage.setItem('tbt3d_lastOrderTs', Date.now().toString());
-
-    // Injecter l'orderId dans la success URL pour éviter les doublons
-    const successUrlWithOrder = successUrl.includes('?')
-      ? successUrl + '&orderId=' + orderRef.id
-      : successUrl + '?orderId=' + orderRef.id;
+    };
+    localStorage.setItem('tbt3d_pendingOrder', JSON.stringify(pendingOrder));
+    localStorage.removeItem('tbt3d_lastOrderId');
 
     // Appeler le Worker
     const res = await fetch(workerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ successUrl: successUrlWithOrder, cancelUrl, items: [workerItem] }),
+      body: JSON.stringify({ successUrl, cancelUrl, items: [workerItem] }),
     });
     const data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || 'Erreur serveur');
