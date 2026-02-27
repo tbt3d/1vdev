@@ -409,7 +409,8 @@ function displayConfirmation(data, orderId, fbData) {
 
   // Total — décomposé TVA + livraison depuis lineItems Stripe
   const totalRows = document.getElementById('totalRows');
-  const totalTTC = fbData?.total ? fbData.total : data.amountTotal ? data.amountTotal / 100 : 0;
+  // Toujours utiliser le montant Stripe comme référence TTC (fbData.total ne contient que les articles HT)
+  const totalTTC = data.amountTotal ? data.amountTotal / 100 : (fbData?.total || 0);
   const allLineItems = data.lineItems || fbData?.lineItems || [];
   let tvaAmt = null, shippingAmt = null, subtotalAmt = null;
   allLineItems.forEach(item => {
