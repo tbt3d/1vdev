@@ -762,11 +762,11 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     <div class="opt-block" id="fillBlock">
       <div class="opt-label">Remplissage <span class="opt-val" id="fillVal">20% — Recommandé</span></div>
       <div class="chips">
-        <div class="chip fill-chip" data-v="10" data-lbl="10% — Léger">10%</div>
-        <div class="chip fill-chip on" data-v="20" data-lbl="20% — Recommandé">20%</div>
-        <div class="chip fill-chip" data-v="50" data-lbl="50% — Solide">50%</div>
-        <div class="chip fill-chip" data-v="70" data-lbl="70% — Très solide">70%</div>
-        <div class="chip fill-chip" data-v="100" data-lbl="100% — Plein">100%</div>
+        <div class="chip fill-chip" data-v="10" data-lbl="10% — Léger">10% <span style="font-size:9px;opacity:.6">base</span></div>
+        <div class="chip fill-chip on" data-v="20" data-lbl="20% — Recommandé">20% <span style="font-size:9px;color:#ff6b35">+2€</span></div>
+        <div class="chip fill-chip" data-v="50" data-lbl="50% — Solide">50% <span style="font-size:9px;color:#ff6b35">+4€</span></div>
+        <div class="chip fill-chip" data-v="70" data-lbl="70% — Très solide">70% <span style="font-size:9px;color:#ff6b35">+6€</span></div>
+        <div class="chip fill-chip" data-v="100" data-lbl="100% — Plein">100% <span style="font-size:9px;color:#ff6b35">+8€</span></div>
       </div>
     </div>
 
@@ -796,6 +796,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     <!-- Breakdown -->
     <div class="bk" id="bk">
       <div class="bk-row" id="rFab"><span>Fabrication</span><span>—</span></div>
+      <div class="bk-row" id="rFill" style="color:var(--accent)"></div>
       <div class="bk-row" id="rTot"><span>Total HT</span><span>—</span></div>
     </div>
 
@@ -1202,6 +1203,14 @@ function calcVol() {
 }
 
 // ── PRICE ─────────────────────────────────────────────────────────────────
+// Supplément remplissage : +2€ HT par palier au-dessus de 10%
+const FILL_LEVELS = [10, 20, 50, 70, 100];
+const FILL_SURCHARGE_PER_LEVEL = 2; // € HT par palier
+function getFillSurcharge(fill) {
+  const idx = FILL_LEVELS.indexOf(fill);
+  return idx <= 0 ? 0 : idx * FILL_SURCHARGE_PER_LEVEL;
+}
+
 function price() {
   if (!S.vol) return;
   const m=TARIFS[S.tech].materiaux[S.mat], vol=S.vol, qty=S.qty;
@@ -1211,13 +1220,17 @@ function price() {
   if(document.getElementById('sMass')) document.getElementById('sMass').textContent=massAffichee.toFixed(0);
   const h=Math.max(0.3,vol/5), cElec=h*(FX.pw/1000)*FX.elec, cUsure=h*FX.usure;
   const rev=cMat+cElec+cUsure+FX.embal+FX.miseEnRoute;
-  const prixHT=rev*MARGE, totHT=prixHT*qty, tva=totHT*FX.tva;
+  const prixHT=rev*MARGE;
+  const fillSurcharge = S.tech==='fdm' ? getFillSurcharge(S.fill) : 0;
+  const totHT=(prixHT*qty)+fillSurcharge, tva=totHT*FX.tva;
   const port=(massAffichee*qty)>500?FX.portHeavy:FX.portLight;
   const ttc=totHT+tva+port;
   document.getElementById('priceDisplay').innerHTML='<span style="font-size:26px;font-weight:300">'+ttc.toFixed(2)+' €</span>';
   const fabLabel=S.tech==='fdm'?m.label+' · '+S.fill+'% de remplissage':m.label+(S._isHollowed?' · paroi 5mm':'');
   document.getElementById('bk').style.display='block';
-  R('rFab','Fabrication ('+fabLabel+')',(totHT).toFixed(2)+' € HT');
+  R('rFab','Fabrication ('+fabLabel+')',(totHT - fillSurcharge).toFixed(2)+' € HT');
+  if (fillSurcharge > 0) R('rFill','Supplément remplissage '+S.fill+'%','+'+fillSurcharge.toFixed(2)+' € HT');
+  else { const el=document.getElementById('rFill'); if(el) el.innerHTML=''; }
   R('rTot','Total HT',(totHT).toFixed(2)+' €');
   document.getElementById('note').textContent='Estimation indicative — prix confirmé avant tout lancement.';
   if (!S._slaBlocked) {

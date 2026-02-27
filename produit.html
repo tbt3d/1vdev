@@ -71,56 +71,24 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
 /* ─── GALERIE GAUCHE ─── */
 .gallery { display: flex; gap: 12px; position: sticky; top: calc(var(--nav-h) + 20px); }
-@media(max-width:960px) { .gallery { position: static; flex-direction: column; gap: 0; } }
-@media(min-width:601px) and (max-width:960px) {
-  .gallery-thumbs {
-    flex-direction: row;
-    width: 100%;
-    overflow-x: auto;
-    padding: 10px 28px 0;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    gap: 8px;
-    order: 2;
-  }
-  .gallery-thumbs::-webkit-scrollbar { display: none; }
-  .gallery-thumbs img { width: 64px; height: 64px; flex-shrink: 0; }
-  .gallery-main { order: 1; }
-}
 .gallery-thumbs { display: flex; flex-direction: column; gap: 8px; width: 72px; flex-shrink: 0; }
 .gallery-thumbs img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1.5px solid var(--border); cursor: pointer; transition: border-color .15s, opacity .15s; opacity: .55; }
 .gallery-thumbs img.active { border-color: var(--black); opacity: 1; }
 .gallery-main { flex: 1; position: relative; border-radius: 10px; overflow: hidden; background: var(--bg); height: calc(100vh - var(--nav-h) - 60px); max-height: 780px; }
 .gallery-main-img { width: 100%; height: 100%; object-fit: cover; object-position: center center; display: block; background: var(--bg); }
 .gallery-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 56px; background: var(--bg); }
-@media(max-width:960px) { .gallery-main { height: 55vw; max-height: 480px; min-height: 300px; border-radius: 0; } }
-@media(max-width:600px) { .gallery-main { height: 80vw; max-height: 380px; min-height: 240px; border-radius: 0; } }
-.gallery-nav { position: absolute; bottom: 14px; right: 14px; display: flex; gap: 6px; }
-.gallery-btn { width: 34px; height: 34px; background: rgba(255,255,255,.92); border: 1px solid rgba(0,0,0,.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
-.gallery-btn:hover { background: var(--white); }
-.gallery-btn svg { width: 14px; height: 14px; }
-
-/* Mobile gallery: thumbs below image */
-@media(max-width:600px) {
-  .gallery { flex-direction: column; gap: 0; }
-  .gallery-thumbs {
-    flex-direction: row;
-    width: 100%;
-    overflow-x: auto;
-    padding: 10px 16px 0;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    gap: 8px;
-    order: 2;
-  }
+/* Tablette + Mobile : thumbs horizontales sous l'image */
+@media(max-width:960px) {
+  .gallery { position: static; flex-direction: column; gap: 0; }
+  .gallery-thumbs { flex-direction: row; width: 100%; overflow-x: auto; padding: 10px 20px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; gap: 8px; order: 2; }
   .gallery-thumbs::-webkit-scrollbar { display: none; }
-  .gallery-thumbs img { width: 60px; height: 60px; flex-shrink: 0; border-radius: 8px; opacity: .5; }
+  .gallery-thumbs img { width: 64px; height: 64px; flex-shrink: 0; border-radius: 6px; opacity: .55; }
   .gallery-thumbs img.active { opacity: 1; border-color: var(--black); }
-  .gallery-main { order: 1; border-radius: 0; }
+  .gallery-main { order: 1; height: 55vw; max-height: 500px; min-height: 300px; border-radius: 0; }
 }
-
-/* Mobile product detail padding */
 @media(max-width:600px) {
+  .gallery-thumbs img { width: 56px; height: 56px; }
+  .gallery-main { height: 82vw; max-height: 420px; }
   .prod-detail { padding: 20px 20px 0; }
 }
 
@@ -313,28 +281,8 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 @media(max-width:500px) { .similar-section { padding: 48px 16px 64px; } }
 @media(max-width:400px) { .similar-grid { grid-template-columns: 1fr 1fr; gap: 10px; } }
 
-/* ─── STICKY MOBILE BUY BAR ─── */
-.mobile-buy-bar { display: none; }
-@media(max-width:768px) {
-  .mobile-buy-bar {
-    display: flex; align-items: center; gap: 10px;
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
-    background: var(--white); border-top: 1px solid var(--border);
-    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-    box-shadow: 0 -4px 20px rgba(0,0,0,.08);
-  }
-  .mobile-buy-bar .btn-buy { margin-bottom: 0; flex: 1; padding: 14px 16px; font-size: 14px; }
-  .mobile-buy-bar .btn-cart-icon {
-    width: 50px; height: 50px; flex-shrink: 0; border: 1.5px solid var(--border);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    background: var(--white); cursor: pointer; transition: all .15s;
-  }
-  .mobile-buy-bar .btn-cart-icon:hover { border-color: var(--black); }
-  .mobile-buy-bar .btn-cart-icon svg { width: 20px; height: 20px; }
-  /* Add padding-bottom to avoid content hidden behind bar */
-  .prod-detail .hr:last-of-type { margin-bottom: 80px; }
-  .trust-row { margin-bottom: 80px; }
-}
+/* ─── STICKY MOBILE BUY BAR ─── (supprimé) */
+.mobile-buy-bar { display: none !important; }
 
 #footer { background: #111; color: rgba(255,255,255,.7); }
 .footer-inner { max-width: var(--max); margin: 0 auto; padding: 60px 32px 40px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
@@ -1112,10 +1060,6 @@ function renderProduct(art) {
 
   document.getElementById('productWrap').style.display = 'block';
 
-  // Afficher la barre sticky mobile
-  const mbb = document.getElementById('mobileBuyBar');
-  if (mbb) mbb.style.display = '';
-
   loadSuggestions(art);
 }
 
@@ -1298,8 +1242,7 @@ function addToCart() {
 }
 
 function buyNow() {
-  addToCart();
-  window.location.href = '/panier.html';
+  openPayhipModal();
 }
 
 function showCartToast(name) {
@@ -1319,17 +1262,6 @@ function showCartToast(name) {
   }, 3000);
 }
 </script>
-<!-- ─── STICKY MOBILE BUY BAR ─── -->
-<div class="mobile-buy-bar" id="mobileBuyBar" style="display:none">
-  <button class="btn-cart-icon" onclick="addToCart()" title="Ajouter au panier">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-  </button>
-
-  <button class="btn-buy" id="mobileBtnBuy" onclick="buyNow()">
-    Acheter
-  </button>
-</div>
-
 <!-- ─── FOOTER ─── -->
 <footer id="footer">
   <div class="footer-inner">
