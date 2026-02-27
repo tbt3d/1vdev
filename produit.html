@@ -71,15 +71,30 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
 /* ─── GALERIE GAUCHE ─── */
 .gallery { display: flex; gap: 12px; position: sticky; top: calc(var(--nav-h) + 20px); }
-@media(max-width:960px) { .gallery { position: static; } }
+@media(max-width:960px) { .gallery { position: static; flex-direction: column; gap: 0; } }
+@media(min-width:601px) and (max-width:960px) {
+  .gallery-thumbs {
+    flex-direction: row;
+    width: 100%;
+    overflow-x: auto;
+    padding: 10px 28px 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    gap: 8px;
+    order: 2;
+  }
+  .gallery-thumbs::-webkit-scrollbar { display: none; }
+  .gallery-thumbs img { width: 64px; height: 64px; flex-shrink: 0; }
+  .gallery-main { order: 1; }
+}
 .gallery-thumbs { display: flex; flex-direction: column; gap: 8px; width: 72px; flex-shrink: 0; }
 .gallery-thumbs img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1.5px solid var(--border); cursor: pointer; transition: border-color .15s, opacity .15s; opacity: .55; }
 .gallery-thumbs img.active { border-color: var(--black); opacity: 1; }
 .gallery-main { flex: 1; position: relative; border-radius: 10px; overflow: hidden; background: var(--bg); height: calc(100vh - var(--nav-h) - 60px); max-height: 780px; }
 .gallery-main-img { width: 100%; height: 100%; object-fit: cover; object-position: center center; display: block; background: var(--bg); }
 .gallery-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 56px; background: var(--bg); }
-@media(max-width:960px) { .gallery-main { height: 50vw; max-height: 420px; border-radius: 0; } }
-@media(max-width:600px) { .gallery-main { height: 56vw; max-height: 280px; border-radius: 0; } }
+@media(max-width:960px) { .gallery-main { height: 55vw; max-height: 480px; min-height: 300px; border-radius: 0; } }
+@media(max-width:600px) { .gallery-main { height: 80vw; max-height: 380px; min-height: 240px; border-radius: 0; } }
 .gallery-nav { position: absolute; bottom: 14px; right: 14px; display: flex; gap: 6px; }
 .gallery-btn { width: 34px; height: 34px; background: rgba(255,255,255,.92); border: 1px solid rgba(0,0,0,.08); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background .15s; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
 .gallery-btn:hover { background: var(--white); }

@@ -381,13 +381,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .sla-warn { display: none; background: #fff0f0; border: 1px solid #f5a0a0; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #8b0000; line-height: 1.6; margin-bottom: 14px; }
 
 /* Qty */
-.qty-row { display: flex; align-items: center; justify-content: space-between; }
-.qty-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.qty-wrap { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: var(--r); overflow: hidden; }
-.qty-btn { width: 40px; height: 40px; background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text); transition: background .15s; display: flex; align-items: center; justify-content: center; }
-.qty-btn:hover { background: var(--bg); }
-.qty-num { width: 52px; text-align: center; border: none; border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border); font-family: var(--font); font-size: 14px; height: 40px; outline: none; -moz-appearance: textfield; background: var(--white); }
-.qty-num::-webkit-inner-spin-button, .qty-num::-webkit-outer-spin-button { display: none; }
+
 
 /* Breakdown */
 .bk { display: none; background: var(--bg); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
@@ -794,14 +788,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
     <!-- Quantité -->
     <div class="opt-block">
-      <div class="qty-row">
-        <span class="qty-label">Quantité</span>
-        <div class="qty-wrap">
-          <button class="qty-btn" id="qMinus">−</button>
-          <input type="number" class="qty-num" id="qNum" value="1" min="1" max="99" readonly>
-          <button class="qty-btn" id="qPlus">+</button>
-        </div>
-      </div>
+
     </div>
 
     <div class="hr"></div>
@@ -1078,8 +1065,7 @@ document.querySelectorAll('.color-chip').forEach(ch => {
 });
 
 // ── QTY ───────────────────────────────────────────────────────────────────
-document.getElementById('qMinus').onclick = () => { if (S.qty > 1) { S.qty--; document.getElementById('qNum').value = S.qty; price(); } };
-document.getElementById('qPlus').onclick  = () => { if (S.qty < 99) { S.qty++; document.getElementById('qNum').value = S.qty; price(); } };
+
 
 buildMat();
 
@@ -1232,7 +1218,7 @@ function price() {
   const fabLabel=S.tech==='fdm'?m.label+' · '+S.fill+'% de remplissage':m.label+(S._isHollowed?' · paroi 5mm':'');
   document.getElementById('bk').style.display='block';
   R('rFab','Fabrication ('+fabLabel+')',(totHT).toFixed(2)+' € HT');
-  R('rTot','Total HT'+(qty>1?' (×'+qty+')':''),(totHT).toFixed(2)+' €');
+  R('rTot','Total HT',(totHT).toFixed(2)+' €');
   document.getElementById('note').textContent='Estimation indicative — prix confirmé avant tout lancement.';
   if (!S._slaBlocked) {
     document.getElementById('btnOrder').disabled=false;
@@ -1417,7 +1403,6 @@ function openOrderModal() {
     '<strong>Technologie :</strong> '+S.tech.toUpperCase()+' · '+m.label+'<br>'+
     (S.tech==='fdm'?'<strong>Remplissage :</strong> '+S.fill+'%<br>':'')+
     '<strong>Couleur :</strong> '+S.color+'<br>'+
-    '<strong>Quantité :</strong> '+S.qty+'<br>'+
     '<strong>Estimation :</strong> '+ttc+' TTC';
   // Reset to form state
   document.getElementById('modalInner').innerHTML=document.getElementById('modalInner').innerHTML;
@@ -1593,7 +1578,7 @@ async function goToPayment() {
       '<div class="success-state">' +
       '<div class="ck">↗</div>' +
       '<h3>Redirection vers Stripe…</h3>' +
-      '<p>' + m.label + (S.tech==='fdm'?' · '+S.fill+'%':'') + ' · ' + S.color + ' · ' + S.qty + ' ex.</p>' +
+      '<p>' + m.label + (S.tech==='fdm'?' · '+S.fill+'%':'') + ' · ' + S.color + '</p>' +
       '<a href="' + data.url + '" onclick="setTimeout(closeOrderModal,1200)">Payer ' + ttc.toFixed(2) + ' € →</a>' +
       '</div>';
     window.location.href = data.url;
