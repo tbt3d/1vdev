@@ -75,7 +75,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .btn-remove svg { width: 12px; height: 12px; }
 
 /* ─── RÉSUMÉ ─── */
-.cart-summary { border: 1.5px solid var(--border); border-radius: 16px; padding: 24px; position: sticky; top: calc(var(--nav-h) + 20px); }
+.cart-summary { border: 1.5px solid var(--border); border-radius: 16px; padding: 24px; position: sticky; top: calc(var(--nav-h) + 20px); overflow: hidden; }
 @media(max-width:768px) { .cart-summary { position: static; } }
 
 .summary-title { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
@@ -97,7 +97,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .summary-line-muted { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
 .summary-line-muted:last-of-type { border-bottom: none; }
 .summary-sep { height: 1px; background: var(--border); margin: 4px 0; }
-.address-form-wrap { margin: 0 -18px; padding: 18px 18px 14px; background: #f8f8f8; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 0; }
+.address-form-wrap { margin: 0 -24px; padding: 18px 24px 16px; background: #f7f7f7; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 0; }
 .address-form-header { display: flex; align-items: center; gap: 7px; margin-bottom: 14px; }
 .address-form-header svg { width: 13px; height: 13px; color: #555; flex-shrink: 0; }
 .address-form-header span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #555; }
@@ -122,7 +122,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
   75%      { transform: translateX(-2px); }
   90%      { transform: translateX(2px); }
 }
-.shipping-select-wrap { display: flex; flex-direction: column; gap: 6px; padding: 10px 0 6px; border-bottom: 1px solid var(--border); }
+.shipping-select-wrap { display: flex; flex-direction: column; gap: 6px; padding: 14px 0 10px; border-bottom: 1px solid var(--border); }
 .shipping-select-wrap label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
 .shipping-select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--font); font-size: 13px; background: var(--white); color: var(--text); cursor: pointer; outline: none; transition: border-color .15s; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
 .shipping-select:focus { border-color: var(--black); }
@@ -862,8 +862,9 @@ async function stripeCheckoutPartial() {
     const successUrl = cfg.successUrl || 'https://tbt3d.fr/panier.html?success=1&session_id={CHECKOUT_SESSION_ID}';
     const cancelUrl  = cfg.cancelUrl  || 'https://tbt3d.fr/panier.html?cancelled=1';
 
-    // Sauvegarde dans Firebase AVANT de rediriger
-    const orderId = await saveOrderToFirebase(stripeItems, 'panier');
+    // Sauvegarde dans Firebase AVANT de rediriger (avec l'adresse du form)
+    const addr = getAddressData();
+    const orderId = await saveOrderToFirebase(stripeItems, 'panier', addr);
     const successUrlFinal = orderId
       ? (successUrl.includes('?') ? successUrl + '&orderId=' + orderId : successUrl + '?orderId=' + orderId)
       : successUrl;
