@@ -465,7 +465,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
       <!-- Groupe boutons achat -->
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-        <button id="btnPayhip" class="btn-buy" style="display:none" onclick="openPayhipModal()">
+        <button id="btnPayhip" class="btn-buy" style="display:none" onclick="buyNow()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           Acheter maintenant
         </button>
@@ -827,8 +827,8 @@ window.stripeDirectCheckout = async function() {
     const cfgDoc = await getDoc(doc(db, 'config', 'panier'));
     const cfg = cfgDoc.exists() ? cfgDoc.data() : {};
     const workerUrl      = cfg.workerUrl || 'https://tbt3d-checkout.optionpdg.workers.dev';
-    const successUrl     = cfg.successUrlDirect || 'https://tbt3d.fr/boutique.html?success=1';
-    const cancelUrl      = cfg.cancelUrlDirect || 'https://tbt3d.fr/boutique.html?cancelled=1';
+    const successUrl     = cfg.successUrl || cfg.successUrlDirect || 'https://tbt3d.fr/panier.html?success=1&session_id={CHECKOUT_SESSION_ID}';
+    const cancelUrl      = cfg.cancelUrl || cfg.cancelUrlDirect || 'https://tbt3d.fr/boutique.html?cancelled=1';
 
     const stripePrice = btnPayhip._stripePrice;
     const price       = btnPayhip._price || parseFloat(_art.price);
@@ -848,7 +848,15 @@ window.stripeDirectCheckout = async function() {
       source: 'boutique-direct',
       status: 'initié',
       createdAt: serverTimestamp(),
-      items: [{ name: _art.name, price, qty, stripePrice: stripePrice || null }],
+      client: { name: '', email: '' },
+      items: [{ 
+        name: _art.name, 
+        price, 
+        qty, 
+        stripePrice: stripePrice || null,
+        variant: (document.querySelector('.variant-option.active')?.textContent || '').trim() || null,
+        image: _art.image || null,
+      }],
       total: price * qty,
     });
     localStorage.setItem('tbt3d_lastOrderId', orderRef.id);
@@ -1269,6 +1277,11 @@ function addToCart() {
   showCartToast(_art.name);
 }
 
+function buyNow() {
+  addToCart();
+  window.location.href = '/panier.html';
+}
+
 function showCartToast(name) {
   let toast = document.getElementById('cartToast');
   if (!toast) {
@@ -1291,10 +1304,11 @@ function showCartToast(name) {
   <button class="btn-cart-icon" onclick="addToCart()" title="Ajouter au panier">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
   </button>
-  <button class="btn-buy" id="mobileBtnBuy" onclick="openPayhipModal()">
+  <button class="btn-buy" id="mobileBtnBuy" onclick="buyNow()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
     Acheter maintenant
   </button>
 </div>
 
 </body>
+</html>

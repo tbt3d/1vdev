@@ -93,6 +93,16 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
 .summary-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 14px; line-height: 1.6; }
 
+/* ─── TVA + LIVRAISON ─── */
+.summary-line-muted { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
+.summary-line-muted:last-of-type { border-bottom: none; }
+.summary-sep { height: 1px; background: var(--border); margin: 4px 0; }
+.shipping-select-wrap { display: flex; flex-direction: column; gap: 6px; padding: 10px 0 6px; border-bottom: 1px solid var(--border); }
+.shipping-select-wrap label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
+.shipping-select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--font); font-size: 13px; background: var(--white); color: var(--text); cursor: pointer; outline: none; transition: border-color .15s; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.shipping-select:focus { border-color: var(--black); }
+.co-summary-lines { display: flex; flex-direction: column; gap: 0; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; padding: 0 14px; }
+
 /* ─── MULTI-LIENS ─── */
 .multi-checkout { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
 .multi-checkout-title { font-size: 11px; color: var(--muted); text-align: center; margin-bottom: 4px; }
@@ -222,8 +232,53 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
       <div class="cart-summary">
         <div class="summary-title">Résumé</div>
         <div id="summaryLines"></div>
+
+        <!-- Livraison -->
+        <div class="shipping-select-wrap">
+          <label>🌍 Pays de livraison</label>
+          <select class="shipping-select" id="shippingCountry" onchange="updateSummaryTotals()">
+            <optgroup label="France">
+              <option value="FR" selected>🇫🇷 France — 6,50 €</option>
+            </optgroup>
+            <optgroup label="Europe">
+              <option value="DE">🇩🇪 Allemagne — 8,00 €</option>
+              <option value="AT">🇦🇹 Autriche — 8,00 €</option>
+              <option value="BE">🇧🇪 Belgique — 8,00 €</option>
+              <option value="BG">🇧🇬 Bulgarie — 8,00 €</option>
+              <option value="HR">🇭🇷 Croatie — 8,00 €</option>
+              <option value="CY">🇨🇾 Chypre — 8,00 €</option>
+              <option value="DK">🇩🇰 Danemark — 8,00 €</option>
+              <option value="ES">🇪🇸 Espagne — 8,00 €</option>
+              <option value="EE">🇪🇪 Estonie — 8,00 €</option>
+              <option value="FI">🇫🇮 Finlande — 8,00 €</option>
+              <option value="GR">🇬🇷 Grèce — 8,00 €</option>
+              <option value="HU">🇭🇺 Hongrie — 8,00 €</option>
+              <option value="IE">🇮🇪 Irlande — 8,00 €</option>
+              <option value="IT">🇮🇹 Italie — 8,00 €</option>
+              <option value="LV">🇱🇻 Lettonie — 8,00 €</option>
+              <option value="LT">🇱🇹 Lituanie — 8,00 €</option>
+              <option value="LU">🇱🇺 Luxembourg — 8,00 €</option>
+              <option value="MT">🇲🇹 Malte — 8,00 €</option>
+              <option value="NL">🇳🇱 Pays-Bas — 8,00 €</option>
+              <option value="PL">🇵🇱 Pologne — 8,00 €</option>
+              <option value="PT">🇵🇹 Portugal — 8,00 €</option>
+              <option value="CZ">🇨🇿 République tchèque — 8,00 €</option>
+              <option value="RO">🇷🇴 Roumanie — 8,00 €</option>
+              <option value="SK">🇸🇰 Slovaquie — 8,00 €</option>
+              <option value="SI">🇸🇮 Slovénie — 8,00 €</option>
+              <option value="SE">🇸🇪 Suède — 8,00 €</option>
+              <option value="CH">🇨🇭 Suisse — 8,00 €</option>
+            </optgroup>
+            <optgroup label="Amérique du Nord">
+              <option value="CA">🇨🇦 Canada — 50,00 €</option>
+              <option value="US">🇺🇸 États-Unis — 50,00 €</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div id="summaryExtras"></div>
         <div class="summary-total">
-          <span>Total</span>
+          <span>Total TTC</span>
           <span id="summaryTotal"></span>
         </div>
 
@@ -252,8 +307,9 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     <h2>Confirmer la commande</h2>
     <p class="sub">Vérifiez vos articles avant de payer</p>
     <div class="checkout-items-list" id="coItemsList"></div>
+    <div id="coSummaryLines" class="co-summary-lines"></div>
     <div class="co-total">
-      <span>Total</span>
+      <span>Total TTC</span>
       <span id="coTotal"></span>
     </div>
     <div class="co-btns" id="coBtns"></div>
@@ -265,6 +321,54 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
 <script src="/cart.js"></script>
 <script>
+// ── TARIFS LIVRAISON ──────────────────────────────────────────────
+const SHIPPING_RATES = {
+  FR: 6.5,
+  // Europe
+  DE:8, AT:8, BE:8, BG:8, HR:8, CY:8, DK:8, ES:8, EE:8, FI:8,
+  GR:8, HU:8, IE:8, IT:8, LV:8, LT:8, LU:8, MT:8, NL:8, PL:8,
+  PT:8, CZ:8, RO:8, SK:8, SI:8, SE:8, CH:8,
+  // Amérique du Nord
+  CA:50, US:50,
+};
+const TVA_RATE = 0.20;
+
+function getShippingCountry() {
+  const sel = document.getElementById('shippingCountry');
+  return sel ? sel.value : 'FR';
+}
+
+function getShippingCost() {
+  return SHIPPING_RATES[getShippingCountry()] || 8;
+}
+
+function computeTotals() {
+  const subtotal  = TBTCart.total();
+  const tva       = parseFloat((subtotal * TVA_RATE).toFixed(2));
+  const shipping  = getShippingCost();
+  const total     = parseFloat((subtotal + tva + shipping).toFixed(2));
+  return { subtotal, tva, shipping, total };
+}
+
+function updateSummaryTotals() {
+  const { subtotal, tva, shipping, total } = computeTotals();
+  document.getElementById('summaryExtras').innerHTML = `
+    <div class="summary-line-muted">
+      <span>Sous-total HT</span>
+      <span>${subtotal.toFixed(2)} €</span>
+    </div>
+    <div class="summary-line-muted">
+      <span>TVA (20%)</span>
+      <span>${tva.toFixed(2)} €</span>
+    </div>
+    <div class="summary-line-muted">
+      <span>Livraison</span>
+      <span>${shipping.toFixed(2)} €</span>
+    </div>
+  `;
+  document.getElementById('summaryTotal').textContent = total.toFixed(2) + ' €';
+}
+
 window.addEventListener('scroll', () => {
   document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
 });
@@ -335,7 +439,7 @@ function renderCart() {
     </div>
   `).join('');
 
-  document.getElementById('summaryTotal').textContent = TBTCart.total().toFixed(2) + ' €';
+  updateSummaryTotals();
 }
 
 function changeQty(key, qty) {
@@ -390,7 +494,13 @@ function openCheckout() {
     </div>
   `).join('');
 
-  document.getElementById('coTotal').textContent = TBTCart.total().toFixed(2) + ' €';
+  const { subtotal, tva, shipping, total } = computeTotals();
+  document.getElementById('coSummaryLines').innerHTML = `
+    <div class="summary-line-muted"><span>Sous-total HT</span><span>${subtotal.toFixed(2)} €</span></div>
+    <div class="summary-line-muted"><span>TVA (20%)</span><span>${tva.toFixed(2)} €</span></div>
+    <div class="summary-line-muted"><span>Livraison</span><span>${shipping.toFixed(2)} €</span></div>
+  `;
+  document.getElementById('coTotal').textContent = total.toFixed(2) + ' €';
 
   // Déterminer le mode de paiement
   // Un article est "Stripe-compatible" s'il a un stripePrice OU isDynamic:true
@@ -406,9 +516,9 @@ function openCheckout() {
     btnsHtml = `
       <button class="co-btn-pay" id="stripeCheckoutBtn" onclick="stripeCheckout()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        Payer en une fois — ${TBTCart.total().toFixed(2)} €
+        Payer en une fois — ${total.toFixed(2)} €
       </button>
-      <p style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px">🔒 Paiement sécurisé via Stripe</p>`;
+      <p style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px">🔒 Paiement sécurisé via Stripe · TVA et livraison incluses</p>`;
 
   } else {
     // Mix : certains articles ont un paiement direct ou sont sans lien
@@ -445,7 +555,8 @@ function openCheckout() {
 
 // ── Prépare les items pour le Worker (gère stripePrice ET isDynamic) ──
 function buildWorkerItems(items, mode) {
-  return items.map(item => {
+  const { tva, shipping } = computeTotals();
+  const workerItems = items.map(item => {
     // Choisit le bon price ID selon le mode (test ou live)
     let priceId = item.stripePrice;
     if (mode === 'live' && item.stripePriceLive) priceId = item.stripePriceLive;
@@ -466,6 +577,30 @@ function buildWorkerItems(items, mode) {
     }
     return null;
   }).filter(Boolean);
+
+  // Ajouter TVA comme ligne dynamique
+  workerItems.push({
+    isDynamic: true,
+    name: 'TVA (20%)',
+    variant: '',
+    note: '',
+    price: tva,
+    qty: 1,
+  });
+
+  // Ajouter livraison comme ligne dynamique
+  const country = getShippingCountry();
+  const countryNames = { FR:'France', DE:'Allemagne', AT:'Autriche', BE:'Belgique', BG:'Bulgarie', HR:'Croatie', CY:'Chypre', DK:'Danemark', ES:'Espagne', EE:'Estonie', FI:'Finlande', GR:'Grèce', HU:'Hongrie', IE:'Irlande', IT:'Italie', LV:'Lettonie', LT:'Lituanie', LU:'Luxembourg', MT:'Malte', NL:'Pays-Bas', PL:'Pologne', PT:'Portugal', CZ:'Rép. tchèque', RO:'Roumanie', SK:'Slovaquie', SI:'Slovénie', SE:'Suède', CH:'Suisse', CA:'Canada', US:'États-Unis' };
+  workerItems.push({
+    isDynamic: true,
+    name: 'Livraison — ' + (countryNames[country] || country),
+    variant: '',
+    note: '',
+    price: shipping,
+    qty: 1,
+  });
+
+  return workerItems;
 }
 
 // ── SAUVEGARDE COMMANDE FIREBASE ──────────────────────────────
