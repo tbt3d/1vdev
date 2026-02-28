@@ -394,6 +394,139 @@ tr:hover td{background:rgba(255,255,255,.01)}
 .dcfg-wrap{max-width:100%;padding:0 4px}
 .dcfg-info{background:rgba(155,114,255,.07);border:1px solid rgba(155,114,255,.2);border-radius:var(--r);padding:11px 15px;margin-bottom:22px;font-size:11px;color:rgba(155,114,255,.9);display:flex;align-items:center;gap:8px;font-family:var(--mono)}
 .cart-badge{position:absolute;top:4px;right:4px;background:#e11d48;width:9px;height:9px;border-radius:50%;display:none;border:1.5px solid #fff}
+
+/* ══════════════════════════════════════
+   RESPONSIVE — MOBILE & TABLET
+══════════════════════════════════════ */
+
+/* ── Hamburger button ── */
+.hamburger{display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:38px;height:38px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;flex-shrink:0;transition:all .18s}
+.hamburger:hover{border-color:var(--accent)}
+.hamburger span{display:block;width:16px;height:1.5px;background:var(--text);border-radius:2px;transition:all .25s}
+.hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+
+/* ── Sidebar overlay (mobile) ── */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:998}
+.sb-overlay.open{display:block}
+
+/* ── Topbar responsive ── */
+.topbar-left{display:flex;align-items:center;gap:10px}
+
+/* ────────────────── 1200px ────────────────── */
+@media(max-width:1200px){
+  :root{--sidebar:210px}
+  .stats-row,.stats-row-2{grid-template-columns:repeat(3,1fr)}
+  .ov-row{grid-template-columns:1fr 1fr 1fr}
+  .ps{padding:22px 24px}
+  .topbar{padding:0 20px}
+}
+
+/* ────────────────── 1024px ────────────────── */
+@media(max-width:1024px){
+  :root{--sidebar:200px}
+  .stats-row,.stats-row-2{grid-template-columns:repeat(2,1fr)}
+  .ov-row{grid-template-columns:1fr 1fr}
+  .sc-val{font-size:28px}
+  .art-layout,.cfg-layout{grid-template-columns:1fr;gap:16px}
+  .art-sidebar-sticky,.cfg-sticky-col{position:static;max-height:none}
+  #page-users{padding:28px 24px!important}
+  .frow{grid-template-columns:1fr}
+}
+
+/* ────────────────── 860px (tablet) ────────────────── */
+@media(max-width:860px){
+  html,body{overflow:auto}
+
+  /* Sidebar devient un drawer */
+  .sidebar{
+    position:fixed;left:0;top:0;bottom:0;z-index:999;
+    transform:translateX(-100%);
+    transition:transform .28s cubic-bezier(.4,0,.2,1);
+    width:260px!important;
+    box-shadow:none;
+  }
+  .sidebar.open{
+    transform:translateX(0);
+    box-shadow:20px 0 60px rgba(0,0,0,.6);
+  }
+
+  /* Main prend toute la largeur */
+  .main{width:100%;min-width:0}
+
+  /* Topbar */
+  .hamburger{display:flex}
+  .topbar{padding:0 14px;gap:8px}
+  .topbar-right{gap:6px}
+  .sync-indicator span{display:none}
+  .btn svg+*{display:none}
+  .btn{padding:8px 10px}
+
+  /* Stats */
+  .stats-row,.stats-row-2{grid-template-columns:repeat(2,1fr);gap:10px}
+  .ov-row{grid-template-columns:1fr 1fr;gap:10px}
+  .sc-val{font-size:26px}
+  .ps{padding:16px 14px}
+
+  /* Tables: masquer colonnes secondaires */
+  table th:nth-child(3),table td:nth-child(3),
+  table th:nth-child(4),table td:nth-child(4){display:none}
+
+  /* Commandes */
+  .cmd-filter-bar{padding:12px 14px 10px}
+  .cmd-list{padding:12px 14px}
+
+  /* Modals */
+  .cmd-modal-box{border-radius:14px}
+  .cmd-detail-grid{grid-template-columns:1fr 1fr}
+
+  /* Pages padding */
+  #page-users{padding:16px 14px!important}
+  .save-bar{padding:12px 14px}
+  .ov-tools-grid{grid-template-columns:1fr 1fr!important}
+}
+
+/* ────────────────── 600px (mobile) ────────────────── */
+@media(max-width:600px){
+  .stats-row,.stats-row-2{grid-template-columns:1fr 1fr;gap:8px}
+  .ov-row{grid-template-columns:1fr 1fr;gap:8px}
+  .ov-tools-grid{grid-template-columns:1fr!important}
+  .sc{padding:14px}
+  .sc-val{font-size:24px}
+  .sc-lbl{font-size:8px}
+  .sc-sub{font-size:10px}
+  .topbar-title{font-size:13px}
+  .sync-indicator{display:none}
+
+  /* Actions quick row */
+  .ov-action{padding:14px}
+  .ov-action-label{font-size:11px}
+  .ov-action-sub{font-size:9px}
+
+  /* Combo rows */
+  .combo-row{grid-template-columns:1fr 1fr 24px;gap:5px}
+
+  /* CMD modal */
+  .cmd-detail-grid{grid-template-columns:1fr}
+  .cmd-modal-box{max-height:100vh;border-radius:0;border-left:none;border-right:none}
+  #cmdModal{padding:0;align-items:flex-end}
+
+  /* Users table */
+  table th:nth-child(2),table td:nth-child(2){display:none}
+}
+
+/* ────────────────── 420px (small mobile) ────────────────── */
+@media(max-width:420px){
+  .stats-row,.stats-row-2{grid-template-columns:1fr 1fr;gap:6px}
+  .sc{padding:12px}
+  .sc-val{font-size:22px}
+  .ov-row{grid-template-columns:1fr}
+  .ps{padding:12px 10px}
+  .topbar{padding:0 10px}
+  .photos-grid{grid-template-columns:repeat(2,1fr)}
+  .mood-grid{grid-template-columns:repeat(3,1fr)}
+}
 </style>
 <script src="/cart.js"></script>
 </head>
@@ -414,6 +547,7 @@ tr:hover td{background:rgba(255,255,255,.01)}
 </div>
 
 <!-- APP -->
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
 <aside class="sidebar" id="appSidebar" style="display:none">
   <div class="sb-logo">
     <img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png"
@@ -525,16 +659,23 @@ tr:hover td{background:rgba(255,255,255,.01)}
   <!-- ═══ OVERVIEW ═══ -->
   <div class="page active" id="page-overview">
     <div class="topbar">
-      <div class="topbar-title">Vue d'ensemble</div>
+      <div class="topbar-left">
+        <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="topbar-title">Vue d'ensemble</div>
+      </div>
       <div class="topbar-right">
-        <div class="sync-indicator"><div class="sync-dot"></div>Firebase connecté</div>
+        <div class="sync-indicator"><div class="sync-dot"></div><span>Firebase connecté</span></div>
         <button class="btn btn-a" onclick="goPage('articles',document.querySelectorAll('.nav-item')[3])" style="font-size:11px">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Nouvel article
+          <span>Nouvel article</span>
         </button>
       </div>
     </div>
     <div class="ps">
+      <!-- ROW 1 : Articles -->
+      <div style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-family:var(--mono);font-weight:600;margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="flex:1;height:1px;background:var(--border)"></span>Articles<span style="flex:1;height:1px;background:var(--border)"></span></div>
       <div class="stats-row">
         <div class="sc">
           <div class="sc-lbl">Articles publiés<div class="sc-ico" style="background:rgba(255,107,53,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div></div>
@@ -553,6 +694,9 @@ tr:hover td{background:rgba(255,255,255,.01)}
           <div class="sc-sub">dans la base</div>
         </div>
       </div>
+
+      <!-- ROW 2 : Messages -->
+      <div style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-family:var(--mono);font-weight:600;margin-bottom:10px;margin-top:6px;display:flex;align-items:center;gap:8px"><span style="flex:1;height:1px;background:var(--border)"></span>Messages<span style="flex:1;height:1px;background:var(--border)"></span></div>
       <div class="stats-row-2">
         <div class="sc" style="cursor:pointer" onclick="goPage('messages',document.getElementById('navMessages'))">
           <div class="sc-lbl">Messages non lus<div class="sc-ico" style="background:rgba(255,61,90,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div></div>
@@ -571,6 +715,29 @@ tr:hover td{background:rgba(255,255,255,.01)}
           <div class="sc-sub">depuis le début</div>
         </div>
       </div>
+
+      <!-- ROW 3 : Commandes & Utilisateurs -->
+      <div style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-family:var(--mono);font-weight:600;margin-bottom:10px;margin-top:6px;display:flex;align-items:center;gap:8px"><span style="flex:1;height:1px;background:var(--border)"></span>Commandes &amp; Clients<span style="flex:1;height:1px;background:var(--border)"></span></div>
+      <div class="stats-row" style="margin-bottom:14px">
+        <div class="sc" style="cursor:pointer" onclick="goPage('commandes',document.getElementById('navCommandes'))">
+          <div class="sc-lbl">Commandes totales<div class="sc-ico" style="background:rgba(46,204,138,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div></div>
+          <div class="sc-val" id="ovCmdTotal">—</div>
+          <div class="sc-sub">dans Firebase</div>
+        </div>
+        <div class="sc" style="cursor:pointer" onclick="goPage('commandes',document.getElementById('navCommandes'))">
+          <div class="sc-lbl">Commandes payées<div class="sc-ico" style="background:rgba(255,107,53,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div></div>
+          <div class="sc-val" id="ovCmdPaid">—</div>
+          <div class="sc-sub">confirmées</div>
+          <div class="sc-trend up" id="ovCmdPaidTrend" style="display:none">↑ En hausse</div>
+        </div>
+        <div class="sc" style="cursor:pointer" onclick="goPage('users',document.getElementById('navUsers2'))">
+          <div class="sc-lbl">Utilisateurs<div class="sc-ico" style="background:rgba(77,166,255,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div></div>
+          <div class="sc-val" id="ovUsersTotal">—</div>
+          <div class="sc-sub">inscrits</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
       <div class="ov-row" style="margin-bottom:22px">
         <div class="ov-action" onclick="goPage('homepage',document.querySelectorAll('.nav-item')[1])">
           <div class="ov-action-ico" style="background:rgba(77,166,255,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8" style="width:16px;height:16px"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
@@ -600,7 +767,7 @@ tr:hover td{background:rgba(255,255,255,.01)}
           </table>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px" class="ov-tools-grid">
         <div class="notice">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           <div class="notice-txt"><strong>Stripe</strong>Gérez vos commandes et paiements.</div>
@@ -623,7 +790,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
   <!-- ═══ PAGE D'ACCUEIL ═══ -->
   <div class="page" id="page-homepage">
     <div class="topbar">
-      <div class="topbar-title">Page d'accueil — 4 produits vedettes</div>
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title">Page d'accueil — 4 produits vedettes</div>
+      </div>
       <div class="topbar-right"><span style="font-size:11px;color:var(--muted)">Glisser pour réordonner</span></div>
     </div>
     <div class="ps" style="flex:1">
@@ -664,7 +834,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
   <!-- ═══ BOUTIQUE ═══ -->
   <div class="page" id="page-boutique-cfg">
     <div class="topbar">
-      <div class="topbar-title">Boutique — Ordre et affichage</div>
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title">Boutique — Ordre et affichage</div>
+      </div>
       <div class="topbar-right">
         <span style="font-size:11px;color:var(--muted)" id="boutCount">Tous les articles publiés</span>
       </div>
@@ -712,7 +885,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
   <!-- ═══ ARTICLES ═══ -->
   <div class="page" id="page-articles">
     <div class="topbar">
-      <div class="topbar-title" id="artPageTitle">Créer un article</div>
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title" id="artPageTitle">Créer un article</div>
+      </div>
       <div class="topbar-right">
         <button class="btn btn-g" id="btnCancel" onclick="resetForm()" style="display:none">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Annuler
@@ -896,7 +1072,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
   <!-- ═══ MESSAGES ═══ -->
   <div class="page" id="page-messages" style="overflow:hidden">
     <div class="topbar">
-      <div class="topbar-title">Messages clients</div>
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title">Messages clients</div>
+      </div>
       <div class="topbar-right">
         <div class="sync-indicator"><div class="sync-dot"></div>Temps réel</div>
         <button class="btn btn-g" onclick="loadMessages()">
@@ -940,7 +1119,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
   <!-- ═══ COMMANDES ═══ -->
   <div class="page" id="page-commandes" style="overflow:hidden">
     <div class="topbar">
-      <div class="topbar-title">Historique des commandes</div>
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title">Historique des commandes</div>
+      </div>
       <div class="topbar-right">
         <div class="sync-indicator"><div class="sync-dot"></div>Firebase</div>
         <button class="btn btn-g" onclick="loadCommandes()">
@@ -996,7 +1178,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
   <!-- ══════════════════════════════════════════════════════════════ -->
   <div class="page" id="page-panier-cfg">
     <div class="topbar">
-      <div class="topbar-title">Configuration — Panier &amp; Boutique</div>
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title">Configuration — Panier &amp; Boutique</div>
+      </div>
       <div class="topbar-right">
         <div class="sync-indicator"><div class="sync-dot"></div>Firebase Config</div>
       </div>
@@ -1157,7 +1342,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
   <!-- ── CODES PROMO ── -->
   <div class="page" id="page-promos" style="overflow:hidden">
     <div class="topbar">
-      <div class="topbar-title">Codes Promo</div>
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title">Codes Promo</div>
+      </div>
       <div class="topbar-right">
         <div class="sync-indicator"><div class="sync-dot"></div>Firestore</div>
         <button class="btn btn-a" onclick="openPromoModal()" style="font-size:12px">
@@ -1287,7 +1475,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
 
   <div class="page" id="page-devis-cfg">
     <div class="topbar">
-      <div class="topbar-title">Configuration — Page Devis</div>
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title">Configuration — Page Devis</div>
+      </div>
       <div class="topbar-right">
         <div class="sync-indicator"><div class="sync-dot"></div>Firebase Config</div>
       </div>
@@ -1462,7 +1653,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
   <!-- ═══ PAGE ANALYTIQUES ═══ -->
   <div class="page" id="page-analytics">
     <div class="topbar">
-      <div class="topbar-title">Analytiques — Trafic &amp; vues</div>
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title">Analytiques — Trafic &amp; vues</div>
+      </div>
       <div class="topbar-right">
         <div class="sync-indicator"><div class="sync-dot"></div>Firebase temps réel</div>
         <button class="btn btn-g" onclick="loadAnalytics()">
@@ -1824,7 +2018,9 @@ const CLOUDINARY_PRESET = 'umjs9csb';
 
 function showApp() {
   document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appSidebar').style.display = '';
+  // On mobile, sidebar starts hidden (as drawer); on desktop it shows normally
+  const sb = document.getElementById('appSidebar');
+  sb.style.display = '';
   document.getElementById('appMain').style.display = '';
   initApp();
 }
@@ -1977,6 +2173,36 @@ window.goPage = (id, btn) => {
   if(id==='devis-cfg') loadDevisCfg();
   if(id==='analytics') loadAnalytics();
   if(id==='promos') loadPromos();
+  // Close sidebar on mobile after navigation
+  closeSidebar();
+};
+
+// ── MOBILE SIDEBAR TOGGLE ──
+window.toggleSidebar = function() {
+  const sb = document.getElementById('appSidebar');
+  const overlay = document.getElementById('sbOverlay');
+  const hb = document.querySelector('.hamburger');
+  const isOpen = sb.classList.contains('open');
+  if (isOpen) {
+    sb.classList.remove('open');
+    overlay.classList.remove('open');
+    if(hb) hb.classList.remove('open');
+  } else {
+    sb.classList.add('open');
+    overlay.classList.add('open');
+    if(hb) hb.classList.add('open');
+  }
+};
+
+window.closeSidebar = function() {
+  const sb = document.getElementById('appSidebar');
+  const overlay = document.getElementById('sbOverlay');
+  const hbs = document.querySelectorAll('.hamburger');
+  if (window.innerWidth <= 860) {
+    sb.classList.remove('open');
+    overlay.classList.remove('open');
+    hbs.forEach(hb => hb.classList.remove('open'));
+  }
 };
 
 // ── OVERVIEW ──
@@ -1990,6 +2216,48 @@ function renderOverview(){
   if(total>0){
     document.getElementById('ovRepPub').style.width = (pub.length/total*100)+'%';
     document.getElementById('ovRepDraft').style.width = (draft.length/total*100)+'%';
+  }
+  // Stats commandes
+  if(window._allCommandes){
+    const cmds = window._allCommandes;
+    document.getElementById('ovCmdTotal').textContent = cmds.length;
+    const paid = cmds.filter(c=>c.status==='paid'||c.status==='paye'||c.paymentStatus==='paid');
+    document.getElementById('ovCmdPaid').textContent = paid.length;
+    if(paid.length>0){ document.getElementById('ovCmdPaidTrend').style.display='inline-flex'; }
+  } else {
+    // Charger depuis Firebase en background
+    (async()=>{
+      try{
+        const {collection,getDocs,query,orderBy,limit} = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        // Use global db
+        if(window.db){
+          const snap = await getDocs(collection(window.db,'orders'));
+          const cmds = snap.docs.map(d=>({id:d.id,...d.data()}));
+          window._allCommandes = cmds;
+          document.getElementById('ovCmdTotal').textContent = cmds.length;
+          const paid = cmds.filter(c=>c.status==='paid'||c.status==='paye'||c.paymentStatus==='paid');
+          document.getElementById('ovCmdPaid').textContent = paid.length;
+        }
+      }catch(e){}
+    })();
+    document.getElementById('ovCmdTotal').textContent = '…';
+    document.getElementById('ovCmdPaid').textContent = '…';
+  }
+  // Stats utilisateurs
+  if(window._allUsers){
+    document.getElementById('ovUsersTotal').textContent = window._allUsers.length;
+  } else {
+    (async()=>{
+      try{
+        const {collection,getDocs} = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        if(window.db){
+          const snap = await getDocs(collection(window.db,'users'));
+          window._allUsers = snap.docs.map(d=>({id:d.id,...d.data()}));
+          document.getElementById('ovUsersTotal').textContent = window._allUsers.length;
+        }
+      }catch(e){}
+    })();
+    document.getElementById('ovUsersTotal').textContent = '…';
   }
   const tb = document.getElementById('ovTableBody');
   tb.innerHTML = arts.length

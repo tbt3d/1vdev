@@ -283,7 +283,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#c0b4a2b4f2f0f3eea3afaeb4a1a3b480a7ada1a9aceea3afad"><span class="__cf_email__" data-cfemail="c4b0a6b0f6f4f7eaa7abaab0a5a7b084a3a9a5ada8eaa7aba9">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a><a href="/devis.html">Devis STL</a>
             <div class="footer-social">
         <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -301,7 +301,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 document.getElementById('footerYear').textContent = new Date().getFullYear();
 document.querySelectorAll('.nav-links a').forEach(function(a) {
   if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
@@ -317,9 +317,24 @@ function toggleSearch() {
 function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('open');
 }
-window.addEventListener('resize', function(){
-  if (window.innerWidth > 768) document.getElementById('mobileNav').classList.remove('open');
-});
+function searchLive() {}
+function searchKeydown(e) { if(e.key==='Escape') toggleSearch(); }
+
+// Fade-in observer
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(e) { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-in').forEach(function(el) { observer.observe(el); });
+
+// Cart badge
+try {
+  if (typeof TBTCart !== 'undefined') {
+    var items = TBTCart.load();
+    var count = items.reduce(function(s,i){ return s + i.qty; }, 0);
+    var badge = document.getElementById('navCartBadge');
+    if (badge) badge.style.display = count > 0 ? 'block' : 'none';
+  }
+} catch(e) {}
 </script>
 </body>
 </html>
