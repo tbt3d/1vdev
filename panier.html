@@ -410,28 +410,22 @@ if (typeof window.TBTCart === 'undefined') {
     function save(items) {
       try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {}
     }
-    function makeKey(id, variant) { return (id || '') + '_' + (variant || ''); }
     return {
       load: load,
       add: function(item) {
         var items = load();
-        var k = makeKey(item.id, item.variant);
+        /* même format de clé que cart.js : id|variant */
+        var k = (item.id || '') + '|' + (item.variant || '');
         var found = items.find(function(x) { return x.key === k; });
-        if (found) { found.qty = (found.qty || 1) + (item.qty || 1); }
+        if (found) { found.qty = Math.min((found.qty || 1) + (item.qty || 1), 99); }
         else { item.key = k; item.qty = item.qty || 1; items.push(item); }
         save(items);
-        // Mettre à jour le badge navbar
-        var badge = document.querySelector('.cart-badge');
-        if (badge) {
-          var total = items.reduce(function(s,i){return s+(i.qty||1);},0);
-          badge.style.display = total > 0 ? 'block' : 'none';
-        }
       },
       remove: function(key) { save(load().filter(function(i){return i.key!==key;})); },
       updateQty: function(key, qty) {
         var items = load();
         var found = items.find(function(i){return i.key===key;});
-        if (found) found.qty = qty;
+        if (found) found.qty = Math.max(1, Math.min(qty, 99));
         save(items);
       },
       total: function() { return load().reduce(function(s,i){return s+parseFloat(i.price||0)*(i.qty||1);},0); },

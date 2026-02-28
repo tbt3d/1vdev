@@ -8,6 +8,7 @@
 <meta name="description" id="metaDesc" content="Lampe imprimée en 3D — TBT3D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="/cart.js"></script>
 <script>
 /* ── TBTCart inline (fallback si /cart.js ne charge pas) ── */
 if (typeof window.TBTCart === 'undefined') {
@@ -17,30 +18,30 @@ if (typeof window.TBTCart === 'undefined') {
       try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e) { return []; }
     }
     function save(items) {
-      try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {}
+      try {
+        localStorage.setItem(KEY, JSON.stringify(items));
+        var total = items.reduce(function(s,i){return s+(i.qty||1);},0);
+        document.querySelectorAll('.cart-badge').forEach(function(b){
+          b.style.display = total > 0 ? 'block' : 'none';
+        });
+      } catch(e) {}
     }
-    function makeKey(id, variant) { return (id || '') + '_' + (variant || ''); }
     return {
       load: load,
       add: function(item) {
         var items = load();
-        var k = makeKey(item.id, item.variant);
+        /* même format de clé que cart.js : id|variant */
+        var k = (item.id || '') + '|' + (item.variant || '');
         var found = items.find(function(x) { return x.key === k; });
-        if (found) { found.qty = (found.qty || 1) + (item.qty || 1); }
+        if (found) { found.qty = Math.min((found.qty || 1) + (item.qty || 1), 99); }
         else { item.key = k; item.qty = item.qty || 1; items.push(item); }
         save(items);
-        // Mettre à jour le badge navbar
-        var badge = document.querySelector('.cart-badge');
-        if (badge) {
-          var total = items.reduce(function(s,i){return s+(i.qty||1);},0);
-          badge.style.display = total > 0 ? 'block' : 'none';
-        }
       },
       remove: function(key) { save(load().filter(function(i){return i.key!==key;})); },
       updateQty: function(key, qty) {
         var items = load();
         var found = items.find(function(i){return i.key===key;});
-        if (found) found.qty = qty;
+        if (found) found.qty = Math.max(1, Math.min(qty, 99));
         save(items);
       },
       total: function() { return load().reduce(function(s,i){return s+parseFloat(i.price||0)*(i.qty||1);},0); },
@@ -49,7 +50,6 @@ if (typeof window.TBTCart === 'undefined') {
   })();
 }
 </script>
-<script src="/cart.js"></script>
 <style>
 /* ─── RESET ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1694,6 +1694,10 @@ function addToCart() {
     ? combo.stripePrice.trim()
     : (_art.stripePrice || null);
 
+  // Lire la quantité depuis le sélecteur
+  const qtyInput = document.getElementById('qNum');
+  const qty = qtyInput ? Math.max(1, Math.min(parseInt(qtyInput.value) || 1, 99)) : 1;
+
   TBTCart.add({
     id: _art.id || _art.slug,
     name: _art.name,
@@ -1703,6 +1707,7 @@ function addToCart() {
     variant: variantStr || null,
     paymentUrl: paymentUrl || null,
     stripePrice: stripePrice || null,
+    qty: qty,
   });
 
   // Feedback visuel sur le bouton
