@@ -692,19 +692,20 @@ function updateSummaryTotals() {
       <span>−${discount.toFixed(2)} €</span>
     </div>`;
   }
+  const tvaLabel = discount > 0 ? `TVA (20% sur ${(subtotal - discount).toFixed(2)} €)` : 'TVA (20%)';
   document.getElementById('summaryExtras').innerHTML = `
     <div class="summary-line-muted">
       <span>Sous-total HT</span>
       <span>${subtotal.toFixed(2)} €</span>
-    </div>
+    </div>${discountLine}
     <div class="summary-line-muted">
-      <span>TVA (20%)</span>
+      <span>${tvaLabel}</span>
       <span>${tva.toFixed(2)} €</span>
     </div>
     <div class="summary-line-muted">
       <span>Livraison</span>
       <span>${shipping.toFixed(2)} €</span>
-    </div>${discountLine}
+    </div>
   `;
   document.getElementById('summaryTotal').textContent = total.toFixed(2) + ' €';
 }
@@ -1004,10 +1005,12 @@ function openCheckout() {
     const lbl = _appliedPromo.type === 'percent' ? `-${_appliedPromo.value}%` : `-${_appliedPromo.value.toFixed(2)} €`;
     discountModalLine = `<div class="summary-line-muted" style="color:var(--green)"><span>Code ${_appliedPromo.code} (${lbl})</span><span>−${discount.toFixed(2)} €</span></div>`;
   }
+  const tvaLabelModal = discount > 0 ? `TVA (20% sur ${(subtotal - discount).toFixed(2)} €)` : 'TVA (20%)';
   document.getElementById('coSummaryLines').innerHTML = `
     <div class="summary-line-muted"><span>Sous-total HT</span><span>${subtotal.toFixed(2)} €</span></div>
-    <div class="summary-line-muted"><span>TVA (20%)</span><span>${tva.toFixed(2)} €</span></div>
-    <div class="summary-line-muted"><span>Livraison</span><span>${shipping.toFixed(2)} €</span></div>${discountModalLine}
+    ${discountModalLine}
+    <div class="summary-line-muted"><span>${tvaLabelModal}</span><span>${tva.toFixed(2)} €</span></div>
+    <div class="summary-line-muted"><span>Livraison</span><span>${shipping.toFixed(2)} €</span></div>
   `;
   document.getElementById('coTotal').textContent = total.toFixed(2) + ' €';
 
@@ -1067,32 +1070,21 @@ function openCheckout() {
 // ── Prépare les items pour le Worker (gère stripePrice ET isDynamic) ──
 function buildWorkerItems(items, mode) {
   const { subtotal, discount, tva, shipping } = computeTotals();
-
-  // Stripe Checkout n'accepte pas les montants négatifs.
-  // On applique donc la remise en réduisant proportionnellement le prix de chaque article HT.
-  // TVA (déjà calculée sur le sous-total remisé) et livraison restent inchangées.
+  // Stripe n'accepte pas les montants négatifs : on applique la remise
+  // proportionnellement sur chaque article. TVA et livraison restent inchangées.
   const hasDiscount = discount > 0 && _appliedPromo;
-  const discountFactor = (hasDiscount && subtotal > 0)
-    ? (subtotal - discount) / subtotal
-    : 1;
-
+  const discountFactor = (hasDiscount && subtotal > 0) ? (subtotal - discount) / subtotal : 1;
   const workerItems = items.map(item => {
     // Choisit le bon price ID selon le mode (test ou live)
     let priceId = item.stripePrice;
     if (mode === 'live' && item.stripePriceLive) priceId = item.stripePriceLive;
     else if (mode === 'test' && item.stripePriceTest) priceId = item.stripePriceTest;
     else if (item.stripePriceTest) priceId = item.stripePriceTest; // fallback test
-
     if (priceId && priceId.startsWith('price_') && !hasDiscount) {
-      // Pas de promo → prix fixe Stripe, pas de modification
       return { stripePrice: priceId, qty: item.qty };
     }
-
-    // Avec promo sur article Stripe (price_id) : on force le mode dynamic avec le prix réduit
-    // Article dynamique : on applique le facteur de réduction
     const basePrice = parseFloat(item.price || 0);
     const finalPrice = parseFloat((basePrice * discountFactor).toFixed(2));
-
     if ((priceId && priceId.startsWith('price_')) || item.isDynamic) {
       return {
         isDynamic: true,
@@ -1107,7 +1099,6 @@ function buildWorkerItems(items, mode) {
   }).filter(Boolean);
 
   // Ajouter TVA comme ligne dynamique
-  // (tva est déjà calculée sur le sous-total après remise dans computeTotals)
   workerItems.push({
     isDynamic: true,
     name: 'TVA (20%)',
