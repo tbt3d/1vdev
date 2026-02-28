@@ -1878,7 +1878,7 @@ function addToCart() {
   const qtyInput = document.getElementById('qNum');
   const qty = qtyInput ? Math.max(1, Math.min(parseInt(qtyInput.value) || 1, 99)) : 1;
 
-  TBTCart.add({
+  var cartPromise = TBTCart.add({
     id: _art.id || _art.slug,
     name: _art.name,
     price: price,
@@ -1904,11 +1904,18 @@ function addToCart() {
 
   // Toast
   showCartToast(_art.name);
+  return cartPromise;
 }
 
 function buyNow() {
-  addToCart();
-  setTimeout(function() { window.location.href = '/panier.html'; }, 150);
+  var promise = addToCart();
+  // Attendre la confirmation Firestore avant de rediriger (évite panier vide à l'arrivée)
+  var p = (promise && typeof promise.then === 'function') ? promise : Promise.resolve();
+  p.then(function() {
+    window.location.href = '/panier.html';
+  }).catch(function() {
+    window.location.href = '/panier.html';
+  });
 }
 
 // Safari iOS : les onclick inline peuvent être ignorés dans certains contextes
