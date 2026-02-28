@@ -608,11 +608,11 @@ body {
 }
 #payhipModal {
   position: fixed; inset: 0; z-index: 9000;
-  display: flex; align-items: center; justify-content: center; padding: 16px;
+  display: none; align-items: center; justify-content: center; padding: 16px;
   background: rgba(8,8,8,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   opacity: 0; pointer-events: none; transition: opacity .25s ease;
 }
-#payhipModal.open { opacity: 1; pointer-events: all; }
+#payhipModal.open { display: flex; opacity: 1; pointer-events: all; }
 #payhipModal.open #payhipBox { animation: payhipBoxIn .35s cubic-bezier(.22,1,.36,1) forwards; }
 #payhipBox {
   position: relative; width: 100%; max-width: 420px; background: #fff;
@@ -1615,24 +1615,6 @@ function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
 
 <script src="/search.js"></script>
 <script>
-/* ─── INIT BOUTONS (fallback addEventListener pour mobile) ─── */
-document.addEventListener('DOMContentLoaded', function() {
-  var btnP = document.getElementById('btnPayhip');
-  var btnC = document.getElementById('btnAddCart');
-  if (btnP) btnP.addEventListener('click', function(e) { e.preventDefault(); buyNow(); });
-  if (btnC) btnC.addEventListener('click', function(e) { e.preventDefault(); addToCart(); });
-  var qm = document.getElementById('qMinus');
-  var qp = document.getElementById('qPlus');
-  if (qm) qm.addEventListener('click', function() {
-    var n = document.getElementById('qNum');
-    if (+n.value > 1) n.value = +n.value - 1;
-  });
-  if (qp) qp.addEventListener('click', function() {
-    var n = document.getElementById('qNum');
-    if (+n.value < 99) n.value = +n.value + 1;
-  });
-});
-
 /* ─── PANIER ─── */
 function addToCart() {
   const _art = window._art;
@@ -1671,7 +1653,7 @@ function addToCart() {
     ? combo.stripePrice.trim()
     : (_art.stripePrice || null);
 
-  TBTCart.add({
+  var cartItem = {
     id: _art.id || _art.slug,
     name: _art.name,
     price: price,
@@ -1680,7 +1662,24 @@ function addToCart() {
     variant: variantStr || null,
     paymentUrl: paymentUrl || null,
     stripePrice: stripePrice || null,
-  });
+    qty: 1,
+  };
+  try {
+    if (typeof TBTCart !== 'undefined' && TBTCart.add) {
+      TBTCart.add(cartItem);
+    } else {
+      var raw = localStorage.getItem('tbt3d_cart');
+      var items = raw ? JSON.parse(raw) : [];
+      var found = items.find(function(x) { return x.id === cartItem.id && x.variant === cartItem.variant; });
+      if (found) { found.qty = (found.qty||1)+1; } else { items.push(cartItem); }
+      localStorage.setItem('tbt3d_cart', JSON.stringify(items));
+    }
+  } catch(err) {
+    console.warn('Cart err:', err);
+    try {
+      localStorage.setItem('tbt3d_cart', JSON.stringify([cartItem]));
+    } catch(e2) {}
+  }
 
   // Feedback visuel sur le bouton
   const btn = document.getElementById('btnAddCart');
