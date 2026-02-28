@@ -3076,18 +3076,15 @@ window.deleteMsgById=async(id)=>{
 };
 
 // ── Téléchargement PJ ──
-// window.location.href = url est la seule méthode fiable cross-origin sans CORS :
-// - Le navigateur télécharge les fichiers non-affichables (ZIP, STL…) et reste sur la page
-// - Pour les PDF : window.open depuis un vrai click utilisateur (pas bloqué)
+// Les fichiers sont uploadés avec access_mode:public → URL directement accessible.
+// PDF → ouvrir dans nouvel onglet (lecteur natif du navigateur)
+// ZIP / STL / autres → window.location.href (téléchargement sans quitter la page, sans CORS)
 window.downloadFile=(url, fileName)=>{
   if(!url){ toast('Erreur : URL manquante'); return; }
   const ext = (fileName||'').split('.').pop().toLowerCase();
   if(ext === 'pdf'){
-    // PDF : affichage dans le reader natif du navigateur
     window.open(url, '_blank');
   } else {
-    // ZIP / STL / OBJ / autres : téléchargement direct via location.href
-    // Le navigateur voit un Content-Type non affichable → télécharge sans quitter la page
     window.location.href = url;
   }
   toast('⬇ ' + (fileName || 'Téléchargement…'));
