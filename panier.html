@@ -399,6 +399,47 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 <!-- ─── TOAST ─── -->
 <div class="toast" id="toast"></div>
 
+<script>
+/* ── TBTCart inline (fallback si /cart.js ne charge pas) ── */
+if (typeof window.TBTCart === 'undefined') {
+  window.TBTCart = (function() {
+    var KEY = 'tbt3d_cart';
+    function load() {
+      try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e) { return []; }
+    }
+    function save(items) {
+      try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {}
+    }
+    function makeKey(id, variant) { return (id || '') + '_' + (variant || ''); }
+    return {
+      load: load,
+      add: function(item) {
+        var items = load();
+        var k = makeKey(item.id, item.variant);
+        var found = items.find(function(x) { return x.key === k; });
+        if (found) { found.qty = (found.qty || 1) + (item.qty || 1); }
+        else { item.key = k; item.qty = item.qty || 1; items.push(item); }
+        save(items);
+        // Mettre à jour le badge navbar
+        var badge = document.querySelector('.cart-badge');
+        if (badge) {
+          var total = items.reduce(function(s,i){return s+(i.qty||1);},0);
+          badge.style.display = total > 0 ? 'block' : 'none';
+        }
+      },
+      remove: function(key) { save(load().filter(function(i){return i.key!==key;})); },
+      updateQty: function(key, qty) {
+        var items = load();
+        var found = items.find(function(i){return i.key===key;});
+        if (found) found.qty = qty;
+        save(items);
+      },
+      total: function() { return load().reduce(function(s,i){return s+parseFloat(i.price||0)*(i.qty||1);},0); },
+      clear: function() { try { localStorage.removeItem(KEY); } catch(e){} },
+    };
+  })();
+}
+</script>
 <script src="/cart.js"></script>
 <script>
 // ── TARIFS LIVRAISON ──────────────────────────────────────────────
