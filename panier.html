@@ -1066,7 +1066,7 @@ function openCheckout() {
 
 // ── Prépare les items pour le Worker (gère stripePrice ET isDynamic) ──
 function buildWorkerItems(items, mode) {
-  const { tva, shipping } = computeTotals();
+  const { tva, shipping, discount } = computeTotals();
   const workerItems = items.map(item => {
     // Choisit le bon price ID selon le mode (test ou live)
     let priceId = item.stripePrice;
@@ -1110,6 +1110,22 @@ function buildWorkerItems(items, mode) {
     price: shipping,
     qty: 1,
   });
+
+  // Ajouter la remise code promo comme ligne négative
+  // (Stripe Checkout accepte les montants négatifs en mode payment)
+  if (_appliedPromo && discount > 0) {
+    const promoLabel = _appliedPromo.type === 'percent'
+      ? `Réduction — Code ${_appliedPromo.code} (−${_appliedPromo.value}%)`
+      : `Réduction — Code ${_appliedPromo.code} (−${parseFloat(_appliedPromo.value).toFixed(2)} €)`;
+    workerItems.push({
+      isDynamic: true,
+      name: promoLabel,
+      variant: '',
+      note: '',
+      price: -discount,
+      qty: 1,
+    });
+  }
 
   return workerItems;
 }

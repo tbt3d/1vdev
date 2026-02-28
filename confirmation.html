@@ -417,14 +417,15 @@ async function generateAndSaveFacture(stripeData, fbData, orderId) {
 
   // Totaux
   const allItems = stripeData?.lineItems || fbData?.lineItems || [];
-  let tvaAmt = null, shippingAmt = null, subtotalAmt = null;
+  let tvaAmt = null, shippingAmt = null, subtotalAmt = null, stripePromoAmt = null;
   allItems.forEach(it => {
     const n = (it.name||'').toLowerCase();
     const a = it.amount != null ? it.amount/100 : null;
     if (n.includes('tva')||n.includes('tax')) tvaAmt = a;
     else if (n.includes('livraison')||n.includes('shipping')||n.includes('frais')) shippingAmt = a;
+    else if (n.includes('réduction')||n.includes('reduction')) stripePromoAmt = a;
   });
-  if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0);
+  if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0) - (stripePromoAmt||0);
 
   const fbPromoCode = fbData?.promoCode || null;
   const fbPromoDiscount = fbData?.promoDiscount ? parseFloat(fbData.promoDiscount) : 0;
@@ -560,14 +561,15 @@ async function sendAutoConfirmationEmail(stripeData, fbData, orderId) {
 
   // Totaux
   const allItems = stripeData?.lineItems || fbData?.lineItems || [];
-  let tvaAmt = null, shippingAmt = null, subtotalAmt = null;
+  let tvaAmt = null, shippingAmt = null, subtotalAmt = null, stripePromoAmt = null;
   allItems.forEach(it => {
     const n = (it.name || '').toLowerCase();
     const a = it.amount != null ? it.amount / 100 : null;
     if (n.includes('tva') || n.includes('tax')) tvaAmt = a;
     else if (n.includes('livraison') || n.includes('shipping') || n.includes('frais')) shippingAmt = a;
+    else if (n.includes('réduction') || n.includes('reduction')) stripePromoAmt = a;
   });
-  if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt || 0) - (shippingAmt || 0);
+  if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt || 0) - (shippingAmt || 0) - (stripePromoAmt || 0);
 
   const totalsHtml = subtotalAmt !== null ? `
     <tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">Sous-total HT</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${subtotalAmt.toFixed(2)} €</td></tr>
@@ -789,15 +791,17 @@ function displayConfirmation(data, orderId, fbData) {
   // Toujours utiliser le montant Stripe comme référence TTC (fbData.total ne contient que les articles HT)
   const totalTTC = data.amountTotal ? data.amountTotal / 100 : (fbData?.total || 0);
   const allLineItems = data.lineItems || fbData?.lineItems || [];
-  let tvaAmt = null, shippingAmt = null, subtotalAmt = null;
+  let tvaAmt = null, shippingAmt = null, subtotalAmt = null, stripePromoAmt = null;
   allLineItems.forEach(item => {
     const n = (item.name||'').toLowerCase();
     const a = item.amount != null ? item.amount / 100 : null;
     if (n.includes('tva') || n.includes('tax')) tvaAmt = a;
     else if (n.includes('livraison') || n.includes('shipping') || n.includes('frais')) shippingAmt = a;
+    else if (n.includes('réduction') || n.includes('reduction')) stripePromoAmt = a; // montant négatif
   });
   if (tvaAmt !== null || shippingAmt !== null) {
-    subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0);
+    // stripePromoAmt est négatif → le soustraire revient à le rajouter au sous-total
+    subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0) - (stripePromoAmt||0);
   }
   const promoCode = fbData?.promoCode || null;
   const promoDiscount = fbData?.promoDiscount ? parseFloat(fbData.promoDiscount) : 0;
@@ -913,14 +917,15 @@ window.downloadFacture = async function() {
       // Total
       const totalTTC = stripeData.amountTotal ? stripeData.amountTotal / 100 : (fbData.total || 0);
       const allItems = stripeData.lineItems || fbData.lineItems || [];
-      let tvaAmt = null, shippingAmt = null, subtotalAmt = null;
+      let tvaAmt = null, shippingAmt = null, subtotalAmt = null, stripePromoAmt = null;
       allItems.forEach(it => {
         const n = (it.name||'').toLowerCase();
         const a = it.amount != null ? it.amount/100 : null;
         if (n.includes('tva')||n.includes('tax')) tvaAmt = a;
         else if (n.includes('livraison')||n.includes('shipping')) shippingAmt = a;
+        else if (n.includes('réduction')||n.includes('reduction')) stripePromoAmt = a;
       });
-      if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0);
+      if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0) - (stripePromoAmt||0);
 
       const dlPromoCode = fbData?.promoCode || null;
       const dlPromoDiscount = fbData?.promoDiscount ? parseFloat(fbData.promoDiscount) : 0;

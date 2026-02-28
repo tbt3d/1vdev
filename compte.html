@@ -406,21 +406,6 @@
       </div>
       <div class="loading-spinner" id="ordersLoading"><div class="spin"></div></div>
       <div id="ordersList"></div>
-
-      <div class="section-divider">ou rechercher par numéro</div>
-
-      <div class="track-search-box">
-        <div class="track-search-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-          Suivre une commande
-        </div>
-        <div class="track-search-sub">Entrez votre numéro de commande (format : TBT-2024-XXXX) pour voir l'état de votre livraison.</div>
-        <div class="track-input-row">
-          <input class="p-input" type="text" id="orderRefInput" placeholder="ex : TBT-2024-0042" style="text-transform:uppercase">
-          <button class="btn-track" onclick="trackOrder()">Suivre →</button>
-        </div>
-        <div id="orderResult"></div>
-      </div>
     </div>
 
     <!-- Panel: PROFIL -->
@@ -824,21 +809,24 @@ async function loadOrders(uid) {
       const date = ts ? new Date(ts).toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) : '—';
 
       const ref   = o.factureNum || o.orderId || ('#' + o._fid.slice(-8).toUpperCase());
-      // Total TTC : amountTotal (Stripe, en centimes) > total HT + TVA + livraison > total brut
+      // Réplique exacte de getTotal() du dashboard
       let totalVal = 0;
-      if (o.amountTotal && o.amountTotal > 0) {
-        totalVal = o.amountTotal / 100;
-      } else if (o.total && parseFloat(o.total) > 0) {
-        let subtotal = parseFloat(o.total);
-        let tva = 0, shipping = 0;
-        const li = Array.isArray(o.lineItems) ? o.lineItems : [];
-        li.forEach(function(item) {
-          const name = (item.name||'').toLowerCase();
-          const amt = item.amount != null ? item.amount / 100 : 0;
-          if (name.includes('tva') || name.includes('tax')) tva = amt;
-          else if (name.includes('livraison') || name.includes('shipping') || name.includes('frais')) shipping = amt;
-        });
-        totalVal = subtotal + tva + shipping;
+      const _items = Array.isArray(o.items) ? o.items : (Array.isArray(o.lineItems) ? [] : []);
+      const _li    = Array.isArray(o.lineItems) ? o.lineItems : [];
+      let _tva = 0, _shipping = 0;
+      _li.forEach(function(item) {
+        const name = (item.name||'').toLowerCase();
+        const amt  = item.amount != null ? item.amount / 100 : 0;
+        if (name.includes('tva') || name.includes('tax')) _tva = amt;
+        else if (name.includes('livraison') || name.includes('shipping') || name.includes('frais')) _shipping = amt;
+      });
+      if (o.total && parseFloat(o.total) > 0) {
+        const subtotalHT = _items.length > 0
+          ? _items.reduce(function(s,i){ return s + parseFloat(i.price||0) * parseInt(i.qty||1); }, 0)
+          : parseFloat(o.total);
+        totalVal = subtotalHT + _tva + _shipping;
+      } else if (_items.length > 0) {
+        totalVal = _items.reduce(function(s,i){ return s + parseFloat(i.price||0) * parseInt(i.qty||1); }, 0);
       }
       const total = totalVal > 0 ? totalVal.toFixed(2) : null;
       const hasPdf = !!(o.factureUrl || o.factureHtml);
