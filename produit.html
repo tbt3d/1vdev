@@ -17,7 +17,7 @@
   --nav-h: 70px; --max: 1280px; --r: 50px;
 }
 html { scroll-behavior: smooth; }
-body { font-family: var(--font); color: var(--text); background: var(--white); padding-top: var(--nav-h); font-size: 14px; line-height: 1.5; }
+body { font-family: var(--font); color: var(--text); background: var(--white); padding-top: var(--nav-h); font-size: 14px; line-height: 1.5; overflow-x: hidden; max-width: 100%; }
 
 /* ─── NAVBAR ─── */
 #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--white); border-bottom: 1px solid var(--border); transition: box-shadow .2s; }
@@ -31,7 +31,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .nav-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; border-radius: 6px; color: var(--black); transition: background .15s; text-decoration: none; }
 .nav-icon:hover { background: var(--bg); }
 .nav-icon svg { width: 20px; height: 20px; }
-.cart-badge{position:absolute;top:4px;right:4px;background:#e11d48;width:9px;height:9px;border-radius:50%;display:none;border:1.5px solid #fff}
+.cart-badge { position: absolute; top: 4px; right: 4px; background: #e11d48; width: 9px; height: 9px; border-radius: 50%; display: none; border: 1.5px solid #fff; }
 .nav-burger { display: none; }
 .search-bar { display: none; border-top: 1px solid var(--border); background: var(--white); padding: 12px 32px; }
 .search-bar.open { display: block; }
@@ -43,14 +43,14 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .mobile-nav.open { display: flex; }
 .mobile-nav a { text-decoration: none; color: var(--black); font-size: 15px; padding: 10px 12px; border-radius: 6px; transition: background .15s; }
 .mobile-nav a:hover { background: var(--bg); }
-@media(max-width:768px) { .nav-links { display: none; } .nav-burger { display: flex; } .nav-inner { padding: 0 20px; } }
+@media(max-width:768px) { .nav-links { display: none; } .nav-burger { display: flex; } .nav-inner { padding: 0 16px; } }
 
 /* ─── BREADCRUMB ─── */
 .breadcrumb { max-width: var(--max); margin: 0 auto; padding: 16px 32px 0; display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--muted); }
 .breadcrumb a { color: var(--muted); text-decoration: none; transition: color .15s; }
 .breadcrumb a:hover { color: var(--black); }
 .breadcrumb .sep { opacity: .4; }
-@media(max-width:768px) { .breadcrumb { padding: 12px 20px 0; } }
+@media(max-width:768px) { .breadcrumb { padding: 12px 16px 0; } }
 
 /* ─── LOADING ─── */
 #loadingState { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 16px; color: var(--muted); }
@@ -63,49 +63,122 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 #notFound p { color: var(--muted); font-size: 14px; }
 #notFound a { margin-top: 8px; padding: 12px 28px; background: var(--black); color: var(--white); text-decoration: none; border-radius: var(--r); font-size: 13px; font-weight: 500; }
 
-/* ─── LAYOUT PRODUIT ─── */
+/* ═══════════════════════════════════════════
+   LAYOUT PRODUIT — SHOPIFY STYLE
+═══════════════════════════════════════════ */
 #productWrap { display: none; }
-.product-inner { max-width: var(--max); margin: 0 auto; padding: 28px 32px 80px; display: grid; grid-template-columns: 1fr 460px; gap: 64px; align-items: start; }
-@media(max-width:960px) { .product-inner { grid-template-columns: 1fr; gap: 0; padding: 0 0 60px; } }
-@media(min-width:601px) and (max-width:960px) { .prod-detail { padding: 28px 28px 0; } }
 
-/* ─── GALERIE GAUCHE ─── */
-.gallery { display: flex; gap: 12px; position: sticky; top: calc(var(--nav-h) + 20px); }
-.gallery-thumbs { display: flex; flex-direction: column; gap: 8px; width: 72px; flex-shrink: 0; }
-.gallery-thumbs img { width: 72px; height: 72px; object-fit: cover; border-radius: 6px; border: 1.5px solid var(--border); cursor: pointer; transition: border-color .15s, opacity .15s; opacity: .55; }
-.gallery-thumbs img.active { border-color: var(--black); opacity: 1; }
-.gallery-main { flex: 1; position: relative; border-radius: 10px; overflow: hidden; background: var(--bg); height: calc(100vh - var(--nav-h) - 60px); max-height: 780px; }
-.gallery-main-img { width: 100%; height: 100%; object-fit: cover; object-position: center center; display: block; background: var(--bg); }
-.gallery-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 56px; background: var(--bg); }
-/* Tablette + Mobile : thumbs horizontales sous l'image */
-@media(max-width:960px) {
-  .gallery { position: static; flex-direction: column; gap: 0; }
-  .gallery-thumbs { flex-direction: row; width: 100%; overflow-x: auto; padding: 10px 20px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; gap: 8px; order: 2; }
-  .gallery-thumbs::-webkit-scrollbar { display: none; }
-  .gallery-thumbs img { width: 64px; height: 64px; flex-shrink: 0; border-radius: 6px; opacity: .55; }
-  .gallery-thumbs img.active { opacity: 1; border-color: var(--black); }
-  .gallery-main { order: 1; height: 55vw; max-height: 500px; min-height: 300px; border-radius: 0; }
+/* Desktop : 2 colonnes, galerie à gauche, détails à droite */
+.product-inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 28px 32px 80px;
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  gap: 60px;
+  align-items: start;
 }
-@media(max-width:600px) {
-  .gallery-thumbs img { width: 56px; height: 56px; }
-  .gallery-main { height: 82vw; max-height: 420px; }
-  .prod-detail { padding: 20px 20px 0; }
+
+/* ─── GALERIE — DESKTOP ─── */
+.gallery { display: flex; gap: 12px; position: sticky; top: calc(var(--nav-h) + 16px); }
+.gallery-thumbs {
+  display: flex; flex-direction: column; gap: 8px;
+  width: 72px; flex-shrink: 0;
+  max-height: calc(100vh - var(--nav-h) - 40px);
+  overflow-y: auto; scrollbar-width: none;
+}
+.gallery-thumbs::-webkit-scrollbar { display: none; }
+.gallery-thumbs img {
+  width: 72px; height: 72px; flex-shrink: 0;
+  object-fit: cover; border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color .15s, opacity .15s;
+  opacity: .55; background: var(--bg);
+}
+.gallery-thumbs img.active { border-color: var(--black); opacity: 1; }
+.gallery-main {
+  flex: 1; position: relative;
+  border-radius: 12px; overflow: hidden;
+  background: var(--bg);
+  aspect-ratio: 1 / 1;
+}
+.gallery-main-img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  display: block; background: var(--bg);
+}
+.gallery-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 56px; background: var(--bg);
+}
+.gallery-nav { position: absolute; bottom: 14px; right: 14px; display: flex; gap: 6px; }
+.gallery-btn {
+  width: 34px; height: 34px;
+  background: rgba(255,255,255,.92); border: 1px solid rgba(0,0,0,.08);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .15s; box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+.gallery-btn:hover { background: var(--white); }
+.gallery-btn svg { width: 14px; height: 14px; }
+
+/* ─── GALERIE — TABLETTE (601–960px) ─── */
+@media(max-width: 960px) {
+  .product-inner {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 0 0 100px;
+    max-width: 100%;
+  }
+  .gallery {
+    position: static;
+    flex-direction: column;
+    gap: 0;
+  }
+  .gallery-main {
+    width: 100%;
+    aspect-ratio: 4/3;
+    border-radius: 0;
+  }
+  .gallery-thumbs {
+    flex-direction: row;
+    width: 100%;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 12px 16px;
+    gap: 8px;
+    order: 2;
+  }
+  .gallery-thumbs img {
+    width: 60px; height: 60px;
+    border-radius: 8px;
+  }
+  .gallery-main { order: 1; }
+  .prod-detail { padding: 24px 20px 0; }
+}
+
+/* ─── GALERIE — MOBILE (<600px) ─── */
+@media(max-width: 600px) {
+  .gallery-main { aspect-ratio: 1/1; }
+  .gallery-thumbs img { width: 52px; height: 52px; }
+  .prod-detail { padding: 20px 16px 0; }
 }
 
 /* ─── DETAIL DROITE ─── */
 .prod-detail { display: flex; flex-direction: column; }
 .prod-badges { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
 .prod-badge { font-size: 10px; font-weight: 600; padding: 4px 12px; border-radius: 20px; letter-spacing: .06em; text-transform: uppercase; background: var(--black); color: var(--white); }
-.prod-name { font-size: 30px; font-weight: 400; letter-spacing: -.02em; margin-bottom: 8px; line-height: 1.15; }
+.prod-name { font-size: 28px; font-weight: 400; letter-spacing: -.02em; margin-bottom: 8px; line-height: 1.2; }
 .prod-tagline { font-size: 14px; color: var(--soft); margin-bottom: 20px; line-height: 1.6; }
 .prod-price-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-.prod-price { font-size: 28px; font-weight: 400; }
+.prod-price { font-size: 26px; font-weight: 500; }
 .prod-old-price { font-size: 16px; color: var(--muted); text-decoration: line-through; }
 .prod-save { font-size: 11px; color: #16a34a; font-weight: 600; background: #f0fdf4; padding: 3px 9px; border-radius: 4px; }
-@media(max-width:600px) {
-  .prod-name { font-size: 26px; }
-  .prod-price { font-size: 24px; }
-  .prod-price-row { margin-bottom: 18px; }
+@media(max-width: 600px) {
+  .prod-name { font-size: 22px; }
+  .prod-price { font-size: 22px; }
 }
 .hr { height: 1px; background: var(--border); margin: 20px 0; }
 
@@ -133,22 +206,42 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .qty-num { width: 52px; text-align: center; border: none; border-left: 1.5px solid var(--border); border-right: 1.5px solid var(--border); font-family: var(--font); font-size: 14px; height: 42px; outline: none; -moz-appearance: textfield; background: var(--white); }
 .qty-num::-webkit-inner-spin-button, .qty-num::-webkit-outer-spin-button { display: none; }
 
-/* Bouton achat */
+/* ─── BOUTONS ACHAT ─── */
 .btn-buy {
   width: 100%; padding: 16px 24px;
   background: var(--black); color: var(--white);
   border: none; font-family: var(--font); font-size: 15px; font-weight: 500;
   border-radius: var(--r); cursor: pointer;
   transition: opacity .2s, transform .15s;
-  margin-bottom: 8px; text-decoration: none;
+  margin-bottom: 10px; text-decoration: none;
   display: flex; align-items: center; justify-content: center; gap: 10px;
+  white-space: nowrap;
+  -webkit-appearance: none;
 }
 .btn-buy:hover { opacity: .86; transform: translateY(-1px); }
 .btn-buy svg { width: 17px; height: 17px; flex-shrink: 0; }
-.btn-contact { width: 100%; padding: 13px 20px; background: var(--white); color: var(--text); border: 1.5px solid var(--border); font-family: var(--font); font-size: 13px; border-radius: var(--r); cursor: pointer; transition: border-color .2s; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-contact {
+  width: 100%; padding: 14px 20px;
+  background: var(--white); color: var(--text);
+  border: 1.5px solid var(--border);
+  font-family: var(--font); font-size: 14px;
+  border-radius: var(--r); cursor: pointer;
+  transition: border-color .2s; text-decoration: none;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  white-space: nowrap;
+  -webkit-appearance: none;
+  margin-bottom: 10px;
+}
 .btn-contact:hover { border-color: var(--text); }
-.btn-contact svg { width: 15px; height: 15px; }
-.trust-row { display: flex; gap: 16px; margin-top: 18px; flex-wrap: wrap; }
+.btn-contact svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* Groupe boutons — toujours pleine largeur, jamais coupés */
+.btn-group {
+  display: flex; flex-direction: column; gap: 0;
+  width: 100%; margin-bottom: 20px;
+}
+
+.trust-row { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
 .trust-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
 .trust-item svg { width: 13px; height: 13px; flex-shrink: 0; }
 
@@ -183,17 +276,17 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .info-item-icon svg { width: 12px; height: 12px; opacity: .5; }
 .info-item-key { font-size: 12px; color: var(--muted); flex: 1; }
 .info-item-val { font-size: 12px; font-weight: 500; }
-@media(max-width:768px) { .info-section { padding: 48px 16px; } .info-grid { grid-template-columns: 1fr; max-width: 100%; } .info-block { border-right: none; border-bottom: 1px solid var(--border); overflow: hidden; max-width: 100%; } .info-block:last-child { border-bottom: none; } }
+@media(max-width:768px) { .info-section { padding: 48px 16px; } .info-grid { grid-template-columns: 1fr; } .info-block { border-right: none; border-bottom: 1px solid var(--border); } .info-block:last-child { border-bottom: none; } }
 
 /* ─── MOOD GRID ─── */
-.mood-section { background: var(--white); padding: 80px 32px 80px; }
+.mood-section { background: var(--white); padding: 80px 32px; }
 .mood-inner { max-width: var(--max); margin: 0 auto; }
 .mood-label { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; }
 .mood-mosaic { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.mood-mosaic img { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: center center; border-radius: 12px; display: block; transition: transform .4s ease; cursor: zoom-in; background: var(--bg); }
+.mood-mosaic img { width: 100%; aspect-ratio: 3/4; object-fit: cover; object-position: center; border-radius: 12px; display: block; transition: transform .4s ease; cursor: zoom-in; background: var(--bg); }
 .mood-mosaic img:hover { transform: scale(1.03); }
-@media(max-width:768px) { .mood-mosaic { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
-@media(max-width:600px) { .mood-section { padding: 48px 20px; } }
+@media(max-width:768px) { .mood-mosaic { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+@media(max-width:600px) { .mood-section { padding: 48px 16px; } }
 
 /* ─── LIGHTBOX ─── */
 .lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.92); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .25s ease; backdrop-filter: blur(6px); }
@@ -203,34 +296,17 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .lightbox-close { position: absolute; top: 20px; right: 24px; width: 40px; height: 40px; background: rgba(255,255,255,.12); border: none; border-radius: 50%; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
 .lightbox-close:hover { background: rgba(255,255,255,.25); }
 .lightbox-prev, .lightbox-next { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; background: rgba(255,255,255,.12); border: none; border-radius: 50%; color: #fff; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
-.lightbox-prev { left: 20px; }
-.lightbox-next { right: 20px; }
+.lightbox-prev { left: 20px; } .lightbox-next { right: 20px; }
 .lightbox-prev:hover, .lightbox-next:hover { background: rgba(255,255,255,.25); }
 .lightbox-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255,255,255,.5); font-family: var(--font); letter-spacing: .08em; }
 
 /* ─── POPUP PAIEMENT ─── */
-@keyframes payhipBoxIn {
-  from { opacity: 0; transform: translateY(32px) scale(.95); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-#payhipModal {
-  position: fixed; inset: 0; z-index: 9000;
-  display: flex; align-items: center; justify-content: center; padding: 20px;
-  background: rgba(8,8,8,.75); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  opacity: 0; pointer-events: none; transition: opacity .25s ease;
-}
+@keyframes payhipBoxIn { from { opacity: 0; transform: translateY(32px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+#payhipModal { position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(8,8,8,.75); backdrop-filter: blur(14px); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
 #payhipModal.open { opacity: 1; pointer-events: all; }
 #payhipModal.open #payhipBox { animation: payhipBoxIn .38s cubic-bezier(.22,1,.36,1) forwards; }
-#payhipBox {
-  position: relative; width: 100%; max-width: 440px; background: #fff;
-  border-radius: 28px; padding: 48px 40px 40px; text-align: center;
-  box-shadow: 0 0 0 1px rgba(0,0,0,.06), 0 24px 60px rgba(0,0,0,.18);
-}
-#payhipCloseBtn {
-  position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;
-  background: #f2f2f2; border: none; border-radius: 50%; color: #888;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .18s;
-}
+#payhipBox { position: relative; width: 100%; max-width: 440px; background: #fff; border-radius: 28px; padding: 48px 40px 40px; text-align: center; box-shadow: 0 0 0 1px rgba(0,0,0,.06), 0 24px 60px rgba(0,0,0,.18); }
+#payhipCloseBtn { position: absolute; top: 16px; right: 16px; width: 32px; height: 32px; background: #f2f2f2; border: none; border-radius: 50%; color: #888; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .18s; }
 #payhipCloseBtn:hover { background: #e5e5e5; color: #111; transform: rotate(90deg); }
 #payhipCloseBtn svg { width: 14px; height: 14px; }
 #payhipIcon { width: 72px; height: 72px; background: #f6f6f6; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; overflow: hidden; }
@@ -239,19 +315,13 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 #payhipProductName { font-size: 26px; font-weight: 400; letter-spacing: -.025em; color: #111; margin-bottom: 6px; line-height: 1.2; }
 #payhipProductPrice { font-size: 20px; color: #555; margin-bottom: 16px; font-weight: 300; }
 #payhipMsg { font-size: 13px; color: #888; line-height: 1.7; margin-bottom: 28px; }
-#payhipGoBtn {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  width: 100%; padding: 16px 24px; background: #111; color: #fff;
-  border-radius: 50px; text-decoration: none;
-  font-family: var(--font); font-size: 15px; font-weight: 500;
-  transition: opacity .2s, transform .15s; margin-bottom: 24px;
-}
+#payhipGoBtn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px 24px; background: #111; color: #fff; border-radius: 50px; text-decoration: none; font-family: var(--font); font-size: 15px; font-weight: 500; transition: opacity .2s, transform .15s; margin-bottom: 24px; }
 #payhipGoBtn:hover { opacity: .85; transform: translateY(-2px); }
 #payhipGoBtn svg { width: 17px; height: 17px; flex-shrink: 0; }
 #payhipTrust { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
 #payhipTrust span { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #bbb; }
 #payhipTrust svg { width: 12px; height: 12px; }
-@media(max-width:480px) { #payhipBox { padding: 40px 24px 32px; border-radius: 22px; } #payhipProductName { font-size: 22px; } }
+@media(max-width:480px) { #payhipBox { padding: 40px 20px 32px; border-radius: 20px; } #payhipProductName { font-size: 20px; } }
 
 /* ─── MORE SECTION ─── */
 .more-section { background: var(--white); padding: 100px 32px; text-align: center; }
@@ -278,12 +348,12 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 .sim-old { font-size: 12px; color: var(--muted); text-decoration: line-through; }
 .sim-price { font-size: 14px; font-weight: 500; }
 @media(max-width:900px) { .similar-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
-@media(max-width:500px) { .similar-section { padding: 48px 16px 64px; } }
-@media(max-width:400px) { .similar-grid { grid-template-columns: 1fr 1fr; gap: 10px; } }
+@media(max-width:500px) { .similar-section { padding: 48px 16px 80px; } }
 
-/* ─── STICKY MOBILE BUY BAR ─── (supprimé) */
+/* Pas de barre sticky — on cache tout résidu */
 .mobile-buy-bar { display: none !important; }
 
+/* ─── FOOTER ─── */
 #footer { background: #111; color: rgba(255,255,255,.7); }
 .footer-inner { max-width: var(--max); margin: 0 auto; padding: 60px 32px 40px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; }
 @media(max-width:900px) { .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; } }
@@ -427,7 +497,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
       <div class="hr"></div>
 
       <!-- Groupe boutons achat -->
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+      <div class="btn-group">
         <button id="btnPayhip" class="btn-buy" style="display:none" onclick="buyNow()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           Acheter maintenant
@@ -445,46 +515,6 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
           Une question ? Contactez-nous
         </a>
       </div>
-
-      <!-- ─── POPUP PAIEMENT ─── -->
-      <div id="payhipModal" onclick="if(event.target===this)closePayhipModal()">
-        <div id="payhipBox">
-          <button id="payhipCloseBtn" onclick="closePayhipModal()" title="Fermer">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-
-          <div id="payhipIcon">
-            <img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" alt="TBT3D">
-          </div>
-
-          <p id="payhipLabel">Vous commandez</p>
-          <h2 id="payhipProductName"></h2>
-          <p id="payhipProductPrice"></p>
-          <p id="payhipMsg">Vous allez être redirigé vers notre plateforme de paiement sécurisé pour finaliser votre commande.</p>
-
-          <!-- Mode lien externe (payhip) -->
-          <a id="payhipGoBtn" href="#" target="_blank" rel="noopener" onclick="setTimeout(closePayhipModal,400)" style="display:none">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Procéder au paiement
-          </a>
-          <!-- Mode Stripe direct (Worker) -->
-          <button id="stripeDirectBtn" onclick="stripeDirectCheckout()" style="display:none;width:100%;padding:15px 20px;background:#111;color:#fff;border:none;font-family:inherit;font-size:14px;font-weight:500;border-radius:12px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:8px">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-            Procéder au paiement
-          </button>
-          <p id="stripeDirectErr" style="display:none;font-size:11px;color:#e11d48;text-align:center;margin-top:8px"></p>
-
-          <div id="payhipTrust">
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Paiement sécurisé</span>
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>CB · PayPal</span>
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Made in Lille</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bouton contact secondaire -->
-
-
       <!-- Caractéristiques inline (générées dynamiquement) -->
       <div class="specs-inline" id="specsInline" style="display:none"></div>
 
@@ -561,51 +591,8 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
 </div><!-- #productWrap -->
 
-<!-- ─── FOOTER ─── -->
-<footer id="footer">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <a href="/index.html">
-        <img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D">
-      </a>
-      <p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p>
-      <p class="footer-tagline">Made in France 🇫🇷</p>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Navigation</div>
-      <a href="/index.html">Home</a>
-      <a href="/boutique.html">Boutique</a>
-      <a href="/devis.html">Impression sur mesure</a>
-      <a href="/a-propos.html">À propos</a>
-      <a href="/contact.html">Contact</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Légal</div>
-      <a href="/mentions-legales.html">Mentions légales</a>
-      <a href="/cgv.html">CGV</a>
-      <a href="/politique-confidentialite.html">Confidentialité</a>
-      <a href="/politique-retour.html">Retours</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Contact</div>
-      <a href="/cdn-cgi/l/email-protection#146076602624273a777b7a60757760547379757d783a777b79"><span class="__cf_email__" data-cfemail="dfabbdabedefecf1bcb0b1abbebcab9fb8b2beb6b3f1bcb0b2">[email&#160;protected]</span></a>
-      <a href="/contact.html">Formulaire</a>
-      <a href="/devis.html">Devis STL</a>
-            <div class="footer-social">
-        <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
-        <a href="https://www.tiktok.com/@tbt203_" aria-label="TikTok" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span>
-    <span class="footer-pay">
-      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
-      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
-      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#003087"/><text x="19" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="white" font-family="sans-serif">PayPal</text></svg>
-    </span>
-  </div>
-</footer>
+
+<!-- ─── FIREBASE
 
 <!-- ─── FIREBASE + LOGIQUE PRODUIT ─── -->
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
@@ -1111,8 +1098,86 @@ async function loadSuggestions(art) {
 }
 </script>
 
+
+<!-- ─── POPUP PAIEMENT ─── -->
+<div id="payhipModal" onclick="if(event.target===this)closePayhipModal()">
+  <div id="payhipBox">
+    <button id="payhipCloseBtn" onclick="closePayhipModal()" title="Fermer">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div id="payhipIcon">
+      <img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" alt="TBT3D">
+    </div>
+    <p id="payhipLabel">Vous commandez</p>
+    <h2 id="payhipProductName"></h2>
+    <p id="payhipProductPrice"></p>
+    <p id="payhipMsg">Vous allez être redirigé vers notre plateforme de paiement sécurisé pour finaliser votre commande.</p>
+    <a id="payhipGoBtn" href="#" target="_blank" rel="noopener" onclick="setTimeout(closePayhipModal,400)" style="display:none">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Procéder au paiement
+    </a>
+    <button id="stripeDirectBtn" onclick="stripeDirectCheckout()" style="display:none;width:100%;padding:15px 20px;background:#111;color:#fff;border:none;font-family:inherit;font-size:14px;font-weight:500;border-radius:12px;cursor:pointer;align-items:center;justify-content:center;gap:8px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:17px;height:17px"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      Procéder au paiement
+    </button>
+    <p id="stripeDirectErr" style="display:none;font-size:11px;color:#e11d48;text-align:center;margin-top:8px"></p>
+    <div id="payhipTrust">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Paiement sécurisé</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>CB · PayPal</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>Made in Lille</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ─── FOOTER ─── -->
+<footer id="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="/index.html">
+        <img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D">
+      </a>
+      <p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p>
+      <p class="footer-tagline">Made in France 🇫🇷</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Navigation</div>
+      <a href="/index.html">Home</a>
+      <a href="/boutique.html">Boutique</a>
+      <a href="/devis.html">Impression sur mesure</a>
+      <a href="/a-propos.html">À propos</a>
+      <a href="/contact.html">Contact</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Légal</div>
+      <a href="/mentions-legales.html">Mentions légales</a>
+      <a href="/cgv.html">CGV</a>
+      <a href="/politique-confidentialite.html">Confidentialité</a>
+      <a href="/politique-retour.html">Retours</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Contact</div>
+      <a href="/cdn-cgi/l/email-protection#146076602624273a777b7a60757760547379757d783a777b79"><span class="__cf_email__" data-cfemail="dfabbdabedefecf1bcb0b1abbebcab9fb8b2beb6b3f1bcb0b2">[email&#160;protected]</span></a>
+      <a href="/contact.html">Formulaire</a>
+      <a href="/devis.html">Devis STL</a>
+      <div class="footer-social">
+        <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
+        <a href="https://www.tiktok.com/@tbt203_" aria-label="TikTok" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span>
+    <span class="footer-pay">
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
+      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#003087"/><text x="19" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="white" font-family="sans-serif">PayPal</text></svg>
+    </span>
+  </div>
+</footer>
+
 <script>
-document.getElementById('footerYear').textContent = new Date().getFullYear();
+const _fy = document.getElementById('footerYear'); if(_fy) _fy.textContent = new Date().getFullYear();
 
 let _lbPhotos = [];
 let _lbIndex = 0;
@@ -1262,50 +1327,5 @@ function showCartToast(name) {
   }, 3000);
 }
 </script>
-<!-- ─── FOOTER ─── -->
-<footer id="footer">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <a href="/index.html">
-        <img src="image/ChatGPT Image 30 juin 2025, 14_57_42-Photoroom (1).png" style="height:44px;width:auto;object-fit:contain" alt="TBT3D">
-      </a>
-      <p>Lampes imprimées en 3D,<br>fabriquées à Lille avec passion.</p>
-      <p class="footer-tagline">Made in France 🇫🇷</p>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Navigation</div>
-      <a href="/index.html">Home</a>
-      <a href="/boutique.html">Boutique</a>
-      <a href="/devis.html">Impression sur mesure</a>
-      <a href="/a-propos.html">À propos</a>
-      <a href="/contact.html">Contact</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Légal</div>
-      <a href="/mentions-legales.html">Mentions légales</a>
-      <a href="/cgv.html">CGV</a>
-      <a href="/politique-confidentialite.html">Confidentialité</a>
-      <a href="/politique-retour.html">Retours</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Contact</div>
-      <a href="/cdn-cgi/l/email-protection#146076602624273a777b7a60757760547379757d783a777b79"><span class="__cf_email__" data-cfemail="dfabbdabedefecf1bcb0b1abbebcab9fb8b2beb6b3f1bcb0b2">[email&#160;protected]</span></a>
-      <a href="/contact.html">Formulaire</a>
-      <a href="/devis.html">Devis STL</a>
-      <div class="footer-social">
-        <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
-        <a href="https://www.tiktok.com/@tbt203_" aria-label="TikTok" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <span>© <span id="footerYear"></span> TBT3D — Tous droits réservés</span>
-    <span class="footer-pay">
-      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#1a1f71"/><text x="19" y="16" text-anchor="middle" font-size="8" font-weight="700" fill="white" font-family="sans-serif">VISA</text></svg>
-      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#fff" stroke="#e5e5e5"/><circle cx="14" cy="12" r="6" fill="#eb001b"/><circle cx="24" cy="12" r="6" fill="#f79e1b"/></svg>
-      <svg viewBox="0 0 38 24" width="38" height="24"><rect width="38" height="24" rx="4" fill="#003087"/><text x="19" y="16" text-anchor="middle" font-size="7" font-weight="700" fill="white" font-family="sans-serif">PayPal</text></svg>
-    </span>
-  </div>
-</footer>
 </body>
 </html>

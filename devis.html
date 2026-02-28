@@ -666,9 +666,9 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
   <!-- GAUCHE : viewer STL -->
   <div class="prod-gallery">
     <div class="gallery-thumbs">
-      <div class="thumb-stl" id="thumbStl" onclick="event.stopPropagation();document.getElementById('fileInput').click()" title="Changer de fichier STL">
+      <div class="thumb-stl" id="thumbStl" onclick="event.stopPropagation();document.getElementById('fileInput').click()" title="Changer de fichier">
         <svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M11 2L2 7v8l9 5 9-5V7L11 2z"/></svg>
-        STL
+        3D
       </div>
 
       <!-- Dimensions verticales -->
@@ -690,15 +690,15 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 
       <!-- Drop zone -->
       <div class="drop-zone" id="dropZone">
-        <input type="file" id="fileInput" accept=".stl">
+        <input type="file" id="fileInput" accept=".stl,.obj,.3mf">
         <div class="drop-icon">
           <svg width="30" height="30" viewBox="0 0 28 28" fill="none">
             <path d="M14 2L2 8v12l12 6 12-6V8L14 2z" stroke="#999" stroke-width="1.5"/>
             <path d="M14 2v22M2 8l12 7M26 8l-12 7" stroke="#999" stroke-width="1" opacity=".4"/>
           </svg>
         </div>
-        <div class="drop-title">Déposez votre fichier STL ici</div>
-        <div class="drop-sub">Format .STL uniquement · Compression ZIP automatique si &gt; 50 Mo</div>
+        <div class="drop-title">Déposez votre fichier 3D ici</div>
+        <div class="drop-sub">Formats .STL · .OBJ · .3MF · Compression ZIP automatique si &gt; 50 Mo</div>
         <button class="drop-cta" onclick="event.stopPropagation();document.getElementById('fileInput').click()">Choisir un fichier</button>
       </div>
 
@@ -731,10 +731,10 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     </div>
 
     <h1 class="prod-name">Impression sur mesure</h1>
-    <p class="prod-tagline">Votre fichier STL imprimé en FDM ou résine, fabriqué à Lille.</p>
+    <p class="prod-tagline">Votre fichier 3D imprimé en FDM ou résine, fabriqué à Lille.</p>
 
     <div class="prod-price" id="priceDisplay">
-      <span class="prod-price-na">Importez votre fichier STL</span>
+      <span class="prod-price-na">Importez votre fichier 3D</span>
     </div>
 
     <div class="hr"></div>
@@ -762,11 +762,11 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     <div class="opt-block" id="fillBlock">
       <div class="opt-label">Remplissage <span class="opt-val" id="fillVal">20% — Recommandé</span></div>
       <div class="chips">
-        <div class="chip fill-chip" data-v="10" data-lbl="10% — Léger">10% <span style="font-size:9px;opacity:.6">base</span></div>
-        <div class="chip fill-chip on" data-v="20" data-lbl="20% — Recommandé">20% <span style="font-size:9px;color:#ff6b35">+2€</span></div>
-        <div class="chip fill-chip" data-v="50" data-lbl="50% — Solide">50% <span style="font-size:9px;color:#ff6b35">+4€</span></div>
-        <div class="chip fill-chip" data-v="70" data-lbl="70% — Très solide">70% <span style="font-size:9px;color:#ff6b35">+6€</span></div>
-        <div class="chip fill-chip" data-v="100" data-lbl="100% — Plein">100% <span style="font-size:9px;color:#ff6b35">+8€</span></div>
+        <div class="chip fill-chip" data-v="10" data-lbl="10% — Léger">10%</div>
+        <div class="chip fill-chip on" data-v="20" data-lbl="20% — Recommandé">20%</div>
+        <div class="chip fill-chip" data-v="50" data-lbl="50% — Solide">50%</div>
+        <div class="chip fill-chip" data-v="70" data-lbl="70% — Très solide">70%</div>
+        <div class="chip fill-chip" data-v="100" data-lbl="100% — Plein">100%</div>
       </div>
     </div>
 
@@ -796,7 +796,6 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     <!-- Breakdown -->
     <div class="bk" id="bk">
       <div class="bk-row" id="rFab"><span>Fabrication</span><span>—</span></div>
-      <div class="bk-row" id="rFill" style="color:var(--accent)"></div>
       <div class="bk-row" id="rTot"><span>Total HT</span><span>—</span></div>
     </div>
 
@@ -812,7 +811,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
       Ajouter au panier
     </button>
 
-    <p class="note" id="note">Importez votre fichier STL pour obtenir une estimation instantanée.</p>
+    <p class="note" id="note">Importez votre fichier 3D pour obtenir une estimation instantanée.</p>
 
     <!-- Trust -->
     <div class="trust-row">
@@ -1079,11 +1078,15 @@ document.addEventListener('dragover', e => e.preventDefault());
 document.addEventListener('drop', e => {
   e.preventDefault();
   const f = e.dataTransfer.files[0];
-  if (f && f.name.toLowerCase().endsWith('.stl')) { dropZone.classList.remove('over'); loadFile(f); }
+  if (f && isSupportedFile(f.name)) { dropZone.classList.remove('over'); loadFile(f); }
 });
 viewer.ondragover  = e => { e.preventDefault(); dropZone.classList.add('over'); };
 viewer.ondragleave = () => dropZone.classList.remove('over');
-fi.onchange = e => { if (e.target.files[0]) { loadFile(e.target.files[0]); fi.value = ''; } };
+fi.onchange = e => { const f = e.target.files[0]; if (f && isSupportedFile(f.name)) { loadFile(f); fi.value = ''; } };
+
+function isSupportedFile(name) {
+  return /\.(stl|obj|3mf)$/i.test(name);
+}
 
 function loadFile(f) {
   S.file = f;
@@ -1092,16 +1095,82 @@ function loadFile(f) {
   document.getElementById('stlBadgeName').textContent = f.name;
   document.getElementById('stlBadge').classList.add('show');
   document.getElementById('changeStlBtn').classList.add('show');
+  const ext = f.name.split('.').pop().toLowerCase();
   const r = new FileReader();
-  r.onload = e => parseSTL(e.target.result);
-  r.readAsArrayBuffer(f);
+  if (ext === 'obj') {
+    r.onload = e => parseOBJ(e.target.result);
+    r.readAsText(f);
+  } else if (ext === '3mf') {
+    r.onload = e => parse3MF(e.target.result);
+    r.readAsArrayBuffer(f);
+  } else {
+    r.onload = e => parseSTL(e.target.result);
+    r.readAsArrayBuffer(f);
+  }
 }
 
-// ── STL PARSE ─────────────────────────────────────────────────────────────
-function parseSTL(buf) {
-  let geo;
-  try { geo = parseBinary(buf); } catch(e) { geo = parseASCII(buf); }
-  if (!geo || !geo.attributes.position || geo.attributes.position.count === 0) geo = parseASCII(buf);
+// ── OBJ PARSE ─────────────────────────────────────────────────────────────
+function parseOBJ(text) {
+  const verts = [], faces = [], pts = [];
+  text.split('\n').forEach(line => {
+    const p = line.trim().split(/\s+/);
+    if (p[0] === 'v') verts.push([+p[1], +p[2], +p[3]]);
+    else if (p[0] === 'f') {
+      // Fan triangulation for polygons
+      const idx = p.slice(1).map(s => parseInt(s.split('/')[0]) - 1);
+      for (let i = 1; i < idx.length - 1; i++) {
+        faces.push([idx[0], idx[i], idx[i+1]]);
+      }
+    }
+  });
+  faces.forEach(([a, b, c]) => {
+    [a, b, c].forEach(i => { pts.push(...(verts[i] || [0,0,0])); });
+  });
+  if (!pts.length) { alert('Fichier OBJ invalide ou vide.'); return; }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pts), 3));
+  geo.computeVertexNormals();
+  onGeoReady(geo);
+}
+
+// ── 3MF PARSE ─────────────────────────────────────────────────────────────
+async function parse3MF(buf) {
+  try {
+    // 3MF is a ZIP containing 3D/3dmodel.model (XML)
+    const { default: JSZip } = await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm');
+    const zip = await JSZip.loadAsync(buf);
+    let xmlText = null;
+    // Find the .model file
+    for (const [name, file] of Object.entries(zip.files)) {
+      if (name.endsWith('.model')) { xmlText = await file.async('text'); break; }
+    }
+    if (!xmlText) { alert('Fichier 3MF invalide.'); return; }
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, 'text/xml');
+    const pts = [];
+    doc.querySelectorAll('mesh').forEach(mesh => {
+      const vertEls = mesh.querySelectorAll('vertices vertex');
+      const triEls  = mesh.querySelectorAll('triangles triangle');
+      const verts   = Array.from(vertEls).map(v => [+v.getAttribute('x'), +v.getAttribute('y'), +v.getAttribute('z')]);
+      triEls.forEach(t => {
+        [+t.getAttribute('v1'), +t.getAttribute('v2'), +t.getAttribute('v3')].forEach(i => {
+          pts.push(...(verts[i] || [0,0,0]));
+        });
+      });
+    });
+    if (!pts.length) { alert('Fichier 3MF vide ou non supporté.'); return; }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pts), 3));
+    geo.computeVertexNormals();
+    onGeoReady(geo);
+  } catch(e) {
+    console.error('3MF parse error:', e);
+    alert('Erreur lecture 3MF : ' + e.message);
+  }
+}
+
+// ── GÉOMÉTRIE PRÊTE (commun STL/OBJ/3MF) ─────────────────────────────────
+function onGeoReady(geo) {
   geo.computeBoundingBox();
   const b = geo.boundingBox;
   const sx = b.max.x - b.min.x, sy = b.max.y - b.min.y, sz = b.max.z - b.min.z;
@@ -1109,7 +1178,6 @@ function parseSTL(buf) {
   document.getElementById('dY').textContent = sy.toFixed(1);
   document.getElementById('dZ').textContent = sz.toFixed(1);
   document.getElementById('dimStrip').classList.add('on');
-  // Sidebar dims (colonne gauche)
   document.getElementById('sX').textContent = sx.toFixed(0);
   document.getElementById('sY').textContent = sy.toFixed(0);
   document.getElementById('sZ').textContent = sz.toFixed(0);
@@ -1118,6 +1186,14 @@ function parseSTL(buf) {
   S._volMesh = computeMeshVolume(geo);
   S.dims = { x: sx.toFixed(1), y: sy.toFixed(1), z: sz.toFixed(1) };
   checkSlaSize(sx, sy, sz); calcVol(); price(); render3D(geo);
+}
+
+// ── STL PARSE ─────────────────────────────────────────────────────────────
+function parseSTL(buf) {
+  let geo;
+  try { geo = parseBinary(buf); } catch(e) { geo = parseASCII(buf); }
+  if (!geo || !geo.attributes.position || geo.attributes.position.count === 0) geo = parseASCII(buf);
+  onGeoReady(geo);
 }
 
 function computeMeshVolume(geo) {
@@ -1180,6 +1256,7 @@ function checkSlaSize(sx, sy, sz) {
     S._slaBlocked=true;
     document.getElementById('btnOrder').disabled=true;
     document.getElementById('btnAddCart').disabled=true;
+    document.getElementById('priceDisplay').innerHTML='<span style="font-size:26px;font-weight:300;color:#888">— — —</span>';
   } else {
     warn.style.display='none'; S._slaBlocked=false;
   }
@@ -1213,6 +1290,12 @@ function getFillSurcharge(fill) {
 
 function price() {
   if (!S.vol) return;
+  // Si pièce bloquée (trop grande pour résine), afficher --- et stopper
+  if (S._slaBlocked) {
+    document.getElementById('priceDisplay').innerHTML='<span style="font-size:26px;font-weight:300;color:#aaa">— — —</span>';
+    document.getElementById('bk').style.display='none';
+    return;
+  }
   const m=TARIFS[S.tech].materiaux[S.mat], vol=S.vol, qty=S.qty;
   const massAffichee=vol*m.densite;
   let cMat = S.tech==='fdm' ? massAffichee*(m.prixKg/1000) : vol*(m.prixLitre/1000);
@@ -1222,15 +1305,15 @@ function price() {
   const rev=cMat+cElec+cUsure+FX.embal+FX.miseEnRoute;
   const prixHT=rev*MARGE;
   const fillSurcharge = S.tech==='fdm' ? getFillSurcharge(S.fill) : 0;
-  const totHT=(prixHT*qty)+fillSurcharge, tva=totHT*FX.tva;
+  const slaSurcharge = S.tech==='sla' ? 5 : 0;
+  const asaSurcharge = (S.tech==='fdm' && S.mat==='asa') ? 3 : 0;
+  const totHT=(prixHT*qty)+fillSurcharge+slaSurcharge+asaSurcharge, tva=totHT*FX.tva;
   const port=(massAffichee*qty)>500?FX.portHeavy:FX.portLight;
   const ttc=totHT+tva+port;
-  document.getElementById('priceDisplay').innerHTML='<span style="font-size:26px;font-weight:300">'+ttc.toFixed(2)+' €</span>';
+  document.getElementById('priceDisplay').innerHTML='<span style="font-size:26px;font-weight:300">'+totHT.toFixed(2)+' € <span style="font-size:14px;color:#888;font-weight:400">HT</span></span>';
   const fabLabel=S.tech==='fdm'?m.label+' · '+S.fill+'% de remplissage':m.label+(S._isHollowed?' · paroi 5mm':'');
   document.getElementById('bk').style.display='block';
-  R('rFab','Fabrication ('+fabLabel+')',(totHT - fillSurcharge).toFixed(2)+' € HT');
-  if (fillSurcharge > 0) R('rFill','Supplément remplissage '+S.fill+'%','+'+fillSurcharge.toFixed(2)+' € HT');
-  else { const el=document.getElementById('rFill'); if(el) el.innerHTML=''; }
+  R('rFab','Fabrication ('+fabLabel+')',(totHT).toFixed(2)+' € HT');
   R('rTot','Total HT',(totHT).toFixed(2)+' €');
   document.getElementById('note').textContent='Estimation indicative — prix confirmé avant tout lancement.';
   if (!S._slaBlocked) {
