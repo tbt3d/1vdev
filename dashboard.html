@@ -2893,27 +2893,90 @@ window.openMsg=async(id)=>{
     : (m.name||'?')[0].toUpperCase();
   const sujetLabel = SUBJ_LABELS[m.sujet||m.subject]||m.sujet||m.subject||'—';
 
-  // Pièce jointe — fetch+blob pour bypass le blocage cross-origin du download
+  // Pièce jointe — rendu enrichi selon le type
   let pjHtml = '';
   if(m.fileName){
-    const isImg = m.fileFormat && ['jpg','jpeg','png','webp','gif'].includes(m.fileFormat);
+    const fmt = (m.fileFormat || m.fileName.split('.').pop() || '').toLowerCase();
+    const isImg  = ['jpg','jpeg','png','webp','gif'].includes(fmt);
+    const isPdf  = fmt === 'pdf';
+    const isZip  = fmt === 'zip';
+    const is3d   = ['stl','obj'].includes(fmt);
+
     if(m.fileUrl){
       if(isImg){
-        pjHtml = `<a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:8px;color:var(--accent);text-decoration:none;">
-          <img src="${m.fileUrl}" style="width:56px;height:56px;object-fit:cover;border-radius:7px;border:1px solid var(--border2)">
-          <span style="font-size:11px">${esc(m.fileName)}</span>
-        </a>
-        <button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="margin-left:6px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.3);color:var(--accent);padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Télécharger
-        </button>`;
+        // ── IMAGE : miniature cliquable + bouton download
+        pjHtml = `
+          <a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:10px;color:var(--accent);text-decoration:none;background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.2);padding:8px 12px;border-radius:9px;">
+            <img src="${m.fileUrl}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--border2);flex-shrink:0">
+            <div>
+              <div style="font-size:11px;font-weight:600;margin-bottom:2px">${esc(m.fileName)}</div>
+              <div style="font-size:9px;color:var(--soft);font-family:var(--mono);text-transform:uppercase">${fmt} · image</div>
+            </div>
+          </a>
+          <button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.3);color:var(--accent);padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Télécharger
+          </button>`;
+      } else if(isPdf){
+        // ── PDF : icône rouge + bouton ouvrir + download
+        pjHtml = `
+          <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,61,90,.06);border:1px solid rgba(255,61,90,.25);padding:10px 14px;border-radius:9px;">
+            <div style="width:40px;height:40px;border-radius:8px;background:rgba(255,61,90,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8" style="width:18px;height:18px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:2px">${esc(m.fileName)}</div>
+              <div style="font-size:9px;color:var(--soft);font-family:var(--mono)">PDF · Document</div>
+            </div>
+          </div>
+          <a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;color:var(--red);background:rgba(255,61,90,.06);border:1px solid rgba(255,61,90,.3);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:6px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Ouvrir
+          </a>
+          <button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="display:inline-flex;align-items:center;gap:5px;color:var(--soft);background:var(--bg3);border:1px solid var(--border2);padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font);margin-left:5px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>⬇
+          </button>`;
+      } else if(isZip){
+        // ── ZIP : icône violette + badge "compressé" + download
+        pjHtml = `
+          <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(155,114,255,.07);border:1px solid rgba(155,114,255,.3);padding:10px 14px;border-radius:9px;">
+            <div style="width:40px;height:40px;border-radius:8px;background:rgba(155,114,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8" style="width:18px;height:18px"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <div>
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+                <span style="font-size:11px;font-weight:600;color:var(--text)">${esc(m.fileName)}</span>
+                <span style="font-size:8px;font-family:var(--mono);background:rgba(155,114,255,.15);color:var(--purple);border:1px solid rgba(155,114,255,.3);padding:1px 6px;border-radius:10px;text-transform:uppercase">Zippé auto</span>
+              </div>
+              <div style="font-size:9px;color:var(--soft);font-family:var(--mono)">ZIP · Fichier compressé (>10 Mo original)</div>
+            </div>
+          </div>
+          <button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="display:inline-flex;align-items:center;gap:6px;color:var(--purple);background:rgba(155,114,255,.08);border:1px solid rgba(155,114,255,.3);padding:6px 14px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font);margin-left:6px;transition:all .15s" onmouseover="this.style.background='rgba(155,114,255,.16)'" onmouseout="this.style.background='rgba(155,114,255,.08)'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>⬇ Télécharger ZIP
+          </button>`;
+      } else if(is3d){
+        // ── STL / OBJ : icône orange 3D
+        pjHtml = `
+          <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.25);padding:10px 14px;border-radius:9px;">
+            <div style="width:40px;height:40px;border-radius:8px;background:rgba(255,107,53,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" style="width:18px;height:18px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:var(--text);margin-bottom:2px">${esc(m.fileName)}</div>
+              <div style="font-size:9px;color:var(--soft);font-family:var(--mono)">${fmt.toUpperCase()} · Fichier 3D</div>
+            </div>
+          </div>
+          <button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.3);padding:6px 14px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font);margin-left:6px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>⬇ Télécharger
+          </button>`;
       } else {
-        pjHtml = `<button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.3);padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font);transition:all .15s" onmouseover="this.style.background='rgba(255,107,53,.14)'" onmouseout="this.style.background='rgba(255,107,53,.06)'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          ⬇ ${esc(m.fileName)}
-        </button>
-        <a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;color:var(--blue);background:rgba(77,166,255,.06);border:1px solid rgba(77,166,255,.25);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:6px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Ouvrir
-        </a>`;
+        // ── GÉNÉRIQUE
+        pjHtml = `
+          <button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.3);padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font);transition:all .15s" onmouseover="this.style.background='rgba(255,107,53,.14)'" onmouseout="this.style.background='rgba(255,107,53,.06)'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            ⬇ ${esc(m.fileName)}
+          </button>
+          <a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;color:var(--blue);background:rgba(77,166,255,.06);border:1px solid rgba(77,166,255,.25);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:6px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Ouvrir
+          </a>`;
       }
     } else {
       pjHtml = `<span style="font-size:11px;color:var(--soft)">📎 ${esc(m.fileName)} <em style="color:var(--muted)">(URL manquante)</em></span>`;

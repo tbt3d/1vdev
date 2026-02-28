@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root {
   --accent-contact: #ff6b35;
@@ -442,13 +443,13 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
 
       <!-- Upload fichier -->
       <div class="f-field">
-        <label>Pièce jointe <span style="color:var(--muted);font-weight:400">(STL, image, PDF — max 10 Mo)</span></label>
+        <label>Pièce jointe <span style="color:var(--muted);font-weight:400">(STL, image, PDF — fichiers >10 Mo zippés automatiquement · max 500 Mo)</span></label>
         <div class="file-drop" id="fileDrop" onclick="document.getElementById('fileInput').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
           <div class="file-drop-icon">📎</div>
           <div class="file-drop-text">Glissez un fichier ici ou <strong>parcourir</strong></div>
-          <div class="file-drop-hint">STL · OBJ · JPG · PNG · PDF</div>
+          <div class="file-drop-hint">STL · OBJ · JPG · PNG · PDF · ZIP — max 500 Mo</div>
         </div>
-        <input type="file" id="fileInput" style="display:none" accept=".stl,.obj,.jpg,.jpeg,.png,.pdf" onchange="handleFile(this.files[0])">
+        <input type="file" id="fileInput" style="display:none" accept=".stl,.obj,.jpg,.jpeg,.png,.pdf,.zip" onchange="handleFile(this.files[0])">
         <div class="file-list" id="fileList"></div>
       </div>
 
@@ -551,15 +552,42 @@ function dropFile(e) {
   if (files.length) handleFile(files[0]);
 }
 
-function handleFile(file) {
+async function handleFile(file) {
   if (!file) return;
-  var maxSize = 10 * 1024 * 1024;
-  if (file.size > maxSize) { alert('Fichier trop volumineux (max 10 Mo)'); return; }
-  _attachedFile = file;
+  var maxRaw    = 10 * 1024 * 1024;    // 10 Mo — seuil auto-zip
+  var hardLimit = 500 * 1024 * 1024;  // 500 Mo — limite absolue
+
+  if (file.size > hardLimit) {
+    alert('❌ Fichier trop volumineux (max 500 Mo)');
+    return;
+  }
+
   var list = document.getElementById('fileList');
-  var size = (file.size / 1024).toFixed(0) + ' Ko';
-  list.innerHTML = '<div class="file-item">📎 <span>' + file.name + ' — ' + size + '</span><span class="file-rm" onclick="removeFile()">×</span></div>';
-  document.getElementById('fileDrop').style.display = 'none';
+
+  if (file.size > maxRaw) {
+    // 🗜 Compression automatique via JSZip
+    list.innerHTML = '<div class="file-item">⏳ <span>Compression… ' + (file.size / 1024 / 1024).toFixed(1) + ' Mo</span></div>';
+    document.getElementById('fileDrop').style.display = 'none';
+    try {
+      var zip  = new JSZip();
+      zip.file(file.name, file);
+      var blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+      var zippedName = file.name.replace(/\.[^.]+$/, '') + '.zip';
+      _attachedFile  = new File([blob], zippedName, { type: 'application/zip' });
+      var origMo = (file.size / 1024 / 1024).toFixed(1);
+      var newMo  = (blob.size  / 1024 / 1024).toFixed(1);
+      list.innerHTML = '<div class="file-item">🗜 <span>' + zippedName + ' — ' + newMo + ' Mo <span style="color:var(--muted);font-size:11px">(était ' + origMo + ' Mo)</span></span><span class="file-rm" onclick="removeFile()">×</span></div>';
+    } catch(e) {
+      list.innerHTML = '';
+      document.getElementById('fileDrop').style.display = '';
+      alert('❌ Compression échouée : ' + e.message);
+    }
+  } else {
+    _attachedFile = file;
+    var size = (file.size / 1024).toFixed(0) + ' Ko';
+    list.innerHTML = '<div class="file-item">📎 <span>' + file.name + ' — ' + size + '</span><span class="file-rm" onclick="removeFile()">×</span></div>';
+    document.getElementById('fileDrop').style.display = 'none';
+  }
 }
 
 function removeFile() {
@@ -569,17 +597,35 @@ function removeFile() {
   document.getElementById('fileDrop').style.display = '';
 }
 
+/* ── Config Cloudinary ── */
+var _cloudinaryCfg = {
+  cloudName:    'TON_CLOUD_NAME',    // ← Dashboard Cloudinary > Account Details
+  uploadPreset: 'TON_UPLOAD_PRESET'  // ← Settings > Upload > Upload presets (mode: unsigned)
+};
+
 /* ── Upload Cloudinary ── */
 async function uploadToCloudinary(file) {
-  var CLOUD_NAME = 'dqwmxzpfk';
-  var UPLOAD_PRESET = 'tbt3d_contacts';
   var fd = new FormData();
   fd.append('file', file);
-  fd.append('upload_preset', UPLOAD_PRESET);
-  var res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/auto/upload', { method: 'POST', body: fd });
-  if (!res.ok) throw new Error('Upload échoué');
+  fd.append('upload_preset', _cloudinaryCfg.uploadPreset);
+  fd.append('folder', 'contacts');
+
+  var res = await fetch(
+    'https://api.cloudinary.com/v1_1/' + _cloudinaryCfg.cloudName + '/auto/upload',
+    { method: 'POST', body: fd }
+  );
+  if (!res.ok) {
+    var err = await res.json().catch(function(){ return {}; });
+    throw new Error(err.error && err.error.message ? err.error.message : 'Cloudinary ' + res.status);
+  }
   var data = await res.json();
-  return data.secure_url;
+  return {
+    url:      data.secure_url,
+    publicId: data.public_id,
+    format:   data.format,
+    bytes:    data.bytes,
+    type:     data.resource_type   // "image" | "raw" | "video"
+  };
 }
 
 /* ── Connexion Firebase ── */
@@ -659,15 +705,18 @@ async function sendContact() {
   btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Envoi en cours…';
 
   try {
-    // 1. Upload fichier si présent
-    var fileUrl = null;
-    var fileExt = null;
+    // 1. Upload fichier vers Cloudinary si présent
+    var cloudFile = null;
     if (_attachedFile) {
       try {
-        fileUrl = await uploadToCloudinary(_attachedFile);
-        fileExt = _attachedFile.name.split('.').pop().toLowerCase();
+        btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Upload Cloudinary…';
+        cloudFile = await uploadToCloudinary(_attachedFile);
       } catch(e) {
-        console.warn('Upload fichier échoué:', e.message);
+        console.error('Cloudinary upload échoué:', e);
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Réessayer';
+        alert('❌ Le fichier joint n\'a pas pu être uploadé.\nVérifiez votre connexion et réessayez.\n(' + e.message + ')');
+        return;
       }
     }
 
@@ -689,9 +738,12 @@ async function sendContact() {
       tel:      tel || null,     // ← dashboard lit m.tel
       message:  msg,
       orderRef: order || null,
-      fileUrl:  fileUrl || null,
-      fileName: _attachedFile ? _attachedFile.name : null,
-      fileFormat: fileExt || null, // ← dashboard utilise ça pour distinguer image/fichier
+      fileUrl:      cloudFile ? cloudFile.url      : null,  // lien Cloudinary
+      filePublicId: cloudFile ? cloudFile.publicId  : null,  // pour supprimer / transformer
+      fileName:     _attachedFile ? _attachedFile.name : null,
+      fileFormat:   cloudFile ? cloudFile.format   : null,  // jpg / pdf / stl / zip…
+      fileType:     cloudFile ? cloudFile.type     : null,  // image | raw | video
+      fileBytes:    cloudFile ? cloudFile.bytes    : null,
       source: 'contact-form',
     };
 
