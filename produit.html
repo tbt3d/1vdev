@@ -673,13 +673,14 @@ body {
   from { opacity: 0; transform: translateY(28px) scale(.95); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+.btn-loading { opacity: .5; pointer-events: none; }
 #payhipModal {
   position: fixed; inset: 0; z-index: 9000;
   display: none; align-items: center; justify-content: center; padding: 16px;
   background: rgba(8,8,8,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  opacity: 0; pointer-events: none; transition: opacity .25s ease;
+  transition: opacity .25s ease;
 }
-#payhipModal.open { display: flex; opacity: 1; pointer-events: all; }
+#payhipModal.open { display: flex; opacity: 1; }
 #payhipModal.open #payhipBox { animation: payhipBoxIn .35s cubic-bezier(.22,1,.36,1) forwards; }
 #payhipBox {
   position: relative; width: 100%; max-width: 420px; background: #fff;
@@ -933,7 +934,7 @@ body {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           Acheter maintenant
         </a>
-        <button id="btnAddCart" class="btn-contact" onclick="addToCart()" disabled style="opacity:.5;cursor:not-allowed;touch-action:manipulation;-webkit-tap-highlight-color:transparent">
+        <button id="btnAddCart" class="btn-contact btn-loading" onclick="addToCart()" style="touch-action:manipulation;-webkit-tap-highlight-color:transparent">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
           Ajouter au panier
         </button>
@@ -1615,7 +1616,7 @@ function renderProduct(art) {
 
   // Activer le bouton panier maintenant que l'article est chargé
   var btnCart = document.getElementById('btnAddCart');
-  if (btnCart) { btnCart.disabled = false; btnCart.style.opacity = ''; btnCart.style.cursor = ''; }
+  if (btnCart) { btnCart.classList.remove('btn-loading'); }
 
   updateBuyButton();
 
@@ -1769,12 +1770,7 @@ function addToCart() {
   const _photos = window._photos || [];
   if (!_art) {
     // Produit pas encore chargé (Safari lent) — retenter dans 500ms
-    const btn = document.getElementById('btnAddCart');
-    if (btn) { btn.innerHTML = btn.innerHTML.replace('Ajouter au panier', 'Chargement...'); }
-    setTimeout(function() {
-      if (btn) { btn.innerHTML = btn.innerHTML.replace('Chargement...', 'Ajouter au panier'); }
-      if (window._art) addToCart();
-    }, 500);
+    setTimeout(function() { if (window._art) addToCart(); }, 500);
     return;
   }
 
@@ -1846,6 +1842,34 @@ function buyNow() {
   addToCart();
   setTimeout(function() { window.location.href = '/panier.html'; }, 150);
 }
+
+// Safari iOS : les onclick inline peuvent être ignorés dans certains contextes
+// On attache les listeners directement sur les éléments pour garantir le déclenchement
+(function attachSafariListeners() {
+  function attach() {
+    var btnCart = document.getElementById('btnAddCart');
+    var btnBuy  = document.getElementById('btnPayhip');
+    if (btnCart) {
+      btnCart.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        addToCart();
+      }, { passive: false });
+      btnCart.addEventListener('click', addToCart);
+    }
+    if (btnBuy) {
+      btnBuy.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        buyNow();
+      }, { passive: false });
+      btnBuy.addEventListener('click', buyNow);
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attach);
+  } else {
+    attach();
+  }
+})();
 
 function showCartToast(name) {
   let toast = document.getElementById('cartToast');
