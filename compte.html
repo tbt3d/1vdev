@@ -498,7 +498,7 @@
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="/cdn-cgi/l/email-protection#d8acbaaceae8ebf6bbb7b6acb9bbac98bfb5b9b1b4f6bbb7b5"><span class="__cf_email__" data-cfemail="582c3a2c6a686b763b37362c393b2c183f35393134763b3735">[email&#160;protected]</span></a>
+      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
@@ -663,10 +663,10 @@ async function loadMessages(uid) {
   const list    = document.getElementById('msgList');
   const user    = auth.currentUser;
   try {
-    // Chercher par userId ET par email (pour les messages envoyés avant connexion)
+    // Requêtes sans orderBy pour éviter l'index composite manquant — tri côté JS
     const [snapUid, snapEmail] = await Promise.all([
-      getDocs(query(collection(db,'messages'), where('userId','==',uid), orderBy('createdAt','desc'))),
-      user?.email ? getDocs(query(collection(db,'messages'), where('email','==',user.email), orderBy('createdAt','desc'))) : Promise.resolve({docs:[]}),
+      getDocs(query(collection(db,'messages'), where('userId','==',uid))),
+      user?.email ? getDocs(query(collection(db,'messages'), where('email','==',user.email))) : Promise.resolve({docs:[]}),
     ]);
     // Fusionner et dedupliquer
     const seen = new Set();
@@ -740,11 +740,16 @@ async function loadOrders(uid) {
     if (user && user.email) {
       const q = query(
         collection(db, 'commandes'),
-        where('client.email', '==', user.email),
-        orderBy('createdAt', 'desc')
+        where('client.email', '==', user.email)
       );
       const snap = await getDocs(q);
       snap.docs.forEach(d => rows.push({ _fid: d.id, ...d.data() }));
+      // Tri côté JS par date décroissante (évite l'index composite Firestore)
+      rows.sort((a,b) => {
+        const ta = a.createdAt?.seconds || (a.createdAt ? new Date(a.createdAt).getTime()/1000 : 0);
+        const tb = b.createdAt?.seconds || (b.createdAt ? new Date(b.createdAt).getTime()/1000 : 0);
+        return tb - ta;
+      });
     }
     spinner.style.display = 'none';
 
@@ -869,7 +874,7 @@ window.toggleMsg = (el) => el.classList.toggle('open');
 window.showPanel = (id, btn) => {
   document.querySelectorAll('.a-panel').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.a-tab').forEach(t => t.classList.remove('on'));
-  const panel = document.getElementById(id);
+  const panel = document.getElementById('panel-' + id);
   if (panel) panel.classList.add('on');
   if (btn) btn.classList.add('on');
 };
