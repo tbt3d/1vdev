@@ -2922,8 +2922,7 @@ window.openMsg=async(id)=>{
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Télécharger
           </button>`;
       } else if(isPdf){
-        // ── PDF : icône rouge + bouton ouvrir (fl_inline pour affichage navigateur) + download (fl_attachment)
-        const pdfInlineUrl = _cloudinaryTransform(m.fileUrl, 'fl_inline');
+        // ── PDF : icône rouge + bouton ouvrir + download
         pjHtml = `
           <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,61,90,.06);border:1px solid rgba(255,61,90,.25);padding:10px 14px;border-radius:9px;">
             <div style="width:40px;height:40px;border-radius:8px;background:rgba(255,61,90,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -2934,12 +2933,12 @@ window.openMsg=async(id)=>{
               <div style="font-size:9px;color:var(--soft);font-family:var(--mono)">PDF · Document</div>
             </div>
           </div>
-          <a href="${pdfInlineUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;color:var(--red);background:rgba(255,61,90,.06);border:1px solid rgba(255,61,90,.3);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:6px">
+          <a href="${m.fileUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;color:var(--red);background:rgba(255,61,90,.06);border:1px solid rgba(255,61,90,.3);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:6px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Ouvrir
           </a>
-          <button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="display:inline-flex;align-items:center;gap:5px;color:var(--soft);background:var(--bg3);border:1px solid var(--border2);padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font);margin-left:5px">
+          <a href="${m.fileUrl}" download="${esc(m.fileName)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;color:var(--soft);background:var(--bg3);border:1px solid var(--border2);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:5px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>⬇
-          </button>`;
+          </a>`;
       } else if(isZip){
         // ── ZIP : icône violette + badge "compressé" + download
         pjHtml = `
@@ -3076,56 +3075,22 @@ window.deleteMsgById=async(id)=>{
   }catch(e){toast('Erreur : '+e.message, true);}
 };
 
-// ── Helper : ajoute une transformation Cloudinary dans l'URL ──
-function _cloudinaryTransform(url, transform) {
-  if (!url || !url.includes('res.cloudinary.com')) return url;
-  // Évite les doublons de transformation
-  if (url.includes('/' + transform + '/')) return url;
-  return url.replace('/upload/', '/upload/' + transform + '/');
-}
-
-// ── Téléchargement PJ — stratégie selon le type de fichier ──
-window.downloadFile=async(url, fileName)=>{
-  const btn = event?.currentTarget;
-  const origHTML = btn?.innerHTML;
-  if(btn){ btn.disabled=true; btn.innerHTML=`<div class="spin" style="width:12px;height:12px;border-width:2px"></div> Téléchargement…`; }
-
-  try{
-    // Pour les URLs Cloudinary : utiliser fl_attachment pour forcer le téléchargement
-    // Cela évite les blocages CORS du fetch() sur les fichiers raw (zip, stl, pdf…)
-    let dlUrl = url;
-    if(url && url.includes('res.cloudinary.com')){
-      dlUrl = _cloudinaryTransform(url, 'fl_attachment');
-    }
-
-    // Tenter fetch+blob en premier (fonctionne si CORS OK)
-    try{
-      const res = await fetch(dlUrl, { mode: 'cors' });
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      const blob = await res.blob();
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = fileName;
-      document.body.appendChild(a); a.click();
-      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-      toast('⬇ Téléchargement lancé : ' + fileName);
-    }catch(corsErr){
-      // Fallback fiable : ouvrir l'URL avec fl_attachment (le navigateur déclenche le téléchargement)
-      const a = document.createElement('a');
-      a.href = dlUrl;
-      a.download = fileName;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      document.body.appendChild(a); a.click();
-      setTimeout(()=>a.remove(), 500);
-      toast('⬇ Téléchargement lancé : ' + fileName);
-    }
-  }catch(e){
-    window.open(url, '_blank');
-    toast('⬇ Ouverture du fichier…');
-  }finally{
-    if(btn){ btn.disabled=false; btn.innerHTML=origHTML; }
-  }
+// ── Téléchargement PJ ──
+// Pour les fichiers raw Cloudinary (zip, stl, pdf...), NE PAS ajouter de transformation
+// dans l'URL (fl_attachment, fl_inline...) => Cloudinary renvoie 401 sur les comptes
+// sans transformations signees. On utilise l'URL originale directement :
+// - Le navigateur telecharge automatiquement les types qu'il ne sait pas afficher (zip, stl)
+// - Les PDF s'ouvrent dans le lecteur integre du navigateur via target=_blank
+window.downloadFile=(url, fileName)=>{
+  if(!url){ toast('Erreur : URL manquante'); return; }
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>a.remove(), 500);
+  toast('⬇ Ouverture : ' + (fileName || 'fichier'));
 };
 
 // ══════════════════════════════════════════════
