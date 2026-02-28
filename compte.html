@@ -821,7 +821,23 @@ async function loadOrders(uid) {
       const date = ts ? new Date(ts).toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) : '—';
 
       const ref   = o.factureNum || o.orderId || ('#' + o._fid.slice(-8).toUpperCase());
-      const total = o.total ? parseFloat(o.total).toFixed(2) : null;
+      // Total TTC : amountTotal (Stripe, en centimes) > total HT + TVA + livraison > total brut
+      let totalVal = 0;
+      if (o.amountTotal && o.amountTotal > 0) {
+        totalVal = o.amountTotal / 100;
+      } else if (o.total && parseFloat(o.total) > 0) {
+        let subtotal = parseFloat(o.total);
+        let tva = 0, shipping = 0;
+        const li = Array.isArray(o.lineItems) ? o.lineItems : [];
+        li.forEach(function(item) {
+          const name = (item.name||'').toLowerCase();
+          const amt = item.amount != null ? item.amount / 100 : 0;
+          if (name.includes('tva') || name.includes('tax')) tva = amt;
+          else if (name.includes('livraison') || name.includes('shipping') || name.includes('frais')) shipping = amt;
+        });
+        totalVal = subtotal + tva + shipping;
+      }
+      const total = totalVal > 0 ? totalVal.toFixed(2) : null;
       const hasPdf = !!(o.factureUrl || o.factureHtml);
 
       // Tous les numéros disponibles
@@ -838,23 +854,15 @@ async function loadOrders(uid) {
 
       let factureBtnHtml;
       if (hasPdf) {
-        const dlLabel = o.factureNum ? o.factureNum : 'Facture PDF';
+        const dlLabel = o.factureNum ? o.factureNum : 'Télécharger';
+        const dlStyle = 'display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#111;color:#fff;border-radius:30px;border:none;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:opacity .2s;font-family:\'Syne\',sans-serif;text-decoration:none';
+        const dlIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
         if (o.factureUrl) {
-          factureBtnHtml =
-            '<a href="' + o.factureUrl + '" target="_blank" download ' +
-            'style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#111;color:#fff;border-radius:30px;text-decoration:none;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:opacity .2s" ' +
-            'onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
-            dlLabel + '</a>';
+          factureBtnHtml = '<a href="' + o.factureUrl + '" target="_blank" download style="' + dlStyle + '" onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' + dlIcon + dlLabel + '</a>';
         } else {
-          // Ouvrir factureHtml dans une nouvelle fenêtre pour impression/impression PDF
-          const escapedHtml = (o.factureHtml||'').replace(/\\/g,'\\\\').replace(/`/g,'\\`');
-          factureBtnHtml =
-            '<button onclick="(function(){var w=window.open(\'\',\'_blank\');w.document.write(`' + escapedHtml + '`);w.document.close();w.focus();setTimeout(function(){w.print();},500);})()" ' +
-            'style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#111;color:#fff;border-radius:30px;border:none;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:opacity .2s;font-family:\'Syne\',sans-serif" ' +
-            'onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
-            dlLabel + '</button>';
+          // factureHtml dispo : ouvrir dans onglet puis print dialog
+          const safeHtml = encodeURIComponent(o.factureHtml || '');
+          factureBtnHtml = '<button onclick="var w=window.open(\'\',\'_blank\');w.document.write(decodeURIComponent(\'' + safeHtml + '\'));w.document.close();w.focus();setTimeout(function(){w.print();},400);" style="' + dlStyle + '" onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' + dlIcon + dlLabel + '</button>';
         }
       } else {
         const factureLabel = o.factureNum ? o.factureNum : 'En attente';
@@ -866,14 +874,17 @@ async function loadOrders(uid) {
       }
 
       let livraisonBtnHtml;
-      if (o.trackingNumber) {
-        const trackUrl = o.trackingUrl || ('https://www.laposte.fr/outils/suivre-vos-envois?code=' + o.trackingNumber);
+      const expData = o.expedition || {};
+      const trackingNum = expData.tracking || o.trackingNumber || '';
+      const trackingUrl = expData.trackingUrl || o.trackingUrl || (trackingNum ? 'https://www.laposte.fr/outils/suivre-vos-envois?code=' + trackingNum : '');
+      if (trackingUrl || trackingNum) {
+        const trackLabel = trackingNum || 'Suivre';
         livraisonBtnHtml =
-          '<a href="' + trackUrl + '" target="_blank" ' +
+          '<a href="' + trackingUrl + '" target="_blank" ' +
           'style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#1a7fd4;color:#fff;border-radius:30px;text-decoration:none;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:opacity .2s" ' +
           'onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' +
           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>' +
-          o.trackingNumber + '</a>';
+          trackLabel + '</a>';
       } else {
         livraisonBtnHtml =
           '<span style="display:inline-flex;align-items:center;gap:5px;padding:8px 14px;background:#f5f5f5;color:#bbb;border-radius:30px;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0" ' +
