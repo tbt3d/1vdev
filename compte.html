@@ -820,14 +820,9 @@ async function loadOrders(uid) {
                  : o.createdAt ? new Date(o.createdAt).getTime() : null;
       const date = ts ? new Date(ts).toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) : '—';
 
-      const items      = Array.isArray(o.items) ? o.items : [];
-      const itemCount  = items.reduce(function(s,i){ return s + (parseInt(i.qty)||1); }, 0);
-      const itemNames  = items.map(function(i){ return i.name || 'Article'; }).join(', ');
-      const itemsLabel = itemNames.length > 42 ? itemNames.substring(0,42) + '…' : (itemNames || 'Commande TBT3D');
-
       const ref   = o.factureNum || o.orderId || ('#' + o._fid.slice(-8).toUpperCase());
       const total = o.total ? parseFloat(o.total).toFixed(2) : null;
-      const hasPdf = !!o.factureUrl;
+      const hasPdf = !!(o.factureUrl || o.factureHtml);
 
       // Tous les numéros disponibles
       const allRefs = [];
@@ -844,12 +839,23 @@ async function loadOrders(uid) {
       let factureBtnHtml;
       if (hasPdf) {
         const dlLabel = o.factureNum ? o.factureNum : 'Facture PDF';
-        factureBtnHtml =
-          '<a href="' + o.factureUrl + '" target="_blank" download ' +
-          'style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#111;color:#fff;border-radius:30px;text-decoration:none;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:opacity .2s" ' +
-          'onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
-          dlLabel + '</a>';
+        if (o.factureUrl) {
+          factureBtnHtml =
+            '<a href="' + o.factureUrl + '" target="_blank" download ' +
+            'style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#111;color:#fff;border-radius:30px;text-decoration:none;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:opacity .2s" ' +
+            'onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+            dlLabel + '</a>';
+        } else {
+          // Ouvrir factureHtml dans une nouvelle fenêtre pour impression/impression PDF
+          const escapedHtml = (o.factureHtml||'').replace(/\\/g,'\\\\').replace(/`/g,'\\`');
+          factureBtnHtml =
+            '<button onclick="(function(){var w=window.open(\'\',\'_blank\');w.document.write(`' + escapedHtml + '`);w.document.close();w.focus();setTimeout(function(){w.print();},500);})()" ' +
+            'style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#111;color:#fff;border-radius:30px;border:none;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:opacity .2s;font-family:\'Syne\',sans-serif" ' +
+            'onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+            dlLabel + '</button>';
+        }
       } else {
         const factureLabel = o.factureNum ? o.factureNum : 'En attente';
         factureBtnHtml =
@@ -881,10 +887,6 @@ async function loadOrders(uid) {
           '<div style="min-width:0">' +
             refsHtml +
             '<div class="order-row-date">' + date + '</div>' +
-          '</div>' +
-          '<div class="order-row-info">' +
-            '<div class="order-row-name">' + itemsLabel + '</div>' +
-            '<div class="order-row-items">' + itemCount + ' article' + (itemCount > 1 ? 's' : '') + '</div>' +
           '</div>' +
           '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto">' +
             (total ? '<div class="order-row-price">' + total + ' €</div>' : '') +
