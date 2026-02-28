@@ -1462,6 +1462,7 @@ tr:hover td{background:rgba(255,255,255,.01)}
 const EMAILJS_SERVICE         = 'service_f73dvuk';
 const EMAILJS_TPL_ADMIN       = 'template_8a89xmr';
 const EMAILJS_TPL_CLIENT_CONF = 'template_q5h5f0v'; // ← Créer ce template EmailJS (voir README ci-dessous)
+const EMAILJS_TPL_EXPEDITION  = 'template_hp5ogi1'; // ← À créer dans EmailJS (voir instructions ci-dessous)
 const EMAILJS_TPL_REPLY       = 'template_h2is8un';
 /* TEMPLATE EmailJS à créer : template_cmd_conf
    Variables attendues :
@@ -1479,6 +1480,7 @@ window.EMAILJS_SERVICE         = EMAILJS_SERVICE;
 window.EMAILJS_TPL_ADMIN       = EMAILJS_TPL_ADMIN;
 window.EMAILJS_TPL_CLIENT_CONF = EMAILJS_TPL_CLIENT_CONF;
 window.EMAILJS_TPL_REPLY       = EMAILJS_TPL_REPLY;
+window.EMAILJS_TPL_EXPEDITION  = EMAILJS_TPL_EXPEDITION;
 window.EMAILJS_PUBLIC_KEY      = EMAILJS_PUBLIC_KEY;
 emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 </script>
@@ -3411,6 +3413,39 @@ function buildCmdModalBody(c){
   html += `</div>`;
   html += `</div>`;
 
+  // ── EXPÉDITION ──────────────────────────────────────────────────────────────
+  html += `<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">`;
+  html += `<div class="cmd-section-lbl" style="margin-bottom:14px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> Expédition</div>`;
+
+  if(c.expedition) {
+    // Déjà expédié — afficher les infos
+    const expDate = c.expedition.expediedAt ? new Date(c.expedition.expediedAt?.seconds ? c.expedition.expediedAt.seconds*1000 : c.expedition.expediedAt).toLocaleDateString('fr-FR') : '—';
+    html += `<div style="background:rgba(77,166,255,.06);border:1px solid rgba(77,166,255,.2);border-radius:10px;padding:14px 16px;margin-bottom:12px">`;
+    html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">`;
+    html += `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(77,166,255,.15);border:1px solid rgba(77,166,255,.3);border-radius:20px;font-size:11px;font-weight:700;color:var(--blue)">📦 Expédié le ${expDate}</span>`;
+    if(c.expedition.emailSent) html += `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(46,204,138,.1);border:1px solid rgba(46,204,138,.3);border-radius:20px;font-size:11px;font-weight:700;color:var(--green)">✓ Email envoyé</span>`;
+    html += `</div>`;
+    html += `<div class="cmd-detail-grid">`;
+    if(c.expedition.transporteur) html += `<div class="cmd-detail-box"><label>Transporteur</label><span style="font-weight:700">${esc(c.expedition.transporteur)}</span></div>`;
+    if(c.expedition.tracking) html += `<div class="cmd-detail-box" style="cursor:pointer" onclick="navigator.clipboard.writeText('${esc(c.expedition.tracking)}').then(()=>toast('Tracking copié ✓'))" title="Cliquer pour copier"><label>N° de suivi ↗</label><span style="font-family:var(--mono);color:var(--blue);font-weight:700">${esc(c.expedition.tracking)}</span></div>`;
+    if(c.expedition.trackingUrl) html += `<div class="cmd-detail-box" style="grid-column:1/-1"><label>Lien de suivi</label><a href="${esc(c.expedition.trackingUrl)}" target="_blank" style="color:var(--blue);font-family:var(--mono);font-size:11px;word-break:break-all;text-decoration:none">${esc(c.expedition.trackingUrl)}</a></div>`;
+    html += `</div>`;
+    html += `</div>`;
+    // Bouton modifier
+    html += `<button onclick="toggleExpeditionForm('${esc(c._id)}')" style="display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:transparent;border:1px solid var(--border2);color:var(--muted);border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:11px;font-weight:600;margin-bottom:4px" id="btnToggleExp_${esc(c._id)}">✏️ Modifier l'expédition</button>`;
+    // Formulaire caché par défaut
+    html += `<div id="expForm_${esc(c._id)}" style="display:none;margin-top:12px">`;
+    html += buildExpeditionForm(c, true);
+    html += `</div>`;
+  } else {
+    // Pas encore expédié — afficher le formulaire directement
+    html += `<div id="expForm_${esc(c._id)}" style="display:block">`;
+    html += buildExpeditionForm(c, false);
+    html += `</div>`;
+  }
+  html += `</div>`;
+  // ────────────────────────────────────────────────────────────────────────────
+
   // ── BL + FACTURE IMPRIMABLE ──
   html += `<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">`;
   // Email sent badge or send button
@@ -3823,6 +3858,271 @@ window.sendConfirmationEmail = async (c) => {
 
 };
 // ────────────────────────────────────────────────────────────────────────────
+
+// ── EXPÉDITION ───────────────────────────────────────────────────────────────
+
+const TRANSPORTEURS = [
+  { label: 'Colissimo (La Poste)', baseUrl: 'https://www.laposte.fr/outils/suivre-vos-envois?code=' },
+  { label: 'Chronopost',           baseUrl: 'https://www.chronopost.fr/tracking-no-cms/suivi-page?listeNumerosLT=' },
+  { label: 'DHL',                  baseUrl: 'https://www.dhl.com/fr-fr/home/tracking.html?tracking-id=' },
+  { label: 'UPS',                  baseUrl: 'https://www.ups.com/track?tracknum=' },
+  { label: 'Mondial Relay',        baseUrl: 'https://www.mondialrelay.fr/suivi-de-colis/?NumeroExpedition=' },
+  { label: 'GLS',                  baseUrl: 'https://gls-group.com/track/' },
+  { label: 'TNT / FedEx',          baseUrl: 'https://www.fedex.com/fr-fr/tracking.html?tracknumbers=' },
+  { label: 'Colis Privé',          baseUrl: 'https://www.colisprive.fr/moncolis/pages/tracking.aspx?numColis=' },
+  { label: 'Autre / Manuel',       baseUrl: '' },
+];
+
+function buildExpeditionForm(c, isEdit) {
+  const existing = c.expedition || {};
+  const transporteurOpts = TRANSPORTEURS.map(t =>
+    `<option value="${t.label}" ${existing.transporteur === t.label ? 'selected' : ''}>${t.label}</option>`
+  ).join('');
+
+  return `
+    <div style="background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="display:block;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-bottom:7px;font-family:var(--mono)">Transporteur</label>
+          <select id="expTransporteur_${esc(c._id)}" onchange="onTransporteurChange('${esc(c._id)}')" style="width:100%;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:12px;border-radius:var(--r);outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+            <option value="">— Choisir —</option>
+            ${transporteurOpts}
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-bottom:7px;font-family:var(--mono)">Numéro de suivi</label>
+          <input type="text" id="expTracking_${esc(c._id)}" value="${esc(existing.tracking||'')}" placeholder="Ex: 6A12345678901" oninput="onTrackingChange('${esc(c._id)}')" style="width:100%;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:12px;border-radius:var(--r);outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+        </div>
+      </div>
+      <div>
+        <label style="display:block;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-bottom:7px;font-family:var(--mono)">Lien de suivi <span style="opacity:.5;text-transform:none;letter-spacing:0">(auto-généré ou personnalisé)</span></label>
+        <input type="url" id="expTrackingUrl_${esc(c._id)}" value="${esc(existing.trackingUrl||'')}" placeholder="https://..." style="width:100%;padding:9px 12px;background:var(--bg);border:1.5px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:11px;border-radius:var(--r);outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+        <div style="font-size:10px;color:var(--muted);margin-top:5px;font-family:var(--mono)">Choisis le transporteur + entre le numéro → le lien se génère automatiquement</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button onclick="expedierCommande('${esc(c._id)}', ${isEdit})" style="display:inline-flex;align-items:center;gap:7px;padding:10px 20px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:13px;font-weight:700;transition:all .18s;box-shadow:0 2px 12px rgba(77,166,255,.3)" onmouseover="this.style.filter='brightness(1.15)'" onmouseout="this.style.filter=''">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          ${isEdit ? 'Mettre à jour' : 'Marquer comme expédié + Envoyer email'}
+        </button>
+        <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--soft);cursor:pointer">
+          <input type="checkbox" id="expSendEmail_${esc(c._id)}" ${!isEdit ? 'checked' : ''} style="accent-color:var(--accent);width:14px;height:14px">
+          Envoyer email au client
+        </label>
+      </div>
+    </div>`;
+}
+
+window.toggleExpeditionForm = (id) => {
+  const form = document.getElementById('expForm_' + id);
+  const btn = document.getElementById('btnToggleExp_' + id);
+  if(!form) return;
+  const isVisible = form.style.display !== 'none';
+  form.style.display = isVisible ? 'none' : 'block';
+  if(btn) btn.textContent = isVisible ? '✏️ Modifier l\'expédition' : '✖ Annuler';
+};
+
+window.onTransporteurChange = (id) => {
+  const sel = document.getElementById('expTransporteur_' + id);
+  const trackingInput = document.getElementById('expTracking_' + id);
+  const urlInput = document.getElementById('expTrackingUrl_' + id);
+  if(!sel || !urlInput) return;
+  const found = TRANSPORTEURS.find(t => t.label === sel.value);
+  if(found && found.baseUrl && trackingInput?.value.trim()) {
+    urlInput.value = found.baseUrl + trackingInput.value.trim();
+  }
+};
+
+window.onTrackingChange = (id) => {
+  const sel = document.getElementById('expTransporteur_' + id);
+  const trackingInput = document.getElementById('expTracking_' + id);
+  const urlInput = document.getElementById('expTrackingUrl_' + id);
+  if(!sel || !urlInput || !trackingInput) return;
+  const found = TRANSPORTEURS.find(t => t.label === sel.value);
+  if(found && found.baseUrl) {
+    urlInput.value = found.baseUrl + trackingInput.value.trim();
+  }
+};
+
+window.expedierCommande = async (id, isEdit) => {
+  const c = _allCommandes.find(x => x._id === id);
+  if(!c) return;
+
+  const transporteur  = document.getElementById('expTransporteur_' + id)?.value?.trim() || '';
+  const tracking      = document.getElementById('expTracking_' + id)?.value?.trim() || '';
+  const trackingUrl   = document.getElementById('expTrackingUrl_' + id)?.value?.trim() || '';
+  const sendEmail     = document.getElementById('expSendEmail_' + id)?.checked ?? true;
+
+  if(!transporteur) { toast('Choisis un transporteur', true); return; }
+
+  const btn = document.querySelector(`[onclick="expedierCommande('${id}', ${isEdit})"]`);
+  if(btn) { btn.disabled = true; btn.innerHTML = '<div class="spin"></div> Enregistrement…'; }
+
+  try {
+    const expeditionData = {
+      transporteur,
+      tracking,
+      trackingUrl,
+      expediedAt: new Date(),
+      emailSent: false,
+    };
+
+    // Mettre à jour Firebase : expédition + statut
+    await updateDoc(doc(db, 'commandes', id), {
+      expedition: expeditionData,
+      status: 'expédié',
+      updatedAt: new Date(),
+    });
+
+    // Mettre à jour le cache local
+    const idx = _allCommandes.findIndex(x => x._id === id);
+    if(idx !== -1) {
+      _allCommandes[idx].expedition = expeditionData;
+      _allCommandes[idx].status = 'expédié';
+    }
+
+    renderCommandesBadge();
+    renderCommandesStats();
+    filterCommandes();
+    toast('📦 Commande marquée comme expédiée !');
+
+    // Envoyer email si coché
+    if(sendEmail) {
+      await sendExpeditionEmail(c, expeditionData);
+    }
+
+    // Rafraîchir le modal
+    const updatedC = _allCommandes.find(x => x._id === id);
+    if(updatedC && document.getElementById('cmdModal').classList.contains('open')) {
+      document.getElementById('cmdModalBody').innerHTML = buildCmdModalBody(updatedC);
+    }
+
+  } catch(e) {
+    toast('Erreur : ' + e.message, true);
+    if(btn) { btn.disabled = false; btn.textContent = isEdit ? 'Mettre à jour' : 'Marquer comme expédié + Envoyer email'; }
+  }
+};
+
+window.sendExpeditionEmail = async (c, expeditionData) => {
+  const email = c.client?.email || c.customerEmail;
+  if(!email) { toast('Pas d\'email client', true); return; }
+
+  const clientName = c.client?.name || c.customerName || 'Client';
+  const trackingUrl = expeditionData.trackingUrl || '';
+  const tracking    = expeditionData.tracking || '';
+  const transporteur = expeditionData.transporteur || '';
+  const items = getItems(c);
+  const total = getTotal(c);
+  const factureNum = c.factureNum || '#' + id.slice(-8).toUpperCase();
+  const date = new Date((c.paidAt?.seconds ? c.paidAt.seconds*1000 : c.paidAt) || Date.now());
+  const dateStr = date.toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric'});
+
+  const itemsRows = items.map(item => {
+    const pu = parseFloat(item.price||0);
+    const qty = parseInt(item.qty||1);
+    return `<tr>
+      <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;font-size:13px;color:#111">${item.name||'Article'}${item.variant?'<br><span style="font-size:11px;color:#888">'+item.variant+'</span>':''}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:center;font-size:13px;color:#555">×${qty}</td>
+      <td style="padding:10px 14px;border-bottom:1px solid #f0f0f0;text-align:right;font-size:13px;font-weight:700;color:#111">${(pu*qty).toFixed(2)} €</td>
+    </tr>`;
+  }).join('');
+
+  const trackingBlock = (tracking || trackingUrl) ? `
+    <tr><td style="padding:0 0 24px">
+      <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:16px 20px">
+        <p style="margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#1d4ed8">📦 Suivre mon colis</p>
+        ${transporteur ? `<p style="margin:0 0 8px;font-size:13px;color:#1e40af;font-weight:600">${transporteur}</p>` : ''}
+        ${tracking ? `<p style="margin:0 0 ${trackingUrl?'10px':'0'};font-size:12px;color:#334155">N° de suivi : <strong style="font-family:monospace">${tracking}</strong></p>` : ''}
+        ${trackingUrl ? `<a href="${trackingUrl}" style="display:inline-block;background:#1d4ed8;color:#fff;text-decoration:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:700;letter-spacing:.02em">🔍 Suivre mon colis →</a>` : ''}
+      </div>
+    </td></tr>` : '';
+
+  const emailHtml = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><title>Votre commande est expédiée !</title></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif">
+<div style="max-width:580px;margin:32px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08)">
+  <div style="background:#111;padding:16px 32px;text-align:center">
+    <span style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em">TBT<span style="color:#ff6b35">3D</span></span>
+  </div>
+  <div style="padding:32px">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr><td style="padding:0 0 8px"><p style="margin:0;font-size:16px;font-weight:700;color:#111">Bonjour ${clientName},</p></td></tr>
+      <tr><td style="padding:0 0 20px"><p style="margin:0;font-size:14px;color:#555;line-height:1.7">
+        Bonne nouvelle ! Votre commande <strong style="color:#111">${factureNum}</strong> vient d'être expédiée. 🎉
+      </p></td></tr>
+      <tr><td style="padding:0 0 20px">
+        <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:12px 16px;display:inline-block">
+          <span style="font-size:13px;font-weight:700;color:#16a34a">📦 Colis expédié !</span>
+        </div>
+      </td></tr>
+      ${trackingBlock}
+      <tr><td style="padding:0 0 24px">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e8e8;border-radius:8px;overflow:hidden">
+          <tr style="background:#111">
+            <td style="padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#fff;font-weight:700">Articles commandés</td>
+            <td style="padding:10px 14px;font-size:11px;color:#999;text-align:right">${items.length} article${items.length>1?'s':''}</td>
+          </tr>
+          ${itemsRows}
+          <tr style="background:#111">
+            <td colspan="2" style="padding:12px 14px;font-size:14px;font-weight:700;color:#fff">Total TTC payé</td>
+            <td style="padding:12px 14px;text-align:right;font-size:16px;font-weight:800;color:#ff6b35">${total.toFixed(2)} €</td>
+          </tr>
+        </table>
+      </td></tr>
+      <tr><td style="padding:0 0 8px;border-top:1px solid #f0f0f0;padding-top:20px">
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding:0 8px 0 0;vertical-align:top;width:50%">
+              <div style="background:#f9f9f9;border-radius:8px;padding:14px">
+                <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#111">📅 Date d'expédition</p>
+                <p style="margin:0;font-size:12px;color:#666">${new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})}</p>
+              </div>
+            </td>
+            <td style="padding:0 0 0 8px;vertical-align:top;width:50%">
+              <div style="background:#f9f9f9;border-radius:8px;padding:14px">
+                <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#111">💬 Une question ?</p>
+                <p style="margin:0;font-size:12px;color:#666"><a href="mailto:tbt203.contact@gmail.com" style="color:#ff6b35;text-decoration:none">tbt203.contact@gmail.com</a></p>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+  </div>
+  <div style="background:#111;padding:20px 32px;text-align:center">
+    <p style="margin:0 0 4px;font-size:12px;color:#aaa">TBT3D · Fabrication additive artisanale · Lambersart, France</p>
+    <p style="margin:0;font-size:12px"><a href="https://tbt3d.fr" style="color:#ff6b35;text-decoration:none">tbt3d.fr</a> · <a href="mailto:tbt203.contact@gmail.com" style="color:#ff6b35;text-decoration:none">tbt203.contact@gmail.com</a></p>
+  </div>
+</div>
+</body></html>`;
+
+  try {
+    toast('Envoi de l\'email d\'expédition…');
+    await emailjs.send(window.EMAILJS_SERVICE, window.EMAILJS_TPL_EXPEDITION, {
+      to_email:     email,
+      to_name:      clientName,
+      facture_num:  factureNum,
+      transporteur: transporteur,
+      tracking_num: tracking,
+      tracking_url: trackingUrl,
+      message_html: emailHtml,
+    });
+
+    // Marquer email expédition envoyé dans Firestore
+    const c2 = _allCommandes.find(x => x._id === c._id);
+    const expData2 = { ...(c2?.expedition || {}), emailSent: true, emailSentAt: new Date() };
+    await updateDoc(doc(db, 'commandes', c._id), { expedition: expData2 });
+    const idx2 = _allCommandes.findIndex(x => x._id === c._id);
+    if(idx2 !== -1) _allCommandes[idx2].expedition = expData2;
+
+    toast('✉️ Email d\'expédition envoyé à ' + email + ' ✓');
+  } catch(e) {
+    const errMsg = e.text || e.message || (e.status ? 'Erreur ' + e.status : JSON.stringify(e));
+    toast('Erreur envoi email : ' + errMsg, true);
+    console.error('EmailJS expedition error:', e);
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 window.updateCmdStatus = async () => {
   if(!_editingCmdId) return;
