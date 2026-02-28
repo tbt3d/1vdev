@@ -400,56 +400,139 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 <div class="toast" id="toast"></div>
 
 <script>
-/* ── TBTCart inline (fallback si /cart.js ne charge pas) ── */
-if (typeof window.TBTCart === 'undefined') {
-  window.TBTCart = (function() {
-    var KEY = 'tbt3d_cart';
-    // Stockage multi-niveaux : localStorage → sessionStorage → cookie → mémoire
-    function _readRaw() {
-      var s = null;
-      try { s = localStorage.getItem(KEY); } catch(e) {}
-      if (!s) { try { s = sessionStorage.getItem(KEY); } catch(e) {} }
-      if (!s) {
-        var m = document.cookie.match('(?:^|;)\s*tbt3d_cart=([^;]*)');
-        if (m) { try { s = decodeURIComponent(m[1]); } catch(e){} }
-      }
-      return s;
+/* ── TBTCart — stockage Firestore (Safari compatible) ── */
+(function() {
+  var PROJECT = 'tbt3d-a0f04';
+  var API_KEY  = 'AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8';
+  var BASE     = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/carts/';
+
+  function _getSessionId() {
+    var m = document.cookie.match(/(?:^|;)\s*tbt_sid=([^;]+)/);
+    if (m) return m[1];
+    var id = 'sid_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    document.cookie = 'tbt_sid=' + id + ';path=/;max-age=604800;SameSite=Lax';
+    return id;
+  }
+
+  function _toFS(val) {
+    if (val === null || val === undefined) return { nullValue: null };
+    if (typeof val === 'boolean') return { booleanValue: val };
+    if (typeof val === 'number') return isNaN(val) ? { nullValue: null } : { doubleValue: val };
+    if (typeof val === 'string') return { stringValue: val };
+    if (Array.isArray(val)) return { arrayValue: { values: val.map(_toFS) } };
+    if (typeof val === 'object') {
+      var fields = {};
+      for (var k in val) if (Object.prototype.hasOwnProperty.call(val, k)) fields[k] = _toFS(val[k]);
+      return { mapValue: { fields: fields } };
     }
-    function _writeRaw(val) {
-      try { localStorage.setItem(KEY, val); } catch(e) {}
-      try { sessionStorage.setItem(KEY, val); } catch(e) {}
-      try { document.cookie = 'tbt3d_cart=' + encodeURIComponent(val) + ';path=/;max-age=86400;SameSite=Lax'; } catch(e) {}
+    return { stringValue: String(val) };
+  }
+  function _fromFS(v) {
+    if (!v) return null;
+    if (v.stringValue  !== undefined) return v.stringValue;
+    if (v.integerValue !== undefined) return Number(v.integerValue);
+    if (v.doubleValue  !== undefined) return Number(v.doubleValue);
+    if (v.booleanValue !== undefined) return v.booleanValue;
+    if (v.nullValue    !== undefined) return null;
+    if (v.arrayValue)  return (v.arrayValue.values || []).map(_fromFS);
+    if (v.mapValue) {
+      var out = {};
+      var f = v.mapValue.fields || {};
+      for (var k in f) out[k] = _fromFS(f[k]);
+      return out;
     }
-    function load() {
-      var s = _readRaw();
-      try { return s ? JSON.parse(s) : []; } catch(e) { return []; }
+    return null;
+  }
+
+  var _mem = null;
+  var _sid = null;
+  function _sid_lazy() { if (!_sid) _sid = _getSessionId(); return _sid; }
+  function _url() { return BASE + _sid_lazy() + '?key=' + API_KEY; }
+
+  function _loadRemote() {
+    return fetch(_url())
+      .then(function(r) {
+        if (r.status === 404) return [];
+        return r.json().then(function(d) {
+          if (!d.fields || !d.fields.items) return [];
+          return _fromFS(d.fields.items) || [];
+        });
+      })
+      .catch(function() { return []; });
+  }
+
+  function _saveRemote(items) {
+    return fetch(_url(), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { items: _toFS(items), updatedAt: _toFS(Date.now()) } })
+    }).catch(function(e) { console.warn('Cart save error:', e); });
+  }
+
+  function _updateBadge(items) {
+    var total = (items || []).reduce(function(s, i) { return s + (i.qty || 1); }, 0);
+    document.querySelectorAll('.cart-badge').forEach(function(b) {
+      b.style.display = total > 0 ? 'block' : 'none';
+    });
+  }
+
+  window.TBTCart = {
+    load: function() { return _mem || []; },
+    init: function() {
+      return _loadRemote().then(function(items) {
+        _mem = items;
+        _updateBadge(items);
+        window.dispatchEvent(new Event('cart:updated'));
+        return items;
+      });
+    },
+    add: function(item) {
+      var items = (_mem || []).slice();
+      var k = (item.id || '') + '|' + (item.variant || '');
+      var found = items.find(function(x) { return x.key === k; });
+      if (found) { found.qty = Math.min((found.qty || 1) + (item.qty || 1), 99); }
+      else { item.key = k; item.qty = item.qty || 1; items.push(item); }
+      _mem = items;
+      _updateBadge(items);
+      window.dispatchEvent(new Event('cart:updated'));
+      return _saveRemote(items);
+    },
+    remove: function(key) {
+      var items = (_mem || []).filter(function(i) { return i.key !== key; });
+      _mem = items;
+      _updateBadge(items);
+      window.dispatchEvent(new Event('cart:updated'));
+      return _saveRemote(items);
+    },
+    updateQty: function(key, qty) {
+      var items = (_mem || []).slice();
+      var found = items.find(function(i) { return i.key === key; });
+      if (found) found.qty = Math.max(1, Math.min(qty, 99));
+      _mem = items;
+      _updateBadge(items);
+      window.dispatchEvent(new Event('cart:updated'));
+      return _saveRemote(items);
+    },
+    total: function() {
+      return (_mem || []).reduce(function(s, i) { return s + parseFloat(i.price || 0) * (i.qty || 1); }, 0);
+    },
+    count: function() {
+      return (_mem || []).reduce(function(s, i) { return s + (i.qty || 1); }, 0);
+    },
+    clear: function() {
+      _mem = [];
+      _updateBadge([]);
+      window.dispatchEvent(new Event('cart:updated'));
+      return _saveRemote([]);
     }
-    function save(items) {
-      try { _writeRaw(JSON.stringify(items)); } catch(e) {}
-    }
-    return {
-      load: load,
-      add: function(item) {
-        var items = load();
-        /* même format de clé que cart.js : id|variant */
-        var k = (item.id || '') + '|' + (item.variant || '');
-        var found = items.find(function(x) { return x.key === k; });
-        if (found) { found.qty = Math.min((found.qty || 1) + (item.qty || 1), 99); }
-        else { item.key = k; item.qty = item.qty || 1; items.push(item); }
-        save(items);
-      },
-      remove: function(key) { save(load().filter(function(i){return i.key!==key;})); },
-      updateQty: function(key, qty) {
-        var items = load();
-        var found = items.find(function(i){return i.key===key;});
-        if (found) found.qty = Math.max(1, Math.min(qty, 99));
-        save(items);
-      },
-      total: function() { return load().reduce(function(s,i){return s+parseFloat(i.price||0)*(i.qty||1);},0); },
-      clear: function() { try { localStorage.removeItem(KEY); } catch(e){} },
-    };
-  })();
-}
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { window.TBTCart.init(); });
+  } else {
+    window.TBTCart.init();
+  }
+})();
 </script>
 <script src="/cart.js"></script>
 <script>
@@ -983,9 +1066,11 @@ document.addEventListener('keydown', e => {
 });
 
 window.addEventListener('cart:updated', renderCart);
-renderCart();
-// Valider l'adresse dès le chargement pour désactiver le btn Commander
-validateAddress();
+// Attendre que Firestore ait chargé le panier avant d'afficher
+TBTCart.init().then(function() {
+  renderCart();
+  validateAddress();
+});
 
 // Détecter retour depuis Stripe après annulation ou succès
 (async function() {
