@@ -4,21 +4,30 @@
   var API_KEY  = 'AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8';
   var BASE     = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/carts/';
 
+  function _saveSid(id) {
+    try { document.cookie = 'tbt_sid=' + id + ';path=/;max-age=604800;SameSite=Strict'; } catch(e) {}
+    try { sessionStorage.setItem('tbt_sid', id); } catch(e) {}
+  }
+
   function _getSessionId() {
-    // 1. Priorité absolue : ?sid= dans l'URL (passé explicitement depuis produit.html sur iOS)
+    // 1. ?sid= dans l'URL — priorité absolue (passé entre pages)
     try {
       var urlSid = new URLSearchParams(window.location.search).get('sid');
-      if (urlSid) {
-        document.cookie = 'tbt_sid=' + urlSid + ';path=/;max-age=604800;SameSite=Lax';
-        return urlSid;
-      }
+      if (urlSid) { _saveSid(urlSid); return urlSid; }
     } catch(e) {}
-    // 2. Cookie existant
-    var m = document.cookie.match(/(?:^|;)\s*tbt_sid=([^;]+)/);
-    if (m) return m[1];
-    // 3. Nouveau sid
+    // 2. Cookie first-party
+    try {
+      var cm = document.cookie.match(/(?:^|;)\s*tbt_sid=([^;]+)/);
+      if (cm && cm[1]) { _saveSid(cm[1]); return cm[1]; }
+    } catch(e) {}
+    // 3. sessionStorage — survit aux navigations dans le même onglet Safari
+    try {
+      var ss = sessionStorage.getItem('tbt_sid');
+      if (ss) { _saveSid(ss); return ss; }
+    } catch(e) {}
+    // 4. Nouveau sid
     var id = 'sid_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-    document.cookie = 'tbt_sid=' + id + ';path=/;max-age=604800;SameSite=Lax';
+    _saveSid(id);
     return id;
   }
 
@@ -140,8 +149,33 @@
   };
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { window.TBTCart.init(); });
+    document.addEventListener('DOMContentLoaded', function() {
+      window.TBTCart.init();
+      _propagateSid();
+    });
   } else {
     window.TBTCart.init();
+    _propagateSid();
+  }
+
+  // ── Propagation du sid dans tous les liens internes (Safari iOS inter-pages) ──
+  function _propagateSid() {
+    var sid = _sid_lazy();
+    if (!sid) return;
+    function patchLinks() {
+      document.querySelectorAll('a[href]').forEach(function(a) {
+        var h = a.getAttribute('href');
+        // Liens internes .html seulement, pas mailto, pas déjà sid, pas http externe
+        if (h && /\.html/.test(h) && !h.includes('sid=') && !/^https?:/.test(h) && !/^mailto/.test(h)) {
+          a.href = h + (h.includes('?') ? '&' : '?') + 'sid=' + encodeURIComponent(sid);
+        }
+      });
+    }
+    patchLinks();
+    // Observer les mutations DOM (liens ajoutés dynamiquement)
+    try {
+      var obs = new MutationObserver(function() { patchLinks(); });
+      obs.observe(document.body, { childList: true, subtree: true });
+    } catch(e) {}
   }
 })();

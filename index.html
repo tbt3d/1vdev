@@ -37,7 +37,7 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
 .nav-icon { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; background: none; border: none; cursor: pointer; border-radius: 6px; color: var(--black); transition: background .15s; text-decoration: none; }
 .nav-icon:hover { background: var(--bg); }
 .nav-icon svg { width: 20px; height: 20px; }
-.cart-badge{position:absolute;top:4px;right:4px;background:#e11d48;width:9px;height:9px;border-radius:50%;display:none;border:1.5px solid #fff}
+.cart-badge { position: absolute; top: 4px; right: 4px; background: #e11d48; width: 9px; height: 9px; border-radius: 50%; display: none; border: 1.5px solid #fff; }
 .nav-burger { display: none; }
 .search-bar { display: none; border-top: 1px solid var(--border); background: var(--white); padding: 12px 32px; }
 .search-bar.open { display: block; }
@@ -75,10 +75,38 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
 .hero-title { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 300; line-height: 1.1; margin-bottom: 20px; letter-spacing: -.02em; }
 .hero-title strong { font-weight: 600; }
 .hero-sub { font-size: 16px; color: rgba(255,255,255,.7); line-height: 1.7; margin-bottom: 36px; }
-.btn-hero { display: inline-block; padding: 15px 36px; background: var(--white); color: var(--black); border-radius: var(--r); text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: .04em; transition: opacity .2s; margin: 0 6px; }
+
+/* ── Boutons hero : flex responsive ── */
+.hero-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+.btn-hero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 36px;
+  background: var(--white);
+  color: var(--black);
+  border-radius: var(--r);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  transition: opacity .2s;
+  white-space: nowrap;
+}
 .btn-hero:hover { opacity: .88; }
 .btn-hero.outline { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,.5); }
 .btn-hero.outline:hover { border-color: var(--white); }
+/* Mobile : boutons empilés pleine largeur */
+@media(max-width:480px) {
+  .hero-ctas { flex-direction: column; align-items: stretch; padding: 0 8px; }
+  .btn-hero { width: 100%; padding: 16px 24px; font-size: 15px; }
+}
+
 .hero-scroll { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; color: rgba(255,255,255,.4); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; animation: bounce 2s infinite; }
 .hero-scroll svg { width: 18px; height: 18px; }
 @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
@@ -145,11 +173,12 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
 .footer-pay { display: flex; gap: 6px; align-items: center; }
 @media(max-width:600px){ .footer-bottom { padding: 16px 20px; } }
 </style>
+<!-- cart.js : panier Firestore + propagation sid inter-pages (Safari iOS) -->
 <script src="/cart.js"></script>
 </head>
 <body data-page="home">
 
-<!-- NAVBAR (reprend le style existant) -->
+<!-- NAVBAR -->
 <header id="navbar">
   <div class="nav-inner">
     <a href="/index.html"><img src="image/o_1iv0ens5l1g5kp9n1nbnk5j1umcl.png" style="height:44px;width:auto;object-fit:contain;border-radius:6px" alt="TBT3D"></a>
@@ -184,13 +213,15 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
     </div>
   </div>
   <div class="mobile-nav" id="mobileNav">
-    <a href="/index.html">Home</a><a href="/boutique.html">Boutique</a>
-    <a href="/devis.html">Devis STL</a><a href="/a-propos.html">À propos</a>
-    <a href="/contact.html">Contact</a><a href="/compte.html">Mon compte</a>
-      <a href="/panier.html">🛍 Mon panier</a>
+    <a href="/index.html">Home</a>
+    <a href="/boutique.html">Boutique</a>
+    <a href="/devis.html">Devis STL</a>
+    <a href="/a-propos.html">À propos</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/compte.html">Mon compte</a>
+    <a href="/panier.html">🛍 Mon panier</a>
   </div>
 </header>
-
 
 <!-- ─── HERO ─── -->
 <section class="hero">
@@ -199,8 +230,11 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
     <div class="hero-eyebrow">Made in France · Lille</div>
     <h1 class="hero-title">La lumière<br><strong>réinventée</strong></h1>
     <p class="hero-sub">Lampes modernes, modulables et imprimées en 3D.<br>Pensées et fabriquées à Lille avec passion.</p>
-    <a href="/boutique.html" class="btn-hero">Découvrir la boutique</a>
-    <a href="/devis.html" class="btn-hero outline">Devis sur mesure</a>
+    <!-- FIXE : wrapper flex — côte à côte sur desktop, empilés pleine largeur sur mobile -->
+    <div class="hero-ctas">
+      <a href="/boutique.html" class="btn-hero">Découvrir la boutique</a>
+      <a href="/devis.html" class="btn-hero outline">Devis sur mesure</a>
+    </div>
   </div>
   <div class="hero-scroll">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
@@ -214,9 +248,7 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
     <h2 class="section-title">Nos créations</h2>
     <p class="section-sub">Chaque lampe est unique, imprimée à la demande dans notre atelier lillois.</p>
   </div>
-  <div class="products-grid" id="productsGrid">
-    <!-- Rempli dynamiquement par JS depuis localStorage (dashboard) -->
-  </div>
+  <div class="products-grid" id="productsGrid"></div>
 </div>
 
 <!-- ─── VALEURS ─── -->
@@ -252,18 +284,25 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Navigation</div>
-      <a href="/index.html">Home</a><a href="/boutique.html">Boutique</a><a href="/devis.html">Impression sur mesure</a><a href="/a-propos.html">À propos</a><a href="/contact.html">Contact</a>
+      <a href="/index.html">Home</a>
+      <a href="/boutique.html">Boutique</a>
+      <a href="/devis.html">Impression sur mesure</a>
+      <a href="/a-propos.html">À propos</a>
+      <a href="/contact.html">Contact</a>
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Légal</div>
-      <a href="/mentions-legales.html">Mentions légales</a><a href="/cgv.html">CGV</a><a href="/politique-confidentialite.html">Confidentialité</a><a href="/politique-retour.html">Retours</a>
+      <a href="/mentions-legales.html">Mentions légales</a>
+      <a href="/cgv.html">CGV</a>
+      <a href="/politique-confidentialite.html">Confidentialité</a>
+      <a href="/politique-retour.html">Retours</a>
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="mailto:contact@tbt3d.fr">contact@tbt3d.fr</a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
-            <div class="footer-social">
+      <div class="footer-social">
         <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
         <a href="https://www.tiktok.com/@tbt203_" aria-label="TikTok" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 106.34 6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg></a>
       </div>
@@ -300,7 +339,7 @@ document.querySelectorAll('.nav-links a').forEach(a => {
   if(a.dataset.page === document.body.dataset.page) a.classList.add('active');
 });
 
-// Scroll shadow
+// Scroll shadow navbar
 window.addEventListener('scroll', () => {
   document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
 });
@@ -308,7 +347,7 @@ window.addEventListener('scroll', () => {
 function toggleSearch() {
   const b = document.getElementById('searchBar');
   b.classList.toggle('open');
-  if(b.classList.contains('open')) setTimeout(()=>document.getElementById('searchInput').focus(),50);
+  if(b.classList.contains('open')) setTimeout(() => document.getElementById('searchInput').focus(), 50);
 }
 function toggleMobileNav() {
   document.getElementById('mobileNav').classList.toggle('open');
@@ -322,21 +361,19 @@ window.toggleMobileNav = toggleMobileNav;
 async function buildProductsGrid() {
   const grid = document.getElementById('productsGrid');
 
-  // Charger articles et config homepage depuis Firestore
   const [artsSnap, hpDoc] = await Promise.all([
     getDocs(collection(db, 'articles')),
     getDoc(doc(db, 'config', 'homepage'))
   ]);
-  const arts = artsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const arts  = artsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
   const hpCfg = hpDoc.exists() ? hpDoc.data() : null;
 
-  // ── Si le dashboard a configuré la page d'accueil ──
+  // ── Config dashboard ──
   if(hpCfg && hpCfg.slots && hpCfg.slots.length) {
     grid.innerHTML = hpCfg.slots.map(slot => {
       if(slot.type === 'article') {
         const art = arts.find(a => a.id === slot.articleId);
-        if(!art) return ''; // slot vide, on skip
-
+        if(!art) return '';
         const badge    = slot.overrideBadge !== undefined ? slot.overrideBadge : art.badge;
         const rawPrice = slot.overridePrice || null;
         const from     = slot.overrideFrom && !slot.overridePrice;
@@ -346,12 +383,9 @@ async function buildProductsGrid() {
         const link     = '/produit.html?id=' + encodeURIComponent(slug);
         const img      = art.photos?.[0];
         const sub      = art.tagline || '';
-
         return `<a href="${link}" class="product-card">
           <div class="product-card-img">
-            ${img
-              ? `<img src="${img}" alt="${art.name}">`
-              : `<div class="product-card-img-placeholder">📷 Photo à venir</div>`}
+            ${img ? `<img src="${img}" alt="${art.name}">` : `<div class="product-card-img-placeholder">📷 Photo à venir</div>`}
             ${badge ? `<div class="product-badge">${badge}</div>` : ''}
           </div>
           <div class="product-name">${art.name}</div>
@@ -362,26 +396,22 @@ async function buildProductsGrid() {
             ${price}
           </div>
         </a>`;
-
       } else {
-        // Carte personnalisée (ex : impression sur mesure)
-        const dark     = slot.customDark;
-        const badge    = slot.customBadge;
-        const bStyle   = slot.customBadgeStyle || 'white';
-        const link     = slot.customLink || '/devis.html';
-        const custImg  = slot.customImage || null;
-
+        const dark    = slot.customDark;
+        const badge   = slot.customBadge;
+        const bStyle  = slot.customBadgeStyle || 'white';
+        const link    = slot.customLink || '/devis.html';
+        const custImg = slot.customImage || null;
         const imgContent = custImg
           ? `<img src="${custImg}" alt="${slot.customLabel || 'Sur mesure'}" style="width:100%;height:100%;object-fit:cover">`
-          : `<div class="product-card-img-placeholder" style="${dark?'background:#111;color:rgba(255,255,255,.3);flex-direction:column;gap:10px':''}">
+          : `<div class="product-card-img-placeholder" style="${dark ? 'background:#111;color:rgba(255,255,255,.3);flex-direction:column;gap:10px' : ''}">
               ${dark ? `<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 4L4 12v16l16 8 16-8V12L20 4z" stroke="currentColor" stroke-width="1.5"/></svg>` : ''}
               ${slot.customLabel || ''}
             </div>`;
-
         return `<a href="${link}" class="product-card">
-          <div class="product-card-img" style="${!custImg && dark?'background:#111':''}">
+          <div class="product-card-img" style="${!custImg && dark ? 'background:#111' : ''}">
             ${imgContent}
-            ${badge ? `<div class="product-badge ${bStyle==='white'?'white':''}" style="${bStyle==='white'?'background:#fff;color:#111':'background:#111;color:#fff'}">${badge}</div>` : ''}
+            ${badge ? `<div class="product-badge ${bStyle === 'white' ? 'white' : ''}" style="${bStyle === 'white' ? 'background:#fff;color:#111' : 'background:#111;color:#fff'}">${badge}</div>` : ''}
           </div>
           <div class="product-name">${slot.customLabel || ''}</div>
           ${slot.customSub ? `<div class="product-sub">${slot.customSub}</div>` : ''}
@@ -392,27 +422,26 @@ async function buildProductsGrid() {
     return;
   }
 
-  // ── Fallback : articles publiés récents (si aucune config dashboard) ──
+  // ── Fallback : articles publiés ──
   const published = arts.filter(a => a.status === 'published').slice(0, 4);
   if(published.length) {
     grid.innerHTML = published.map(art => {
-      const img = art.photos?.[0];
+      const img  = art.photos?.[0];
       const slug = art.slug || art.id;
       return `<a href="/produit.html?id=${encodeURIComponent(slug)}" class="product-card">
         <div class="product-card-img">
-          ${img?`<img src="${img}" alt="${art.name}">`:`<div class="product-card-img-placeholder">📷 Photo à venir</div>`}
-          ${art.badge?`<div class="product-badge">${art.badge}</div>`:''}
+          ${img ? `<img src="${img}" alt="${art.name}">` : `<div class="product-card-img-placeholder">📷 Photo à venir</div>`}
+          ${art.badge ? `<div class="product-badge">${art.badge}</div>` : ''}
         </div>
         <div class="product-name">${art.name}</div>
-        ${art.tagline?`<div class="product-sub">${art.tagline}</div>`:''}
+        ${art.tagline ? `<div class="product-sub">${art.tagline}</div>` : ''}
         <div class="product-price"><span class="product-price-from">À partir de</span>${parseFloat(art.price).toFixed(2)} €</div>
       </a>`;
     }).join('');
     return;
   }
 
-  // ── Fallback statique (aucun article créé du tout) ──
-
+  // ── Fallback statique (aucun article dans Firebase) ──
   grid.innerHTML = `
     <a href="/boutique.html#eta" class="product-card">
       <div class="product-card-img"><div class="product-card-img-placeholder">📷 Photo ETA à venir</div><div class="product-badge">Bestseller</div></div>
@@ -441,20 +470,21 @@ async function buildProductsGrid() {
       <div class="product-price">Prix calculé en ligne</div>
     </a>`;
 
-  // Fade in on scroll (appliqué après insertion des cartes)
+  // Fade in on scroll
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => {
-      if(e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='none'; }
+      if(e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'none'; }
     });
   }, { threshold: 0.1 });
   document.querySelectorAll('.product-card').forEach(c => {
-    c.style.opacity='0'; c.style.transform='translateY(16px)'; c.style.transition='opacity .4s, transform .4s';
+    c.style.opacity = '0';
+    c.style.transform = 'translateY(16px)';
+    c.style.transition = 'opacity .4s, transform .4s';
     observer.observe(c);
   });
 }
 
 buildProductsGrid();
 </script>
-<script src="/search.js"></script>
 </body>
 </html>
