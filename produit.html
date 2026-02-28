@@ -14,12 +14,23 @@
 if (typeof window.TBTCart === 'undefined') {
   window.TBTCart = (function() {
     var KEY = 'tbt3d_cart';
+    // Safari en navigation privée bloque localStorage → fallback mémoire
+    var _memStore = null;
+    function _testStorage() {
+      try { localStorage.setItem('_tbt_t', '1'); localStorage.removeItem('_tbt_t'); return true; } catch(e) { return false; }
+    }
+    var _canStore = _testStorage();
     function load() {
+      if (_memStore !== null) return _memStore;
+      if (!_canStore) return [];
       try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e) { return []; }
     }
     function save(items) {
+      _memStore = items;
+      if (_canStore) {
+        try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {}
+      }
       try {
-        localStorage.setItem(KEY, JSON.stringify(items));
         var total = items.reduce(function(s,i){return s+(i.qty||1);},0);
         document.querySelectorAll('.cart-badge').forEach(function(b){
           b.style.display = total > 0 ? 'block' : 'none';
@@ -899,7 +910,7 @@ body {
 
       <!-- Boutons achat -->
       <div class="buy-actions">
-        <button id="btnPayhip" class="btn-buy" style="display:none" onclick="buyNow()">
+        <button id="btnPayhip" class="btn-buy" style="display:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent" onclick="buyNow()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           Acheter maintenant
         </button>
@@ -907,7 +918,7 @@ body {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           Acheter maintenant
         </a>
-        <button id="btnAddCart" class="btn-contact" onclick="addToCart()">
+        <button id="btnAddCart" class="btn-contact" onclick="addToCart()" disabled style="opacity:.5;cursor:not-allowed;touch-action:manipulation;-webkit-tap-highlight-color:transparent">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
           Ajouter au panier
         </button>
@@ -1510,6 +1521,10 @@ function renderProduct(art) {
   window._photos = _photos;
   window._currentComboKey = _currentComboKey;
 
+  // Activer le bouton panier maintenant que l'article est chargé
+  var btnCart = document.getElementById('btnAddCart');
+  if (btnCart) { btnCart.disabled = false; btnCart.style.opacity = ''; btnCart.style.cursor = ''; }
+
   updateBuyButton();
 
   document.getElementById('qMinus').onclick = function() {
@@ -1660,7 +1675,16 @@ function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
 function addToCart() {
   const _art = window._art;
   const _photos = window._photos || [];
-  if (!_art) return;
+  if (!_art) {
+    // Produit pas encore chargé (Safari lent) — retenter dans 500ms
+    const btn = document.getElementById('btnAddCart');
+    if (btn) { btn.innerHTML = btn.innerHTML.replace('Ajouter au panier', 'Chargement...'); }
+    setTimeout(function() {
+      if (btn) { btn.innerHTML = btn.innerHTML.replace('Chargement...', 'Ajouter au panier'); }
+      if (window._art) addToCart();
+    }, 500);
+    return;
+  }
 
   // Récupérer la variante sélectionnée (lecture directe du DOM — fonctionne en mobile)
   const variantParts = [];

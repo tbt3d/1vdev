@@ -404,11 +404,17 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 if (typeof window.TBTCart === 'undefined') {
   window.TBTCart = (function() {
     var KEY = 'tbt3d_cart';
+    // Safari en navigation privée bloque localStorage → fallback mémoire
+    function _testStorage() {
+      try { localStorage.setItem('_tbt_t', '1'); localStorage.removeItem('_tbt_t'); return true; } catch(e) { return false; }
+    }
+    var _canStore = _testStorage();
     function load() {
+      if (!_canStore) return [];
       try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e) { return []; }
     }
     function save(items) {
-      try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {}
+      if (_canStore) { try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {} }
     }
     return {
       load: load,
