@@ -3081,15 +3081,8 @@ window.downloadFile=async(url, fileName)=>{
   const origHTML = btn?.innerHTML;
   if(btn){ btn.disabled=true; btn.innerHTML=`<div class="spin" style="width:12px;height:12px;border-width:2px"></div> Téléchargement…`; }
 
-  // Pour les fichiers Cloudinary (raw : PDF, ZIP, STL…), on injecte fl_attachment
-  // pour forcer le Content-Disposition: attachment et bypass le blocage navigateur
-  let dlUrl = url;
-  if(url && url.includes('res.cloudinary.com') && !url.includes('fl_attachment')) {
-    dlUrl = url.replace('/upload/', '/upload/fl_attachment/');
-  }
-
   try{
-    const res = await fetch(dlUrl);
+    const res = await fetch(url);
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const blob = await res.blob();
     const a = document.createElement('a');
@@ -3100,8 +3093,8 @@ window.downloadFile=async(url, fileName)=>{
     setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
     toast('⬇ Téléchargement lancé : ' + fileName);
   }catch(e){
-    // Fallback : ouvrir avec fl_attachment dans un nouvel onglet
-    window.open(dlUrl, '_blank');
+    // Fallback : ouvrir dans un nouvel onglet
+    window.open(url, '_blank');
     toast('⬇ Ouverture du fichier…');
   }finally{
     if(btn){ btn.disabled=false; btn.innerHTML=origHTML; }

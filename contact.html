@@ -738,7 +738,7 @@ async function sendContact() {
       orderRef:  order || null,
       fileUrl:    cloudFile ? cloudFile.url      : null,
       fileName:   _attachedFile ? _attachedFile.name : null,
-      fileFormat: cloudFile ? cloudFile.format   : null,
+      fileFormat: cloudFile ? (cloudFile.format || _attachedFile.name.split('.').pop().toLowerCase() || null) : null,
       source: 'contact-form',
     };
 
