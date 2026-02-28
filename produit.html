@@ -14,22 +14,37 @@
 if (typeof window.TBTCart === 'undefined') {
   window.TBTCart = (function() {
     var KEY = 'tbt3d_cart';
-    // Safari en navigation privée bloque localStorage → fallback mémoire
-    var _memStore = null;
-    function _testStorage() {
-      try { localStorage.setItem('_tbt_t', '1'); localStorage.removeItem('_tbt_t'); return true; } catch(e) { return false; }
+    // Stockage multi-niveaux : localStorage → sessionStorage → cookie → mémoire
+    var _mem = null;
+    function _readRaw() {
+      var s = null;
+      try { s = localStorage.getItem(KEY); } catch(e) {}
+      if (!s) { try { s = sessionStorage.getItem(KEY); } catch(e) {} }
+      if (!s) {
+        var m = document.cookie.match('(?:^|;)\s*tbt3d_cart=([^;]*)');
+        if (m) { try { s = decodeURIComponent(m[1]); } catch(e){} }
+      }
+      return s;
     }
-    var _canStore = _testStorage();
+    function _writeRaw(val) {
+      var ok = false;
+      try { localStorage.setItem(KEY, val); ok = true; } catch(e) {}
+      try { sessionStorage.setItem(KEY, val); ok = true; } catch(e) {}
+      // Cookie fallback (max 4KB, suffisant pour quelques articles)
+      try {
+        document.cookie = 'tbt3d_cart=' + encodeURIComponent(val) + ';path=/;max-age=86400;SameSite=Lax';
+        ok = true;
+      } catch(e) {}
+      return ok;
+    }
     function load() {
-      if (_memStore !== null) return _memStore;
-      if (!_canStore) return [];
-      try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e) { return []; }
+      if (_mem !== null) return _mem;
+      var s = _readRaw();
+      try { return s ? JSON.parse(s) : []; } catch(e) { return []; }
     }
     function save(items) {
-      _memStore = items;
-      if (_canStore) {
-        try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {}
-      }
+      _mem = items;
+      try { _writeRaw(JSON.stringify(items)); } catch(e) {}
       try {
         var total = items.reduce(function(s,i){return s+(i.qty||1);},0);
         document.querySelectorAll('.cart-badge').forEach(function(b){
@@ -865,7 +880,7 @@ body {
     <div class="gallery">
       <div class="gallery-thumbs" id="galleryThumbs"></div>
       <div class="gallery-main">
-        <img id="mainImg" class="gallery-main-img" src="" alt="" style="display:none" onclick="openGalleryLightboxFn()">
+        <img id="mainImg" class="gallery-main-img" src="" alt="" style="display:none" onclick="if(window.innerWidth>600)openGalleryLightboxFn()">
         <div id="mainPlaceholder" class="gallery-placeholder">🏮</div>
         <div class="gallery-nav" id="galleryNav" style="display:none">
           <button class="gallery-btn" onclick="prevImg()">

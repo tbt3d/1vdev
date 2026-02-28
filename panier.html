@@ -404,17 +404,28 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 if (typeof window.TBTCart === 'undefined') {
   window.TBTCart = (function() {
     var KEY = 'tbt3d_cart';
-    // Safari en navigation privée bloque localStorage → fallback mémoire
-    function _testStorage() {
-      try { localStorage.setItem('_tbt_t', '1'); localStorage.removeItem('_tbt_t'); return true; } catch(e) { return false; }
+    // Stockage multi-niveaux : localStorage → sessionStorage → cookie → mémoire
+    function _readRaw() {
+      var s = null;
+      try { s = localStorage.getItem(KEY); } catch(e) {}
+      if (!s) { try { s = sessionStorage.getItem(KEY); } catch(e) {} }
+      if (!s) {
+        var m = document.cookie.match('(?:^|;)\s*tbt3d_cart=([^;]*)');
+        if (m) { try { s = decodeURIComponent(m[1]); } catch(e){} }
+      }
+      return s;
     }
-    var _canStore = _testStorage();
+    function _writeRaw(val) {
+      try { localStorage.setItem(KEY, val); } catch(e) {}
+      try { sessionStorage.setItem(KEY, val); } catch(e) {}
+      try { document.cookie = 'tbt3d_cart=' + encodeURIComponent(val) + ';path=/;max-age=86400;SameSite=Lax'; } catch(e) {}
+    }
     function load() {
-      if (!_canStore) return [];
-      try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e) { return []; }
+      var s = _readRaw();
+      try { return s ? JSON.parse(s) : []; } catch(e) { return []; }
     }
     function save(items) {
-      if (_canStore) { try { localStorage.setItem(KEY, JSON.stringify(items)); } catch(e) {} }
+      try { _writeRaw(JSON.stringify(items)); } catch(e) {}
     }
     return {
       load: load,
