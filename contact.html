@@ -608,7 +608,8 @@ async function uploadToCloudinary(file) {
   fd.append('file', file);
   fd.append('upload_preset', _cloudinaryCfg.uploadPreset);
   fd.append('folder', 'contacts');
-  fd.append('access_mode', 'public');   // forcer accès public (évite 401 au téléchargement)
+  // ⚠ NE PAS ajouter access_mode ici — interdit avec unsigned upload.
+  // Régler "Delivery type: Public" directement dans le preset Cloudinary.
 
   var res = await fetch(
     'https://api.cloudinary.com/v1_1/' + _cloudinaryCfg.cloudName + '/auto/upload',
