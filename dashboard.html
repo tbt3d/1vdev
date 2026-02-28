@@ -2933,12 +2933,12 @@ window.openMsg=async(id)=>{
               <div style="font-size:9px;color:var(--soft);font-family:var(--mono)">PDF · Document</div>
             </div>
           </div>
-          <a href="${m.fileUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;color:var(--red);background:rgba(255,61,90,.06);border:1px solid rgba(255,61,90,.3);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:6px">
+          <a href="${m.fileUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;color:var(--red);background:rgba(255,61,90,.06);border:1px solid rgba(255,61,90,.3);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:6px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Ouvrir
           </a>
-          <a href="${m.fileUrl}" download="${esc(m.fileName)}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:5px;color:var(--soft);background:var(--bg3);border:1px solid var(--border2);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:5px">
+          <button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="display:inline-flex;align-items:center;gap:5px;color:var(--soft);background:var(--bg3);border:1px solid var(--border2);padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font);margin-left:5px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>⬇
-          </a>`;
+          </button>`;
       } else if(isZip){
         // ── ZIP : icône violette + badge "compressé" + download
         pjHtml = `
@@ -3076,21 +3076,35 @@ window.deleteMsgById=async(id)=>{
 };
 
 // ── Téléchargement PJ ──
-// Pour les fichiers raw Cloudinary (zip, stl, pdf...), NE PAS ajouter de transformation
-// dans l'URL (fl_attachment, fl_inline...) => Cloudinary renvoie 401 sur les comptes
-// sans transformations signees. On utilise l'URL originale directement :
-// - Le navigateur telecharge automatiquement les types qu'il ne sait pas afficher (zip, stl)
-// - Les PDF s'ouvrent dans le lecteur integre du navigateur via target=_blank
+// Utilise un <iframe> caché : impossible à bloquer par un popup blocker,
+// fonctionne pour tous les types (ZIP, PDF, STL...) sans transformation Cloudinary.
+// Pour les PDF : ouvre dans un nouvel onglet (le navigateur affiche son reader).
+// Pour ZIP/STL/autres : le navigateur déclenche le téléchargement automatiquement.
 window.downloadFile=(url, fileName)=>{
   if(!url){ toast('Erreur : URL manquante'); return; }
-  const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(()=>a.remove(), 500);
-  toast('⬇ Ouverture : ' + (fileName || 'fichier'));
+
+  const ext = (fileName||url).split('.').pop().toLowerCase();
+  const isPdf = ext === 'pdf';
+
+  if(isPdf){
+    // PDF : ouvrir dans un nouvel onglet pour affichage natif
+    // On passe par un <a> en click direct (sync) — pas bloqué par popup blocker
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>a.remove(), 300);
+  } else {
+    // ZIP / STL / autres : iframe caché = jamais bloqué, déclenche le téléchargement
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;border:none';
+    iframe.src = url;
+    document.body.appendChild(iframe);
+    setTimeout(()=>{ try{ iframe.remove(); }catch(e){} }, 8000);
+  }
+  toast('⬇ ' + (fileName || 'Téléchargement lancé…'));
 };
 
 // ══════════════════════════════════════════════
