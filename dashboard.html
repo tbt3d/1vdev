@@ -1461,9 +1461,13 @@ tr:hover td{background:rgba(255,255,255,.01)}
 <script>
 const EMAILJS_SERVICE         = 'service_f73dvuk';
 const EMAILJS_TPL_ADMIN       = 'template_8a89xmr';
-const EMAILJS_TPL_CLIENT_CONF = 'template_q5h5f0v'; // ← Créer ce template EmailJS (voir README ci-dessous)
-const EMAILJS_TPL_EXPEDITION  = 'template_hp5ogi1'; // ← À créer dans EmailJS (voir instructions ci-dessous)
+const EMAILJS_TPL_CLIENT_CONF = 'template_q5h5f0v';
 const EMAILJS_TPL_REPLY       = 'template_h2is8un';
+
+// ── Compte EmailJS #2 — Expédition (tbt-livraison)
+const EMAILJS_SERVICE_EXPEDITION    = 'service_auud9nd';
+const EMAILJS_TPL_EXPEDITION        = 'template_hp5ogi1';
+const EMAILJS_PUBLIC_KEY_EXPEDITION = 'OwuwOtWfKrVUrtc6k';
 /* TEMPLATE EmailJS à créer : template_cmd_conf
    Variables attendues :
    - to_email     : email du client
@@ -1476,12 +1480,14 @@ const EMAILJS_TPL_REPLY       = 'template_h2is8un';
 */
 const EMAILJS_PUBLIC_KEY      = 'Hz2TaEfDTVW8Usv6Q';
 // Expose to window for module script access
-window.EMAILJS_SERVICE         = EMAILJS_SERVICE;
-window.EMAILJS_TPL_ADMIN       = EMAILJS_TPL_ADMIN;
-window.EMAILJS_TPL_CLIENT_CONF = EMAILJS_TPL_CLIENT_CONF;
-window.EMAILJS_TPL_REPLY       = EMAILJS_TPL_REPLY;
-window.EMAILJS_TPL_EXPEDITION  = EMAILJS_TPL_EXPEDITION;
-window.EMAILJS_PUBLIC_KEY      = EMAILJS_PUBLIC_KEY;
+window.EMAILJS_SERVICE               = EMAILJS_SERVICE;
+window.EMAILJS_TPL_ADMIN             = EMAILJS_TPL_ADMIN;
+window.EMAILJS_TPL_CLIENT_CONF       = EMAILJS_TPL_CLIENT_CONF;
+window.EMAILJS_TPL_REPLY             = EMAILJS_TPL_REPLY;
+window.EMAILJS_SERVICE_EXPEDITION    = EMAILJS_SERVICE_EXPEDITION;
+window.EMAILJS_TPL_EXPEDITION        = EMAILJS_TPL_EXPEDITION;
+window.EMAILJS_PUBLIC_KEY_EXPEDITION = EMAILJS_PUBLIC_KEY_EXPEDITION;
+window.EMAILJS_PUBLIC_KEY            = EMAILJS_PUBLIC_KEY;
 emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 </script>
 
@@ -4097,7 +4103,7 @@ window.sendExpeditionEmail = async (c, expeditionData) => {
 
   try {
     toast('Envoi de l\'email d\'expédition…');
-    await emailjs.send(window.EMAILJS_SERVICE, window.EMAILJS_TPL_EXPEDITION, {
+    await emailjs.send(window.EMAILJS_SERVICE_EXPEDITION, window.EMAILJS_TPL_EXPEDITION, {
       to_email:     email,
       to_name:      clientName,
       facture_num:  factureNum,
@@ -4105,7 +4111,7 @@ window.sendExpeditionEmail = async (c, expeditionData) => {
       tracking_num: tracking,
       tracking_url: trackingUrl,
       message_html: emailHtml,
-    });
+    }, { publicKey: window.EMAILJS_PUBLIC_KEY_EXPEDITION });
 
     // Marquer email expédition envoyé dans Firestore
     const c2 = _allCommandes.find(x => x._id === c._id);
