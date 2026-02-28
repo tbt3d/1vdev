@@ -1093,14 +1093,14 @@ tr:hover td{background:rgba(255,255,255,.01)}
               <div class="field">
                 <label>Clé Stripe TEST <span style="color:#d97706">sk_test_...</span></label>
                 <div style="position:relative">
-                  <input type="password" id="skTest" placeholder="sk_test_xxxxxxxxxxxxxxxx" autocomplete="off" style="font-family:monospace;font-size:12px;padding-right:40px">
+                  <input type="password" id="skTest" placeholder="sk_test_xxxxxxxxxxxxxxxx" autocomplete="off" style="font-family:monospace;font-size:12px;padding-right:40px" oninput="if(this.value.trim())localStorage.setItem('stripe_skTest',this.value.trim())">
                   <button type="button" onclick="toggleVis('skTest',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">👁</button>
                 </div>
               </div>
               <div class="field">
                 <label>Clé Stripe LIVE <span style="color:#16a34a">sk_live_...</span></label>
                 <div style="position:relative">
-                  <input type="password" id="skLive" placeholder="sk_live_xxxxxxxxxxxxxxxx" autocomplete="off" style="font-family:monospace;font-size:12px;padding-right:40px">
+                  <input type="password" id="skLive" placeholder="sk_live_xxxxxxxxxxxxxxxx" autocomplete="off" style="font-family:monospace;font-size:12px;padding-right:40px" oninput="if(this.value.trim())localStorage.setItem('stripe_skLive',this.value.trim())">
                   <button type="button" onclick="toggleVis('skLive',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">👁</button>
                 </div>
               </div>
@@ -1116,11 +1116,11 @@ tr:hover td{background:rgba(255,255,255,.01)}
               <div class="frow">
                 <div class="field">
                   <label>Account ID Cloudflare</label>
-                  <input type="text" id="cfAccountId" placeholder="a1b2c3d4..." autocomplete="off" style="font-family:monospace;font-size:12px">
+                  <input type="text" id="cfAccountId" placeholder="a1b2c3d4..." autocomplete="off" style="font-family:monospace;font-size:12px" oninput="if(this.value.trim())localStorage.setItem('cf_accountId',this.value.trim())">
                 </div>
                 <div class="field">
                   <label>Nom du Worker</label>
-                  <input type="text" id="cfWorkerName" placeholder="tbt3d-checkout">
+                  <input type="text" id="cfWorkerName" placeholder="tbt3d-checkout" oninput="if(this.value.trim())localStorage.setItem('cf_workerName',this.value.trim())">
                 </div>
               </div>
               <div class="field">
@@ -1129,7 +1129,7 @@ tr:hover td{background:rgba(255,255,255,.01)}
                   <input type="password" id="cfApiToken" placeholder="xxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" style="font-family:monospace;font-size:12px;padding-right:40px">
                   <button type="button" onclick="toggleVis('cfApiToken',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">👁</button>
                 </div>
-                <div class="fhint">Effacé après usage — jamais sauvegardé.</div>
+                <div class="fhint">Effacé après usage — jamais sauvegardé. &nbsp;<button type="button" onclick="['stripe_skTest','stripe_skLive','cf_accountId','cf_workerName'].forEach(k=>localStorage.removeItem(k));document.getElementById('skTest').value='';document.getElementById('skLive').value='';document.getElementById('cfAccountId').value='';document.getElementById('cfWorkerName').value='';toast('Clés effacées du navigateur ✓')" style="background:none;border:none;color:#e11d48;cursor:pointer;font-size:10px;text-decoration:underline;padding:0">🗑 Effacer les clés sauvegardées</button></div>
               </div>
             </details>
 
@@ -4943,7 +4943,20 @@ window.applyStripeKey = async () => {
   }
 };
 
+// ─── Chargement des clés Stripe/CF depuis localStorage ───
+window.loadStripeKeys = () => {
+  const skTest     = localStorage.getItem('stripe_skTest');
+  const skLive     = localStorage.getItem('stripe_skLive');
+  const accountId  = localStorage.getItem('cf_accountId');
+  const workerName = localStorage.getItem('cf_workerName');
+  if (skTest)     document.getElementById('skTest').value      = skTest;
+  if (skLive)     document.getElementById('skLive').value      = skLive;
+  if (accountId)  document.getElementById('cfAccountId').value = accountId;
+  if (workerName) document.getElementById('cfWorkerName').value = workerName;
+};
+
 window.loadPanierCfg = async () => {
+  loadStripeKeys();
   try {
     const data = await fbGetConfig('panier');
     const cfg = data || PCFG_DEFAULTS;
