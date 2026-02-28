@@ -116,6 +116,155 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 .footer-pay{display:flex;gap:6px;align-items:center}
 @media(max-width:600px){.footer-bottom{padding:16px 20px}}
 </style>
+<script>
+/* ── TBTCart — stockage Firestore (Safari compatible) ── */
+(function() {
+  var PROJECT = 'tbt3d-a0f04';
+  var API_KEY  = 'AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8';
+  var BASE     = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/carts/';
+
+  function _getSessionId() {
+    // 1. Priorité absolue : ?sid= dans l'URL (passé explicitement depuis produit.html sur iOS)
+    try {
+      var urlSid = new URLSearchParams(window.location.search).get('sid');
+      if (urlSid) {
+        document.cookie = 'tbt_sid=' + urlSid + ';path=/;max-age=604800;SameSite=Lax';
+        return urlSid;
+      }
+    } catch(e) {}
+    // 2. Cookie existant
+    var m = document.cookie.match(/(?:^|;)\s*tbt_sid=([^;]+)/);
+    if (m) return m[1];
+    // 3. Nouveau sid
+    var id = 'sid_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    document.cookie = 'tbt_sid=' + id + ';path=/;max-age=604800;SameSite=Lax';
+    return id;
+  }
+
+  function _toFS(val) {
+    if (val === null || val === undefined) return { nullValue: null };
+    if (typeof val === 'boolean') return { booleanValue: val };
+    if (typeof val === 'number') return isNaN(val) ? { nullValue: null } : { doubleValue: val };
+    if (typeof val === 'string') return { stringValue: val };
+    if (Array.isArray(val)) return { arrayValue: { values: val.map(_toFS) } };
+    if (typeof val === 'object') {
+      var fields = {};
+      for (var k in val) if (Object.prototype.hasOwnProperty.call(val, k)) fields[k] = _toFS(val[k]);
+      return { mapValue: { fields: fields } };
+    }
+    return { stringValue: String(val) };
+  }
+
+  function _fromFS(v) {
+    if (!v) return null;
+    if (v.stringValue  !== undefined) return v.stringValue;
+    if (v.integerValue !== undefined) return Number(v.integerValue);
+    if (v.doubleValue  !== undefined) return Number(v.doubleValue);
+    if (v.booleanValue !== undefined) return v.booleanValue;
+    if (v.nullValue    !== undefined) return null;
+    if (v.arrayValue)  return (v.arrayValue.values || []).map(_fromFS);
+    if (v.mapValue) {
+      var out = {};
+      var f = v.mapValue.fields || {};
+      for (var k in f) out[k] = _fromFS(f[k]);
+      return out;
+    }
+    return null;
+  }
+
+  var _mem = null;
+  var _sid = null;
+  function _sid_lazy() { if (!_sid) _sid = _getSessionId(); return _sid; }
+  function _url() { return BASE + _sid_lazy() + '?key=' + API_KEY; }
+
+  // Expose le sid pour le passer dans les URLs de navigation
+  window._getTBTSid = function() { return _sid_lazy(); };
+
+  function _loadRemote() {
+    return fetch(_url())
+      .then(function(r) {
+        if (r.status === 404) return [];
+        return r.json().then(function(d) {
+          if (!d.fields || !d.fields.items) return [];
+          return _fromFS(d.fields.items) || [];
+        });
+      })
+      .catch(function() { return []; });
+  }
+
+  function _saveRemote(items) {
+    return fetch(_url(), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { items: _toFS(items), updatedAt: _toFS(Date.now()) } })
+    }).catch(function(e) { console.warn('Cart save error:', e); });
+  }
+
+  function _updateBadge(items) {
+    var total = (items || []).reduce(function(s, i) { return s + (i.qty || 1); }, 0);
+    document.querySelectorAll('.cart-badge').forEach(function(b) {
+      b.style.display = total > 0 ? 'block' : 'none';
+    });
+  }
+
+  window.TBTCart = {
+    load: function() { return _mem || []; },
+    init: function() {
+      return _loadRemote().then(function(items) {
+        _mem = items;
+        _updateBadge(items);
+        window.dispatchEvent(new Event('cart:updated'));
+        return items;
+      });
+    },
+    add: function(item) {
+      var items = (_mem || []).slice();
+      var k = (item.id || '') + '|' + (item.variant || '');
+      var found = items.find(function(x) { return x.key === k; });
+      if (found) { found.qty = Math.min((found.qty || 1) + (item.qty || 1), 99); }
+      else { item.key = k; item.qty = item.qty || 1; items.push(item); }
+      _mem = items;
+      _updateBadge(items);
+      window.dispatchEvent(new Event('cart:updated'));
+      return _saveRemote(items);
+    },
+    remove: function(key) {
+      var items = (_mem || []).filter(function(i) { return i.key !== key; });
+      _mem = items;
+      _updateBadge(items);
+      window.dispatchEvent(new Event('cart:updated'));
+      return _saveRemote(items);
+    },
+    updateQty: function(key, qty) {
+      var items = (_mem || []).slice();
+      var found = items.find(function(i) { return i.key === key; });
+      if (found) found.qty = Math.max(1, Math.min(qty, 99));
+      _mem = items;
+      _updateBadge(items);
+      window.dispatchEvent(new Event('cart:updated'));
+      return _saveRemote(items);
+    },
+    total: function() {
+      return (_mem || []).reduce(function(s, i) { return s + parseFloat(i.price || 0) * (i.qty || 1); }, 0);
+    },
+    count: function() {
+      return (_mem || []).reduce(function(s, i) { return s + (i.qty || 1); }, 0);
+    },
+    clear: function() {
+      _mem = [];
+      _updateBadge([]);
+      window.dispatchEvent(new Event('cart:updated'));
+      return _saveRemote([]);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { window.TBTCart.init(); });
+  } else {
+    window.TBTCart.init();
+  }
+})();
+</script>
 <script src="/cart.js"></script>
 </head>
 <body data-page="boutique">
@@ -216,7 +365,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#0b7f697f393b38256864657f6a687f4b6c666a626725686466"><span class="__cf_email__" data-cfemail="f3879187c1c3c0dd909c9d87929087b3949e929a9fdd909c9e">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a><a href="/devis.html">Devis STL</a>
             <div class="footer-social">
         <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -246,25 +395,76 @@ const firebaseConfig = {
   storageBucket: "tbt3d-a0f04.firebasestorage.app",
   appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
 };
-const db = getFirestore(initializeApp(firebaseConfig));
+const API_KEY = "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8";
+const PROJECT = "tbt3d-a0f04";
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 let allArticles = [];
 let activeFilter = 'all';
 
-// ─── CHARGEMENT FIREBASE ───────────────────────────────────────────────────
-async function loadData() {
-  const snap = await getDocs(collection(db, 'articles'));
-  const arts = [];
-  snap.forEach(d => arts.push({ ...d.data(), id: d.id }));
+// ─── HELPERS REST API (fallback Tor/Safari) ────────────────────────────────
+function _fromFS(v) {
+  if (!v) return null;
+  if (v.stringValue  !== undefined) return v.stringValue;
+  if (v.integerValue !== undefined) return Number(v.integerValue);
+  if (v.doubleValue  !== undefined) return Number(v.doubleValue);
+  if (v.booleanValue !== undefined) return v.booleanValue;
+  if (v.nullValue    !== undefined) return null;
+  if (v.arrayValue)  return (v.arrayValue.values || []).map(_fromFS);
+  if (v.mapValue) {
+    const out = {};
+    for (const [k, val] of Object.entries(v.mapValue.fields || {})) out[k] = _fromFS(val);
+    return out;
+  }
+  return null;
+}
+async function _restGetCollection(col) {
+  const url = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents/${col}?key=${API_KEY}&pageSize=100`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('REST ' + r.status);
+  const data = await r.json();
+  return (data.documents || []).map(d => ({
+    id: d.name.split('/').pop(),
+    ..._fromFS({ _: { mapValue: { fields: d.fields } } })._
+  }));
+}
+async function _restGetDoc(col, docId) {
+  const url = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents/${col}/${docId}?key=${API_KEY}`;
+  const r = await fetch(url);
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error('REST ' + r.status);
+  const d = await r.json();
+  return _fromFS({ _: { mapValue: { fields: d.fields || {} } } })._;
+}
 
-  // Charger les deux configs en parallèle
-  const [cfgDoc, hpDoc] = await Promise.all([
-    getDoc(doc(db, 'config', 'boutique')),
-    getDoc(doc(db, 'config', 'homepage'))
-  ]);
-  const cfg = cfgDoc.exists() ? cfgDoc.data() : null;
-  const hpCfg = hpDoc.exists() ? hpDoc.data() : null;
+// ─── CHARGEMENT DONNÉES ────────────────────────────────────────────────────
+async function loadData() {
+  let arts = [], cfg = null, hpCfg = null;
+
+  // Essai 1 : Firebase SDK
+  try {
+    const db = getFirestore(initializeApp(firebaseConfig));
+    const snap = await getDocs(collection(db, 'articles'));
+    snap.forEach(d => arts.push({ ...d.data(), id: d.id }));
+    const [cfgDoc, hpDoc] = await Promise.all([
+      getDoc(doc(db, 'config', 'boutique')),
+      getDoc(doc(db, 'config', 'homepage'))
+    ]);
+    cfg   = cfgDoc.exists() ? cfgDoc.data() : null;
+    hpCfg = hpDoc.exists()  ? hpDoc.data()  : null;
+  } catch(e) {
+    console.warn('Firebase SDK bloqué, bascule REST API:', e.message);
+    // Essai 2 : REST API (Tor / Safari ITP)
+    try {
+      arts  = await _restGetCollection('articles');
+      cfg   = await _restGetDoc('config', 'boutique');
+      hpCfg = await _restGetDoc('config', 'homepage');
+    } catch(e2) {
+      document.getElementById('productGrid').innerHTML =
+        '<div class="empty-boutique"><h3>Chargement impossible</h3><p>Vérifiez votre connexion internet.</p></div>';
+      return;
+    }
+  }
 
   // Récupérer les images des slots custom depuis homepage (source de vérité pour les images)
   const hpCustomImages = {};
@@ -500,18 +700,44 @@ function searchLive() {}
 function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
 
 window.addToCartAndGo = function(id, name, price, oldPrice, image, stripePrice, paymentUrl, variant) {
-  TBTCart.add({
+  var promise = TBTCart.add({
     id:          id,
     name:        name,
     price:       price,
-    oldPrice:    (oldPrice && oldPrice > price) ? oldPrice : null,
+    oldPrice:    (oldPrice && parseFloat(oldPrice) > parseFloat(price)) ? parseFloat(oldPrice) : null,
     image:       image || null,
-    variant:     variant || null,
     stripePrice: stripePrice || null,
     paymentUrl:  paymentUrl || null,
+    variant:     variant || null,
+    qty:         1,
   });
-  window.location.href = '/panier.html';
-}
+  // Attendre Firestore puis rediriger avec le sid dans l'URL
+  var p = (promise && typeof promise.then === 'function') ? promise : Promise.resolve();
+  p.then(function() {
+    var sid = window._getTBTSid ? window._getTBTSid() : '';
+    window.location.href = '/panier.html' + (sid ? '?sid=' + encodeURIComponent(sid) : '');
+  }).catch(function() {
+    var sid = window._getTBTSid ? window._getTBTSid() : '';
+    window.location.href = '/panier.html' + (sid ? '?sid=' + encodeURIComponent(sid) : '');
+  });
+};
+
+// Mettre à jour les liens panier avec le sid (Safari iOS)
+(function patchCartLinks() {
+  function doUpdate() {
+    var sid = window._getTBTSid ? window._getTBTSid() : '';
+    if (!sid) return;
+    document.querySelectorAll('a[href="/panier.html"]').forEach(function(a) {
+      a.href = '/panier.html?sid=' + encodeURIComponent(sid);
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', doUpdate);
+  } else {
+    doUpdate();
+  }
+  setTimeout(doUpdate, 500);
+})();
 </script>
 
 </body>
