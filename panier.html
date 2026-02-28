@@ -129,6 +129,28 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
   90%      { transform: translateX(2px); }
 }
 .shipping-select-wrap { display: flex; flex-direction: column; gap: 6px; padding: 14px 0 10px; border-bottom: 1px solid var(--border); }
+
+/* ─── CODE PROMO ─── */
+.promo-wrap { padding: 14px 0 12px; border-bottom: 1px solid var(--border); }
+.promo-label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+.promo-label svg { width: 11px; height: 11px; }
+.promo-input-row { display: flex; gap: 7px; align-items: stretch; }
+.promo-input { flex: 1; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--font); font-size: 13px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--text); outline: none; background: var(--white); transition: border-color .18s, box-shadow .18s; }
+.promo-input::placeholder { text-transform: none; font-weight: 400; color: #bbb; letter-spacing: 0; }
+.promo-input:focus { border-color: var(--black); box-shadow: 0 0 0 3px rgba(0,0,0,.06); }
+.promo-input.success { border-color: var(--green) !important; background: var(--green-bg); }
+.promo-input.error { border-color: #e11d48 !important; background: #fff8f8; }
+.promo-btn { padding: 9px 14px; background: var(--black); color: var(--white); border: none; border-radius: 10px; font-family: var(--font); font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: opacity .18s, transform .15s; display: flex; align-items: center; gap: 5px; }
+.promo-btn:hover { opacity: .85; transform: translateY(-1px); }
+.promo-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.promo-btn svg { width: 13px; height: 13px; }
+.promo-feedback { margin-top: 8px; font-size: 11px; border-radius: 8px; padding: 7px 11px; display: none; align-items: center; gap: 6px; }
+.promo-feedback.ok  { display: flex; background: var(--green-bg); border: 1px solid #86efac; color: #15803d; }
+.promo-feedback.err { display: flex; background: #fff1f2; border: 1px solid #fecdd3; color: #be123c; }
+.promo-feedback svg { width: 13px; height: 13px; flex-shrink: 0; }
+.promo-clear { background: none; border: none; cursor: pointer; font-size: 16px; color: #888; line-height: 1; margin-left: auto; padding: 0 0 0 8px; transition: color .15s; }
+.promo-clear:hover { color: #e11d48; }
+.summary-line-promo { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 12px; color: var(--green); border-bottom: 1px solid var(--border); font-weight: 500; }
 .shipping-select-wrap label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
 .shipping-select { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-family: var(--font); font-size: 13px; background: var(--white); color: var(--text); cursor: pointer; outline: none; transition: border-color .15s; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
 .shipping-select:focus { border-color: var(--black); }
@@ -368,6 +390,24 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
               <option value="US">🇺🇸 États-Unis — 50,00 €</option>
             </optgroup>
           </select>
+        </div>
+
+        <!-- Code promo -->
+        <div class="promo-wrap" id="promoWrap">
+          <div class="promo-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Code promo
+          </div>
+          <div class="promo-input-row">
+            <input type="text" id="promoInput" class="promo-input" placeholder="MONCODE" maxlength="32"
+              oninput="this.value=this.value.toUpperCase()"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();applyPromo();}">
+            <button class="promo-btn" id="promoBtn" onclick="applyPromo()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Appliquer
+            </button>
+          </div>
+          <div class="promo-feedback" id="promoFeedback"></div>
         </div>
 
         <div id="summaryExtras"></div>
@@ -618,16 +658,40 @@ function getShippingCost() {
   return SHIPPING_RATES[getShippingCountry()] || 8;
 }
 
+// ── Code promo ──────────────────────────────────────────────
+let _appliedPromo = null; // { code, type:'percent'|'fixed', value, label }
+
+function getPromoDiscount(subtotalHT) {
+  if (!_appliedPromo) return 0;
+  if (_appliedPromo.type === 'percent') {
+    return parseFloat(((subtotalHT * _appliedPromo.value) / 100).toFixed(2));
+  }
+  return parseFloat(Math.min(_appliedPromo.value, subtotalHT).toFixed(2));
+}
+
 function computeTotals() {
   const subtotal  = TBTCart.total();
-  const tva       = parseFloat((subtotal * TVA_RATE).toFixed(2));
+  const discount  = getPromoDiscount(subtotal);
+  const subtotalAfterDiscount = Math.max(0, subtotal - discount);
+  const tva       = parseFloat((subtotalAfterDiscount * TVA_RATE).toFixed(2));
   const shipping  = getShippingCost();
-  const total     = parseFloat((subtotal + tva + shipping).toFixed(2));
-  return { subtotal, tva, shipping, total };
+  const total     = parseFloat((subtotalAfterDiscount + tva + shipping).toFixed(2));
+  return { subtotal, discount, tva, shipping, total };
 }
 
 function updateSummaryTotals() {
-  const { subtotal, tva, shipping, total } = computeTotals();
+  const { subtotal, discount, tva, shipping, total } = computeTotals();
+  let discountLine = '';
+  if (discount > 0 && _appliedPromo) {
+    const label = _appliedPromo.type === 'percent'
+      ? `-${_appliedPromo.value}%`
+      : `-${_appliedPromo.value.toFixed(2)} €`;
+    discountLine = `
+    <div class="summary-line-promo">
+      <span>🎉 Code <strong>${_appliedPromo.code}</strong> (${label})</span>
+      <span>−${discount.toFixed(2)} €</span>
+    </div>`;
+  }
   document.getElementById('summaryExtras').innerHTML = `
     <div class="summary-line-muted">
       <span>Sous-total HT</span>
@@ -640,9 +704,117 @@ function updateSummaryTotals() {
     <div class="summary-line-muted">
       <span>Livraison</span>
       <span>${shipping.toFixed(2)} €</span>
-    </div>
+    </div>${discountLine}
   `;
   document.getElementById('summaryTotal').textContent = total.toFixed(2) + ' €';
+}
+
+// Valide le code promo contre Firestore
+async function applyPromo() {
+  const input = document.getElementById('promoInput');
+  const btn   = document.getElementById('promoBtn');
+  const feedback = document.getElementById('promoFeedback');
+  const code  = input.value.trim().toUpperCase();
+
+  feedback.className = 'promo-feedback';
+  feedback.innerHTML = '';
+  input.className = 'promo-input';
+
+  if (!code) {
+    _showPromoError(feedback, input, 'Veuillez entrer un code promo.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div>';
+
+  try {
+    // Lecture via Firestore REST API (compatible Safari / pas besoin de SDK)
+    const API_KEY = 'AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8';
+    const url = `https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/promoCodes/${encodeURIComponent(code)}?key=${API_KEY}`;
+    const res = await fetch(url);
+
+    if (res.status === 404) {
+      _showPromoError(feedback, input, 'Code promo invalide ou inexistant.');
+      return;
+    }
+    if (!res.ok) throw new Error('Erreur réseau');
+
+    const data = await res.json();
+    const f = data.fields || {};
+
+    // Parse champs
+    const active   = f.active?.booleanValue ?? true;
+    const type     = f.type?.stringValue || 'percent';
+    const value    = Number(f.value?.doubleValue ?? f.value?.integerValue ?? 0);
+    const minOrder = Number(f.minOrder?.doubleValue ?? f.minOrder?.integerValue ?? 0);
+    const maxUses  = Number(f.maxUses?.integerValue ?? f.maxUses?.doubleValue ?? 0);
+    const usedCount= Number(f.usedCount?.integerValue ?? f.usedCount?.doubleValue ?? 0);
+    const expiresAt= f.expiresAt?.timestampValue || null;
+
+    // Validations
+    if (!active) {
+      _showPromoError(feedback, input, 'Ce code promo est désactivé.');
+      return;
+    }
+    if (expiresAt && new Date(expiresAt) < new Date()) {
+      _showPromoError(feedback, input, 'Ce code promo est expiré.');
+      return;
+    }
+    if (maxUses > 0 && usedCount >= maxUses) {
+      _showPromoError(feedback, input, 'Ce code promo a atteint sa limite d\'utilisation.');
+      return;
+    }
+    const subtotal = TBTCart.total();
+    if (minOrder > 0 && subtotal < minOrder) {
+      _showPromoError(feedback, input, `Commande minimum de ${minOrder.toFixed(2)} € requise.`);
+      return;
+    }
+
+    // ✅ Code valide
+    _appliedPromo = { code, type, value };
+    input.className = 'promo-input success';
+    const discount = getPromoDiscount(subtotal);
+    const label = type === 'percent' ? `-${value}%` : `-${value.toFixed(2)} €`;
+    feedback.className = 'promo-feedback ok';
+    feedback.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Code appliqué ! Réduction : <strong>${label}</strong> (−${discount.toFixed(2)} €) <button class="promo-clear" onclick="clearPromo()" title="Retirer">×</button>`;
+    btn.disabled = true;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+    input.disabled = true;
+    updateSummaryTotals();
+
+  } catch(e) {
+    _showPromoError(feedback, input, 'Impossible de valider le code. Réessayez.');
+  } finally {
+    if (!_appliedPromo) {
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Appliquer';
+    }
+  }
+}
+
+function _showPromoError(feedback, input, msg) {
+  input.className = 'promo-input error';
+  feedback.className = 'promo-feedback err';
+  feedback.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${msg}`;
+  const btn = document.getElementById('promoBtn');
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Appliquer';
+}
+
+function clearPromo() {
+  _appliedPromo = null;
+  const input = document.getElementById('promoInput');
+  const btn   = document.getElementById('promoBtn');
+  const feedback = document.getElementById('promoFeedback');
+  input.value = '';
+  input.className = 'promo-input';
+  input.disabled = false;
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Appliquer';
+  feedback.className = 'promo-feedback';
+  feedback.innerHTML = '';
+  updateSummaryTotals();
 }
 
 window.addEventListener('scroll', () => {
@@ -826,11 +998,16 @@ function openCheckout() {
     </div>
   `).join('');
 
-  const { subtotal, tva, shipping, total } = computeTotals();
+  const { subtotal, discount, tva, shipping, total } = computeTotals();
+  let discountModalLine = '';
+  if (discount > 0 && _appliedPromo) {
+    const lbl = _appliedPromo.type === 'percent' ? `-${_appliedPromo.value}%` : `-${_appliedPromo.value.toFixed(2)} €`;
+    discountModalLine = `<div class="summary-line-muted" style="color:var(--green)"><span>Code ${_appliedPromo.code} (${lbl})</span><span>−${discount.toFixed(2)} €</span></div>`;
+  }
   document.getElementById('coSummaryLines').innerHTML = `
     <div class="summary-line-muted"><span>Sous-total HT</span><span>${subtotal.toFixed(2)} €</span></div>
     <div class="summary-line-muted"><span>TVA (20%)</span><span>${tva.toFixed(2)} €</span></div>
-    <div class="summary-line-muted"><span>Livraison</span><span>${shipping.toFixed(2)} €</span></div>
+    <div class="summary-line-muted"><span>Livraison</span><span>${shipping.toFixed(2)} €</span></div>${discountModalLine}
   `;
   document.getElementById('coTotal').textContent = total.toFixed(2) + ' €';
 
@@ -948,7 +1125,6 @@ async function saveOrderToFirebase(items, source, addr) {
     const app = getApps().length ? getApps()[0] : initializeApp(fbCfg);
     const db = getFirestore(app);
 
-    const total = items.reduce((s,i) => s + parseFloat(i.price||0)*parseInt(i.qty||1), 0);
     const orderItems = items.map(i => ({
       id: i.id || '',
       name: i.name || '',
@@ -969,6 +1145,7 @@ async function saveOrderToFirebase(items, source, addr) {
       image: i.image || null,
     }));
 
+    const { subtotal, discount, tva, shipping, total: totalTTC } = computeTotals();
     const orderDoc = {
       createdAt: new Date(),
       status: 'initié',
@@ -983,7 +1160,13 @@ async function saveOrderToFirebase(items, source, addr) {
         phone: addr.phone || '',
       } : { name:'', email:'', address:'', city:'', zip:'', country:'', phone:'' },
       items: orderItems,
-      total: parseFloat(total.toFixed(2)),
+      total: parseFloat(totalTTC.toFixed(2)),
+      ...((_appliedPromo && discount > 0) ? {
+        promoCode: _appliedPromo.code,
+        promoType: _appliedPromo.type,
+        promoValue: _appliedPromo.value,
+        promoDiscount: discount,
+      } : {}),
     };
 
     const ref = await addDoc(collection(db, 'commandes'), orderDoc);
@@ -1244,7 +1427,7 @@ TBTCart.init().then(function() {
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#8bffe9ffb9bbb8a5e8e4e5ffeae8ffcbece6eae2e7a5e8e4e6"><span class="__cf_email__" data-cfemail="d7a3b5a3e5e7e4f9b4b8b9a3b6b4a397b0bab6bebbf9b4b8ba">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
@@ -1262,5 +1445,10 @@ TBTCart.init().then(function() {
     </span>
   </div>
 </footer>
+
+<script>
+  document.getElementById('footerYear').textContent = new Date().getFullYear();
+</script>
+
 </body>
 </html>

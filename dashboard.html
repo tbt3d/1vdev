@@ -481,6 +481,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
     Config Panier
   </button>
+  <button class="nav-item" onclick="goPage('promos',this)" id="navPromos">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    Codes Promo
+  </button>
   <button class="nav-item" onclick="goPage('devis-cfg',this)" id="navDevisCfg">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
     Config Devis
@@ -1144,6 +1148,137 @@ tr:hover td{background:rgba(255,255,255,.01)}
           <button class="btn btn-a" onclick="savePanierCfg()" style="font-size:12px;flex:1;justify-content:center" id="btnSavePanierCfg">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
             Enregistrer la configuration
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CODES PROMO ── -->
+  <div class="page" id="page-promos" style="overflow:hidden">
+    <div class="topbar">
+      <div class="topbar-title">Codes Promo</div>
+      <div class="topbar-right">
+        <div class="sync-indicator"><div class="sync-dot"></div>Firestore</div>
+        <button class="btn btn-a" onclick="openPromoModal()" style="font-size:12px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nouveau code
+        </button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:24px 28px 40px;display:flex;flex-direction:column;gap:16px">
+      <!-- Stats -->
+      <div id="promoStatsRow" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"></div>
+      <!-- Filtres -->
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <input id="promoSearch" type="text" placeholder="🔍 Rechercher un code…" oninput="filterPromos()"
+          style="flex:1;min-width:200px;padding:9px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none;transition:border-color .2s">
+        <select id="promoFilterStatus" onchange="filterPromos()"
+          style="padding:9px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none">
+          <option value="">Tous les statuts</option>
+          <option value="active">Actifs</option>
+          <option value="inactive">Désactivés</option>
+          <option value="expired">Expirés</option>
+        </select>
+        <select id="promoFilterType" onchange="filterPromos()"
+          style="padding:9px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none">
+          <option value="">Tous les types</option>
+          <option value="percent">% Pourcentage</option>
+          <option value="fixed">€ Montant fixe</option>
+        </select>
+      </div>
+      <!-- Table -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Codes promo</span>
+          <span id="promoCount" style="font-size:10px;color:var(--soft);font-family:var(--mono)"></span>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>CODE</th><th>TYPE</th><th>VALEUR</th><th>MIN COMMANDE</th>
+                <th>UTILISATIONS</th><th>EXPIRATION</th><th>STATUT</th><th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="promoTableBody">
+              <tr><td colspan="8" style="text-align:center;color:var(--soft);padding:32px 0">
+                <div style="width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;margin:0 auto 12px"></div>
+                Chargement…
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL PROMO ── -->
+  <div id="promoModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.82);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 40px 80px rgba(0,0,0,.6);position:relative">
+      <div style="padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:16px;font-weight:700;letter-spacing:-.01em" id="promoModalTitle">Nouveau code promo</div>
+          <div style="font-size:10px;color:var(--soft);font-family:var(--mono);margin-top:2px">Firestore · collection <span style="color:var(--accent)">promoCodes</span></div>
+        </div>
+        <button onclick="closePromoModal()" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--border2);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:18px;transition:all .15s">×</button>
+      </div>
+      <div style="padding:24px 28px 28px;display:flex;flex-direction:column;gap:15px">
+        <div class="field"><label>Code <span style="color:var(--red)">*</span></label>
+          <input type="text" id="pmCode" placeholder="BIENVENUE10" maxlength="32"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9_\-]/g,'')"
+            style="font-family:var(--mono);font-weight:600;letter-spacing:.08em">
+          <div class="fhint">Lettres majuscules, chiffres, tirets uniquement.</div>
+        </div>
+        <div class="field"><label>Description (interne)</label>
+          <input type="text" id="pmDesc" placeholder="Ex: 10% pour nouveaux clients" maxlength="120">
+        </div>
+        <div class="frow">
+          <div class="field" style="margin-bottom:0"><label>Type <span style="color:var(--red)">*</span></label>
+            <select id="pmType" onchange="updatePromoPreview()">
+              <option value="percent">% Pourcentage</option>
+              <option value="fixed">€ Montant fixe</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0"><label>Valeur <span style="color:var(--red)">*</span></label>
+            <input type="number" id="pmValue" min="0.01" step="0.01" placeholder="10" oninput="updatePromoPreview()">
+          </div>
+        </div>
+        <div id="promoPreview" style="background:linear-gradient(135deg,rgba(46,204,138,.08),rgba(46,204,138,.04));border:1px solid rgba(46,204,138,.25);border-radius:10px;padding:11px 16px;font-size:12px;color:var(--green);font-family:var(--mono);display:none;align-items:center;gap:8px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="promoPreviewText"></span>
+        </div>
+        <div class="frow">
+          <div class="field" style="margin-bottom:0"><label>Commande minimum (€)</label>
+            <input type="number" id="pmMinOrder" min="0" step="0.01" placeholder="0">
+            <div class="fhint">0 = pas de minimum</div>
+          </div>
+          <div class="field" style="margin-bottom:0"><label>Max utilisations</label>
+            <input type="number" id="pmMaxUses" min="0" step="1" placeholder="0">
+            <div class="fhint">0 = illimité</div>
+          </div>
+        </div>
+        <div class="field"><label>Date d'expiration</label>
+          <input type="datetime-local" id="pmExpires">
+          <div class="fhint">Laisser vide = pas d'expiration</div>
+        </div>
+        <!-- Toggle actif -->
+        <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:13px 16px">
+          <div>
+            <div style="font-size:12px;font-weight:600">Activer le code</div>
+            <div style="font-size:10px;color:var(--soft);font-family:var(--mono);margin-top:1px">Visible et utilisable par les clients</div>
+          </div>
+          <div id="pmToggleWrap" onclick="togglePromoActive()" style="width:44px;height:24px;border-radius:12px;background:var(--green);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0">
+            <div id="pmToggleThumb" style="position:absolute;top:3px;left:23px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s,transform .1s;box-shadow:0 1px 4px rgba(0,0,0,.3)"></div>
+          </div>
+        </div>
+        <input type="hidden" id="pmActiveVal" value="true">
+        <div id="promoModalFeedback" style="display:none;padding:10px 14px;border-radius:10px;font-size:12px"></div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn btn-g" onclick="closePromoModal()" style="font-size:12px">Annuler</button>
+          <button class="btn btn-a" onclick="savePromo()" id="btnSavePromo" style="font-size:12px;flex:1;justify-content:center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg>
+            Enregistrer
           </button>
         </div>
       </div>
@@ -1841,6 +1976,7 @@ window.goPage = (id, btn) => {
   if(id==='panier-cfg') loadPanierCfg();
   if(id==='devis-cfg') loadDevisCfg();
   if(id==='analytics') loadAnalytics();
+  if(id==='promos') loadPromos();
 };
 
 // ── OVERVIEW ──
@@ -5184,6 +5320,296 @@ window.saveDevisCfg = async () => {
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer la configuration';
   }
+};
+
+// ═══════════════════════════════════════════════════════════
+// ── CODES PROMO ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+
+const PROMO_API = 'https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/promoCodes';
+const PROMO_API_KEY = 'AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8';
+
+let _allPromos = [];
+let _editingPromoId = null;
+
+function _pFromFS(fields) {
+  if (!fields) return {};
+  const r = {};
+  for (const [k, v] of Object.entries(fields)) {
+    if (v.stringValue !== undefined) r[k] = v.stringValue;
+    else if (v.integerValue !== undefined) r[k] = Number(v.integerValue);
+    else if (v.doubleValue !== undefined) r[k] = Number(v.doubleValue);
+    else if (v.booleanValue !== undefined) r[k] = v.booleanValue;
+    else if (v.nullValue !== undefined) r[k] = null;
+    else if (v.timestampValue !== undefined) r[k] = v.timestampValue;
+    else r[k] = null;
+  }
+  return r;
+}
+
+function _pToFS(obj) {
+  const fields = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === null || v === undefined) continue;
+    else if (typeof v === 'boolean') fields[k] = {booleanValue: v};
+    else if (typeof v === 'number') {
+      if (Number.isInteger(v)) fields[k] = {integerValue: v};
+      else fields[k] = {doubleValue: v};
+    }
+    else if (typeof v === 'string') {
+      if (/^\d{4}-\d{2}-\d{2}T/.test(v)) fields[k] = {timestampValue: v};
+      else fields[k] = {stringValue: v};
+    }
+  }
+  return { fields };
+}
+
+window.loadPromos = async function() {
+  try {
+    const res = await fetch(`${PROMO_API}?key=${PROMO_API_KEY}&pageSize=200`);
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    _allPromos = (data.documents || []).map(doc => {
+      const id = doc.name.split('/').pop();
+      return { id, ...(_pFromFS(doc.fields)) };
+    });
+    renderPromoStats();
+    filterPromos();
+  } catch(e) {
+    document.getElementById('promoTableBody').innerHTML = `
+      <tr><td colspan="8" style="text-align:center;color:var(--red);padding:32px 0">
+        ⚠ Impossible de charger les codes : ${e.message}
+      </td></tr>`;
+  }
+};
+
+function renderPromoStats() {
+  const now = new Date();
+  const total   = _allPromos.length;
+  const active  = _allPromos.filter(p => p.active !== false && (!p.expiresAt || new Date(p.expiresAt) > now)).length;
+  const expired = _allPromos.filter(p => p.expiresAt && new Date(p.expiresAt) <= now).length;
+  const uses    = _allPromos.reduce((s,p) => s + (p.usedCount || 0), 0);
+  const stats   = [
+    {label:'Total codes', val:total, color:'var(--blue)'},
+    {label:'Actifs', val:active, color:'var(--green)'},
+    {label:'Expirés', val:expired, color:'var(--red)'},
+    {label:'Utilisations', val:uses, color:'var(--orange)'},
+  ];
+  document.getElementById('promoStatsRow').innerHTML = stats.map(s => `
+    <div class="sc"><div class="sc-lbl">${s.label}</div>
+    <div class="sc-val" style="font-size:28px;color:${s.color}">${s.val}</div></div>`).join('');
+}
+
+window.filterPromos = function() {
+  const q  = (document.getElementById('promoSearch')?.value || '').toLowerCase();
+  const st = document.getElementById('promoFilterStatus')?.value || '';
+  const tp = document.getElementById('promoFilterType')?.value || '';
+  const now = new Date();
+  const filtered = _allPromos.filter(p => {
+    const matchQ = !q || p.id.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q);
+    const isExpired = p.expiresAt && new Date(p.expiresAt) <= now;
+    const isActive  = p.active !== false && !isExpired;
+    const matchSt = !st || (st==='active'&&isActive) || (st==='inactive'&&p.active===false&&!isExpired) || (st==='expired'&&isExpired);
+    const matchTp = !tp || p.type === tp;
+    return matchQ && matchSt && matchTp;
+  });
+  document.getElementById('promoCount').textContent = `${filtered.length} / ${_allPromos.length}`;
+  if (filtered.length === 0) {
+    document.getElementById('promoTableBody').innerHTML = `
+      <tr><td colspan="8" style="text-align:center;color:var(--soft);padding:36px 0;font-family:var(--mono);font-size:12px">Aucun code trouvé</td></tr>`;
+    return;
+  }
+  document.getElementById('promoTableBody').innerHTML = filtered.map(p => {
+    const now2 = new Date();
+    const isExpired = p.expiresAt && new Date(p.expiresAt) <= now2;
+    const isActive  = p.active !== false && !isExpired;
+    const badge = isExpired
+      ? '<span style="background:rgba(255,61,90,.15);color:var(--red);padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;font-family:var(--mono)">EXPIRÉ</span>'
+      : p.active !== false
+        ? '<span style="background:rgba(46,204,138,.15);color:var(--green);padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;font-family:var(--mono)">ACTIF</span>'
+        : '<span style="background:rgba(107,107,107,.15);color:var(--soft);padding:2px 8px;border-radius:6px;font-size:9px;font-weight:700;font-family:var(--mono)">DÉSACTIVÉ</span>';
+    const typeLabel = p.type==='percent'
+      ? '<span style="color:var(--purple);font-family:var(--mono)">%</span>'
+      : '<span style="color:var(--orange);font-family:var(--mono)">€</span>';
+    const valDisp = p.type==='percent' ? `<strong>${p.value}%</strong>` : `<strong>${(p.value||0).toFixed(2)} €</strong>`;
+    const minDisp = p.minOrder>0 ? `${p.minOrder.toFixed(2)} €` : '<span style="color:var(--muted)">—</span>';
+    const usesDisp = `${p.usedCount||0}${p.maxUses>0?' / '+p.maxUses:''}`;
+    const expDisp = p.expiresAt
+      ? `<span style="${isExpired?'color:var(--red)':''}">${new Date(p.expiresAt).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit'})}</span>`
+      : '<span style="color:var(--muted)">—</span>';
+    return `<tr>
+      <td><div style="font-family:var(--mono);font-weight:700;font-size:12px;color:var(--accent)">${p.id}</div>
+        ${p.description?`<div style="font-size:10px;color:var(--soft);margin-top:2px">${p.description}</div>`:''}
+      </td>
+      <td style="font-size:12px">${typeLabel} ${p.type==='percent'?'Pourcent.':'Fixe'}</td>
+      <td style="font-size:13px">${valDisp}</td>
+      <td style="font-size:12px">${minDisp}</td>
+      <td style="font-size:12px;font-family:var(--mono)">${usesDisp}</td>
+      <td style="font-size:11px">${expDisp}</td>
+      <td>${badge}</td>
+      <td><div style="display:flex;gap:5px">
+        <button onclick="editPromo('${p.id}')" title="Modifier" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button onclick="togglePromoStatus('${p.id}',${isActive})" title="${isActive?'Désactiver':'Activer'}" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;cursor:pointer;transition:all .15s">
+          ${isActive
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px;color:var(--red)"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px;color:var(--green)"><polyline points="20 6 9 17 4 12"/></svg>'}
+        </button>
+        <button onclick="deletePromo('${p.id}')" title="Supprimer" style="display:flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;cursor:pointer;transition:all .15s" onmouseover="this.style.background='rgba(255,61,90,.15)';this.style.borderColor='var(--red)'" onmouseout="this.style.background='var(--bg3)';this.style.borderColor='var(--border2)'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:11px;height:11px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+        </button>
+      </div></td>
+    </tr>`;
+  }).join('');
+};
+
+window.openPromoModal = function() {
+  _editingPromoId = null;
+  document.getElementById('promoModalTitle').textContent = 'Nouveau code promo';
+  ['pmCode','pmDesc','pmValue','pmMinOrder','pmMaxUses','pmExpires'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.disabled = false; }
+  });
+  document.getElementById('pmType').value = 'percent';
+  document.getElementById('pmActiveVal').value = 'true';
+  _setPromoToggle(true);
+  document.getElementById('promoPreview').style.display = 'none';
+  document.getElementById('promoModalFeedback').style.display = 'none';
+  document.getElementById('promoModal').style.display = 'flex';
+};
+
+window.editPromo = function(id) {
+  const p = _allPromos.find(x => x.id === id);
+  if (!p) return;
+  _editingPromoId = id;
+  document.getElementById('promoModalTitle').textContent = 'Modifier — ' + id;
+  document.getElementById('pmCode').value = p.id;
+  document.getElementById('pmCode').disabled = true;
+  document.getElementById('pmDesc').value = p.description || '';
+  document.getElementById('pmType').value = p.type || 'percent';
+  document.getElementById('pmValue').value = p.value || '';
+  document.getElementById('pmMinOrder').value = p.minOrder > 0 ? p.minOrder : '';
+  document.getElementById('pmMaxUses').value = p.maxUses > 0 ? p.maxUses : '';
+  if (p.expiresAt) {
+    const d = new Date(p.expiresAt);
+    const pad = n => String(n).padStart(2,'0');
+    document.getElementById('pmExpires').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } else document.getElementById('pmExpires').value = '';
+  const isActive = p.active !== false;
+  document.getElementById('pmActiveVal').value = String(isActive);
+  _setPromoToggle(isActive);
+  updatePromoPreview();
+  document.getElementById('promoModalFeedback').style.display = 'none';
+  document.getElementById('promoModal').style.display = 'flex';
+};
+
+window.closePromoModal = function() {
+  document.getElementById('promoModal').style.display = 'none';
+  _editingPromoId = null;
+};
+
+window.togglePromoActive = function() {
+  const cur = document.getElementById('pmActiveVal').value === 'true';
+  _setPromoToggle(!cur);
+};
+
+function _setPromoToggle(active) {
+  document.getElementById('pmActiveVal').value = String(active);
+  const wrap = document.getElementById('pmToggleWrap');
+  const thumb = document.getElementById('pmToggleThumb');
+  if (!wrap || !thumb) return;
+  wrap.style.background = active ? 'var(--green)' : 'var(--border2)';
+  thumb.style.left = active ? '23px' : '3px';
+}
+
+window.updatePromoPreview = function() {
+  const type = document.getElementById('pmType').value;
+  const val  = parseFloat(document.getElementById('pmValue').value) || 0;
+  const prev = document.getElementById('promoPreview');
+  const text = document.getElementById('promoPreviewText');
+  if (!prev || !val || val <= 0) { if(prev) prev.style.display='none'; return; }
+  prev.style.display = 'flex';
+  text.textContent = type==='percent'
+    ? `Réduction de ${val}% — ex: commande 100 € → total ${(100*(1-val/100)).toFixed(2)} €`
+    : `Réduction fixe de ${val.toFixed(2)} € sur la commande`;
+};
+
+window.savePromo = async function() {
+  const btn = document.getElementById('btnSavePromo');
+  const fb  = document.getElementById('promoModalFeedback');
+  const code = (document.getElementById('pmCode').value || '').trim().toUpperCase();
+  const desc = (document.getElementById('pmDesc').value || '').trim();
+  const type = document.getElementById('pmType').value;
+  const value = parseFloat(document.getElementById('pmValue').value);
+  const minOrder = parseFloat(document.getElementById('pmMinOrder').value) || 0;
+  const maxUses  = parseInt(document.getElementById('pmMaxUses').value) || 0;
+  const expiresRaw = document.getElementById('pmExpires').value;
+  const active = document.getElementById('pmActiveVal').value === 'true';
+
+  if (!code) return _promoFbErr(fb, 'Le code est obligatoire.');
+  if (!/^[A-Z0-9_\-]{1,32}$/.test(code)) return _promoFbErr(fb, 'Code invalide (maj, chiffres, tirets).');
+  if (isNaN(value) || value <= 0) return _promoFbErr(fb, 'La valeur doit être > 0.');
+  if (type==='percent' && value>100) return _promoFbErr(fb, 'Pourcentage max : 100%.');
+
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div>';
+  fb.style.display = 'none';
+
+  const existingCount = _editingPromoId ? (_allPromos.find(p=>p.id===_editingPromoId)?.usedCount||0) : 0;
+  const docData = { type, value, description:desc, active, minOrder, maxUses, usedCount:existingCount };
+  if (expiresRaw) docData.expiresAt = new Date(expiresRaw).toISOString();
+
+  try {
+    const url = `${PROMO_API}/${encodeURIComponent(code)}?key=${PROMO_API_KEY}`;
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(_pToFS(docData)),
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || res.status); }
+    toast(_editingPromoId ? `Code ${code} modifié ✓` : `Code ${code} créé ✓`);
+    closePromoModal();
+    await loadPromos();
+  } catch(e) {
+    _promoFbErr(fb, 'Erreur : ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer';
+  }
+};
+
+function _promoFbErr(fb, msg) {
+  fb.style.cssText = 'display:block;padding:10px 14px;border-radius:10px;font-size:12px;background:rgba(255,61,90,.1);color:var(--red);border:1px solid rgba(255,61,90,.2)';
+  fb.textContent = '⚠ ' + msg;
+  const btn = document.getElementById('btnSavePromo');
+  btn.disabled = false;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer';
+}
+
+window.togglePromoStatus = async function(id, isCurrentlyActive) {
+  const p = _allPromos.find(x => x.id===id);
+  if (!p) return;
+  const newActive = !isCurrentlyActive;
+  try {
+    const url = `${PROMO_API}/${encodeURIComponent(id)}?key=${PROMO_API_KEY}&updateMask.fieldPaths=active`;
+    const res = await fetch(url, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({fields:{active:{booleanValue:newActive}}}) });
+    if (!res.ok) throw new Error(res.status);
+    p.active = newActive;
+    toast(`Code ${id} ${newActive?'activé':'désactivé'} ✓`);
+    renderPromoStats(); filterPromos();
+  } catch(e) { toast('Erreur : ' + e.message); }
+};
+
+window.deletePromo = async function(id) {
+  if (!confirm(`Supprimer définitivement le code « ${id} » ?\nCette action est irréversible.`)) return;
+  try {
+    const res = await fetch(`${PROMO_API}/${encodeURIComponent(id)}?key=${PROMO_API_KEY}`, { method:'DELETE' });
+    if (!res.ok) throw new Error(res.status);
+    _allPromos = _allPromos.filter(p => p.id !== id);
+    toast(`Code ${id} supprimé`);
+    renderPromoStats(); filterPromos();
+  } catch(e) { toast('Erreur : ' + e.message); }
 };
 
 </script>
