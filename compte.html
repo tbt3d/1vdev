@@ -202,6 +202,7 @@
 .btn-delete-account{padding:11px 20px;background:none;color:#e33;border:1.5px solid rgba(230,50,50,.3);border-radius:10px;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
 .btn-delete-account:hover{background:rgba(230,50,50,.06);border-color:#e33}
 .danger-zone{background:rgba(230,50,50,.02);border-color:rgba(230,50,50,.15)!important}
+.addr-autofill-badge{display:none;align-items:center;gap:6px;margin-top:10px;padding:7px 12px;background:rgba(46,204,138,.08);border:1px solid rgba(46,204,138,.25);border-radius:8px;font-size:11px;color:#1a9e66;font-family:'JetBrains Mono',monospace}
 .loading-spinner{display:flex;align-items:center;justify-content:center;padding:60px;gap:12px;color:#bbb;font-size:12px;font-family:'JetBrains Mono',monospace}
 .spin{width:28px;height:28px;border:2.5px solid #eee;border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -443,6 +444,25 @@
           <div class="auth-ok" id="profileOk" style="margin:0;flex:1"></div>
         </div>
       </div>
+
+      <!-- Adresse de livraison -->
+      <div class="profile-card">
+        <div class="profile-card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Adresse de livraison
+        </div>
+        <div class="p-field"><label>Adresse</label><input class="p-input" type="text" id="pAddrLine1" placeholder="12 rue des Makers"></div>
+        <div class="p-grid2">
+          <div class="p-field"><label>Code postal</label><input class="p-input" type="text" id="pAddrZip" placeholder="59000"></div>
+          <div class="p-field"><label>Ville</label><input class="p-input" type="text" id="pAddrCity" placeholder="Lille"></div>
+        </div>
+        <div class="p-field"><label>Pays</label><input class="p-input" type="text" id="pAddrCountry" placeholder="France"></div>
+        <div class="addr-autofill-badge" id="addrAutofillBadge">✓ Rempli depuis votre dernière commande</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px">
+          <button class="btn-save-profile" onclick="saveAddress()">Enregistrer l'adresse</button>
+          <div class="auth-ok" id="addrOk" style="margin:0;flex:1"></div>
+        </div>
+      </div>
     </div>
 
     <!-- Panel: SÉCURITÉ -->
@@ -498,7 +518,7 @@
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#502432246260637e333f3e2431332410373d31393c7e333f3d"><span class="__cf_email__" data-cfemail="8ffbedfbbdbfbca1ece0e1fbeeecfbcfe8e2eee6e3a1ece0e2">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
@@ -516,7 +536,7 @@
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, deleteDoc, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, updatePassword, updateProfile, deleteUser } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -569,6 +589,10 @@ onAuthStateChanged(auth, async user => {
         document.getElementById('pNom').value    = nom;
         if (d.tel)   document.getElementById('pTel').value   = d.tel;
         if (d.ville) document.getElementById('pVille').value = d.ville;
+        if (d.addrLine1)   document.getElementById('pAddrLine1').value   = d.addrLine1;
+        if (d.addrZip)     document.getElementById('pAddrZip').value     = d.addrZip;
+        if (d.addrCity)    document.getElementById('pAddrCity').value    = d.addrCity;
+        if (d.addrCountry) document.getElementById('pAddrCountry').value = d.addrCountry;
 
         const av       = document.getElementById('userAvatar');
         const initials = ((prenom[0]||'')+(nom[0]||'')).toUpperCase() || user.email[0].toUpperCase();
@@ -752,6 +776,30 @@ async function loadOrders(uid) {
       });
     }
     spinner.style.display = 'none';
+
+    // ── Auto-remplissage adresse depuis la dernière commande payée ──
+    const addrFields = ['pAddrLine1','pAddrZip','pAddrCity','pAddrCountry'];
+    const hasAddr = addrFields.some(id => document.getElementById(id)?.value.trim());
+    if (!hasAddr) {
+      const paidOrder = rows.find(o => ['payé','expédié','livré'].includes(o.status));
+      if (paidOrder && paidOrder.client) {
+        const c = paidOrder.client;
+        const line1   = c.address || c.line1 || c.addrLine1 || '';
+        const zip     = c.zip     || c.addrZip || c.postalCode || '';
+        const city    = c.city    || c.addrCity || '';
+        const country = c.country || c.addrCountry || '';
+        if (line1 || zip || city) {
+          document.getElementById('pAddrLine1').value   = line1;
+          document.getElementById('pAddrZip').value     = zip;
+          document.getElementById('pAddrCity').value    = city;
+          document.getElementById('pAddrCountry').value = country;
+          const badge = document.getElementById('addrAutofillBadge');
+          if (badge) badge.style.display = 'flex';
+          const u = auth.currentUser;
+          if (u) setDoc(doc(db,'users',u.uid),{addrLine1:line1,addrZip:zip,addrCity:city,addrCountry:country},{merge:true}).catch(()=>{});
+        }
+      }
+    }
 
     if (rows.length === 0) {
       listEl.innerHTML =
@@ -945,6 +993,18 @@ window.saveProfile = async () => {
   setTimeout(()=>ok.style.display='none',3000);
 };
 
+// ── Save address ──
+window.saveAddress = async () => {
+  const user=auth.currentUser;
+  const addrLine1  =document.getElementById('pAddrLine1').value.trim();
+  const addrZip    =document.getElementById('pAddrZip').value.trim();
+  const addrCity   =document.getElementById('pAddrCity').value.trim();
+  const addrCountry=document.getElementById('pAddrCountry').value.trim();
+  await setDoc(doc(db,'users',user.uid),{addrLine1,addrZip,addrCity,addrCountry},{merge:true});
+  const ok=document.getElementById('addrOk'); ok.textContent='Adresse enregistrée ✓'; ok.style.display='block';
+  setTimeout(()=>ok.style.display='none',3000);
+};
+
 // ── Change password ──
 window.changePwd = async () => {
   const pwd=document.getElementById('newPwd').value, pwd2=document.getElementById('newPwd2').value;
@@ -977,12 +1037,13 @@ window.addEventListener('scroll', () => {
 });
 
 document.querySelectorAll('.nav-links a').forEach(a => {
-  if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
+  if (a.dataset.page && document.body.dataset.page === a.dataset.page) {
+    a.classList.add('active');
+  }
 });
 
 document.getElementById('footerYear').textContent = new Date().getFullYear();
-</script>
 
-<script src="/search.js"></script>
+</script>
 </body>
 </html>

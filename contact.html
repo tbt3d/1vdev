@@ -316,7 +316,7 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
         </div>
         <div>
           <div class="info-label">Email direct</div>
-          <div class="info-value"><a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a></div>
+          <div class="info-value"><a href="/cdn-cgi/l/email-protection#3b4f594f090b08155854554f5a584f7b5c565a525715585456"><span class="__cf_email__" data-cfemail="8df9eff9bfbdbea3eee2e3f9eceef9cdeae0ece4e1a3eee2e0">[email&#160;protected]</span></a></div>
         </div>
       </div>
       <div class="info-item">
@@ -481,7 +481,7 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#46322432747675682529283227253206212b272f2a6825292b"><span class="__cf_email__" data-cfemail="ed998f99dfdddec38e8283998c8e99ad8a808c8481c38e8280">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
             <div class="footer-social">
         <a href="https://www.instagram.com/tbt3d_/" aria-label="Instagram" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></a>
@@ -494,7 +494,7 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 document.getElementById('footerYear').textContent = new Date().getFullYear();
 document.querySelectorAll('.nav-links a').forEach(function(a) {
   if (a.dataset.page === document.body.dataset.page) a.classList.add('active');
@@ -502,17 +502,238 @@ document.querySelectorAll('.nav-links a').forEach(function(a) {
 window.addEventListener('scroll', function() {
   document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
 });
+/* ── Navbar ── */
 function toggleSearch() {
   var b = document.getElementById('searchBar');
   b.classList.toggle('open');
   if (b.classList.contains('open')) setTimeout(function(){ document.getElementById('searchInput').focus(); }, 50);
 }
-function toggleMobileNav() {
-  document.getElementById('mobileNav').classList.toggle('open');
+function searchLive() {
+  var q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!q) return;
+  window.location.href = '/boutique.html?q=' + encodeURIComponent(q);
 }
-window.addEventListener('resize', function(){
-  if (window.innerWidth > 768) document.getElementById('mobileNav').classList.remove('open');
+function searchKeydown(e) { if (e.key === 'Enter') searchLive(); }
+function toggleMobileNav() { document.getElementById('mobileNav').classList.toggle('open'); }
+
+/* ── Subject chips ── */
+document.querySelectorAll('.s-chip').forEach(function(chip) {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.s-chip').forEach(function(c){ c.classList.remove('on'); });
+    chip.classList.add('on');
+    document.getElementById('orderField').style.display =
+      chip.dataset.v === 'commande' ? 'block' : 'none';
+  });
 });
+
+/* ── Compteur caractères ── */
+function updateCounter(el) {
+  var c = document.getElementById('charCounter');
+  c.textContent = el.value.length + ' / 2000';
+  c.classList.toggle('warn', el.value.length > 1800);
+}
+
+/* ── File drag & drop ── */
+var _attachedFile = null;
+
+function dragOver(e) { e.preventDefault(); document.getElementById('fileDrop').classList.add('dragover'); }
+function dragLeave(e) { document.getElementById('fileDrop').classList.remove('dragover'); }
+function dropFile(e) {
+  e.preventDefault();
+  document.getElementById('fileDrop').classList.remove('dragover');
+  var files = e.dataTransfer.files;
+  if (files.length) handleFile(files[0]);
+}
+
+function handleFile(file) {
+  if (!file) return;
+  var maxSize = 10 * 1024 * 1024;
+  if (file.size > maxSize) { alert('Fichier trop volumineux (max 10 Mo)'); return; }
+  _attachedFile = file;
+  var list = document.getElementById('fileList');
+  var size = (file.size / 1024).toFixed(0) + ' Ko';
+  list.innerHTML = '<div class="file-item">📎 <span>' + file.name + ' — ' + size + '</span><span class="file-rm" onclick="removeFile()">×</span></div>';
+  document.getElementById('fileDrop').style.display = 'none';
+}
+
+function removeFile() {
+  _attachedFile = null;
+  document.getElementById('fileList').innerHTML = '';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('fileDrop').style.display = '';
+}
+
+/* ── Upload Cloudinary ── */
+async function uploadToCloudinary(file) {
+  var CLOUD_NAME = 'dqwmxzpfk';
+  var UPLOAD_PRESET = 'tbt3d_contacts';
+  var fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  var res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUD_NAME + '/auto/upload', { method: 'POST', body: fd });
+  if (!res.ok) throw new Error('Upload échoué');
+  var data = await res.json();
+  return data.secure_url;
+}
+
+/* ── Connexion Firebase ── */
+var _fbCfg = {
+  apiKey: 'AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8',
+  authDomain: 'tbt3d-a0f04.firebaseapp.com',
+  projectId: 'tbt3d-a0f04',
+  storageBucket: 'tbt3d-a0f04.firebasestorage.app',
+  appId: '1:10842592812:web:f06cbd6c6892f29a6ca389'
+};
+
+/* ── Pré-remplir si connecté ── */
+(async function() {
+  try {
+    var { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    var { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+    var app = getApps().length ? getApps()[0] : initializeApp(_fbCfg);
+    var auth = getAuth(app);
+    onAuthStateChanged(auth, function(user) {
+      if (!user) return;
+      var hint = document.getElementById('userHint');
+      var txt  = document.getElementById('userHintTxt');
+      if (hint && txt) {
+        txt.textContent = 'Connecté en tant que ' + (user.displayName || user.email);
+        hint.classList.add('show');
+      }
+      if (user.email && document.getElementById('fEmail')) document.getElementById('fEmail').value = user.email;
+      if (user.displayName) {
+        var parts = user.displayName.split(' ');
+        if (document.getElementById('fPrenom')) document.getElementById('fPrenom').value = parts[0] || '';
+        if (document.getElementById('fNom') && parts.length > 1) document.getElementById('fNom').value = parts.slice(1).join(' ');
+      }
+    });
+  } catch(e) { /* pas connecté ou SDK bloqué */ }
+})();
+
+/* ── Envoi du formulaire ── */
+async function sendContact() {
+  var btn = document.getElementById('submitBtn');
+
+  // Récupérer les valeurs
+  var prenom  = (document.getElementById('fPrenom').value || '').trim();
+  var nom     = (document.getElementById('fNom').value || '').trim();
+  var email   = (document.getElementById('fEmail').value || '').trim();
+  var tel     = (document.getElementById('fTel').value || '').trim();
+  var msg     = (document.getElementById('fMsg').value || '').trim();
+  var order   = (document.getElementById('fOrder').value || '').trim();
+  var chip    = document.querySelector('.s-chip.on');
+  var subject = chip ? chip.dataset.v : 'autre';
+
+  // Validation
+  var errors = [];
+  if (!prenom) errors.push('fPrenom');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('fEmail');
+  if (!msg || msg.length < 10) errors.push('fMsg');
+
+  // Reset styles
+  document.querySelectorAll('.f-input').forEach(function(el){ el.style.borderColor = ''; });
+
+  if (errors.length) {
+    errors.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.style.borderColor = '#e11d48';
+        el.style.animation = 'shake .3s ease';
+        setTimeout(function(){ el.style.animation = ''; }, 300);
+      }
+    });
+    document.getElementById(errors[0]).focus();
+    return;
+  }
+
+  // Loading state
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Envoi en cours…';
+
+  try {
+    // 1. Upload fichier si présent
+    var fileUrl = null;
+    if (_attachedFile) {
+      try {
+        fileUrl = await uploadToCloudinary(_attachedFile);
+      } catch(e) {
+        console.warn('Upload fichier échoué:', e.message);
+        // On continue sans le fichier plutôt que bloquer l'envoi
+      }
+    }
+
+    // 2. Sauvegarder dans Firestore
+    var { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+    var { getFirestore, addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    var app = getApps().length ? getApps()[0] : initializeApp(_fbCfg);
+    var db  = getFirestore(app);
+
+    var docData = {
+      createdAt: new Date(),
+      status: 'nouveau',
+      subject: subject,
+      name: (prenom + ' ' + nom).trim(),
+      email: email,
+      phone: tel || null,
+      message: msg,
+      orderRef: order || null,
+      fileUrl: fileUrl || null,
+      fileName: _attachedFile ? _attachedFile.name : null,
+      source: 'contact-form',
+    };
+
+    await addDoc(collection(db, 'messages'), docData);
+
+    // 3. Afficher l'écran de succès
+    document.getElementById('formContent').style.display = 'none';
+    document.getElementById('successScreen').style.display = 'block';
+
+  } catch(e) {
+    console.error('Erreur envoi:', e);
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Réessayer';
+    // Afficher l'erreur sous le bouton
+    var errEl = document.getElementById('sendError');
+    if (!errEl) {
+      errEl = document.createElement('p');
+      errEl.id = 'sendError';
+      errEl.style.cssText = 'font-size:12px;color:#e11d48;text-align:center;margin-top:10px;font-family:JetBrains Mono,monospace';
+      btn.parentNode.appendChild(errEl);
+    }
+    errEl.textContent = '⚠ Erreur : ' + e.message + '. Contactez-nous directement par email.';
+  }
+}
+
+/* ── Reset formulaire ── */
+function resetForm() {
+  document.getElementById('successScreen').style.display = 'none';
+  document.getElementById('formContent').style.display = 'block';
+  document.getElementById('fPrenom').value = '';
+  document.getElementById('fNom').value = '';
+  document.getElementById('fEmail').value = '';
+  document.getElementById('fTel').value = '';
+  document.getElementById('fMsg').value = '';
+  document.getElementById('fOrder').value = '';
+  document.getElementById('charCounter').textContent = '0 / 2000';
+  removeFile();
+  document.querySelectorAll('.s-chip').forEach(function(c){ c.classList.remove('on'); });
+  document.querySelector('.s-chip[data-v="commande"]').classList.add('on');
+  document.getElementById('orderField').style.display = 'none';
+  var errEl = document.getElementById('sendError');
+  if (errEl) errEl.remove();
+}
+
+/* ── Badge panier ── */
+(function() {
+  try {
+    if (typeof TBTCart !== 'undefined') {
+      var items = TBTCart.load();
+      var count = items.reduce(function(s,i){ return s + i.qty; }, 0);
+      var badge = document.getElementById('navCartBadge');
+      if (badge) badge.style.display = count > 0 ? 'block' : 'none';
+    }
+  } catch(e){}
+})();
 </script>
 </body>
 </html>
