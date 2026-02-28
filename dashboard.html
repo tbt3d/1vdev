@@ -451,6 +451,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
     Utilisateurs
     <span class="nb nb-b" id="usersBadge2" style="display:none">0</span>
   </button>
+  <button class="nav-item" onclick="goPage('analytics',this)" id="navAnalytics">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Analytiques
+  </button>
 
   <div class="sb-section">Site</div>
   <a href="index.html" target="_blank" class="nav-item">
@@ -1320,6 +1324,164 @@ tr:hover td{background:rgba(255,255,255,.01)}
 
   </div>
 
+  <!-- ═══ PAGE ANALYTIQUES ═══ -->
+  <div class="page" id="page-analytics">
+    <div class="topbar">
+      <div class="topbar-title">Analytiques — Trafic &amp; vues</div>
+      <div class="topbar-right">
+        <div class="sync-indicator"><div class="sync-dot"></div>Firebase temps réel</div>
+        <button class="btn btn-g" onclick="loadAnalytics()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Actualiser
+        </button>
+        <button class="btn btn-p" onclick="showTrackingSnippet()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Snippet de tracking
+        </button>
+      </div>
+    </div>
+    <div class="ps" style="flex:1;overflow-y:auto">
+
+      <!-- Info banner -->
+      <div style="background:rgba(155,114,255,.08);border:1px solid rgba(155,114,255,.2);border-radius:var(--r);padding:10px 14px;margin-bottom:20px;font-size:11px;color:rgba(155,114,255,.9);display:flex;align-items:center;gap:8px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Les données de vues sont collectées via le snippet de tracking à intégrer dans chaque page de ton site. Clique sur "Snippet de tracking" pour l'obtenir.
+      </div>
+
+      <!-- Période filtre -->
+      <div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:11px;color:var(--muted);font-family:var(--mono)">Période :</span>
+        <button class="cmd-chip on" id="anPeriod7" onclick="setAnPeriod(7,this)">7 jours</button>
+        <button class="cmd-chip" id="anPeriod30" onclick="setAnPeriod(30,this)">30 jours</button>
+        <button class="cmd-chip" id="anPeriod90" onclick="setAnPeriod(90,this)">3 mois</button>
+        <button class="cmd-chip" id="anPeriodAll" onclick="setAnPeriod(0,this)">Tout</button>
+      </div>
+
+      <!-- KPI Stats row -->
+      <div class="stats-row" style="margin-bottom:14px">
+        <div class="sc">
+          <div class="sc-lbl">Vues totales<div class="sc-ico" style="background:rgba(255,107,53,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div></div>
+          <div class="sc-val" id="anTotalViews">—</div>
+          <div class="sc-sub">visites enregistrées</div>
+          <div class="sc-trend up" id="anViewsTrend" style="display:none">↑ +0%</div>
+        </div>
+        <div class="sc">
+          <div class="sc-lbl">Visiteurs uniques<div class="sc-ico" style="background:rgba(46,204,138,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div></div>
+          <div class="sc-val" id="anUniqueVisitors">—</div>
+          <div class="sc-sub">sessions distinctes</div>
+        </div>
+        <div class="sc">
+          <div class="sc-lbl">Page la plus vue<div class="sc-ico" style="background:rgba(77,166,255,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div></div>
+          <div class="sc-val" id="anTopPageVal" style="font-size:18px">—</div>
+          <div class="sc-sub" id="anTopPageCount">0 vues</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px">
+        <div class="sc">
+          <div class="sc-lbl">Vues aujourd'hui<div class="sc-ico" style="background:rgba(245,166,35,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div></div>
+          <div class="sc-val" id="anToday">—</div>
+          <div class="sc-sub">ce jour</div>
+        </div>
+        <div class="sc">
+          <div class="sc-lbl">Vues cette semaine<div class="sc-ico" style="background:rgba(155,114,255,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div></div>
+          <div class="sc-val" id="anThisWeek">—</div>
+          <div class="sc-sub">7 derniers jours</div>
+        </div>
+        <div class="sc">
+          <div class="sc-lbl">Moy. vues/jour<div class="sc-ico" style="background:rgba(77,166,255,.1)"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div></div>
+          <div class="sc-val" id="anAvgPerDay">—</div>
+          <div class="sc-sub">sur la période</div>
+        </div>
+      </div>
+
+      <!-- Graphe vues par jour -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-head">
+          <div class="card-title">Vues par jour</div>
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)" id="anChartLabel">30 derniers jours</span>
+        </div>
+        <div style="padding:20px">
+          <div id="anChart" style="height:140px;display:flex;align-items:flex-end;gap:3px;overflow:hidden"></div>
+          <div id="anChartDates" style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:var(--muted);font-family:var(--mono)"></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <!-- Pages les plus visitées -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Pages les plus visitées</div>
+          </div>
+          <div style="padding:16px 20px" id="anTopPages">
+            <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Chargement…</div>
+          </div>
+        </div>
+
+        <!-- Appareils -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Répartition des appareils</div>
+          </div>
+          <div style="padding:16px 20px" id="anDevices">
+            <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Chargement…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sources de trafic (referrers) -->
+      <div class="card" style="margin-top:14px">
+        <div class="card-head">
+          <div class="card-title">Sources de trafic (Referrers)</div>
+        </div>
+        <div style="padding:16px 20px" id="anReferrers">
+          <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Chargement…</div>
+        </div>
+      </div>
+
+      <!-- Dernières visites -->
+      <div class="card" style="margin-top:14px;margin-bottom:28px">
+        <div class="card-head">
+          <div class="card-title">Dernières visites</div>
+        </div>
+        <div class="card-body">
+          <table>
+            <thead><tr><th>Page</th><th>Appareil</th><th>Referrer</th><th>Date</th></tr></thead>
+            <tbody id="anRecentVisits"><tr><td colspan="4" style="text-align:center;color:var(--muted);font-size:11px;padding:16px 0">Chargement…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL SNIPPET TRACKING ═══ -->
+  <div id="snippetModal" onclick="if(event.target===this)closeSnippetModal()" style="display:none;position:fixed;inset:0;z-index:9100;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:700px;max-height:90vh;overflow-y:auto">
+      <div style="padding:22px 26px 18px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:1;border-radius:20px 20px 0 0">
+        <div>
+          <div style="font-size:15px;font-weight:700">Snippet de tracking</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--mono)">À coller dans le &lt;head&gt; de chaque page</div>
+        </div>
+        <button onclick="closeSnippetModal()" style="width:32px;height:32px;background:var(--bg3);border:1px solid var(--border2);border-radius:50%;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px">×</button>
+      </div>
+      <div style="padding:24px">
+        <div style="background:rgba(46,204,138,.07);border:1px solid rgba(46,204,138,.2);border-radius:8px;padding:10px 14px;margin-bottom:18px;font-size:11px;color:rgba(46,204,138,.9)">
+          ✓ Ce script envoie les données de chaque visite dans Firebase Firestore (collection <code style="font-family:var(--mono)">pageViews</code>) · Aucun cookie · RGPD-friendly
+        </div>
+        <div style="position:relative">
+          <pre id="snippetCode" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:16px;font-family:var(--mono);font-size:11px;color:var(--text);overflow-x:auto;white-space:pre;line-height:1.7;margin:0"></pre>
+          <button onclick="copySnippet()" style="position:absolute;top:10px;right:10px;padding:5px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--mono)" id="btnCopySnippet">Copier</button>
+        </div>
+        <div style="margin-top:18px;font-size:11px;color:var(--muted);line-height:1.9">
+          <strong style="color:var(--text)">Instructions :</strong><br>
+          1. Copie ce snippet et colle-le dans le <code style="font-family:var(--mono)">&lt;head&gt;</code> de chaque page HTML de ton site (index.html, boutique.html, contact.html, etc.)<br>
+          2. Les données apparaîtront automatiquement dans cet onglet Analytiques<br>
+          3. Le tracking respecte la vie privée — aucun cookie, aucune donnée personnelle
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ MODAL EDIT USER ═══ -->
   <div id="userModal" onclick="if(event.target===this)closeUserModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px">
     <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:500px;max-height:92vh;overflow-y:auto;position:relative;display:flex;flex-direction:column">
@@ -1671,6 +1833,7 @@ window.goPage = (id, btn) => {
   if(id==='commandes') loadCommandes();
   if(id==='panier-cfg') loadPanierCfg();
   if(id==='devis-cfg') loadDevisCfg();
+  if(id==='analytics') loadAnalytics();
 };
 
 // ── OVERVIEW ──
@@ -4620,6 +4783,319 @@ const DCFG_DEFAULTS = {
   minPrice: 5.00,
   delay: 5,
 };
+
+// ══════════════════════════════════════════════════════════════
+// ── ANALYTIQUES ───────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+
+let _anData = [];
+let _anPeriod = 30; // jours (0 = tout)
+
+window.setAnPeriod = (days, btn) => {
+  _anPeriod = days;
+  document.querySelectorAll('#anPeriod7,#anPeriod30,#anPeriod90,#anPeriodAll').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderAnalytics();
+};
+
+window.loadAnalytics = async () => {
+  document.getElementById('anTotalViews').textContent = '…';
+  document.getElementById('anUniqueVisitors').textContent = '…';
+  document.getElementById('anToday').textContent = '…';
+  document.getElementById('anThisWeek').textContent = '…';
+  document.getElementById('anAvgPerDay').textContent = '…';
+  try {
+    const q = query(collection(db, 'pageViews'), orderBy('timestamp', 'desc'));
+    const snap = await getDocs(q);
+    _anData = [];
+    snap.forEach(d => _anData.push({...d.data(), _id: d.id}));
+    renderAnalytics();
+    toast('Analytiques chargées ✓');
+  } catch(e) {
+    toast('Erreur analytiques : ' + e.message, true);
+    document.getElementById('anTotalViews').textContent = '—';
+    document.getElementById('anUniqueVisitors').textContent = '—';
+    document.getElementById('anToday').textContent = '—';
+    document.getElementById('anThisWeek').textContent = '—';
+    document.getElementById('anAvgPerDay').textContent = '—';
+    document.getElementById('anTopPages').innerHTML = '<div style="color:var(--red);font-size:11px;text-align:center;padding:16px">Erreur de chargement — vérifie les règles Firestore</div>';
+    document.getElementById('anRecentVisits').innerHTML = '<tr><td colspan="4" style="color:var(--red);font-size:11px;text-align:center;padding:16px">Erreur : ' + esc(e.message) + '</td></tr>';
+  }
+};
+
+function getAnFiltered() {
+  if (!_anPeriod) return _anData;
+  const cutoff = Date.now() - _anPeriod * 86400000;
+  return _anData.filter(v => {
+    const ts = v.timestamp?.seconds ? v.timestamp.seconds * 1000 : (v.timestamp || 0);
+    return ts >= cutoff;
+  });
+}
+
+function renderAnalytics() {
+  const data = getAnFiltered();
+  const now = Date.now();
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  const weekStart = now - 7 * 86400000;
+
+  // KPI
+  const total = data.length;
+  const unique = new Set(data.map(v => v.sessionId || v._id)).size;
+  const today = data.filter(v => {
+    const ts = v.timestamp?.seconds ? v.timestamp.seconds * 1000 : (v.timestamp || 0);
+    return ts >= todayStart.getTime();
+  }).length;
+  const week = data.filter(v => {
+    const ts = v.timestamp?.seconds ? v.timestamp.seconds * 1000 : (v.timestamp || 0);
+    return ts >= weekStart;
+  }).length;
+
+  // Period days count
+  let days = _anPeriod || 90;
+  if (!_anPeriod && data.length > 0) {
+    const oldest = Math.min(...data.map(v => v.timestamp?.seconds ? v.timestamp.seconds * 1000 : (v.timestamp || now)));
+    days = Math.max(1, Math.ceil((now - oldest) / 86400000));
+  }
+  const avg = total > 0 ? (total / days).toFixed(1) : '0';
+
+  document.getElementById('anTotalViews').textContent = total.toLocaleString('fr-FR');
+  document.getElementById('anUniqueVisitors').textContent = unique.toLocaleString('fr-FR');
+  document.getElementById('anToday').textContent = today.toLocaleString('fr-FR');
+  document.getElementById('anThisWeek').textContent = week.toLocaleString('fr-FR');
+  document.getElementById('anAvgPerDay').textContent = avg;
+
+  // Top page
+  const pageCounts = {};
+  data.forEach(v => {
+    const p = v.page || '/';
+    pageCounts[p] = (pageCounts[p] || 0) + 1;
+  });
+  const topPageEntries = Object.entries(pageCounts).sort((a,b) => b[1]-a[1]);
+  if (topPageEntries.length) {
+    const [topPage, topCount] = topPageEntries[0];
+    document.getElementById('anTopPageVal').textContent = topPage.replace(/^https?:\/\/[^\/]+/, '').substring(0, 16) || '/';
+    document.getElementById('anTopPageCount').textContent = topCount + ' vues';
+  } else {
+    document.getElementById('anTopPageVal').textContent = '—';
+    document.getElementById('anTopPageCount').textContent = '0 vues';
+  }
+
+  // Chart
+  renderAnChart(data, _anPeriod || 30);
+
+  // Top pages table
+  const topPagesEl = document.getElementById('anTopPages');
+  if (!topPageEntries.length) {
+    topPagesEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Aucune donnée</div>';
+  } else {
+    const maxCount = topPageEntries[0][1];
+    topPagesEl.innerHTML = topPageEntries.slice(0, 8).map(([page, count]) => {
+      const label = page.replace(/^https?:\/\/[^\/]+/, '') || '/';
+      const pct = Math.round((count / maxCount) * 100);
+      return `<div style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:12px;font-family:var(--mono);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%">${esc(label)}</span>
+          <span style="font-size:11px;font-weight:700;font-family:var(--mono);color:var(--accent);flex-shrink:0;margin-left:8px">${count}</span>
+        </div>
+        <div style="height:4px;background:var(--border2);border-radius:2px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .4s ease"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Devices
+  const deviceCounts = {desktop:0, mobile:0, tablet:0};
+  data.forEach(v => {
+    const d = (v.device || 'desktop').toLowerCase();
+    if (d.includes('mobile')) deviceCounts.mobile++;
+    else if (d.includes('tablet')) deviceCounts.tablet++;
+    else deviceCounts.desktop++;
+  });
+  const devTotal = Object.values(deviceCounts).reduce((a,b)=>a+b,0) || 1;
+  const devIcons = {desktop:'💻', mobile:'📱', tablet:'📲'};
+  const devColors = {desktop:'var(--blue)', mobile:'var(--green)', tablet:'var(--purple)'};
+  const devLabels = {desktop:'Desktop', mobile:'Mobile', tablet:'Tablette'};
+  document.getElementById('anDevices').innerHTML = Object.entries(deviceCounts).map(([type, count]) => {
+    const pct = Math.round((count / devTotal) * 100);
+    return `<div style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;font-weight:500">${devIcons[type]} ${devLabels[type]}</span>
+        <span style="font-size:11px;font-family:var(--mono);color:${devColors[type]};font-weight:700">${pct}% · ${count}</span>
+      </div>
+      <div style="height:4px;background:var(--border2);border-radius:2px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${devColors[type]};border-radius:2px;transition:width .4s ease"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Referrers
+  const refCounts = {};
+  data.forEach(v => {
+    let ref = v.referrer || '(direct)';
+    try { if (ref && ref !== '(direct)') ref = new URL(ref).hostname; } catch(e){}
+    if (!ref || ref === location.hostname) ref = '(direct)';
+    refCounts[ref] = (refCounts[ref] || 0) + 1;
+  });
+  const refEntries = Object.entries(refCounts).sort((a,b)=>b[1]-a[1]);
+  const maxRef = refEntries[0]?.[1] || 1;
+  document.getElementById('anReferrers').innerHTML = refEntries.length ? refEntries.slice(0,6).map(([ref, count]) => {
+    const pct = Math.round((count / maxRef) * 100);
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text)">${esc(ref)}</span>
+        <span style="font-size:11px;font-weight:700;font-family:var(--mono);color:var(--blue)">${count}</span>
+      </div>
+      <div style="height:4px;background:var(--border2);border-radius:2px"><div style="height:100%;width:${pct}%;background:var(--blue);opacity:.6;border-radius:2px"></div></div>
+    </div>`;
+  }).join('') : '<div style="color:var(--muted);font-size:12px;text-align:center;padding:16px">Aucune donnée</div>';
+
+  // Recent visits
+  const tbody = document.getElementById('anRecentVisits');
+  const recent = [...data].sort((a,b) => {
+    const ta = a.timestamp?.seconds ? a.timestamp.seconds*1000 : (a.timestamp||0);
+    const tb = b.timestamp?.seconds ? b.timestamp.seconds*1000 : (b.timestamp||0);
+    return tb - ta;
+  }).slice(0, 20);
+  if (!recent.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);font-size:11px;text-align:center;padding:16px">Aucune visite enregistrée</td></tr>';
+  } else {
+    tbody.innerHTML = recent.map(v => {
+      const ts = v.timestamp?.seconds ? v.timestamp.seconds*1000 : (v.timestamp || 0);
+      const date = ts ? new Date(ts).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+      const page = (v.page||'/').replace(/^https?:\/\/[^\/]+/,'') || '/';
+      let ref = v.referrer || '(direct)';
+      try { if (ref && ref !== '(direct)') ref = new URL(ref).hostname; } catch(e){}
+      if (!ref || ref === location.hostname) ref = '(direct)';
+      const dev = v.device || '—';
+      const devIcon = dev.toLowerCase().includes('mobile') ? '📱' : dev.toLowerCase().includes('tablet') ? '📲' : '💻';
+      return `<tr>
+        <td style="font-family:var(--mono);font-size:11px;color:var(--text)">${esc(page)}</td>
+        <td style="font-size:11px">${devIcon} ${esc(dev)}</td>
+        <td style="font-size:11px;color:var(--muted);font-family:var(--mono)">${esc(ref)}</td>
+        <td style="font-size:11px;color:var(--muted);font-family:var(--mono)">${date}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function renderAnChart(data, periodDays) {
+  const chartEl = document.getElementById('anChart');
+  const datesEl = document.getElementById('anChartDates');
+  if (!chartEl) return;
+  const days = Math.min(periodDays || 30, 60);
+  const buckets = {};
+  const labels = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    buckets[key] = 0;
+    labels.push(key);
+  }
+  data.forEach(v => {
+    const ts = v.timestamp?.seconds ? v.timestamp.seconds*1000 : (v.timestamp||0);
+    if (!ts) return;
+    const key = new Date(ts).toISOString().slice(0, 10);
+    if (key in buckets) buckets[key]++;
+  });
+  const vals = labels.map(k => buckets[k]);
+  const maxVal = Math.max(...vals, 1);
+  chartEl.innerHTML = vals.map((val, i) => {
+    const pct = Math.round((val / maxVal) * 100);
+    const d = new Date(labels[i]);
+    const today = new Date().toISOString().slice(0,10) === labels[i];
+    return `<div title="${labels[i]}: ${val} vue${val>1?'s':''}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer">
+      <div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-bottom:2px;opacity:${val>0?1:0}">${val||''}</div>
+      <div style="width:100%;height:${Math.max(pct,val>0?4:1)}%;background:${today?'var(--accent)':'rgba(255,107,53,0.5)'};border-radius:2px 2px 0 0;min-height:${val>0?'3px':'1px'};max-height:120px;transition:all .3s"></div>
+    </div>`;
+  }).join('');
+  // Date labels (first, mid, last)
+  const lbl = [labels[0], labels[Math.floor(days/2)], labels[days-1]];
+  datesEl.innerHTML = lbl.map(k => {
+    const d = new Date(k);
+    return `<span>${d.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})}</span>`;
+  }).join('');
+  document.getElementById('anChartLabel').textContent = `${days} derniers jours`;
+}
+
+window.showTrackingSnippet = () => {
+  // Build the snippet using the same Firebase config
+  const cfg = typeof firebaseConfig !== 'undefined' ? firebaseConfig : {};
+  const snippet = `<!-- TBT3D Analytics Tracker -->
+<script>
+(function() {
+  // Initialisation Firebase (même config que le dashboard)
+  const firebaseConfig = ${JSON.stringify(cfg, null, 2)};
+  
+  // Détection appareil
+  function getDevice() {
+    const ua = navigator.userAgent;
+    if (/tablet|ipad/i.test(ua)) return 'tablet';
+    if (/mobile|android|iphone/i.test(ua)) return 'mobile';
+    return 'desktop';
+  }
+  
+  // Session ID (sans cookies, 24h)
+  function getSessionId() {
+    const key = 'tbt3d_sid';
+    const now = Date.now();
+    let sid = sessionStorage.getItem(key);
+    if (!sid) { sid = Math.random().toString(36).slice(2) + now; sessionStorage.setItem(key, sid); }
+    return sid;
+  }
+  
+  // Envoyer la vue à Firestore via REST API
+  async function trackView() {
+    try {
+      const payload = {
+        fields: {
+          page:       { stringValue: location.href },
+          referrer:   { stringValue: document.referrer || '(direct)' },
+          device:     { stringValue: getDevice() },
+          sessionId:  { stringValue: getSessionId() },
+          timestamp:  { timestampValue: new Date().toISOString() },
+          userAgent:  { stringValue: navigator.userAgent.substring(0, 120) }
+        }
+      };
+      const projectId = firebaseConfig.projectId;
+      await fetch(
+        \`https://firestore.googleapis.com/v1/projects/\${projectId}/databases/(default)/documents/pageViews\`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+      );
+    } catch(e) { /* silencieux */ }
+  }
+  
+  // Tracker dès que la page est prête
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', trackView);
+  } else {
+    trackView();
+  }
+})();
+<\/script>`;
+  document.getElementById('snippetCode').textContent = snippet;
+  document.getElementById('snippetModal').style.display = 'flex';
+};
+
+window.closeSnippetModal = () => {
+  document.getElementById('snippetModal').style.display = 'none';
+};
+
+window.copySnippet = () => {
+  const code = document.getElementById('snippetCode').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById('btnCopySnippet');
+    btn.textContent = 'Copié ✓';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => { btn.textContent = 'Copier'; btn.style.background = 'var(--accent)'; }, 2000);
+  });
+};
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('snippetModal')?.style.display === 'flex') closeSnippetModal();
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 window.loadDevisCfg = async () => {
   try {
