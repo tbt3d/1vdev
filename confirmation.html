@@ -426,11 +426,21 @@ async function generateAndSaveFacture(stripeData, fbData, orderId) {
   });
   if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0);
 
+  const fbPromoCode = fbData?.promoCode || null;
+  const fbPromoDiscount = fbData?.promoDiscount ? parseFloat(fbData.promoDiscount) : 0;
+  const fbPromoType = fbData?.promoType || null;
+  const fbPromoValue = fbData?.promoValue || null;
+  const fbPromoLabel = fbPromoType === 'percent' ? `-${fbPromoValue}%` : (fbPromoValue ? `-${parseFloat(fbPromoValue).toFixed(2)} €` : '');
+  const promoLineHtml = (fbPromoCode && fbPromoDiscount > 0)
+    ? `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#16a34a;border-bottom:1px solid #e8e8e8;font-weight:500"><span>🎟 Code promo ${fbPromoCode}${fbPromoLabel ? ' ('+fbPromoLabel+')' : ''}</span><span>−${fbPromoDiscount.toFixed(2)} €</span></div>`
+    : '';
+
   const totalsHtml = subtotalAmt !== null ? `
     <div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total HT</span><span>${subtotalAmt.toFixed(2)} €</span></div>
     ${tvaAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>TVA (20%)</span><span>${tvaAmt.toFixed(2)} €</span></div>`:''}
     ${shippingAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Livraison</span><span>${shippingAmt.toFixed(2)} €</span></div>`:''}
-  ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${totalTTC.toFixed(2)} €</span></div>`;
+    ${promoLineHtml}
+  ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${totalTTC.toFixed(2)} €</span></div>${promoLineHtml}`;
 
   const countryLabel = CNAMES[(fb.country||'').toUpperCase()] || fb.country || '';
 
@@ -789,12 +799,20 @@ function displayConfirmation(data, orderId, fbData) {
   if (tvaAmt !== null || shippingAmt !== null) {
     subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0);
   }
+  const promoCode = fbData?.promoCode || null;
+  const promoDiscount = fbData?.promoDiscount ? parseFloat(fbData.promoDiscount) : 0;
+  const promoType = fbData?.promoType || null;
+  const promoValue = fbData?.promoValue || null;
+  const promoLabel = promoType === 'percent' ? `-${promoValue}%` : (promoValue ? `-${parseFloat(promoValue).toFixed(2)} €` : '');
+
   totalRows.innerHTML = subtotalAmt !== null ? `
     <div class="total-row"><span>Sous-total HT</span><span>${subtotalAmt.toFixed(2)} €</span></div>
     ${tvaAmt !== null ? `<div class="total-row"><span>TVA (20%)</span><span>${tvaAmt.toFixed(2)} €</span></div>` : ''}
     ${shippingAmt !== null ? `<div class="total-row"><span>Livraison</span><span>${shippingAmt.toFixed(2)} €</span></div>` : ''}
+    ${promoCode && promoDiscount > 0 ? `<div class="total-row" style="color:var(--green)"><span>🎟 Code promo ${promoCode}${promoLabel ? ' ('+promoLabel+')' : ''}</span><span>−${promoDiscount.toFixed(2)} €</span></div>` : ''}
     <div class="total-row main"><span>Total TTC payé</span><strong>${totalTTC.toFixed(2)} €</strong></div>
   ` : `
+    ${promoCode && promoDiscount > 0 ? `<div class="total-row" style="color:var(--green)"><span>🎟 Code promo ${promoCode}${promoLabel ? ' ('+promoLabel+')' : ''}</span><span>−${promoDiscount.toFixed(2)} €</span></div>` : ''}
     <div class="total-row main"><span>Total payé</span><strong>${totalTTC.toFixed(2)} €</strong></div>
   `;
 
@@ -904,11 +922,21 @@ window.downloadFacture = async function() {
       });
       if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0);
 
+      const dlPromoCode = fbData?.promoCode || null;
+      const dlPromoDiscount = fbData?.promoDiscount ? parseFloat(fbData.promoDiscount) : 0;
+      const dlPromoType = fbData?.promoType || null;
+      const dlPromoValue = fbData?.promoValue || null;
+      const dlPromoLabel = dlPromoType === 'percent' ? `-${dlPromoValue}%` : (dlPromoValue ? `-${parseFloat(dlPromoValue).toFixed(2)} €` : '');
+      const dlPromoLine = (dlPromoCode && dlPromoDiscount > 0)
+        ? `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#16a34a;border-bottom:1px solid #e8e8e8;font-weight:500"><span>🎟 Code promo ${dlPromoCode}${dlPromoLabel ? ' ('+dlPromoLabel+')' : ''}</span><span>−${dlPromoDiscount.toFixed(2)} €</span></div>`
+        : '';
+
       const totalsHtml = subtotalAmt !== null ? `
         <div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total HT</span><span>${subtotalAmt.toFixed(2)} €</span></div>
         ${tvaAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>TVA (20%)</span><span>${tvaAmt.toFixed(2)} €</span></div>`:''}
         ${shippingAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Livraison</span><span>${shippingAmt.toFixed(2)} €</span></div>`:''}
-      ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${totalTTC.toFixed(2)} €</span></div>`;
+        ${dlPromoLine}
+      ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${totalTTC.toFixed(2)} €</span></div>${dlPromoLine}`;
 
       const countryLabel = CNAMES[(c.client?.country||'').toUpperCase()] || c.client?.country || '';
 

@@ -2854,7 +2854,12 @@ function renderMsgList(searchTerm=''){
   let filtered=allMsgs.filter(m=>{
     if(msgFilter!=='all'&&m.status!==msgFilter) return false;
     if(subjectFilter!=='all'&&m.sujet!==subjectFilter) return false;
-    if(searchTerm){const hay=`${m.prenom} ${m.nom} ${m.email} ${m.message} ${m.sujet}`.toLowerCase();if(!hay.includes(searchTerm))return false;}
+    if(searchTerm){
+      // Compatibilité anciens messages (field "name") + nouveaux (prenom/nom)
+      const fullName = m.prenom ? `${m.prenom} ${m.nom||''}` : (m.name||'');
+      const hay=`${fullName} ${m.email} ${m.message} ${m.sujet||m.subject||''} ${m.titre||''}`.toLowerCase();
+      if(!hay.includes(searchTerm))return false;
+    }
     return true;
   });
   const ct=document.getElementById('msgListContainer');
@@ -2862,10 +2867,15 @@ function renderMsgList(searchTerm=''){
   ct.innerHTML=filtered.map(m=>{
     const date=m.createdAt?.toDate?m.createdAt.toDate().toLocaleDateString('fr-FR',{day:'2-digit',month:'short'}):'—';
     const sbadge={nouveau:`<span class="msg-status-badge msb-nouveau">Nouveau</span>`,lu:`<span class="msg-status-badge msb-lu">Lu</span>`,repondu:`<span class="msg-status-badge msb-repondu">Répondu</span>`}[m.status]||'';
-    const preview=(m.message||'').replace(/\n/g,' ').slice(0,70)+(m.message?.length>70?'…':'');
+    // Compatibilité anciens messages
+    const displayName = m.prenom ? `${esc(m.prenom)} ${esc(m.nom||'')}` : esc(m.name||'Inconnu');
+    const sujetLabel = SUBJ_LABELS[m.sujet||m.subject]||m.sujet||m.subject||'—';
+    const titre = m.titre ? `<div style="font-size:12px;font-weight:600;color:var(--text);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.titre)}</div>` : '';
+    const preview=(m.message||'').replace(/\n/g,' ').slice(0,60)+(m.message?.length>60?'…':'');
     return `<div class="msg-item ${m.status==='nouveau'?'unread':''} ${selectedMsgId===m.id?'selected':''}" onclick="openMsg('${m.id}')">
-      <div class="msg-item-head"><span class="msg-item-name">${esc(m.prenom||'')} ${esc(m.nom||'')}</span><span style="display:flex;align-items:center;gap:4px">${sbadge}<span class="msg-item-date">${date}</span></span></div>
-      <div class="msg-item-subj">${SUBJ_LABELS[m.sujet]||m.sujet||'—'}</div>
+      <div class="msg-item-head"><span class="msg-item-name">${displayName}</span><span style="display:flex;align-items:center;gap:4px">${sbadge}<span class="msg-item-date">${date}</span></span></div>
+      <div class="msg-item-subj">${sujetLabel}</div>
+      ${titre}
       <div class="msg-item-preview">${esc(preview)}</div>
     </div>`;
   }).join('');
@@ -2876,29 +2886,66 @@ window.openMsg=async(id)=>{
   const m=allMsgs.find(x=>x.id===id); if(!m) return;
   if(m.status==='nouveau'){await updateDoc(doc(db,'messages',id),{status:'lu'});m.status='lu';}
   const date=m.createdAt?.toDate?m.createdAt.toDate().toLocaleString('fr-FR'):'—';
-  const initials=`${m.prenom?.[0]||''}${m.nom?.[0]||''}`.toUpperCase()||'?';
+  // Compatibilité anciens messages (field "name") + nouveaux (prenom/nom)
+  const displayName = m.prenom ? `${m.prenom} ${m.nom||''}` : (m.name||'Inconnu');
+  const initials = m.prenom
+    ? `${m.prenom[0]||''}${(m.nom||'')[0]||''}`.toUpperCase()||'?'
+    : (m.name||'?')[0].toUpperCase();
+  const sujetLabel = SUBJ_LABELS[m.sujet||m.subject]||m.sujet||m.subject||'—';
+
+  // Pièce jointe — fetch+blob pour bypass le blocage cross-origin du download
+  let pjHtml = '';
+  if(m.fileName){
+    const isImg = m.fileFormat && ['jpg','jpeg','png','webp','gif'].includes(m.fileFormat);
+    if(m.fileUrl){
+      if(isImg){
+        pjHtml = `<a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:8px;color:var(--accent);text-decoration:none;">
+          <img src="${m.fileUrl}" style="width:56px;height:56px;object-fit:cover;border-radius:7px;border:1px solid var(--border2)">
+          <span style="font-size:11px">${esc(m.fileName)}</span>
+        </a>
+        <button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="margin-left:6px;display:inline-flex;align-items:center;gap:5px;background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.3);color:var(--accent);padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Télécharger
+        </button>`;
+      } else {
+        pjHtml = `<button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.3);padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font);transition:all .15s" onmouseover="this.style.background='rgba(255,107,53,.14)'" onmouseout="this.style.background='rgba(255,107,53,.06)'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          ⬇ ${esc(m.fileName)}
+        </button>
+        <a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;color:var(--blue);background:rgba(77,166,255,.06);border:1px solid rgba(77,166,255,.25);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:6px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Ouvrir
+        </a>`;
+      }
+    } else {
+      pjHtml = `<span style="font-size:11px;color:var(--soft)">📎 ${esc(m.fileName)} <em style="color:var(--muted)">(URL manquante)</em></span>`;
+    }
+  }
+
   const col=document.getElementById('msgDetailCol');
   col.innerHTML=`
     <div class="msg-detail-wrap" id="msgDetailWrap">
       <div class="msg-d-header">
         <div class="msg-d-meta">
           <div class="msg-d-avatar">${initials}</div>
-          <div><div class="msg-d-name">${esc(m.prenom||'')} ${esc(m.nom||'')}</div><div class="msg-d-email">${esc(m.email||'')}</div></div>
+          <div>
+            <div class="msg-d-name">${esc(displayName)}</div>
+            <div class="msg-d-email">${esc(m.email||'')}</div>
+          </div>
           <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
             <button class="btn btn-g" style="font-size:10px;padding:5px 10px" onclick="deleteMsgById('${id}')">🗑</button>
           </div>
         </div>
         <div class="msg-d-tags">
-          <span class="msg-d-tag" style="background:rgba(255,107,53,.12);color:var(--accent)">${SUBJ_LABELS[m.sujet]||m.sujet}</span>
+          <span class="msg-d-tag" style="background:rgba(255,107,53,.12);color:var(--accent)">${sujetLabel}</span>
           <span class="msg-d-tag" style="background:var(--bg3);color:var(--soft);font-family:var(--mono);font-size:9px">${date}</span>
           ${m.status==='repondu'?`<span class="msg-d-tag" style="background:rgba(46,204,138,.1);color:var(--green)">Répondu ✓</span>`:''}
           ${m.userId?`<span class="msg-d-tag" style="background:rgba(77,166,255,.1);color:var(--blue)">Client enregistré</span>`:''}
         </div>
       </div>
-      ${m.tel||m.orderRef||m.fileName?`<div class="msg-d-extras">
-        ${m.tel?`<div class="msg-d-extra"><strong>Téléphone</strong>${esc(m.tel)}</div>`:''}
+      ${m.titre?`<div style="padding:12px 20px 0;font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.01em;border-top:1px solid var(--border)">📝 ${esc(m.titre)}</div>`:''}
+      ${(m.tel||m.phone)||m.orderRef||m.fileName?`<div class="msg-d-extras">
+        ${(m.tel||m.phone)?`<div class="msg-d-extra"><strong>Téléphone</strong>${esc(m.tel||m.phone)}</div>`:''}
         ${m.orderRef?`<div class="msg-d-extra"><strong>N° commande</strong>${esc(m.orderRef)}</div>`:''}
-        ${m.fileName?`<div class="msg-d-extra"><strong>Pièce jointe</strong>${m.fileUrl?(m.fileFormat&&['jpg','jpeg','png','webp','gif'].includes(m.fileFormat)?`<a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;"><img src="${m.fileUrl}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border2)"><span style="font-size:11px">${esc(m.fileName)}</span></a>`:`<a href="${m.fileUrl}" target="_blank" download="${esc(m.fileName)}" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);text-decoration:none;border:1px solid rgba(255,107,53,.3);padding:5px 10px;border-radius:7px;font-size:11px;background:rgba(255,107,53,.06)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>${esc(m.fileName)}</a>`):`📎 ${esc(m.fileName)}`}</div>`:''}
+        ${m.fileName?`<div class="msg-d-extra"><strong>Pièce jointe</strong><div style="margin-top:6px;display:flex;align-items:center;flex-wrap:wrap;gap:6px">${pjHtml}</div></div>`:''}
       </div>`:''}
       <div class="msg-d-body">${esc(m.message||'')}</div>
       ${m.reply?`<div class="prev-reply"><div class="prev-reply-label">✉ Ta réponse — ${m.repliedAt?new Date(m.repliedAt).toLocaleDateString('fr-FR'):''}</div><div class="prev-reply-text">${esc(m.reply)}</div></div>`:''}
@@ -2958,6 +3005,31 @@ window.deleteMsgById=async(id)=>{
     document.getElementById('msgDetailCol').innerHTML=`<div class="msg-detail-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span style="font-size:12px;font-family:var(--mono)">Sélectionnez un message</span></div>`;
     renderMsgList(); updateMsgBadges(); toast('Message supprimé');
   }catch(e){toast('Erreur : '+e.message, true);}
+};
+
+// ── Téléchargement PJ via fetch+blob (contourne le blocage cross-origin du <a download>) ──
+window.downloadFile=async(url, fileName)=>{
+  const btn = event?.currentTarget;
+  const origHTML = btn?.innerHTML;
+  if(btn){ btn.disabled=true; btn.innerHTML=`<div class="spin" style="width:12px;height:12px;border-width:2px"></div> Téléchargement…`; }
+  try{
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('⬇ Téléchargement lancé : ' + fileName);
+  }catch(e){
+    // Fallback : ouvrir dans un nouvel onglet si fetch bloqué
+    toast('⚠ Impossible de télécharger directement, ouverture dans un nouvel onglet');
+    window.open(url, '_blank');
+  }finally{
+    if(btn){ btn.disabled=false; btn.innerHTML=origHTML; }
+  }
 };
 
 // ══════════════════════════════════════════════

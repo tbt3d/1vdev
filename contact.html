@@ -397,6 +397,12 @@ select.f-input { cursor: pointer; appearance: none; background-image: url("data:
       </div>
       <div style="height:16px"></div>
 
+      <!-- Titre de l'objet -->
+      <div class="f-field">
+        <label>Titre / Objet <span>*</span></label>
+        <input class="f-input" type="text" id="fTitre" placeholder="Résumez votre demande en quelques mots…" maxlength="100">
+      </div>
+
       <!-- Identité -->
       <div class="f-grid2">
         <div class="f-field">
@@ -619,15 +625,17 @@ async function sendContact() {
   var nom     = (document.getElementById('fNom').value || '').trim();
   var email   = (document.getElementById('fEmail').value || '').trim();
   var tel     = (document.getElementById('fTel').value || '').trim();
+  var titre   = (document.getElementById('fTitre').value || '').trim();
   var msg     = (document.getElementById('fMsg').value || '').trim();
   var order   = (document.getElementById('fOrder').value || '').trim();
   var chip    = document.querySelector('.s-chip.on');
-  var subject = chip ? chip.dataset.v : 'autre';
+  var sujet   = chip ? chip.dataset.v : 'autre';
 
   // Validation
   var errors = [];
   if (!prenom) errors.push('fPrenom');
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('fEmail');
+  if (!titre) errors.push('fTitre');
   if (!msg || msg.length < 10) errors.push('fMsg');
 
   // Reset styles
@@ -653,32 +661,37 @@ async function sendContact() {
   try {
     // 1. Upload fichier si présent
     var fileUrl = null;
+    var fileExt = null;
     if (_attachedFile) {
       try {
         fileUrl = await uploadToCloudinary(_attachedFile);
+        fileExt = _attachedFile.name.split('.').pop().toLowerCase();
       } catch(e) {
         console.warn('Upload fichier échoué:', e.message);
-        // On continue sans le fichier plutôt que bloquer l'envoi
       }
     }
 
     // 2. Sauvegarder dans Firestore
+    // Noms de champs alignés avec ce qu'attend le dashboard
     var { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    var { getFirestore, addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    var { getFirestore, addDoc, collection } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
     var app = getApps().length ? getApps()[0] : initializeApp(_fbCfg);
     var db  = getFirestore(app);
 
     var docData = {
       createdAt: new Date(),
       status: 'nouveau',
-      subject: subject,
-      name: (prenom + ' ' + nom).trim(),
-      email: email,
-      phone: tel || null,
-      message: msg,
+      sujet:    sujet,           // ← dashboard lit m.sujet
+      titre:    titre,           // ← nouveau champ titre
+      prenom:   prenom,          // ← dashboard lit m.prenom
+      nom:      nom || null,     // ← dashboard lit m.nom
+      email:    email,
+      tel:      tel || null,     // ← dashboard lit m.tel
+      message:  msg,
       orderRef: order || null,
-      fileUrl: fileUrl || null,
+      fileUrl:  fileUrl || null,
       fileName: _attachedFile ? _attachedFile.name : null,
+      fileFormat: fileExt || null, // ← dashboard utilise ça pour distinguer image/fichier
       source: 'contact-form',
     };
 
@@ -692,7 +705,6 @@ async function sendContact() {
     console.error('Erreur envoi:', e);
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Réessayer';
-    // Afficher l'erreur sous le bouton
     var errEl = document.getElementById('sendError');
     if (!errEl) {
       errEl = document.createElement('p');
@@ -712,6 +724,7 @@ function resetForm() {
   document.getElementById('fNom').value = '';
   document.getElementById('fEmail').value = '';
   document.getElementById('fTel').value = '';
+  document.getElementById('fTitre').value = '';
   document.getElementById('fMsg').value = '';
   document.getElementById('fOrder').value = '';
   document.getElementById('charCounter').textContent = '0 / 2000';
