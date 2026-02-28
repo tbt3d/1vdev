@@ -2902,12 +2902,17 @@ window.openMsg=async(id)=>{
     const isZip  = fmt === 'zip';
     const is3d   = ['stl','obj'].includes(fmt);
 
+    // Helper : miniature Cloudinary 120x120 pour les images
+    const thumbUrl = (url) => url && url.includes('res.cloudinary.com')
+      ? url.replace('/upload/', '/upload/c_fill,w_120,h_120,q_auto,f_auto/')
+      : url;
+
     if(m.fileUrl){
       if(isImg){
-        // ── IMAGE : miniature cliquable + bouton download
+        // ── IMAGE : miniature optimisée Cloudinary + bouton download
         pjHtml = `
           <a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:10px;color:var(--accent);text-decoration:none;background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.2);padding:8px 12px;border-radius:9px;">
-            <img src="${m.fileUrl}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--border2);flex-shrink:0">
+            <img src="${thumbUrl(m.fileUrl)}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--border2);flex-shrink:0">
             <div>
               <div style="font-size:11px;font-weight:600;margin-bottom:2px">${esc(m.fileName)}</div>
               <div style="font-size:9px;color:var(--soft);font-family:var(--mono);text-transform:uppercase">${fmt} · image</div>
@@ -3075,8 +3080,16 @@ window.downloadFile=async(url, fileName)=>{
   const btn = event?.currentTarget;
   const origHTML = btn?.innerHTML;
   if(btn){ btn.disabled=true; btn.innerHTML=`<div class="spin" style="width:12px;height:12px;border-width:2px"></div> Téléchargement…`; }
+
+  // Pour les fichiers Cloudinary (raw : PDF, ZIP, STL…), on injecte fl_attachment
+  // pour forcer le Content-Disposition: attachment et bypass le blocage navigateur
+  let dlUrl = url;
+  if(url && url.includes('res.cloudinary.com') && !url.includes('fl_attachment')) {
+    dlUrl = url.replace('/upload/', '/upload/fl_attachment/');
+  }
+
   try{
-    const res = await fetch(url);
+    const res = await fetch(dlUrl);
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const blob = await res.blob();
     const a = document.createElement('a');
@@ -3087,9 +3100,9 @@ window.downloadFile=async(url, fileName)=>{
     setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
     toast('⬇ Téléchargement lancé : ' + fileName);
   }catch(e){
-    // Fallback : ouvrir dans un nouvel onglet si fetch bloqué
-    toast('⚠ Impossible de télécharger directement, ouverture dans un nouvel onglet');
-    window.open(url, '_blank');
+    // Fallback : ouvrir avec fl_attachment dans un nouvel onglet
+    window.open(dlUrl, '_blank');
+    toast('⬇ Ouverture du fichier…');
   }finally{
     if(btn){ btn.disabled=false; btn.innerHTML=origHTML; }
   }
