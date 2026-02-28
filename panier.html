@@ -590,8 +590,26 @@ function removeItem(key) {
 const WORKER_URL_DEFAULT = 'https://tbt3d-checkout.optionpdg.workers.dev';
 let _panierCfg = null;
 
+// Convertit champs Firestore REST en objet JS plat
+function _fromFirestoreFields(fields) {
+  if (!fields) return {};
+  const out = {};
+  for (const [k, v] of Object.entries(fields)) {
+    if (v.stringValue !== undefined) out[k] = v.stringValue;
+    else if (v.integerValue !== undefined) out[k] = Number(v.integerValue);
+    else if (v.doubleValue !== undefined) out[k] = Number(v.doubleValue);
+    else if (v.booleanValue !== undefined) out[k] = v.booleanValue;
+    else if (v.nullValue !== undefined) out[k] = null;
+    else if (v.mapValue !== undefined) out[k] = _fromFirestoreFields(v.mapValue.fields || {});
+    else if (v.arrayValue !== undefined) out[k] = (v.arrayValue.values || []).map(x => _fromFirestoreFields({_:x})._);
+    else out[k] = null;
+  }
+  return out;
+}
+
 async function getPanierCfg() {
   if (_panierCfg) return _panierCfg;
+  // Essai 1 : SDK Firebase
   try {
     const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
     const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
@@ -606,6 +624,17 @@ async function getPanierCfg() {
     const db = getFirestore(app);
     const d = await getDoc(doc(db, 'config', 'panier'));
     _panierCfg = d.exists() ? d.data() : {};
+    return _panierCfg;
+  } catch(e) {
+    console.warn('Firebase SDK bloqué pour config panier, bascule REST:', e.message);
+  }
+  // Essai 2 : REST API Firestore (contourne Safari ITP)
+  try {
+    const res = await fetch('https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/config/panier?key=AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8');
+    if (res.ok) {
+      const data = await res.json();
+      _panierCfg = _fromFirestoreFields(data.fields || {});
+    } else { _panierCfg = {}; }
   } catch(e) { _panierCfg = {}; }
   return _panierCfg;
 }

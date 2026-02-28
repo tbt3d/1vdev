@@ -1108,7 +1108,9 @@ const firebaseConfig = {
   appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
 };
 
-const db = getFirestore(initializeApp(firebaseConfig));
+const API_KEY = "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8";
+const PROJECT = "tbt3d-a0f04";
+
 const esc = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 const slug = new URLSearchParams(window.location.search).get('id');
@@ -1118,26 +1120,90 @@ if (!slug) {
   loadProduct(slug);
 }
 
-async function loadProduct(slug) {
-  try {
-    let snap = await getDocs(query(collection(db, 'articles'), where('slug', '==', slug)));
-    if (snap.empty) {
-      snap = await getDocs(query(collection(db, 'articles'), where('id', '==', slug)));
-    }
-    if (snap.empty) {
-      showNotFound();
-      return;
-    }
-    const art = { id: snap.docs[0].id, ...snap.docs[0].data() };
-    if (art.status !== 'published') {
-      showNotFound();
-      return;
-    }
-    renderProduct(art);
-  } catch (e) {
-    console.error('Erreur Firebase:', e);
-    showNotFound();
+// Convertit un document Firestore REST en objet JS plat
+function _fromFirestore(fields) {
+  if (!fields) return {};
+  const out = {};
+  for (const [k, v] of Object.entries(fields)) {
+    if (v.stringValue !== undefined) out[k] = v.stringValue;
+    else if (v.integerValue !== undefined) out[k] = Number(v.integerValue);
+    else if (v.doubleValue !== undefined) out[k] = Number(v.doubleValue);
+    else if (v.booleanValue !== undefined) out[k] = v.booleanValue;
+    else if (v.nullValue !== undefined) out[k] = null;
+    else if (v.arrayValue !== undefined) out[k] = (v.arrayValue.values || []).map(x => _fromFirestore({_:x})._);
+    else if (v.mapValue !== undefined) out[k] = _fromFirestore(v.mapValue.fields || {});
+    else out[k] = null;
   }
+  return out;
+}
+
+async function _queryREST(field, value) {
+  const url = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents:runQuery?key=${API_KEY}`;
+  const body = {
+    structuredQuery: {
+      from: [{ collectionId: 'articles' }],
+      where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: { stringValue: value } } },
+      limit: 1
+    }
+  };
+  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  if (!data[0] || !data[0].document) return null;
+  const doc = data[0].document;
+  const fields = _fromFirestore(doc.fields || {});
+  // id = dernière partie du name (projects/.../documents/articles/ID)
+  fields.id = doc.name.split('/').pop();
+  return fields;
+}
+
+async function loadProduct(slug) {
+  // Essai 1 : SDK Firebase (rapide, avec cache)
+  let art = null;
+  try {
+    const db = getFirestore(initializeApp(firebaseConfig));
+    let snap = await getDocs(query(collection(db, 'articles'), where('slug', '==', slug)));
+    if (snap.empty) snap = await getDocs(query(collection(db, 'articles'), where('id', '==', slug)));
+    if (!snap.empty) {
+      art = { id: snap.docs[0].id, ...snap.docs[0].data() };
+    }
+  } catch (e) {
+    console.warn('Firebase SDK bloqué (Safari ITP?), bascule sur REST API:', e.message);
+  }
+
+  // Essai 2 : API REST Firestore (contourne le blocage SDK Safari)
+  if (!art) {
+    try {
+      art = await _queryREST('slug', slug);
+      if (!art) art = await _queryREST('id', slug);
+    } catch (e) {
+      console.error('REST API aussi échouée:', e.message);
+      showFirebaseError();
+      return;
+    }
+  }
+
+  if (!art || art.status !== 'published') {
+    showNotFound();
+    return;
+  }
+  renderProduct(art);
+}
+
+function showFirebaseError() {
+  document.getElementById('loadingState').style.display = 'none';
+  const el = document.getElementById('notFound');
+  el.innerHTML = `
+    <div style="text-align:center;padding:40px 20px;max-width:400px;margin:0 auto">
+      <div style="font-size:40px;margin-bottom:16px">⚠️</div>
+      <h2 style="font-size:18px;font-weight:600;margin-bottom:10px">Connexion bloquée</h2>
+      <p style="color:#666;font-size:14px;line-height:1.6;margin-bottom:20px">
+        Les protections avancées de Safari bloquent le chargement des données produit.<br><br>
+        <strong>Solution :</strong> Appuyez sur <em>"Réduire les protections"</em> en haut de la page, ou ouvrez ce lien dans Safari normal (pas en navigation privée).
+      </p>
+      <a href="javascript:location.reload()" style="display:inline-block;padding:12px 24px;background:#111;color:#fff;border-radius:30px;text-decoration:none;font-size:14px">Réessayer</a>
+    </div>`;
+  el.style.display = 'flex';
 }
 
 function showNotFound() {
@@ -1259,22 +1325,33 @@ window.stripeDirectCheckout = async function() {
   btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Redirection…';
 
   try {
-    // Charger config panier depuis Firebase (lecture seule — on ne crée PAS de doc ici)
-    const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-    const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-    const app = getApps().length ? getApps()[0] : initializeApp({
-      apiKey:"AIzaSyBmBmFqGXOCbFo_FqJ3aSEIRHIqQDGXirQ",
-      authDomain:"tbt3d-a0f04.firebaseapp.com",
-      projectId:"tbt3d-a0f04",
-      storageBucket:"tbt3d-a0f04.firebasestorage.app",
-      messagingSenderId:"439285162044",
-      appId:"1:439285162044:web:e04f226b62e82f76e4c3f1"
-    });
-    const db = getFirestore(app);
-
-    // Lire config panier
-    const cfgDoc = await getDoc(doc(db, 'config', 'panier'));
-    const cfg = cfgDoc.exists() ? cfgDoc.data() : {};
+    // Charger config panier — SDK Firebase d'abord, puis REST API si bloqué (Safari ITP)
+    let cfg = {};
+    try {
+      const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+      const { getFirestore, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      const app = getApps().length ? getApps()[0] : initializeApp({
+        apiKey:"AIzaSyBmBmFqGXOCbFo_FqJ3aSEIRHIqQDGXirQ",
+        authDomain:"tbt3d-a0f04.firebaseapp.com",
+        projectId:"tbt3d-a0f04",
+        storageBucket:"tbt3d-a0f04.firebasestorage.app",
+        messagingSenderId:"439285162044",
+        appId:"1:439285162044:web:e04f226b62e82f76e4c3f1"
+      });
+      const db2 = getFirestore(app);
+      const cfgDoc = await getDoc(doc(db2, 'config', 'panier'));
+      if (cfgDoc.exists()) cfg = cfgDoc.data();
+    } catch(e) {
+      console.warn('SDK Firebase bloqué pour config, bascule REST:', e.message);
+      // Fallback REST API
+      try {
+        const cfgRes = await fetch(`https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/config/panier?key=AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8`);
+        if (cfgRes.ok) {
+          const cfgData = await cfgRes.json();
+          cfg = _fromFirestore(cfgData.fields || {});
+        }
+      } catch(e2) { /* utilise les défauts */ }
+    }
     const workerUrl      = cfg.workerUrl || 'https://tbt3d-checkout.optionpdg.workers.dev';
     const successUrl     = cfg.successUrl || cfg.successUrlDirect || 'https://tbt3d.fr/panier.html?success=1&session_id={CHECKOUT_SESSION_ID}';
     const cancelUrl      = cfg.cancelUrl || cfg.cancelUrlDirect || 'https://tbt3d.fr/boutique.html?cancelled=1';
