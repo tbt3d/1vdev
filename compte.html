@@ -814,6 +814,9 @@ async function loadOrders(uid) {
     const STATUS_LABELS = { 'payé':'Payé','expédié':'Expédié','annulé':'Annulé','initié':'En attente','preparation':'En préparation' };
     const STATUS_CSS    = { 'payé':'os-preparation','expédié':'os-expedition','annulé':'os-annule','initié':'os-en_attente','preparation':'os-impression' };
 
+    // Stockage global des HTML de factures pour ouverture propre
+    window._facturesHtml = {};
+
     let html = '<div class="orders-list">';
     rows.forEach(function(o) {
       const ts   = o.createdAt && o.createdAt.seconds ? o.createdAt.seconds * 1000
@@ -859,10 +862,11 @@ async function loadOrders(uid) {
         const dlIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
         if (o.factureUrl) {
           factureBtnHtml = '<a href="' + o.factureUrl + '" target="_blank" download style="' + dlStyle + '" onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' + dlIcon + dlLabel + '</a>';
+        } else if (o.factureHtml) {
+          window._facturesHtml[o._fid] = o.factureHtml;
+          factureBtnHtml = '<button onclick="openFacture(\'' + o._fid + '\')" style="' + dlStyle + '" onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' + dlIcon + dlLabel + '</button>';
         } else {
-          // factureHtml dispo : ouvrir dans onglet puis print dialog
-          const safeHtml = encodeURIComponent(o.factureHtml || '');
-          factureBtnHtml = '<button onclick="var w=window.open(\'\',\'_blank\');w.document.write(decodeURIComponent(\'' + safeHtml + '\'));w.document.close();w.focus();setTimeout(function(){w.print();},400);" style="' + dlStyle + '" onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' + dlIcon + dlLabel + '</button>';
+          factureBtnHtml = '';
         }
       } else {
         const factureLabel = o.factureNum ? o.factureNum : 'En attente';
@@ -960,6 +964,16 @@ window.trackOrder = async () => {
 document.getElementById('orderRefInput')?.addEventListener('keydown', e => { if(e.key==='Enter') window.trackOrder(); });
 
 // ── UI helpers ──
+window.openFacture = function(fid) {
+  const html = window._facturesHtml && window._facturesHtml[fid];
+  if (!html) return;
+  const w = window.open('', '_blank');
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(function(){ w.print(); }, 500);
+};
 window.toggleMsg = (el) => el.classList.toggle('open');
 window.showPanel = (id, btn) => {
   document.querySelectorAll('.a-panel').forEach(p => p.classList.remove('on'));
