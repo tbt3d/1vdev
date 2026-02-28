@@ -1066,30 +1066,48 @@ function openCheckout() {
 
 // ── Prépare les items pour le Worker (gère stripePrice ET isDynamic) ──
 function buildWorkerItems(items, mode) {
-  const { tva, shipping, discount } = computeTotals();
+  const { subtotal, discount, tva, shipping } = computeTotals();
+
+  // Stripe Checkout n'accepte pas les montants négatifs.
+  // On applique donc la remise en réduisant proportionnellement le prix de chaque article HT.
+  // TVA (déjà calculée sur le sous-total remisé) et livraison restent inchangées.
+  const hasDiscount = discount > 0 && _appliedPromo;
+  const discountFactor = (hasDiscount && subtotal > 0)
+    ? (subtotal - discount) / subtotal
+    : 1;
+
   const workerItems = items.map(item => {
     // Choisit le bon price ID selon le mode (test ou live)
     let priceId = item.stripePrice;
     if (mode === 'live' && item.stripePriceLive) priceId = item.stripePriceLive;
     else if (mode === 'test' && item.stripePriceTest) priceId = item.stripePriceTest;
     else if (item.stripePriceTest) priceId = item.stripePriceTest; // fallback test
-    if (priceId && priceId.startsWith('price_')) {
+
+    if (priceId && priceId.startsWith('price_') && !hasDiscount) {
+      // Pas de promo → prix fixe Stripe, pas de modification
       return { stripePrice: priceId, qty: item.qty };
     }
-    if (item.isDynamic) {
+
+    // Avec promo sur article Stripe (price_id) : on force le mode dynamic avec le prix réduit
+    // Article dynamique : on applique le facteur de réduction
+    const basePrice = parseFloat(item.price || 0);
+    const finalPrice = parseFloat((basePrice * discountFactor).toFixed(2));
+
+    if ((priceId && priceId.startsWith('price_')) || item.isDynamic) {
       return {
         isDynamic: true,
-        name:  item.name,
+        name:    item.name || '',
         variant: item.variant || '',
-        note:  item._note || '',
-        price: item.price,
-        qty:   item.qty,
+        note:    item._note || '',
+        price:   finalPrice,
+        qty:     item.qty,
       };
     }
     return null;
   }).filter(Boolean);
 
   // Ajouter TVA comme ligne dynamique
+  // (tva est déjà calculée sur le sous-total après remise dans computeTotals)
   workerItems.push({
     isDynamic: true,
     name: 'TVA (20%)',
@@ -1110,22 +1128,6 @@ function buildWorkerItems(items, mode) {
     price: shipping,
     qty: 1,
   });
-
-  // Ajouter la remise code promo comme ligne négative
-  // (Stripe Checkout accepte les montants négatifs en mode payment)
-  if (_appliedPromo && discount > 0) {
-    const promoLabel = _appliedPromo.type === 'percent'
-      ? `Réduction — Code ${_appliedPromo.code} (−${_appliedPromo.value}%)`
-      : `Réduction — Code ${_appliedPromo.code} (−${parseFloat(_appliedPromo.value).toFixed(2)} €)`;
-    workerItems.push({
-      isDynamic: true,
-      name: promoLabel,
-      variant: '',
-      note: '',
-      price: -discount,
-      qty: 1,
-    });
-  }
 
   return workerItems;
 }
