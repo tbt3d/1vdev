@@ -2933,7 +2933,7 @@ window.openMsg=async(id)=>{
               <div style="font-size:9px;color:var(--soft);font-family:var(--mono)">PDF · Document</div>
             </div>
           </div>
-          <a href="${m.fileUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:5px;color:var(--red);background:rgba(255,61,90,.06);border:1px solid rgba(255,61,90,.3);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:6px">
+          <a href="${m.fileUrl}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;color:var(--red);background:rgba(255,61,90,.06);border:1px solid rgba(255,61,90,.3);padding:6px 12px;border-radius:7px;font-size:11px;text-decoration:none;margin-left:6px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Ouvrir
           </a>
           <button onclick="downloadFile('${m.fileUrl}','${esc(m.fileName)}')" style="display:inline-flex;align-items:center;gap:5px;color:var(--soft);background:var(--bg3);border:1px solid var(--border2);padding:6px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:var(--font);margin-left:5px">
@@ -3076,35 +3076,21 @@ window.deleteMsgById=async(id)=>{
 };
 
 // ── Téléchargement PJ ──
-// Utilise un <iframe> caché : impossible à bloquer par un popup blocker,
-// fonctionne pour tous les types (ZIP, PDF, STL...) sans transformation Cloudinary.
-// Pour les PDF : ouvre dans un nouvel onglet (le navigateur affiche son reader).
-// Pour ZIP/STL/autres : le navigateur déclenche le téléchargement automatiquement.
+// window.location.href = url est la seule méthode fiable cross-origin sans CORS :
+// - Le navigateur télécharge les fichiers non-affichables (ZIP, STL…) et reste sur la page
+// - Pour les PDF : window.open depuis un vrai click utilisateur (pas bloqué)
 window.downloadFile=(url, fileName)=>{
   if(!url){ toast('Erreur : URL manquante'); return; }
-
-  const ext = (fileName||url).split('.').pop().toLowerCase();
-  const isPdf = ext === 'pdf';
-
-  if(isPdf){
-    // PDF : ouvrir dans un nouvel onglet pour affichage natif
-    // On passe par un <a> en click direct (sync) — pas bloqué par popup blocker
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>a.remove(), 300);
+  const ext = (fileName||'').split('.').pop().toLowerCase();
+  if(ext === 'pdf'){
+    // PDF : affichage dans le reader natif du navigateur
+    window.open(url, '_blank');
   } else {
-    // ZIP / STL / autres : iframe caché = jamais bloqué, déclenche le téléchargement
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;border:none';
-    iframe.src = url;
-    document.body.appendChild(iframe);
-    setTimeout(()=>{ try{ iframe.remove(); }catch(e){} }, 8000);
+    // ZIP / STL / OBJ / autres : téléchargement direct via location.href
+    // Le navigateur voit un Content-Type non affichable → télécharge sans quitter la page
+    window.location.href = url;
   }
-  toast('⬇ ' + (fileName || 'Téléchargement lancé…'));
+  toast('⬇ ' + (fileName || 'Téléchargement…'));
 };
 
 // ══════════════════════════════════════════════
