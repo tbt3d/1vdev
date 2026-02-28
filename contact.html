@@ -597,13 +597,12 @@ function removeFile() {
   document.getElementById('fileDrop').style.display = '';
 }
 
-/* ── Config Cloudinary ── */
+/* ── Upload Cloudinary ── */
 var _cloudinaryCfg = {
-  cloudName:    'TON_CLOUD_NAME',    // ← Dashboard Cloudinary > Account Details
-  uploadPreset: 'TON_UPLOAD_PRESET'  // ← Settings > Upload > Upload presets (mode: unsigned)
+  cloudName:    'dfcrqwbee',
+  uploadPreset: 'tbt3d_contact'
 };
 
-/* ── Upload Cloudinary ── */
 async function uploadToCloudinary(file) {
   var fd = new FormData();
   fd.append('file', file);
@@ -624,7 +623,7 @@ async function uploadToCloudinary(file) {
     publicId: data.public_id,
     format:   data.format,
     bytes:    data.bytes,
-    type:     data.resource_type   // "image" | "raw" | "video"
+    type:     data.resource_type
   };
 }
 
@@ -709,7 +708,7 @@ async function sendContact() {
     var cloudFile = null;
     if (_attachedFile) {
       try {
-        btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Upload Cloudinary…';
+        btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Upload du fichier…';
         cloudFile = await uploadToCloudinary(_attachedFile);
       } catch(e) {
         console.error('Cloudinary upload échoué:', e);
@@ -721,7 +720,6 @@ async function sendContact() {
     }
 
     // 2. Sauvegarder dans Firestore
-    // Noms de champs alignés avec ce qu'attend le dashboard
     var { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
     var { getFirestore, addDoc, collection } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
     var app = getApps().length ? getApps()[0] : initializeApp(_fbCfg);
@@ -729,21 +727,18 @@ async function sendContact() {
 
     var docData = {
       createdAt: new Date(),
-      status: 'nouveau',
-      sujet:    sujet,           // ← dashboard lit m.sujet
-      titre:    titre,           // ← nouveau champ titre
-      prenom:   prenom,          // ← dashboard lit m.prenom
-      nom:      nom || null,     // ← dashboard lit m.nom
-      email:    email,
-      tel:      tel || null,     // ← dashboard lit m.tel
-      message:  msg,
-      orderRef: order || null,
-      fileUrl:      cloudFile ? cloudFile.url      : null,  // lien Cloudinary
-      filePublicId: cloudFile ? cloudFile.publicId  : null,  // pour supprimer / transformer
-      fileName:     _attachedFile ? _attachedFile.name : null,
-      fileFormat:   cloudFile ? cloudFile.format   : null,  // jpg / pdf / stl / zip…
-      fileType:     cloudFile ? cloudFile.type     : null,  // image | raw | video
-      fileBytes:    cloudFile ? cloudFile.bytes    : null,
+      status:    'nouveau',
+      sujet:     sujet,
+      titre:     titre,
+      prenom:    prenom,
+      nom:       nom || null,
+      email:     email,
+      tel:       tel || null,
+      message:   msg,
+      orderRef:  order || null,
+      fileUrl:    cloudFile ? cloudFile.url      : null,
+      fileName:   _attachedFile ? _attachedFile.name : null,
+      fileFormat: cloudFile ? cloudFile.format   : null,
       source: 'contact-form',
     };
 
