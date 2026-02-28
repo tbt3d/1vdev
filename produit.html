@@ -277,16 +277,32 @@ body {
   }
 }
 
-/* — Mobile (<= 600px): image carrée, thumbs petites — */
+/* — Mobile (<= 600px): image haute + barres blanches côtés — */
 @media(max-width: 600px) {
-  .gallery-main { aspect-ratio: 1 / 1; }
+  /* Conteneur avec padding latéral = barres blanches */
+  .gallery {
+    background: var(--white);
+    padding: 0 18px;
+    box-sizing: border-box;
+  }
 
+  /* Image plus haute (ratio portrait) */
+  .gallery-main {
+    aspect-ratio: 3 / 4;
+    border-radius: 14px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  /* Thumbs alignées sous l'image */
   .gallery-thumbs {
-    padding: 10px 16px;
+    padding: 10px 0;
+    width: 100%;
   }
   .gallery-thumbs img {
     width: 52px;
     height: 52px;
+    border-radius: 8px;
   }
 
   .prod-detail {
@@ -1588,21 +1604,28 @@ function searchKeydown(e) { if (e.key === 'Escape') toggleSearch(); }
 function addToCart() {
   const _art = window._art;
   const _photos = window._photos || [];
-  const _currentComboKey = window._currentComboKey;
   if (!_art) return;
 
-  // Récupérer la variante sélectionnée
+  // Récupérer la variante sélectionnée (lecture directe du DOM — fonctionne en mobile)
   const variantParts = [];
-  if (_art.variants && _art.variants.length > 0) {
-    _art.variants.forEach((vg, gi) => {
-      const selected = document.querySelector(`#variantsWrap .opt-block:nth-child(${gi+1}) .chip.on, #variantsWrap .opt-block:nth-child(${gi+1}) .color-chip.on`);
-      if (selected) variantParts.push(selected.dataset.val);
-    });
-  }
+  document.querySelectorAll('#variantsWrap .opt-block').forEach(function(block) {
+    const sel = block.querySelector('.chip.on, .color-chip.on');
+    if (sel) variantParts.push(sel.dataset.val || sel.textContent.trim());
+  });
   const variantStr = variantParts.join(' · ');
 
+  // Recalculer le comboKey depuis le DOM
+  function getComboKey() {
+    const vals = [];
+    document.querySelectorAll('#variantsWrap .opt-block').forEach(function(block) {
+      const active = block.querySelector('.chip.on, .color-chip.on');
+      if (active) vals.push(active.dataset.val);
+    });
+    return vals.join('|');
+  }
+
   // Récupérer l'URL de paiement du combo actuel
-  const comboKey = _currentComboKey ? _currentComboKey() : '';
+  const comboKey = getComboKey();
   const combo = (_art.comboLinks || {})[comboKey];
   const paymentUrl = (combo && combo.url && combo.url.trim()) ? combo.url.trim() : (_art.payhip || '');
 
@@ -1643,7 +1666,8 @@ function addToCart() {
 }
 
 function buyNow() {
-  openPayhipModal();
+  addToCart();
+  setTimeout(function() { window.location.href = '/panier.html'; }, 150);
 }
 
 function showCartToast(name) {
