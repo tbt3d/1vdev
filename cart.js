@@ -5,8 +5,18 @@
   var BASE     = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents/carts/';
 
   function _getSessionId() {
+    // 1. Priorité absolue : ?sid= dans l'URL (passé explicitement depuis produit.html sur iOS)
+    try {
+      var urlSid = new URLSearchParams(window.location.search).get('sid');
+      if (urlSid) {
+        document.cookie = 'tbt_sid=' + urlSid + ';path=/;max-age=604800;SameSite=Lax';
+        return urlSid;
+      }
+    } catch(e) {}
+    // 2. Cookie existant
     var m = document.cookie.match(/(?:^|;)\s*tbt_sid=([^;]+)/);
     if (m) return m[1];
+    // 3. Nouveau sid
     var id = 'sid_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
     document.cookie = 'tbt_sid=' + id + ';path=/;max-age=604800;SameSite=Lax';
     return id;
@@ -25,6 +35,7 @@
     }
     return { stringValue: String(val) };
   }
+
   function _fromFS(v) {
     if (!v) return null;
     if (v.stringValue  !== undefined) return v.stringValue;
@@ -46,6 +57,9 @@
   var _sid = null;
   function _sid_lazy() { if (!_sid) _sid = _getSessionId(); return _sid; }
   function _url() { return BASE + _sid_lazy() + '?key=' + API_KEY; }
+
+  // Expose le sid pour le passer dans les URLs de navigation
+  window._getTBTSid = function() { return _sid_lazy(); };
 
   function _loadRemote() {
     return fetch(_url())
