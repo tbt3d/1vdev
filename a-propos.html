@@ -336,5 +336,14 @@ try {
   }
 } catch(e) {}
 </script>
+<!-- TBT3D Analytics -->
+<script>
+(function(){
+  const _p='https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/pageViews';
+  function _d(){var u=navigator.userAgent;return /tablet|ipad/i.test(u)?'tablet':/mobile|android|iphone/i.test(u)?'mobile':'desktop';}
+  function _s(){var k='tbt3d_sid',s=sessionStorage.getItem(k);if(!s){s=Math.random().toString(36).slice(2)+Date.now();sessionStorage.setItem(k,s);}return s;}
+  fetch(_p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{page:{stringValue:location.href},referrer:{stringValue:document.referrer||'(direct)'},device:{stringValue:_d()},sessionId:{stringValue:_s()},timestamp:{timestampValue:new Date().toISOString()}}})}).catch(function(){});
+})();
+</script>
 </body>
 </html>

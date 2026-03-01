@@ -629,6 +629,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
     Config Panier
   </button>
+  <button class="nav-item" onclick="goPage('livraison-cfg',this)" id="navLivraisonCfg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    Livraison &amp; TVA
+  </button>
   <button class="nav-item" onclick="goPage('promos',this)" id="navPromos">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
     Codes Promo
@@ -1354,6 +1358,88 @@ tr:hover td{background:rgba(255,255,255,.01)}
           <button class="btn btn-a" onclick="savePanierCfg()" style="font-size:12px;flex:1;justify-content:center" id="btnSavePanierCfg">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
             Enregistrer la configuration
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LIVRAISON & TVA ── -->
+  <div class="page" id="page-livraison-cfg">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title">Livraison &amp; TVA</div>
+      </div>
+      <div class="topbar-right">
+        <div class="sync-indicator"><div class="sync-dot"></div>Firebase Config</div>
+      </div>
+    </div>
+    <div class="ps" style="flex:1;overflow-y:auto">
+      <div class="dcfg-wrap">
+        <div class="dcfg-info">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Les tarifs sont appliqués en temps réel dans le panier, la confirmation et la facture. Toute modification est mise en ligne immédiatement après enregistrement.
+        </div>
+
+        <!-- TVA -->
+        <div class="fsec" style="margin-bottom:16px">
+          <div class="fsec-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <span class="fsec-title">TVA</span>
+          </div>
+          <div class="fsec-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding:14px 16px;background:var(--bg3);border-radius:10px;border:1.5px solid var(--border2)">
+              <div>
+                <div style="font-size:13px;font-weight:600">TVA activée</div>
+                <div class="fhint" style="margin-top:3px">Si désactivée, aucune TVA n'est ajoutée dans le panier ni envoyée à Stripe.</div>
+              </div>
+              <label style="position:relative;display:inline-flex;flex-shrink:0;width:44px;height:24px;cursor:pointer">
+                <input type="checkbox" id="lvTvaEnabled" style="opacity:0;width:0;height:0;position:absolute" onchange="lvToggleTrack(this.checked)">
+                <span id="lvTvaTrack" style="position:absolute;inset:0;border-radius:24px;background:var(--border2);transition:.2s">
+                  <span id="lvTvaThumb" style="position:absolute;left:2px;top:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.3)"></span>
+                </span>
+              </label>
+            </div>
+            <div class="frow">
+              <div class="field">
+                <label>Taux TVA (%)</label>
+                <input type="number" id="lvTvaRate" min="0" max="100" step="0.1" placeholder="20">
+                <div class="fhint">Entrez 20 pour 20%. Ignoré si TVA désactivée.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Livraison -->
+        <div class="fsec" style="margin-bottom:16px">
+          <div class="fsec-head">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <span class="fsec-title">Tarifs de livraison par pays</span>
+          </div>
+          <div class="fsec-body">
+            <div class="frow" style="margin-bottom:16px">
+              <div class="field">
+                <label>Tarif par défaut (pays non listé) €</label>
+                <input type="number" id="lvDefaultShipping" min="0" step="0.5" placeholder="8">
+                <div class="fhint">Appliqué si le pays sélectionné n'a pas de tarif défini ci-dessous.</div>
+              </div>
+            </div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);font-family:var(--mono);margin-bottom:10px">Tarifs par pays</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:10px" id="lvRatesGrid"></div>
+            <button class="btn-add-row" onclick="lvAddRow()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Ajouter un pays
+            </button>
+          </div>
+        </div>
+
+        <div id="lvFeedback" style="display:none;margin-bottom:12px"></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-g" onclick="loadLivraisonCfg()" style="font-size:12px">↺ Réinitialiser</button>
+          <button class="btn btn-a" onclick="saveLivraisonCfg()" id="btnSaveLivraison" style="font-size:12px;flex:1;justify-content:center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
+            Enregistrer
           </button>
         </div>
       </div>
@@ -2194,6 +2280,7 @@ window.goPage = (id, btn) => {
   if(id==='users') loadUsers();
   if(id==='commandes') loadCommandes();
   if(id==='panier-cfg') loadPanierCfg();
+  if(id==='livraison-cfg') loadLivraisonCfg();
   if(id==='devis-cfg') loadDevisCfg();
   if(id==='analytics') loadAnalytics();
   if(id==='promos') loadPromos();
@@ -5352,6 +5439,140 @@ window.savePanierCfg = async () => {
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer la configuration';
   }
 };
+
+// ─── LIVRAISON & TVA CONFIG ────────────────────────────────────────────────
+
+const _LV_COUNTRY_LIST = [
+  {code:'FR',flag:'🇫🇷',name:'France'},
+  {code:'DE',flag:'🇩🇪',name:'Allemagne'},{code:'AT',flag:'🇦🇹',name:'Autriche'},
+  {code:'BE',flag:'🇧🇪',name:'Belgique'},{code:'BG',flag:'🇧🇬',name:'Bulgarie'},
+  {code:'HR',flag:'🇭🇷',name:'Croatie'},{code:'CY',flag:'🇨🇾',name:'Chypre'},
+  {code:'DK',flag:'🇩🇰',name:'Danemark'},{code:'ES',flag:'🇪🇸',name:'Espagne'},
+  {code:'EE',flag:'🇪🇪',name:'Estonie'},{code:'FI',flag:'🇫🇮',name:'Finlande'},
+  {code:'GR',flag:'🇬🇷',name:'Grèce'},{code:'HU',flag:'🇭🇺',name:'Hongrie'},
+  {code:'IE',flag:'🇮🇪',name:'Irlande'},{code:'IT',flag:'🇮🇹',name:'Italie'},
+  {code:'LV',flag:'🇱🇻',name:'Lettonie'},{code:'LT',flag:'🇱🇹',name:'Lituanie'},
+  {code:'LU',flag:'🇱🇺',name:'Luxembourg'},{code:'MT',flag:'🇲🇹',name:'Malte'},
+  {code:'NL',flag:'🇳🇱',name:'Pays-Bas'},{code:'PL',flag:'🇵🇱',name:'Pologne'},
+  {code:'PT',flag:'🇵🇹',name:'Portugal'},{code:'CZ',flag:'🇨🇿',name:'Rép. tchèque'},
+  {code:'RO',flag:'🇷🇴',name:'Roumanie'},{code:'SK',flag:'🇸🇰',name:'Slovaquie'},
+  {code:'SI',flag:'🇸🇮',name:'Slovénie'},{code:'SE',flag:'🇸🇪',name:'Suède'},
+  {code:'CH',flag:'🇨🇭',name:'Suisse'},
+  {code:'CA',flag:'🇨🇦',name:'Canada'},{code:'US',flag:'🇺🇸',name:'États-Unis'},
+  {code:'GB',flag:'🇬🇧',name:'Royaume-Uni'},{code:'JP',flag:'🇯🇵',name:'Japon'},
+  {code:'AU',flag:'🇦🇺',name:'Australie'},{code:'BR',flag:'🇧🇷',name:'Brésil'},
+  {code:'MX',flag:'🇲🇽',name:'Mexique'},{code:'CN',flag:'🇨🇳',name:'Chine'},
+  {code:'KR',flag:'🇰🇷',name:'Corée du Sud'},{code:'IN',flag:'🇮🇳',name:'Inde'},
+];
+
+const LV_DEFAULTS = {
+  tvaEnabled: true, tvaRate: 0.20, defaultShipping: 8,
+  shippingRates: { FR:6.5, DE:8, AT:8, BE:8, BG:8, HR:8, CY:8, DK:8, ES:8, EE:8, FI:8, GR:8, HU:8, IE:8, IT:8, LV:8, LT:8, LU:8, MT:8, NL:8, PL:8, PT:8, CZ:8, RO:8, SK:8, SI:8, SE:8, CH:8, CA:50, US:50 }
+};
+
+window.lvToggleTrack = (on) => {
+  document.getElementById('lvTvaTrack').style.background = on ? 'var(--accent)' : 'var(--border2)';
+  document.getElementById('lvTvaThumb').style.left = on ? '22px' : '2px';
+};
+
+let _lvCurrentRates = {};
+
+window.lvRenderGrid = (rates) => {
+  _lvCurrentRates = Object.assign({}, rates);
+  const grid = document.getElementById('lvRatesGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  Object.entries(_lvCurrentRates).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([code, price]) => {
+    const info = _LV_COUNTRY_LIST.find(c=>c.code===code) || {flag:'🌍', name:code};
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;background:var(--bg3);border:1.5px solid var(--border2);border-radius:10px;padding:8px 12px';
+    row.dataset.code = code;
+    row.innerHTML = `<span style="font-size:18px;flex-shrink:0">${info.flag}</span><span style="flex:1;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${info.name}</span><input type="number" min="0" step="0.5" value="${price}" style="width:70px;padding:5px 8px;background:var(--bg4);border:1.5px solid var(--border2);border-radius:8px;font-size:12px;color:var(--text);text-align:right;outline:none" onchange="lvUpdateRate('${code}',this.value)"><span style="font-size:11px;color:var(--muted)">€</span><button onclick="lvRemoveRow('${code}')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;flex-shrink:0;padding:2px 4px;border-radius:4px;transition:color .15s" title="Supprimer">×</button>`;
+    grid.appendChild(row);
+  });
+};
+
+window.lvUpdateRate = (code, val) => { _lvCurrentRates[code] = parseFloat(val)||0; };
+window.lvRemoveRow = (code) => { delete _lvCurrentRates[code]; lvRenderGrid(_lvCurrentRates); };
+
+window.lvAddRow = () => {
+  const used = Object.keys(_lvCurrentRates);
+  const avail = _LV_COUNTRY_LIST.filter(c => !used.includes(c.code));
+  if (!avail.length) { toast('Tous les pays sont déjà ajoutés'); return; }
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'background:var(--bg3);border:1.5px solid var(--accent);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;flex-direction:column;gap:8px';
+  wrap.innerHTML = `
+    <div style="font-size:11px;font-weight:600;color:var(--soft)">Choisir un pays :</div>
+    <select id="lvNewCountrySel" style="padding:8px 12px;background:var(--bg4);border:1.5px solid var(--border2);border-radius:8px;font-size:12px;color:var(--text);outline:none">
+      ${avail.map(c=>`<option value="${c.code}">${c.flag} ${c.name}</option>`).join('')}
+    </select>
+    <div style="display:flex;align-items:center;gap:8px">
+      <input type="number" id="lvNewPrice" min="0" step="0.5" placeholder="Prix €" value="8" style="flex:1;padding:8px 12px;background:var(--bg4);border:1.5px solid var(--border2);border-radius:8px;font-size:12px;color:var(--text);outline:none">
+      <span style="font-size:11px;color:var(--muted)">€</span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="lvConfirmAdd(this.closest('div[style]'))" class="btn btn-a" style="font-size:11px;flex:1;justify-content:center">Ajouter</button>
+      <button onclick="this.closest('div[style]').remove()" class="btn btn-g" style="font-size:11px">Annuler</button>
+    </div>`;
+  document.getElementById('lvRatesGrid').before(wrap);
+};
+
+window.lvConfirmAdd = (wrap) => {
+  const code = document.getElementById('lvNewCountrySel').value;
+  const price = parseFloat(document.getElementById('lvNewPrice').value)||0;
+  wrap.remove();
+  _lvCurrentRates[code] = price;
+  lvRenderGrid(_lvCurrentRates);
+};
+
+window.loadLivraisonCfg = async () => {
+  try {
+    const data = await fbGetConfig('livraison');
+    const cfg = data || LV_DEFAULTS;
+    const tvaOn = cfg.tvaEnabled !== false;
+    document.getElementById('lvTvaEnabled').checked = tvaOn;
+    lvToggleTrack(tvaOn);
+    document.getElementById('lvTvaRate').value = Math.round((cfg.tvaRate || LV_DEFAULTS.tvaRate) * 100);
+    document.getElementById('lvDefaultShipping').value = cfg.defaultShipping ?? LV_DEFAULTS.defaultShipping;
+    lvRenderGrid(cfg.shippingRates || LV_DEFAULTS.shippingRates);
+  } catch(e) {
+    document.getElementById('lvTvaEnabled').checked = true;
+    lvToggleTrack(true);
+    document.getElementById('lvTvaRate').value = 20;
+    document.getElementById('lvDefaultShipping').value = 8;
+    lvRenderGrid(LV_DEFAULTS.shippingRates);
+  }
+};
+
+window.saveLivraisonCfg = async () => {
+  const btn = document.getElementById('btnSaveLivraison');
+  const fb  = document.getElementById('lvFeedback');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Enregistrement…';
+  fb.style.display = 'none';
+  try {
+    const cfg = {
+      tvaEnabled:      document.getElementById('lvTvaEnabled').checked,
+      tvaRate:         (parseFloat(document.getElementById('lvTvaRate').value)||20) / 100,
+      defaultShipping: parseFloat(document.getElementById('lvDefaultShipping').value)||8,
+      shippingRates:   Object.assign({}, _lvCurrentRates),
+      updatedAt:       new Date(),
+    };
+    await fbSetConfig('livraison', cfg);
+    fb.style.cssText = 'display:block;color:#16a34a;background:rgba(22,163,74,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center;margin-bottom:12px';
+    fb.textContent = '✓ Configuration enregistrée ! Le panier appliquera ces tarifs immédiatement.';
+    toast('Livraison & TVA sauvegardées ✓');
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer';
+    setTimeout(() => fb.style.display='none', 5000);
+  } catch(e) {
+    fb.style.cssText = 'display:block;color:#e11d48;background:rgba(225,29,72,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center;margin-bottom:12px';
+    fb.textContent = '⚠ Erreur : ' + e.message;
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer';
+  }
+};
+
 
 
 const DCFG_DEFAULTS = {

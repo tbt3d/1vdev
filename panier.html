@@ -352,44 +352,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
         <!-- Livraison -->
         <div class="shipping-select-wrap">
           <label>🌍 Pays de livraison</label>
-          <select class="shipping-select" id="shippingCountry" onchange="updateSummaryTotals()">
-            <optgroup label="France">
-              <option value="FR" selected>🇫🇷 France — 6,50 €</option>
-            </optgroup>
-            <optgroup label="Europe">
-              <option value="DE">🇩🇪 Allemagne — 8,00 €</option>
-              <option value="AT">🇦🇹 Autriche — 8,00 €</option>
-              <option value="BE">🇧🇪 Belgique — 8,00 €</option>
-              <option value="BG">🇧🇬 Bulgarie — 8,00 €</option>
-              <option value="HR">🇭🇷 Croatie — 8,00 €</option>
-              <option value="CY">🇨🇾 Chypre — 8,00 €</option>
-              <option value="DK">🇩🇰 Danemark — 8,00 €</option>
-              <option value="ES">🇪🇸 Espagne — 8,00 €</option>
-              <option value="EE">🇪🇪 Estonie — 8,00 €</option>
-              <option value="FI">🇫🇮 Finlande — 8,00 €</option>
-              <option value="GR">🇬🇷 Grèce — 8,00 €</option>
-              <option value="HU">🇭🇺 Hongrie — 8,00 €</option>
-              <option value="IE">🇮🇪 Irlande — 8,00 €</option>
-              <option value="IT">🇮🇹 Italie — 8,00 €</option>
-              <option value="LV">🇱🇻 Lettonie — 8,00 €</option>
-              <option value="LT">🇱🇹 Lituanie — 8,00 €</option>
-              <option value="LU">🇱🇺 Luxembourg — 8,00 €</option>
-              <option value="MT">🇲🇹 Malte — 8,00 €</option>
-              <option value="NL">🇳🇱 Pays-Bas — 8,00 €</option>
-              <option value="PL">🇵🇱 Pologne — 8,00 €</option>
-              <option value="PT">🇵🇹 Portugal — 8,00 €</option>
-              <option value="CZ">🇨🇿 République tchèque — 8,00 €</option>
-              <option value="RO">🇷🇴 Roumanie — 8,00 €</option>
-              <option value="SK">🇸🇰 Slovaquie — 8,00 €</option>
-              <option value="SI">🇸🇮 Slovénie — 8,00 €</option>
-              <option value="SE">🇸🇪 Suède — 8,00 €</option>
-              <option value="CH">🇨🇭 Suisse — 8,00 €</option>
-            </optgroup>
-            <optgroup label="Amérique du Nord">
-              <option value="CA">🇨🇦 Canada — 50,00 €</option>
-              <option value="US">🇺🇸 États-Unis — 50,00 €</option>
-            </optgroup>
-          </select>
+          <select class="shipping-select" id="shippingCountry" onchange="updateSummaryTotals()"></select>
         </div>
 
         <!-- Code promo -->
@@ -638,16 +601,70 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
 </script>
 <script>
 // ── TARIFS LIVRAISON ──────────────────────────────────────────────
-const SHIPPING_RATES = {
-  FR: 6.5,
-  // Europe
-  DE:8, AT:8, BE:8, BG:8, HR:8, CY:8, DK:8, ES:8, EE:8, FI:8,
+// ── Taux par défaut — écrasés en temps réel par Firebase config/livraison ──
+let SHIPPING_RATES = {
+  FR:6.5, DE:8, AT:8, BE:8, BG:8, HR:8, CY:8, DK:8, ES:8, EE:8, FI:8,
   GR:8, HU:8, IE:8, IT:8, LV:8, LT:8, LU:8, MT:8, NL:8, PL:8,
-  PT:8, CZ:8, RO:8, SK:8, SI:8, SE:8, CH:8,
-  // Amérique du Nord
-  CA:50, US:50,
+  PT:8, CZ:8, RO:8, SK:8, SI:8, SE:8, CH:8, CA:50, US:50,
 };
-const TVA_RATE = 0.20;
+let TVA_RATE    = 0.20;
+let TVA_ENABLED = true;
+let DEFAULT_SHIPPING = 8;
+let _livraisonCfg = null;
+
+const _LV_FLAGS = {FR:'🇫🇷',DE:'🇩🇪',AT:'🇦🇹',BE:'🇧🇪',BG:'🇧🇬',HR:'🇭🇷',CY:'🇨🇾',DK:'🇩🇰',ES:'🇪🇸',EE:'🇪🇪',FI:'🇫🇮',GR:'🇬🇷',HU:'🇭🇺',IE:'🇮🇪',IT:'🇮🇹',LV:'🇱🇻',LT:'🇱🇹',LU:'🇱🇺',MT:'🇲🇹',NL:'🇳🇱',PL:'🇵🇱',PT:'🇵🇹',CZ:'🇨🇿',RO:'🇷🇴',SK:'🇸🇰',SI:'🇸🇮',SE:'🇸🇪',CH:'🇨🇭',CA:'🇨🇦',US:'🇺🇸'};
+const _LV_NAMES = {FR:'France',DE:'Allemagne',AT:'Autriche',BE:'Belgique',BG:'Bulgarie',HR:'Croatie',CY:'Chypre',DK:'Danemark',ES:'Espagne',EE:'Estonie',FI:'Finlande',GR:'Grèce',HU:'Hongrie',IE:'Irlande',IT:'Italie',LV:'Lettonie',LT:'Lituanie',LU:'Luxembourg',MT:'Malte',NL:'Pays-Bas',PL:'Pologne',PT:'Portugal',CZ:'République tchèque',RO:'Roumanie',SK:'Slovaquie',SI:'Slovénie',SE:'Suède',CH:'Suisse',CA:'Canada',US:'États-Unis'};
+const _LV_GROUPS = {
+  'France':['FR'],
+  'Europe':['DE','AT','BE','BG','HR','CY','DK','ES','EE','FI','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','CZ','RO','SK','SI','SE','CH'],
+  'Amérique du Nord':['CA','US'],
+};
+
+async function getLivraisonCfg() {
+  if (_livraisonCfg) return _livraisonCfg;
+  try {
+    const res = await fetch('https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/config/livraison?key=AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8');
+    if (res.ok) { const d = await res.json(); _livraisonCfg = _fromFirestoreFields(d.fields||{}); }
+    else _livraisonCfg = {};
+  } catch(e) { _livraisonCfg = {}; }
+  return _livraisonCfg;
+}
+
+function applyLivraisonCfg(cfg) {
+  if (!cfg) return;
+  if (cfg.tvaEnabled !== undefined) TVA_ENABLED = !!cfg.tvaEnabled;
+  if (cfg.tvaRate)           TVA_RATE          = parseFloat(cfg.tvaRate) || 0.20;
+  if (cfg.defaultShipping !== undefined) DEFAULT_SHIPPING = parseFloat(cfg.defaultShipping) || 8;
+  if (cfg.shippingRates && typeof cfg.shippingRates === 'object') {
+    Object.keys(SHIPPING_RATES).forEach(k => delete SHIPPING_RATES[k]);
+    Object.keys(cfg.shippingRates).forEach(k => { SHIPPING_RATES[k] = parseFloat(cfg.shippingRates[k])||0; });
+  }
+  rebuildCountrySelect();
+}
+
+function rebuildCountrySelect() {
+  const sel = document.getElementById('shippingCountry');
+  if (!sel) return;
+  const cur = sel.value || 'FR';
+  sel.innerHTML = '';
+  let hasCur = false;
+  Object.entries(_LV_GROUPS).forEach(([grpLabel, codes]) => {
+    const avail = codes.filter(c => SHIPPING_RATES[c] !== undefined);
+    if (!avail.length) return;
+    const og = document.createElement('optgroup');
+    og.label = grpLabel;
+    avail.forEach(code => {
+      const opt = document.createElement('option');
+      opt.value = code;
+      opt.textContent = (_LV_FLAGS[code]||'') + ' ' + (_LV_NAMES[code]||code) + ' — ' + SHIPPING_RATES[code].toFixed(2).replace('.',',') + ' €';
+      if (code === cur) { opt.selected = true; hasCur = true; }
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+  if (!hasCur && sel.options.length) sel.options[0].selected = true;
+  updateSummaryTotals();
+}
 
 function getShippingCountry() {
   const sel = document.getElementById('shippingCountry');
@@ -655,7 +672,8 @@ function getShippingCountry() {
 }
 
 function getShippingCost() {
-  return SHIPPING_RATES[getShippingCountry()] || 8;
+  const c = getShippingCountry();
+  return SHIPPING_RATES[c] !== undefined ? SHIPPING_RATES[c] : DEFAULT_SHIPPING;
 }
 
 // ── Code promo ──────────────────────────────────────────────
@@ -673,7 +691,7 @@ function computeTotals() {
   const subtotal  = TBTCart.total();
   const discount  = getPromoDiscount(subtotal);
   const subtotalAfterDiscount = Math.max(0, subtotal - discount);
-  const tva       = parseFloat((subtotalAfterDiscount * TVA_RATE).toFixed(2));
+  const tva       = TVA_ENABLED ? parseFloat((subtotalAfterDiscount * TVA_RATE).toFixed(2)) : 0;
   const shipping  = getShippingCost();
   const total     = parseFloat((subtotalAfterDiscount + tva + shipping).toFixed(2));
   return { subtotal, discount, tva, shipping, total };
@@ -692,16 +710,14 @@ function updateSummaryTotals() {
       <span>−${discount.toFixed(2)} €</span>
     </div>`;
   }
-  const tvaLabel = discount > 0 ? `TVA (20% sur ${(subtotal - discount).toFixed(2)} €)` : 'TVA (20%)';
+  const tvaPct = Math.round(TVA_RATE * 100);
+  const tvaLabel = discount > 0 ? `TVA (${tvaPct}% sur ${(subtotal - discount).toFixed(2)} €)` : `TVA (${tvaPct}%)`;
+  const tvaLine  = TVA_ENABLED && tva > 0 ? `<div class="summary-line-muted"><span>${tvaLabel}</span><span>${tva.toFixed(2)} €</span></div>` : '';
   document.getElementById('summaryExtras').innerHTML = `
     <div class="summary-line-muted">
       <span>Sous-total HT</span>
       <span>${subtotal.toFixed(2)} €</span>
-    </div>${discountLine}
-    <div class="summary-line-muted">
-      <span>${tvaLabel}</span>
-      <span>${tva.toFixed(2)} €</span>
-    </div>
+    </div>${discountLine}${tvaLine}
     <div class="summary-line-muted">
       <span>Livraison</span>
       <span>${shipping.toFixed(2)} €</span>
@@ -1005,11 +1021,12 @@ function openCheckout() {
     const lbl = _appliedPromo.type === 'percent' ? `-${_appliedPromo.value}%` : `-${_appliedPromo.value.toFixed(2)} €`;
     discountModalLine = `<div class="summary-line-muted" style="color:var(--green)"><span>Code ${_appliedPromo.code} (${lbl})</span><span>−${discount.toFixed(2)} €</span></div>`;
   }
-  const tvaLabelModal = discount > 0 ? `TVA (20% sur ${(subtotal - discount).toFixed(2)} €)` : 'TVA (20%)';
+  const tvaPctM = Math.round(TVA_RATE * 100);
+  const tvaLabelModal = discount > 0 ? `TVA (${tvaPctM}% sur ${(subtotal - discount).toFixed(2)} €)` : `TVA (${tvaPctM}%)`;
+  const tvaLineM = TVA_ENABLED && tva > 0 ? `<div class="summary-line-muted"><span>${tvaLabelModal}</span><span>${tva.toFixed(2)} €</span></div>` : '';
   document.getElementById('coSummaryLines').innerHTML = `
     <div class="summary-line-muted"><span>Sous-total HT</span><span>${subtotal.toFixed(2)} €</span></div>
-    ${discountModalLine}
-    <div class="summary-line-muted"><span>${tvaLabelModal}</span><span>${tva.toFixed(2)} €</span></div>
+    ${discountModalLine}${tvaLineM}
     <div class="summary-line-muted"><span>Livraison</span><span>${shipping.toFixed(2)} €</span></div>
   `;
   document.getElementById('coTotal').textContent = total.toFixed(2) + ' €';
@@ -1098,15 +1115,17 @@ function buildWorkerItems(items, mode) {
     return null;
   }).filter(Boolean);
 
-  // Ajouter TVA comme ligne dynamique
-  workerItems.push({
-    isDynamic: true,
-    name: 'TVA (20%)',
-    variant: '',
-    note: '',
-    price: tva,
-    qty: 1,
-  });
+  // Ajouter TVA comme ligne dynamique (si activée)
+  if (TVA_ENABLED && tva > 0) {
+    workerItems.push({
+      isDynamic: true,
+      name: 'TVA (' + Math.round(TVA_RATE * 100) + '%)',
+      variant: '',
+      note: '',
+      price: tva,
+      qty: 1,
+    });
+  }
 
   // Ajouter livraison comme ligne dynamique
   const country = getShippingCountry();
@@ -1335,10 +1354,13 @@ document.addEventListener('keydown', e => {
 });
 
 window.addEventListener('cart:updated', renderCart);
-// Attendre que Firestore ait chargé le panier avant d'afficher
-TBTCart.init().then(function() {
-  renderCart();
-  validateAddress();
+// Charger config livraison PUIS initialiser le panier
+getLivraisonCfg().then(function(cfg) {
+  applyLivraisonCfg(cfg);
+  TBTCart.init().then(function() {
+    renderCart();
+    validateAddress();
+  });
 });
 
 // Détecter retour depuis Stripe après annulation ou succès
@@ -1458,6 +1480,14 @@ TBTCart.init().then(function() {
 <script>
   document.getElementById('footerYear').textContent = new Date().getFullYear();
 </script>
-
+<!-- TBT3D Analytics -->
+<script>
+(function(){
+  const _p='https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/pageViews';
+  function _d(){var u=navigator.userAgent;return /tablet|ipad/i.test(u)?'tablet':/mobile|android|iphone/i.test(u)?'mobile':'desktop';}
+  function _s(){var k='tbt3d_sid',s=sessionStorage.getItem(k);if(!s){s=Math.random().toString(36).slice(2)+Date.now();sessionStorage.setItem(k,s);}return s;}
+  fetch(_p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{page:{stringValue:location.href},referrer:{stringValue:document.referrer||'(direct)'},device:{stringValue:_d()},sessionId:{stringValue:_s()},timestamp:{timestampValue:new Date().toISOString()}}})}).catch(function(){});
+})();
+</script>
 </body>
 </html>

@@ -438,7 +438,7 @@ async function generateAndSaveFacture(stripeData, fbData, orderId) {
 
   const totalsHtml = subtotalAmt !== null ? `
     <div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total HT</span><span>${subtotalAmt.toFixed(2)} €</span></div>
-    ${tvaAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>TVA (20%)</span><span>${tvaAmt.toFixed(2)} €</span></div>`:''}
+    ${tvaAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>TVA</span><span>${tvaAmt.toFixed(2)} €</span></div>`:''}
     ${shippingAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Livraison</span><span>${shippingAmt.toFixed(2)} €</span></div>`:''}
     ${promoLineHtml}
   ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${totalTTC.toFixed(2)} €</span></div>${promoLineHtml}`;
@@ -573,7 +573,7 @@ async function sendAutoConfirmationEmail(stripeData, fbData, orderId) {
 
   const totalsHtml = subtotalAmt !== null ? `
     <tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">Sous-total HT</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${subtotalAmt.toFixed(2)} €</td></tr>
-    ${tvaAmt !== null ? `<tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">TVA (20%)</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${tvaAmt.toFixed(2)} €</td></tr>` : ''}
+    ${tvaAmt !== null ? `<tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">TVA</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${tvaAmt.toFixed(2)} €</td></tr>` : ''}
     ${shippingAmt !== null ? `<tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">Livraison</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${shippingAmt.toFixed(2)} €</td></tr>` : ''}
   ` : '';
 
@@ -811,7 +811,7 @@ function displayConfirmation(data, orderId, fbData) {
 
   totalRows.innerHTML = subtotalAmt !== null ? `
     <div class="total-row"><span>Sous-total HT</span><span>${subtotalAmt.toFixed(2)} €</span></div>
-    ${tvaAmt !== null ? `<div class="total-row"><span>TVA (20%)</span><span>${tvaAmt.toFixed(2)} €</span></div>` : ''}
+    ${tvaAmt !== null ? `<div class="total-row"><span>TVA</span><span>${tvaAmt.toFixed(2)} €</span></div>` : ''}
     ${shippingAmt !== null ? `<div class="total-row"><span>Livraison</span><span>${shippingAmt.toFixed(2)} €</span></div>` : ''}
     ${promoCode && promoDiscount > 0 ? `<div class="total-row" style="color:var(--green)"><span>🎟 Code promo ${promoCode}${promoLabel ? ' ('+promoLabel+')' : ''}</span><span>−${promoDiscount.toFixed(2)} €</span></div>` : ''}
     <div class="total-row main"><span>Total TTC payé</span><strong>${totalTTC.toFixed(2)} €</strong></div>
@@ -938,7 +938,7 @@ window.downloadFacture = async function() {
 
       const totalsHtml = subtotalAmt !== null ? `
         <div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total HT</span><span>${subtotalAmt.toFixed(2)} €</span></div>
-        ${tvaAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>TVA (20%)</span><span>${tvaAmt.toFixed(2)} €</span></div>`:''}
+        ${tvaAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>TVA</span><span>${tvaAmt.toFixed(2)} €</span></div>`:''}
         ${shippingAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Livraison</span><span>${shippingAmt.toFixed(2)} €</span></div>`:''}
         ${dlPromoLine}
       ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${totalTTC.toFixed(2)} €</span></div>${dlPromoLine}`;
@@ -1108,5 +1108,14 @@ function showError(msg) {
     </span>
   </div>
 </footer>
+<!-- TBT3D Analytics -->
+<script>
+(function(){
+  const _p='https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/pageViews';
+  function _d(){var u=navigator.userAgent;return /tablet|ipad/i.test(u)?'tablet':/mobile|android|iphone/i.test(u)?'mobile':'desktop';}
+  function _s(){var k='tbt3d_sid',s=sessionStorage.getItem(k);if(!s){s=Math.random().toString(36).slice(2)+Date.now();sessionStorage.setItem(k,s);}return s;}
+  fetch(_p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{page:{stringValue:location.href},referrer:{stringValue:document.referrer||'(direct)'},device:{stringValue:_d()},sessionId:{stringValue:_s()},timestamp:{timestampValue:new Date().toISOString()}}})}).catch(function(){});
+})();
+</script>
 </body>
 </html>
