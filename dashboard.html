@@ -2269,6 +2269,8 @@ async function initApp(){
     // Charger la config TVA/livraison en premier pour que window._appTvaRate
     // soit correct AVANT toute génération de facture
     try { const d = await fbGetConfig('livraison'); if(d?.tvaRate) window._appTvaRate = d.tvaRate; } catch(e){}
+    // Charger les thumbnails devis pour les previews boutique/hp
+    try { const d = await fbGetConfig('devis'); if(d?.boutThumb) window._devisBoutThumb = d.boutThumb; if(d?.homeThumb) window._devisHomeThumb = d.homeThumb; } catch(e){}
     await fbGetArticles();
     await loadHp();
     await loadBout();
@@ -2585,7 +2587,7 @@ function renderPreview(gridId,slots){
     const price=slot.type==='custom'?slot.customPrice:(slot.overridePrice||(art?parseFloat(art.price).toFixed(2)+' €':'—'));
     const from=slot.type==='article'&&slot.overrideFrom&&!slot.overridePrice;
     const dark=slot.type==='custom'&&slot.customDark;
-    const img=slot.type==='custom'?(slot.customImage||null):art?.photos?.[0];
+    const img=slot.type==='custom'?(slot.customImage||(dark?(prefix==='bout'?window._devisBoutThumb:window._devisHomeThumb)||null:null)):art?.photos?.[0];
     const bs=(slot.customBadgeStyle||slot.overrideBadgeStyle||'black')==='white'?'background:#fff;color:#111':'background:#111;color:#fff';
     return `<div class="pv-card" style="${dark?'background:#111;border-color:#333':''}"><div class="pv-img" style="${dark?'background:#0a0a0a':''}">${img?`<img src="${img}">`:`<div class="pv-ph" style="${dark?'background:#111;color:rgba(255,255,255,.2)':''}">${dark?'⬡':'🏮'}</div>`}${badge?`<div class="pv-b" style="${bs}">${esc(badge)}</div>`:''}</div><div class="pv-info" style="${dark?'background:#111':''}"><div class="pv-n" style="${dark?'color:#efefef':''}">${esc(name)}</div><div class="pv-s">${esc(sub.substring(0,26))}</div><div class="pv-p" style="${dark?'color:#efefef':''}">${from?`<span class="pv-from">À partir de </span>`:''}${esc(price)}</div></div></div>`;
   }).join('');
@@ -5970,11 +5972,16 @@ window.loadDevisCfg = async () => {
     document.getElementById('dcfgSlaRate').value = cfg.slaRate ?? DCFG_DEFAULTS.slaRate;
     document.getElementById('dcfgMinPrice').value = cfg.minPrice ?? DCFG_DEFAULTS.minPrice;
     document.getElementById('dcfgDelay').value = cfg.delay ?? DCFG_DEFAULTS.delay;
+    // Stocker les thumbnails globalement pour usage dans les previews boutique/hp
+    if(cfg.homeThumb) window._devisHomeThumb = cfg.homeThumb;
+    if(cfg.boutThumb) window._devisBoutThumb = cfg.boutThumb;
     // Thumbnails
     const hp = document.getElementById('dcfgHomeImgPreview');
     const bt = document.getElementById('dcfgBoutImgPreview');
     if(cfg.homeThumb && hp) hp.innerHTML = `<img src="${cfg.homeThumb}" style="width:100%;height:100%;object-fit:cover">`;
     if(cfg.boutThumb && bt) bt.innerHTML = `<img src="${cfg.boutThumb}" style="width:100%;height:100%;object-fit:cover">`;
+    // Rafraichir les previews boutique/hp avec la bonne image
+    renderHpPreview(); renderBoutPreview();
   } catch(e){ console.log('Config devis not found, using defaults'); }
 };
 
