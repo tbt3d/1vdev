@@ -5986,6 +5986,10 @@ window.uploadDevisThumb = async (which, input) => {
     const url = data.secure_url;
     const prevEl = document.getElementById(which === 'home' ? 'dcfgHomeImgPreview' : 'dcfgBoutImgPreview');
     if(prevEl) prevEl.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover">`;
+    // Mettre à jour les variables globales + rafraîchir previews
+    if(which === 'home') window._devisHomeThumb = url;
+    else window._devisBoutThumb = url;
+    renderHpPreview(); renderBoutPreview();
     // Save immediately to Firebase
     const existing = await fbGetConfig('devis') || {};
     await fbSetConfig('devis', { ...existing, [which === 'home' ? 'homeThumb' : 'boutThumb']: url, updatedAt: new Date() });
