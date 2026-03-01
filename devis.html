@@ -1455,8 +1455,9 @@ async function addDevisToCartAndPay() {
 
   btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Ajout au panier…';
 
-  // Ajouter au panier
-  TBTCart.add({
+  // Ajouter au panier — AWAIT pour s'assurer que le PATCH Firestore est terminé
+  // avant de naviguer (sinon l'item n'est pas encore en base quand panier.html charge)
+  await TBTCart.add({
     id:         'devis-' + Date.now(),
     name:       'Impression sur mesure — ' + S.file.name,
     price:      ttc,
@@ -1473,8 +1474,9 @@ async function addDevisToCartAndPay() {
     qty:        S.qty,
   });
 
-  // Redirection vers le panier
-  window.location.href = '/panier.html';
+  // Redirection vers le panier avec le sid pour garantir la continuité de session
+  const sid = window._getTBTSid ? window._getTBTSid() : null;
+  window.location.href = '/panier.html' + (sid ? '?sid=' + encodeURIComponent(sid) : '');
 }
 
 // ── BADGE PANIER ──────────────────────────────────────────────────────────────
