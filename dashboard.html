@@ -5502,6 +5502,7 @@ window.lvAddRow = () => {
   const avail = _LV_COUNTRY_LIST.filter(c => !used.includes(c.code));
   if (!avail.length) { toast('Tous les pays sont déjà ajoutés'); return; }
   const wrap = document.createElement('div');
+  wrap.className = 'lv-add-wrap';
   wrap.style.cssText = 'background:var(--bg3);border:1.5px solid var(--accent);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;flex-direction:column;gap:8px';
   wrap.innerHTML = `
     <div style="font-size:11px;font-weight:600;color:var(--soft)">Choisir un pays :</div>
@@ -5513,8 +5514,8 @@ window.lvAddRow = () => {
       <span style="font-size:11px;color:var(--muted)">€</span>
     </div>
     <div style="display:flex;gap:8px">
-      <button onclick="lvConfirmAdd(this.closest('div[style]'))" class="btn btn-a" style="font-size:11px;flex:1;justify-content:center">Ajouter</button>
-      <button onclick="this.closest('div[style]').remove()" class="btn btn-g" style="font-size:11px">Annuler</button>
+      <button onclick="lvConfirmAdd(this.closest('.lv-add-wrap'))" class="btn btn-a" style="font-size:11px;flex:1;justify-content:center">Ajouter</button>
+      <button onclick="this.closest('.lv-add-wrap').remove()" class="btn btn-g" style="font-size:11px">Annuler</button>
     </div>`;
   document.getElementById('lvRatesGrid').before(wrap);
 };
