@@ -825,6 +825,7 @@ tr:hover td{background:rgba(255,255,255,.01)}
         <div>
           <div class="slots-wrap" id="hpSlots"></div>
           <div style="margin-top:6px;font-size:10px;color:var(--muted)">☝ Glissez pour changer l'ordre</div>
+          <button class="btn btn-g" style="margin-top:10px;width:100%;justify-content:center;font-size:11px" onclick="boutAddCustom()">✦ Ajouter une carte sur mesure</button>
         </div>
         <div class="cfg-sticky-col">
           <div class="cfg-pv">
@@ -872,6 +873,7 @@ tr:hover td{background:rgba(255,255,255,.01)}
         <div>
           <div class="slots-wrap" id="boutSlots"></div>
           <div style="margin-top:6px;font-size:10px;color:var(--muted)">☝ Glissez pour changer l'ordre</div>
+          <button class="btn btn-g" style="margin-top:10px;width:100%;justify-content:center;font-size:11px" onclick="boutAddCustom()">✦ Ajouter une carte sur mesure</button>
         </div>
         <div class="cfg-sticky-col">
           <div class="cfg-pv">
@@ -2448,6 +2450,11 @@ window.saveBout = async () => {
   setBtnLoading('btnSaveBout',false,true);
 };
 window.resetBout = () => { boutSlots=[]; syncBoutSlots(); dirty('bout',true); renderBoutUI(); };
+window.boutAddCustom = () => {
+  boutSlots.push({type:'custom',customLabel:'Impression sur mesure',customSub:'Votre fichier STL · FDM ou résine',customPrice:'Prix calculé en ligne',customBadge:'Sur mesure',customBadgeStyle:'black',customLink:'/devis.html',customDark:true,customImage:window._devisBoutThumb||null});
+  dirty('bout',true);
+  renderBoutUI();
+};
 
 // ── DIRTY FLAG ──
 function dirty(which,d){
@@ -2477,7 +2484,7 @@ function renderSlotCard(ct,slot,i,prefix){
     <div class="field"><label>Produit</label>
       <select onchange="setSlotArt('${prefix}',${i},this.value)">
         <option value="">— Choisir —</option>${opts}
-        ${prefix==='hp'?`<option value="__custom__">✦ Carte personnalisée</option>`:''}
+        <option value="__custom__">✦ Carte personnalisée</option>
       </select>
     </div>
     ${art?`<div class="sl-prev">${art.photos?.[0]?`<img class="sl-thumb" src="${art.photos[0]}">`:`<div class="sl-thumb-ph">🏮</div>`}<div><div class="sl-pn">${esc(art.name)}</div><div class="sl-pp">${parseFloat(art.price).toFixed(2)} €</div></div></div>`:''}
