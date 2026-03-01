@@ -3899,28 +3899,21 @@ function getItems(c) {
   return [];
 }
 
-// Total TTC réel (€) — priorité à amountTotal Stripe qui inclut TVA + livraison
+// Total TTC réel (€) — priorité à amountTotal Stripe qui inclut TVA + livraison + promo
 function getTotal(c) {
   if (c.amountTotal && c.amountTotal > 0) return c.amountTotal / 100;
-  // Fallback : c.total = sous-total HT articles (sans TVA ni livraison)
-  if (c.total && parseFloat(c.total) > 0) {
-    const items = getItems(c);
-    const subtotalHT = items.length > 0
-      ? items.reduce((s, i) => s + parseFloat(i.price||0) * parseInt(i.qty||1), 0)
-      : parseFloat(c.total);
-    const li = Array.isArray(c.lineItems) ? c.lineItems : [];
-    let tva = 0, shipping = 0;
-    li.forEach(item => {
-      const name = (item.name||'').toLowerCase();
-      const amt = item.amount != null ? item.amount / 100 : 0;
-      if (name.includes('tva') || name.includes('tax')) tva = amt;
-      else if (name.includes('livraison') || name.includes('shipping') || name.includes('frais')) shipping = amt;
-    });
-    return subtotalHT + tva + shipping;
-  }
-  const items = getItems(c);
-  if (items.length > 0) return items.reduce((s, i) => s + parseFloat(i.price||0) * parseInt(i.qty||1), 0);
-  return 0;
+  // Fallback : subtotal + tva + livraison - promo
+  const li = Array.isArray(c.lineItems) ? c.lineItems : [];
+  let tva = 0, shipping = 0;
+  li.forEach(item => {
+    const name = (item.name||'').toLowerCase();
+    const amt = item.amount != null ? item.amount / 100 : 0;
+    if (name.includes('tva') || name.includes('tax')) tva = amt;
+    else if (name.includes('livraison') || name.includes('shipping') || name.includes('frais')) shipping = amt;
+  });
+  const subtotalHT = getSubtotalHT(c);
+  const promo = parseFloat(c.promoDiscount || 0);
+  return Math.max(0, subtotalHT + tva + shipping - promo);
 }
 
 // Sous-total HT articles (sans TVA ni livraison)
