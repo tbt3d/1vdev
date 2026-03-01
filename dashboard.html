@@ -2587,7 +2587,8 @@ function renderPreview(gridId,slots){
     const price=slot.type==='custom'?slot.customPrice:(slot.overridePrice||(art?parseFloat(art.price).toFixed(2)+' €':'—'));
     const from=slot.type==='article'&&slot.overrideFrom&&!slot.overridePrice;
     const dark=slot.type==='custom'&&slot.customDark;
-    const img=slot.type==='custom'?(slot.customImage||(dark?(prefix==='bout'?window._devisBoutThumb:window._devisHomeThumb)||null:null)):art?.photos?.[0];
+    const devisThumb = dark ? (gridId==='boutPrev' ? (window._devisBoutThumb||null) : (window._devisHomeThumb||null)) : null;
+    const img=slot.type==='custom'?(slot.customImage||devisThumb):art?.photos?.[0];
     const bs=(slot.customBadgeStyle||slot.overrideBadgeStyle||'black')==='white'?'background:#fff;color:#111':'background:#111;color:#fff';
     return `<div class="pv-card" style="${dark?'background:#111;border-color:#333':''}"><div class="pv-img" style="${dark?'background:#0a0a0a':''}">${img?`<img src="${img}">`:`<div class="pv-ph" style="${dark?'background:#111;color:rgba(255,255,255,.2)':''}">${dark?'⬡':'🏮'}</div>`}${badge?`<div class="pv-b" style="${bs}">${esc(badge)}</div>`:''}</div><div class="pv-info" style="${dark?'background:#111':''}"><div class="pv-n" style="${dark?'color:#efefef':''}">${esc(name)}</div><div class="pv-s">${esc(sub.substring(0,26))}</div><div class="pv-p" style="${dark?'color:#efefef':''}">${from?`<span class="pv-from">À partir de </span>`:''}${esc(price)}</div></div></div>`;
   }).join('');
@@ -3919,23 +3920,9 @@ function getSubtotalHT(c) {
   return 0;
 }
 
-// Calcule le taux TVA réel depuis les données de la commande
-// Priorité : (1) données Stripe réelles tva/subtotal, (2) config globale _appTvaRate
+// Retourne le taux TVA configuré (chargé depuis Firebase au démarrage)
 function getTvaRate(c) {
-  const li = Array.isArray(c.lineItems) ? c.lineItems : [];
-  let tva = null, subtotalHT = getSubtotalHT(c) || null;
-  li.forEach(item => {
-    const name = (item.name||'').toLowerCase();
-    const amt = item.amount != null ? item.amount / 100 : null;
-    if (name.includes('tva') || name.includes('tax')) tva = amt;
-  });
-  if (tva !== null && subtotalHT && subtotalHT > 0) {
-    const computed = tva / subtotalHT;
-    // Arrondi au % le plus proche (ex: 0.2198 → 0.22)
-    return Math.round(computed * 100) / 100;
-  }
-  // Fallback sur la config globale
-  return getTvaRate(c);
+  return window._appTvaRate || 0.20;
 }
 
 // Extrait TVA et livraison depuis lineItems Stripe
@@ -4323,8 +4310,7 @@ function buildCmdModalBody(c){
     </button>`;
   }
   html += `<div style="display:flex;gap:8px">`;
-  html += `<button onclick="downloadFacturePdf('${esc(c._id)}')" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.4);color:#6366f1;border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;transition:all .15s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>⬇ Facture PDF</button>`;
-  html += `<button onclick="printFacture()" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.3);color:#6366f1;border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;transition:all .15s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Imprimer</button>`;
+  html += `<button onclick="printFacture()" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.3);color:#6366f1;border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;transition:all .15s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Imprimer facture</button>`;
   html += `<button onclick="printBL()" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:rgba(46,204,138,.08);border:1px solid rgba(46,204,138,.3);color:var(--green);border-radius:var(--r);cursor:pointer;font-family:var(--font);font-size:12px;font-weight:700;transition:all .15s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimer le bon de livraison</button>`;
   html += `</div></div>`;
 
@@ -5264,7 +5250,7 @@ window.printFacture = () => {
   <div class="totals">
     ${_ts.subtotal!==null ? `
       <div class="total-row"><span>Sous-total HT</span><span>${_ts.subtotal.toFixed(2)} €</span></div>
-      ${_ts.tva!==null?'<div class="total-row"><span>TVA (${Math.round((getTvaRate(c))*100)}%)</span><span>'+_ts.tva.toFixed(2)+' €</span></div>':''}
+      ${_ts.tva!==null?`<div class="total-row"><span>TVA (${Math.round(getTvaRate(c)*100)}%)</span><span>${_ts.tva.toFixed(2)} €</span></div>`:''}
       ${_ts.shipping!==null?'<div class="total-row"><span>Frais de livraison</span><span>'+_ts.shipping.toFixed(2)+' €</span></div>':''}
     ` : `
       <div class="total-row"><span>Sous-total</span><span>${total.toFixed(2)} €</span></div>
