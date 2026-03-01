@@ -8,7 +8,6 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f4f4f4; color: #111; }
 
-    /* Loading / Error screens */
     .screen { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; padding: 40px 20px; }
     .spinner { width: 40px; height: 40px; border: 3px solid #e8e8e8; border-top-color: #111; border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -16,7 +15,6 @@
     .screen h2 { font-size: 22px; font-weight: 600; color: #111; }
     .screen a { margin-top: 8px; padding: 12px 28px; background: #111; color: #fff; text-decoration: none; border-radius: 50px; font-size: 13px; font-weight: 500; }
 
-    /* Top action bar (non-printable) */
     .action-bar {
       background: #111;
       padding: 14px 32px;
@@ -25,6 +23,9 @@
       justify-content: space-between;
       gap: 12px;
       flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     .action-bar-brand { color: #fff; font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
     .action-bar-brand span { color: #ff6b35; }
@@ -44,7 +45,18 @@
     }
     .btn-back:hover { background: rgba(255,255,255,.18); }
 
-    /* Facture iframe/container */
+    /* iOS tip banner */
+    #iosTip {
+      display: none;
+      background: #fff3cd;
+      border-bottom: 1px solid #ffc107;
+      padding: 10px 20px;
+      font-size: 13px;
+      color: #856404;
+      text-align: center;
+    }
+
+    /* Facture wrapper */
     #factureWrap {
       max-width: 860px;
       margin: 32px auto 60px;
@@ -52,30 +64,39 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 32px rgba(0,0,0,.1);
-      padding: 0;
     }
-    #factureContent { width: 100%; padding: 0; }
+
+    /* Mobile: scale iframe content */
+    .iframe-scaler {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+    #factureFrame {
+      border: none;
+      display: block;
+      /* will be sized by JS */
+    }
 
     @media print {
       .action-bar { display: none !important; }
+      #iosTip { display: none !important; }
       #factureWrap { margin: 0; box-shadow: none; border-radius: 0; }
       body { background: #fff; }
     }
-    @media (max-width: 600px) {
-      .action-bar { padding: 12px 16px; }
-      #factureWrap { margin: 16px; }
+    @media (max-width: 860px) {
+      #factureWrap { margin: 12px; border-radius: 8px; }
+      .action-bar { padding: 10px 16px; }
     }
   </style>
 </head>
 <body>
 
-<!-- Loading -->
 <div id="stateLoading" class="screen">
   <div class="spinner"></div>
   <p>Chargement de la facture…</p>
 </div>
 
-<!-- Error -->
 <div id="stateError" class="screen" style="display:none">
   <div style="font-size:48px">⚠️</div>
   <h2>Facture introuvable</h2>
@@ -83,7 +104,6 @@
   <a href="https://tbt3d.fr">← Retour à la boutique</a>
 </div>
 
-<!-- Success -->
 <div id="stateSuccess" style="display:none">
   <div class="action-bar">
     <div class="action-bar-brand">TBT<span>3D</span> — Votre facture</div>
@@ -92,14 +112,19 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
         Boutique
       </a>
-      <button onclick="window.print()" class="btn-print">
+      <button id="btnDownload" class="btn-print">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Télécharger / Imprimer
       </button>
     </div>
   </div>
+  <div id="iosTip">
+    📱 Sur iOS : appuyez sur le bouton partage <strong>⬆</strong> de Safari → "Imprimer" ou "Enregistrer en PDF"
+  </div>
   <div id="factureWrap">
-    <div id="factureContent"></div>
+    <div class="iframe-scaler" id="iframeScaler">
+      <iframe id="factureFrame"></iframe>
+    </div>
   </div>
 </div>
 
@@ -118,9 +143,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Detect iOS
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isMobile = window.innerWidth < 768;
+
 const params = new URLSearchParams(window.location.search);
-const id = params.get('id');         // Firestore document ID
-const fac = params.get('fac');       // Numéro de facture (FAC-2026-XXXX)
+const id = params.get('id');
+const fac = params.get('fac');
+
+// Store factureHtml globally for download
+let _factureHtml = null;
+let _factureNum = 'facture';
 
 if (!id && !fac) {
   showError('Aucun identifiant de facture fourni dans le lien.');
@@ -128,48 +161,86 @@ if (!id && !fac) {
   loadFacture(id, fac);
 }
 
+// Download button handler
+document.getElementById('btnDownload').addEventListener('click', () => {
+  if (!_factureHtml) return;
+
+  if (isIOS) {
+    // iOS: open in new tab so Safari can share/print
+    const blob = new Blob([_factureHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    // Show tip
+    document.getElementById('iosTip').style.display = 'block';
+  } else {
+    // Desktop/Android: use print dialog
+    const iframe = document.getElementById('factureFrame');
+    try {
+      iframe.contentWindow.print();
+    } catch(e) {
+      window.print();
+    }
+  }
+});
+
 async function loadFacture(id, fac) {
   try {
-    let factureHtml = null;
-    let factureNum = null;
-
     if (id) {
-      // Charger directement par ID Firestore
       const snap = await getDoc(doc(db, 'commandes', id));
       if (!snap.exists()) throw new Error('Commande introuvable.');
       const data = snap.data();
-      factureHtml = data.factureHtml || null;
-      factureNum = data.factureNum || null;
+      _factureHtml = data.factureHtml || null;
+      _factureNum = data.factureNum || 'facture';
     } else if (fac) {
-      // Chercher par numéro de facture
       const q = query(collection(db, 'commandes'), where('factureNum', '==', fac));
       const snap = await getDocs(q);
       if (snap.empty) throw new Error('Facture introuvable.');
       const data = snap.docs[0].data();
-      factureHtml = data.factureHtml || null;
-      factureNum = data.factureNum || null;
+      _factureHtml = data.factureHtml || null;
+      _factureNum = data.factureNum || 'facture';
     }
 
-    if (!factureHtml) {
-      throw new Error('La facture n\'est pas encore générée. Revenez dans quelques instants ou contactez-nous.');
+    if (!_factureHtml) {
+      throw new Error("La facture n'est pas encore générée. Revenez dans quelques instants ou contactez-nous.");
     }
 
-    // Mettre à jour le titre
-    if (factureNum) document.title = factureNum + ' — TBT3D';
+    if (_factureNum) document.title = _factureNum + ' — TBT3D';
 
-    // Injecter le HTML de la facture dans un shadow DOM pour isoler les styles
-    const wrap = document.getElementById('factureContent');
-    // Utiliser srcdoc dans un iframe pour un rendu parfait et isolé
-    const iframe = document.createElement('iframe');
-    iframe.style.cssText = 'width:100%;border:none;display:block;min-height:400px';
-    iframe.srcdoc = factureHtml;
+    // Inject into iframe via srcdoc
+    const iframe = document.getElementById('factureFrame');
+    iframe.srcdoc = _factureHtml;
+
     iframe.onload = () => {
-      // Ajuster la hauteur à celle du contenu
       try {
-        iframe.style.height = iframe.contentDocument.body.scrollHeight + 40 + 'px';
-      } catch(e) {}
+        const iDoc = iframe.contentDocument;
+        // Get natural width of the invoice (designed for ~794px)
+        const naturalWidth = Math.max(iDoc.body.scrollWidth, 600);
+        const naturalHeight = iDoc.body.scrollHeight;
+        const containerWidth = document.getElementById('iframeScaler').clientWidth || window.innerWidth - 24;
+
+        if (containerWidth < naturalWidth) {
+          // Scale down to fit on mobile
+          const scale = containerWidth / naturalWidth;
+          iframe.style.width = naturalWidth + 'px';
+          iframe.style.height = (naturalHeight + 40) + 'px';
+          iframe.style.transform = `scale(${scale})`;
+          iframe.style.transformOrigin = 'top left';
+          // Set scaler height to scaled height
+          document.getElementById('iframeScaler').style.height = Math.ceil((naturalHeight + 40) * scale) + 'px';
+        } else {
+          iframe.style.width = '100%';
+          iframe.style.height = (naturalHeight + 40) + 'px';
+        }
+      } catch(e) {
+        iframe.style.width = '100%';
+        iframe.style.height = '900px';
+      }
     };
-    wrap.appendChild(iframe);
+
+    // Show iOS tip immediately if on iOS
+    if (isIOS) {
+      document.getElementById('iosTip').style.display = 'block';
+    }
 
     document.getElementById('stateLoading').style.display = 'none';
     document.getElementById('stateSuccess').style.display = '';
@@ -184,6 +255,30 @@ function showError(msg) {
   document.getElementById('stateError').style.display = '';
   document.getElementById('errorMsg').textContent = msg;
 }
+
+// Handle resize
+window.addEventListener('resize', () => {
+  const iframe = document.getElementById('factureFrame');
+  if (!iframe.contentDocument) return;
+  try {
+    const naturalWidth = Math.max(iframe.contentDocument.body.scrollWidth, 600);
+    const naturalHeight = iframe.contentDocument.body.scrollHeight;
+    const containerWidth = document.getElementById('iframeScaler').clientWidth || window.innerWidth - 24;
+    if (containerWidth < naturalWidth) {
+      const scale = containerWidth / naturalWidth;
+      iframe.style.width = naturalWidth + 'px';
+      iframe.style.height = (naturalHeight + 40) + 'px';
+      iframe.style.transform = `scale(${scale})`;
+      iframe.style.transformOrigin = 'top left';
+      document.getElementById('iframeScaler').style.height = Math.ceil((naturalHeight + 40) * scale) + 'px';
+    } else {
+      iframe.style.width = '100%';
+      iframe.style.height = (naturalHeight + 40) + 'px';
+      iframe.style.transform = '';
+      document.getElementById('iframeScaler').style.height = '';
+    }
+  } catch(e) {}
+});
 </script>
 
 <!-- TBT3D Analytics -->
