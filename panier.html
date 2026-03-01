@@ -1150,6 +1150,25 @@ function buildWorkerItems(items, mode) {
     qty: 1,
   });
 
+  // ── Correction d'arrondi ──
+  // La somme des lignes arrondies individuellement peut différer du total attendu.
+  // On ajuste la ligne TVA (ou livraison en fallback) pour absorber l'écart.
+  const { total } = computeTotals();
+  const sumItems = workerItems.reduce((s, i) => s + Math.round(i.price * 100) * i.qty, 0); // en centimes
+  const expectedCents = Math.round(total * 100);
+  const diffCents = expectedCents - sumItems;
+  if (diffCents !== 0) {
+    // Chercher la ligne TVA pour ajuster
+    const tvaLine = workerItems.find(i => i.name && i.name.startsWith('TVA'));
+    if (tvaLine) {
+      tvaLine.price = parseFloat((tvaLine.price + diffCents / 100).toFixed(2));
+    } else {
+      // Fallback : ajuster la livraison
+      const shipLine = workerItems.find(i => i.name && i.name.startsWith('Livraison'));
+      if (shipLine) shipLine.price = parseFloat((shipLine.price + diffCents / 100).toFixed(2));
+    }
+  }
+
   return workerItems;
 }
 
