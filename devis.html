@@ -1095,6 +1095,8 @@ function loadFile(f) {
   document.getElementById('stlBadgeName').textContent = f.name;
   document.getElementById('stlBadge').classList.add('show');
   document.getElementById('changeStlBtn').classList.add('show');
+  // Démarrer le cooldown dès le chargement du fichier
+  _startCooldown();
   const ext = f.name.split('.').pop().toLowerCase();
   const r = new FileReader();
   if (ext === 'obj') {
@@ -1317,8 +1319,11 @@ function price() {
   R('rTot','Total HT',(totHT).toFixed(2)+' €');
   document.getElementById('note').textContent='Estimation indicative — prix confirmé avant tout lancement.';
   if (!S._slaBlocked) {
-    document.getElementById('btnOrder').disabled=false;
-    document.getElementById('btnAddCart').disabled=false;
+    if (!_isCooldownActive()) {
+      document.getElementById('btnOrder').disabled=false;
+      document.getElementById('btnAddCart').disabled=false;
+    }
+    // Si cooldown actif, _applyBtnCooldown() gère déjà l'état des boutons
   }
 }
 function R(id,l,v){ document.getElementById(id).innerHTML='<span>'+l+'</span><span>'+v+'</span>'; }
@@ -1356,6 +1361,55 @@ async function uploadStlToCloudinary(file, onProgress) {
   if (data.secure_url) return data.secure_url;
   throw new Error(data.error?.message || 'Upload échoué');
 }
+
+// ── Cooldown Cloudinary (évite le rate limit : 1 upload / 30s) ──────────────
+// Persistant via localStorage → survit aux refreshs de page
+const UPLOAD_COOLDOWN = 30000; // 30s
+const COOLDOWN_KEY    = 'tbt3d_last_file_load';
+var _cooldownTimer    = null;
+
+function _isCooldownActive() {
+  const last = parseInt(localStorage.getItem(COOLDOWN_KEY) || '0', 10);
+  return (Date.now() - last) < UPLOAD_COOLDOWN;
+}
+
+function _cooldownRemaining() {
+  const last = parseInt(localStorage.getItem(COOLDOWN_KEY) || '0', 10);
+  return Math.max(0, Math.ceil((UPLOAD_COOLDOWN - (Date.now() - last)) / 1000));
+}
+
+function _applyBtnCooldown() {
+  const btnCart  = document.getElementById('btnAddCart');
+  const btnOrder = document.getElementById('btnOrder');
+  if (!btnCart && !btnOrder) return;
+  clearInterval(_cooldownTimer);
+  function tick() {
+    const rem = _cooldownRemaining();
+    if (rem <= 0) {
+      clearInterval(_cooldownTimer);
+      if (S.vol && !S._slaBlocked) {
+        if (btnCart)  { btnCart.disabled  = false; btnCart.style.borderColor  = ''; btnCart.style.color  = ''; btnCart.innerHTML  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px;flex-shrink:0"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Ajouter au panier'; }
+        if (btnOrder) { btnOrder.disabled = false; btnOrder.style.borderColor = ''; btnOrder.style.color = ''; btnOrder.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Commander cette pièce'; }
+      }
+    } else {
+      const label = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Disponible dans ' + rem + 's…';
+      if (btnCart)  { btnCart.disabled  = true; btnCart.style.borderColor  = '#f59e0b'; btnCart.style.color  = '#f59e0b'; btnCart.innerHTML  = label; }
+      if (btnOrder) { btnOrder.disabled = true; btnOrder.style.borderColor = '#f59e0b'; btnOrder.style.color = '#f59e0b'; btnOrder.innerHTML = label; }
+    }
+  }
+  tick();
+  _cooldownTimer = setInterval(tick, 1000);
+}
+
+function _startCooldown() {
+  localStorage.setItem(COOLDOWN_KEY, String(Date.now()));
+  _applyBtnCooldown();
+}
+
+// Au chargement de la page : reprendre le timer s'il est encore actif
+window.addEventListener('DOMContentLoaded', function() {
+  if (_isCooldownActive()) { setTimeout(_applyBtnCooldown, 200); }
+});
 
 // ── HELPER : toast panier ──────────────────────────────────────────────────
 function showCartToast(msg) {
@@ -1409,7 +1463,7 @@ async function addDevisToCart() {
     qty:         S.qty,
   });
 
-  // Feedback bouton — toast, pas de redirection
+  // Feedback bouton
   const btn = document.getElementById('btnAddCart');
   btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Ajouté !';
   btn.style.borderColor = '#16a34a';
@@ -1419,13 +1473,15 @@ async function addDevisToCart() {
   // Toast notification
   showCartToast('Article ajouté au panier !');
 
-  // Réactiver le bouton après 2s
+  // Remettre le label après 1.5s (le cooldown garde le bouton désactivé si besoin)
   setTimeout(() => {
-    btn.disabled = false;
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px;flex-shrink:0"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Ajouter au panier';
-    btn.style.borderColor = '';
-    btn.style.color = '';
-  }, 2000);
+    if (!_isCooldownActive()) {
+      btn.disabled = false;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="width:16px;height:16px;flex-shrink:0"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Ajouter au panier';
+    }
+  }, 1500);
 }
 
 // ── COMMANDER = AJOUTER AU PANIER + REDIRECTION PANIER ────────────────────────
@@ -1455,8 +1511,7 @@ async function addDevisToCartAndPay() {
 
   btn.innerHTML = '<div style="width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Ajout au panier…';
 
-  // Ajouter au panier — AWAIT pour s'assurer que le PATCH Firestore est terminé
-  // avant de naviguer (sinon l'item n'est pas encore en base quand panier.html charge)
+  // Ajouter au panier — await pour s'assurer que Firestore est écrit avant navigation
   await TBTCart.add({
     id:         'devis-' + Date.now(),
     name:       'Impression sur mesure — ' + S.file.name,
@@ -1474,7 +1529,7 @@ async function addDevisToCartAndPay() {
     qty:        S.qty,
   });
 
-  // Redirection vers le panier avec le sid pour garantir la continuité de session
+  // Redirection avec sid pour continuité de session (Safari iOS)
   const sid = window._getTBTSid ? window._getTBTSid() : null;
   window.location.href = '/panier.html' + (sid ? '?sid=' + encodeURIComponent(sid) : '');
 }
