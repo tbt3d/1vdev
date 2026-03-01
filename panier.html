@@ -610,14 +610,20 @@ let SHIPPING_RATES = {
 let TVA_RATE    = 0.20;
 let TVA_ENABLED = true;
 let DEFAULT_SHIPPING = 8;
+let SHIPPING_ENABLED = true;
 let _livraisonCfg = null;
 
-const _LV_FLAGS = {FR:'🇫🇷',DE:'🇩🇪',AT:'🇦🇹',BE:'🇧🇪',BG:'🇧🇬',HR:'🇭🇷',CY:'🇨🇾',DK:'🇩🇰',ES:'🇪🇸',EE:'🇪🇪',FI:'🇫🇮',GR:'🇬🇷',HU:'🇭🇺',IE:'🇮🇪',IT:'🇮🇹',LV:'🇱🇻',LT:'🇱🇹',LU:'🇱🇺',MT:'🇲🇹',NL:'🇳🇱',PL:'🇵🇱',PT:'🇵🇹',CZ:'🇨🇿',RO:'🇷🇴',SK:'🇸🇰',SI:'🇸🇮',SE:'🇸🇪',CH:'🇨🇭',CA:'🇨🇦',US:'🇺🇸'};
-const _LV_NAMES = {FR:'France',DE:'Allemagne',AT:'Autriche',BE:'Belgique',BG:'Bulgarie',HR:'Croatie',CY:'Chypre',DK:'Danemark',ES:'Espagne',EE:'Estonie',FI:'Finlande',GR:'Grèce',HU:'Hongrie',IE:'Irlande',IT:'Italie',LV:'Lettonie',LT:'Lituanie',LU:'Luxembourg',MT:'Malte',NL:'Pays-Bas',PL:'Pologne',PT:'Portugal',CZ:'République tchèque',RO:'Roumanie',SK:'Slovaquie',SI:'Slovénie',SE:'Suède',CH:'Suisse',CA:'Canada',US:'États-Unis'};
+const _LV_FLAGS = {FR:'🇫🇷',DE:'🇩🇪',AT:'🇦🇹',BE:'🇧🇪',BG:'🇧🇬',HR:'🇭🇷',CY:'🇨🇾',DK:'🇩🇰',ES:'🇪🇸',EE:'🇪🇪',FI:'🇫🇮',GR:'🇬🇷',HU:'🇭🇺',IE:'🇮🇪',IT:'🇮🇹',LV:'🇱🇻',LT:'🇱🇹',LU:'🇱🇺',MT:'🇲🇹',NL:'🇳🇱',PL:'🇵🇱',PT:'🇵🇹',CZ:'🇨🇿',RO:'🇷🇴',SK:'🇸🇰',SI:'🇸🇮',SE:'🇸🇪',CH:'🇨🇭',NO:'🇳🇴',IS:'🇮🇸',GB:'🇬🇧',CA:'🇨🇦',US:'🇺🇸',MX:'🇲🇽',BR:'🇧🇷',AR:'🇦🇷',CL:'🇨🇱',CO:'🇨🇴',JP:'🇯🇵',AU:'🇦🇺',NZ:'🇳🇿',CN:'🇨🇳',KR:'🇰🇷',IN:'🇮🇳',SG:'🇸🇬',HK:'🇭🇰',TH:'🇹🇭',VN:'🇻🇳',PH:'🇵🇭',ID:'🇮🇩',MY:'🇲🇾',AE:'🇦🇪',SA:'🇸🇦',QA:'🇶🇦',IL:'🇮🇱',TR:'🇹🇷',ZA:'🇿🇦',MA:'🇲🇦',DZ:'🇩🇿',TN:'🇹🇳'};
+const _LV_NAMES = {FR:'France',DE:'Allemagne',AT:'Autriche',BE:'Belgique',BG:'Bulgarie',HR:'Croatie',CY:'Chypre',DK:'Danemark',ES:'Espagne',EE:'Estonie',FI:'Finlande',GR:'Grèce',HU:'Hongrie',IE:'Irlande',IT:'Italie',LV:'Lettonie',LT:'Lituanie',LU:'Luxembourg',MT:'Malte',NL:'Pays-Bas',PL:'Pologne',PT:'Portugal',CZ:'République tchèque',RO:'Roumanie',SK:'Slovaquie',SI:'Slovénie',SE:'Suède',CH:'Suisse',NO:'Norvège',IS:'Islande',GB:'Royaume-Uni',CA:'Canada',US:'États-Unis',MX:'Mexique',BR:'Brésil',AR:'Argentine',CL:'Chili',CO:'Colombie',JP:'Japon',AU:'Australie',NZ:'Nouvelle-Zélande',CN:'Chine',KR:'Corée du Sud',IN:'Inde',SG:'Singapour',HK:'Hong Kong',TH:'Thaïlande',VN:'Viêt Nam',PH:'Philippines',ID:'Indonésie',MY:'Malaisie',AE:'Émirats arabes unis',SA:'Arabie saoudite',QA:'Qatar',IL:'Israël',TR:'Turquie',ZA:'Afrique du Sud',MA:'Maroc',DZ:'Algérie',TN:'Tunisie'};
 const _LV_GROUPS = {
   'France':['FR'],
-  'Europe':['DE','AT','BE','BG','HR','CY','DK','ES','EE','FI','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','CZ','RO','SK','SI','SE','CH'],
-  'Amérique du Nord':['CA','US'],
+  'Europe (UE)':['DE','AT','BE','BG','HR','CY','DK','ES','EE','FI','GR','HU','IE','IT','LV','LT','LU','MT','NL','PL','PT','CZ','RO','SK','SI','SE'],
+  'Europe (hors UE)':['CH','NO','IS','GB','TR'],
+  'Amérique du Nord':['CA','US','MX'],
+  'Amérique du Sud':['BR','AR','CL','CO'],
+  'Asie-Pacifique':['JP','AU','NZ','CN','KR','IN','SG','HK','TH','VN','PH','ID','MY'],
+  'Moyen-Orient':['AE','SA','QA','IL'],
+  'Afrique':['ZA','MA','DZ','TN'],
 };
 
 async function getLivraisonCfg() {
@@ -634,11 +640,15 @@ function applyLivraisonCfg(cfg) {
   if (!cfg) return;
   if (cfg.tvaEnabled !== undefined) TVA_ENABLED = !!cfg.tvaEnabled;
   if (cfg.tvaRate)           TVA_RATE          = parseFloat(cfg.tvaRate) || 0.20;
+  if (cfg.shippingEnabled !== undefined) SHIPPING_ENABLED = !!cfg.shippingEnabled;
   if (cfg.defaultShipping !== undefined) DEFAULT_SHIPPING = parseFloat(cfg.defaultShipping) || 8;
   if (cfg.shippingRates && typeof cfg.shippingRates === 'object') {
     Object.keys(SHIPPING_RATES).forEach(k => delete SHIPPING_RATES[k]);
     Object.keys(cfg.shippingRates).forEach(k => { SHIPPING_RATES[k] = parseFloat(cfg.shippingRates[k])||0; });
   }
+  // Afficher/masquer le sélecteur de livraison
+  const wrap = document.querySelector('.shipping-select-wrap');
+  if (wrap) wrap.style.display = SHIPPING_ENABLED ? '' : 'none';
   rebuildCountrySelect();
 }
 
@@ -672,6 +682,7 @@ function getShippingCountry() {
 }
 
 function getShippingCost() {
+  if (!SHIPPING_ENABLED) return 0;
   const c = getShippingCountry();
   return SHIPPING_RATES[c] !== undefined ? SHIPPING_RATES[c] : DEFAULT_SHIPPING;
 }

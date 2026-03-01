@@ -1418,6 +1418,18 @@ tr:hover td{background:rgba(255,255,255,.01)}
             <span class="fsec-title">Tarifs de livraison par pays</span>
           </div>
           <div class="fsec-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding:14px 16px;background:var(--bg3);border-radius:10px;border:1.5px solid var(--border2)">
+              <div>
+                <div style="font-size:13px;font-weight:600">Livraison activée</div>
+                <div class="fhint" style="margin-top:3px">Si désactivée, la livraison n'est pas ajoutée dans le panier.</div>
+              </div>
+              <label style="position:relative;display:inline-flex;flex-shrink:0;width:44px;height:24px;cursor:pointer">
+                <input type="checkbox" id="lvShippingEnabled" style="opacity:0;width:0;height:0;position:absolute" onchange="lvToggleShippingTrack(this.checked)" checked>
+                <span id="lvShippingTrack" style="position:absolute;inset:0;border-radius:24px;background:var(--accent);transition:.2s">
+                  <span id="lvShippingThumb" style="position:absolute;left:22px;top:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.3)"></span>
+                </span>
+              </label>
+            </div>
             <div class="frow" style="margin-bottom:16px">
               <div class="field">
                 <label>Tarif par défaut (pays non listé) €</label>
@@ -5463,6 +5475,17 @@ const _LV_COUNTRY_LIST = [
   {code:'AU',flag:'🇦🇺',name:'Australie'},{code:'BR',flag:'🇧🇷',name:'Brésil'},
   {code:'MX',flag:'🇲🇽',name:'Mexique'},{code:'CN',flag:'🇨🇳',name:'Chine'},
   {code:'KR',flag:'🇰🇷',name:'Corée du Sud'},{code:'IN',flag:'🇮🇳',name:'Inde'},
+  {code:'SG',flag:'🇸🇬',name:'Singapour'},{code:'AE',flag:'🇦🇪',name:'Émirats arabes unis'},
+  {code:'ZA',flag:'🇿🇦',name:'Afrique du Sud'},{code:'NZ',flag:'🇳🇿',name:'Nouvelle-Zélande'},
+  {code:'HK',flag:'🇭🇰',name:'Hong Kong'},{code:'NO',flag:'🇳🇴',name:'Norvège'},
+  {code:'IS',flag:'🇮🇸',name:'Islande'},{code:'TR',flag:'🇹🇷',name:'Turquie'},
+  {code:'MA',flag:'🇲🇦',name:'Maroc'},{code:'DZ',flag:'🇩🇿',name:'Algérie'},
+  {code:'TN',flag:'🇹🇳',name:'Tunisie'},{code:'IL',flag:'🇮🇱',name:'Israël'},
+  {code:'SA',flag:'🇸🇦',name:'Arabie saoudite'},{code:'QA',flag:'🇶🇦',name:'Qatar'},
+  {code:'AR',flag:'🇦🇷',name:'Argentine'},{code:'CL',flag:'🇨🇱',name:'Chili'},
+  {code:'CO',flag:'🇨🇴',name:'Colombie'},{code:'TH',flag:'🇹🇭',name:'Thaïlande'},
+  {code:'VN',flag:'🇻🇳',name:'Viêt Nam'},{code:'PH',flag:'🇵🇭',name:'Philippines'},
+  {code:'ID',flag:'🇮🇩',name:'Indonésie'},{code:'MY',flag:'🇲🇾',name:'Malaisie'},
 ];
 
 window._appTvaRate = 0.20; // mis à jour dynamiquement depuis Firebase
@@ -5470,6 +5493,11 @@ window._appTvaRate = 0.20; // mis à jour dynamiquement depuis Firebase
 const LV_DEFAULTS = {
   tvaEnabled: true, tvaRate: 0.20, defaultShipping: 8,
   shippingRates: { FR:6.5, DE:8, AT:8, BE:8, BG:8, HR:8, CY:8, DK:8, ES:8, EE:8, FI:8, GR:8, HU:8, IE:8, IT:8, LV:8, LT:8, LU:8, MT:8, NL:8, PL:8, PT:8, CZ:8, RO:8, SK:8, SI:8, SE:8, CH:8, CA:50, US:50 }
+};
+
+window.lvToggleShippingTrack = (on) => {
+  document.getElementById('lvShippingTrack').style.background = on ? 'var(--accent)' : 'var(--border2)';
+  document.getElementById('lvShippingThumb').style.left = on ? '22px' : '2px';
 };
 
 window.lvToggleTrack = (on) => {
@@ -5534,8 +5562,11 @@ window.loadLivraisonCfg = async () => {
     const cfg = data || LV_DEFAULTS;
     window._appTvaRate = cfg.tvaRate || LV_DEFAULTS.tvaRate;
     const tvaOn = cfg.tvaEnabled !== false;
+    const shippingOn = cfg.shippingEnabled !== false;
     document.getElementById('lvTvaEnabled').checked = tvaOn;
     lvToggleTrack(tvaOn);
+    document.getElementById('lvShippingEnabled').checked = shippingOn;
+    lvToggleShippingTrack(shippingOn);
     document.getElementById('lvTvaRate').value = Math.round((cfg.tvaRate || LV_DEFAULTS.tvaRate) * 100);
     document.getElementById('lvDefaultShipping').value = cfg.defaultShipping ?? LV_DEFAULTS.defaultShipping;
     lvRenderGrid(cfg.shippingRates || LV_DEFAULTS.shippingRates);
@@ -5557,6 +5588,7 @@ window.saveLivraisonCfg = async () => {
   try {
     const cfg = {
       tvaEnabled:      document.getElementById('lvTvaEnabled').checked,
+      shippingEnabled: document.getElementById('lvShippingEnabled').checked,
       tvaRate:         (parseFloat(document.getElementById('lvTvaRate').value)||20) / 100,
       defaultShipping: parseFloat(document.getElementById('lvDefaultShipping').value)||8,
       shippingRates:   Object.assign({}, _lvCurrentRates),
