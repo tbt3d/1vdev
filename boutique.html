@@ -472,19 +472,21 @@ async function _restGetDoc(col, docId) {
 
 // ─── CHARGEMENT DONNÉES ────────────────────────────────────────────────────
 async function loadData() {
-  let arts = [], cfg = null, hpCfg = null;
+  let arts = [], cfg = null, hpCfg = null, devisBoutThumb = null;
 
   // Essai 1 : Firebase SDK
   try {
     const db = getFirestore(initializeApp(firebaseConfig));
     const snap = await getDocs(collection(db, 'articles'));
     snap.forEach(d => arts.push({ ...d.data(), id: d.id }));
-    const [cfgDoc, hpDoc] = await Promise.all([
+    const [cfgDoc, hpDoc, devisDoc] = await Promise.all([
       getDoc(doc(db, 'config', 'boutique')),
-      getDoc(doc(db, 'config', 'homepage'))
+      getDoc(doc(db, 'config', 'homepage')),
+      getDoc(doc(db, 'config', 'devis'))
     ]);
     cfg   = cfgDoc.exists() ? cfgDoc.data() : null;
     hpCfg = hpDoc.exists()  ? hpDoc.data()  : null;
+    const devisBoutThumb = devisDoc.exists() ? (devisDoc.data().boutThumb || null) : null;
   } catch(e) {
     console.warn('Firebase SDK bloqué, bascule REST API:', e.message);
     // Essai 2 : REST API (Tor / Safari ITP)
@@ -492,6 +494,7 @@ async function loadData() {
       arts  = await _restGetCollection('articles');
       cfg   = await _restGetDoc('config', 'boutique');
       hpCfg = await _restGetDoc('config', 'homepage');
+      try { const devisData = await _restGetDoc('config', 'devis'); devisBoutThumb = devisData?.boutThumb || null; } catch(e) {}
     } catch(e2) {
       document.getElementById('productGrid').innerHTML =
         '<div class="empty-boutique"><h3>Chargement impossible</h3><p>Vérifiez votre connexion internet.</p></div>';
@@ -527,7 +530,7 @@ async function loadData() {
         // Récupérer l'image depuis homepage si elle n'est pas dans boutique
         if (!slot.customImage) {
           const key = slot.customLabel || 'default';
-          slot.customImage = hpCustomImages[key] || hpCustomImages['_fallback'] || null;
+          slot.customImage = devisBoutThumb || hpCustomImages[key] || hpCustomImages['_fallback'] || null;
         }
         window.allCustomCards.push(slot);
         return;
