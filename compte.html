@@ -530,7 +530,7 @@
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, initializeFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, deleteDoc, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, updatePassword, updateProfile, deleteUser, browserLocalPersistence, setPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, updatePassword, updateProfile, deleteUser, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence, setPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
@@ -540,11 +540,19 @@ const firebaseConfig = {
   appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
 };
 const app  = initializeApp(firebaseConfig);
-// experimentalAutoDetectLongPolling : plus robuste que forceLongPolling sur iOS Safari
+// AutoDetect est plus robuste que ForceLongPolling sur iOS Safari
 const db   = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
 const auth = getAuth(app);
-// Force localStorage persistence — résout le blocage des cookies tiers sur Safari iOS (ITP)
-setPersistence(auth, browserLocalPersistence).catch(() => {});
+// Safari ITP bloque localStorage (erreur "insecure") → fallback sessionStorage → fallback mémoire
+(async () => {
+  try { await setPersistence(auth, browserLocalPersistence); }
+  catch(_) {
+    try { await setPersistence(auth, browserSessionPersistence); }
+    catch(__) {
+      try { await setPersistence(auth, inMemoryPersistence); } catch(___){}
+    }
+  }
+})();
 const googleProvider = new GoogleAuthProvider();
 
 const ERR_FR = {
@@ -619,7 +627,7 @@ onAuthStateChanged(auth, async user => {
       }
     } catch(e) {
       // Firestore injoignable — on reste avec les infos Auth, pas de crash
-      console.warn('[TBT3D] Firestore profil inaccessible:', e.message, '| code:', e.code);
+      console.warn('Firestore profil inaccessible:', e.message);
     }
     // Commandes : chargement different au premier clic
   } else {
