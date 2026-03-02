@@ -560,11 +560,10 @@ const IMAGE_EXTS = ['jpg','jpeg','png','webp','gif'];
 // ── Lazy loading : on ne charge qu'un panneau qu'une seule fois ──
 const _loaded = { messages: false, commandes: false };
 
-// Timeout helper : reject si Firestore ne répond pas en 8s (mobile lente)
 function withTimeout(promise, ms) {
   return Promise.race([
     promise,
-    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout réseau — vérifiez votre connexion.')), ms))
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout reseau — verifiez votre connexion.')), ms))
   ]);
 }
 
@@ -581,7 +580,7 @@ onAuthStateChanged(auth, async user => {
         const prenom   = d.prenom || d.firstName || (user.displayName||'').split(' ')[0] || '';
         const nom      = d.nom    || d.lastName  || (user.displayName||'').split(' ').slice(1).join(' ') || '';
         const fullName = (prenom+' '+nom).trim() || user.displayName || 'Client';
-        const role     = d.role || 'user';
+        const role     = d.hasAdminAccess ? 'admin' : (d.role || 'user');
 
         // ── Gestion des rôles ──
         applyUserRole(role, fullName, user);
@@ -621,9 +620,8 @@ onAuthStateChanged(auth, async user => {
       av.textContent = (user.displayName||user.email)[0].toUpperCase();
       applyUserRole('user', displayName, user);
     }
-    // Charger messages immédiatement (panel visible par défaut)
     _loadMessagesOnce(user);
-    // Commandes : chargement différé au premier clic sur l'onglet
+    // Commandes : chargement different au premier clic
   } else {
     document.getElementById('authWall').style.display    = 'flex';
     document.getElementById('accountDash').style.display = 'none';
@@ -692,7 +690,6 @@ async function _loadMessagesOnce(user) {
   const spinner = document.getElementById('msgsLoading');
   const list    = document.getElementById('msgList');
   try {
-    // Requêtes sans orderBy pour éviter l'index composite manquant — tri côté JS
     const [snapUid, snapEmail] = await withTimeout(Promise.all([
       getDocs(query(collection(db,'messages'), where('userId','==',uid))),
       user?.email ? getDocs(query(collection(db,'messages'), where('email','==',user.email))) : Promise.resolve({docs:[]}),
@@ -868,7 +865,7 @@ async function _loadOrdersOnce(user) {
       let factureBtnHtml;
       if (hasPdf) {
         const dlLabel = o.factureNum ? o.factureNum : 'Télécharger';
-        const dlStyle = 'display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#111;color:#fff;border-radius:30px;border:none;cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:opacity .2s;font-family:\'Syne\',sans-serif;text-decoration:none';
+        const dlStyle = 'display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,107,53,.08);color:var(--acc);border-radius:30px;border:1.5px solid rgba(255,107,53,.25);cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;transition:all .2s;font-family:\'Syne\',sans-serif;text-decoration:none';
         const dlIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
         if (o.factureUrl) {
           factureBtnHtml = '<a href="' + o.factureUrl + '" target="_blank" download style="' + dlStyle + '" onmouseover="this.style.opacity=\'.75\'" onmouseout="this.style.opacity=\'1\'">' + dlIcon + dlLabel + '</a>';
@@ -908,14 +905,18 @@ async function _loadOrdersOnce(user) {
       }
 
       html +=
-        '<div class="order-row" style="flex-wrap:wrap;gap:10px;cursor:default">' +
-          '<div style="min-width:0">' +
-            refsHtml +
-            '<div class="order-row-date">' + date + '</div>' +
+        '<div class="order-row" style="flex-direction:column;align-items:stretch;gap:12px;cursor:default;padding:16px 18px">' +
+          '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">' +
+            '<div style="min-width:0">' +
+              refsHtml +
+              '<div class="order-row-date">' + date + '</div>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
+              (total ? '<div class="order-row-price">' + total + ' €</div>' : '') +
+              '<div class="order-status-badge ' + statusCss + '">' + statusLabel + '</div>' +
+            '</div>' +
           '</div>' +
-          '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto">' +
-            (total ? '<div class="order-row-price">' + total + ' €</div>' : '') +
-            '<div class="order-status-badge ' + statusCss + '">' + statusLabel + '</div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
             factureBtnHtml +
             livraisonBtnHtml +
           '</div>' +
@@ -991,7 +992,6 @@ window.showPanel = (id, btn) => {
   const panel = document.getElementById('panel-' + id);
   if (panel) panel.classList.add('on');
   if (btn) btn.classList.add('on');
-  // Lazy load au premier clic
   const user = typeof auth !== 'undefined' ? auth.currentUser : null;
   if (user) {
     if (id === 'commandes' && !_loaded.commandes) _loadOrdersOnce(user);

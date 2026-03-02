@@ -88,6 +88,13 @@
       #factureWrap { margin: 12px; border-radius: 8px; }
       .action-bar { padding: 10px 16px; }
     }
+    @media (max-width: 480px) {
+      #factureWrap { margin: 8px; border-radius: 6px; }
+      .action-bar { padding: 8px 12px; gap: 8px; }
+      .action-bar-brand { font-size: 13px; }
+      .btn-print { padding: 8px 14px; font-size: 12px; }
+      .btn-back { padding: 8px 12px; font-size: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -213,24 +220,37 @@ async function loadFacture(id, fac) {
     iframe.onload = () => {
       try {
         const iDoc = iframe.contentDocument;
-        // Get natural width of the invoice (designed for ~794px)
-        const naturalWidth = Math.max(iDoc.body.scrollWidth, 600);
-        const naturalHeight = iDoc.body.scrollHeight;
-        const containerWidth = document.getElementById('iframeScaler').clientWidth || window.innerWidth - 24;
+        // Force the invoice body to not overflow on mobile
+        const styleTag = iDoc.createElement('style');
+        styleTag.textContent = 'body,html{overflow-x:hidden!important} table{table-layout:auto!important} td,th{word-break:break-word}';
+        iDoc.head && iDoc.head.appendChild(styleTag);
 
-        if (containerWidth < naturalWidth) {
-          // Scale down to fit on mobile
-          const scale = containerWidth / naturalWidth;
-          iframe.style.width = naturalWidth + 'px';
-          iframe.style.height = (naturalHeight + 40) + 'px';
-          iframe.style.transform = `scale(${scale})`;
-          iframe.style.transformOrigin = 'top left';
-          // Set scaler height to scaled height
-          document.getElementById('iframeScaler').style.height = Math.ceil((naturalHeight + 40) * scale) + 'px';
-        } else {
-          iframe.style.width = '100%';
-          iframe.style.height = (naturalHeight + 40) + 'px';
-        }
+        // Wait one frame for layout to settle after style injection
+        requestAnimationFrame(() => {
+          try {
+            const naturalWidth = Math.max(iDoc.documentElement.scrollWidth, iDoc.body.scrollWidth, 600);
+            const naturalHeight = Math.max(iDoc.documentElement.scrollHeight, iDoc.body.scrollHeight);
+            const scaler = document.getElementById('iframeScaler');
+            const containerWidth = scaler.clientWidth || (window.innerWidth - 24);
+
+            if (containerWidth < naturalWidth) {
+              const scale = containerWidth / naturalWidth;
+              iframe.style.width = naturalWidth + 'px';
+              iframe.style.height = (naturalHeight + 60) + 'px';
+              iframe.style.transform = `scale(${scale})`;
+              iframe.style.transformOrigin = 'top left';
+              scaler.style.height = Math.ceil((naturalHeight + 60) * scale) + 'px';
+            } else {
+              iframe.style.width = '100%';
+              iframe.style.height = (naturalHeight + 40) + 'px';
+              iframe.style.transform = '';
+              scaler.style.height = '';
+            }
+          } catch(e2) {
+            iframe.style.width = '100%';
+            iframe.style.height = '900px';
+          }
+        });
       } catch(e) {
         iframe.style.width = '100%';
         iframe.style.height = '900px';
@@ -257,27 +277,33 @@ function showError(msg) {
 }
 
 // Handle resize
+let _resizeTimer;
 window.addEventListener('resize', () => {
-  const iframe = document.getElementById('factureFrame');
-  if (!iframe.contentDocument) return;
-  try {
-    const naturalWidth = Math.max(iframe.contentDocument.body.scrollWidth, 600);
-    const naturalHeight = iframe.contentDocument.body.scrollHeight;
-    const containerWidth = document.getElementById('iframeScaler').clientWidth || window.innerWidth - 24;
-    if (containerWidth < naturalWidth) {
-      const scale = containerWidth / naturalWidth;
-      iframe.style.width = naturalWidth + 'px';
-      iframe.style.height = (naturalHeight + 40) + 'px';
-      iframe.style.transform = `scale(${scale})`;
-      iframe.style.transformOrigin = 'top left';
-      document.getElementById('iframeScaler').style.height = Math.ceil((naturalHeight + 40) * scale) + 'px';
-    } else {
-      iframe.style.width = '100%';
-      iframe.style.height = (naturalHeight + 40) + 'px';
-      iframe.style.transform = '';
-      document.getElementById('iframeScaler').style.height = '';
-    }
-  } catch(e) {}
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => {
+    const iframe = document.getElementById('factureFrame');
+    if (!iframe.contentDocument) return;
+    try {
+      const iDoc = iframe.contentDocument;
+      const naturalWidth = Math.max(iDoc.documentElement.scrollWidth, iDoc.body.scrollWidth, 600);
+      const naturalHeight = Math.max(iDoc.documentElement.scrollHeight, iDoc.body.scrollHeight);
+      const scaler = document.getElementById('iframeScaler');
+      const containerWidth = scaler.clientWidth || (window.innerWidth - 24);
+      if (containerWidth < naturalWidth) {
+        const scale = containerWidth / naturalWidth;
+        iframe.style.width = naturalWidth + 'px';
+        iframe.style.height = (naturalHeight + 60) + 'px';
+        iframe.style.transform = `scale(${scale})`;
+        iframe.style.transformOrigin = 'top left';
+        scaler.style.height = Math.ceil((naturalHeight + 60) * scale) + 'px';
+      } else {
+        iframe.style.width = '100%';
+        iframe.style.height = (naturalHeight + 40) + 'px';
+        iframe.style.transform = '';
+        scaler.style.height = '';
+      }
+    } catch(e) {}
+  }, 150);
 });
 </script>
 
