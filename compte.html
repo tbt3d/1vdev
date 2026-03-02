@@ -540,10 +540,11 @@ const firebaseConfig = {
   appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
 };
 const app = initializeApp(firebaseConfig);
-// forceLongPolling + useFetchStreams:false = XHR pur → seul transport fiable sur Safari iOS strict
+// On garde le SDK Firestore uniquement pour les WRITES (setDoc, deleteDoc)
+// Les READS se font via REST fetch() — seul transport fiable sur Safari iOS
 const db  = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
 
-// initializeAuth définit la persistence AVANT tout accès storage → évite "insecure" sur Safari
+// Auth : initializeAuth définit la persistence AVANT tout accès storage (évite "insecure" Safari)
 function _safePersistence() {
   try { localStorage.setItem('_tbt','1'); localStorage.removeItem('_tbt'); return [browserLocalPersistence]; } catch(_){}
   try { sessionStorage.setItem('_tbt','1'); sessionStorage.removeItem('_tbt'); return [browserSessionPersistence]; } catch(_){}
@@ -551,6 +552,56 @@ function _safePersistence() {
 }
 const auth = initializeAuth(app, { persistence: _safePersistence() });
 const googleProvider = new GoogleAuthProvider();
+
+// ── Firestore REST helpers (bypass SDK transport — Safari compatible) ──
+const FS_BASE = 'https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents';
+
+function _fsParseVal(v) {
+  if (!v) return null;
+  if (v.stringValue  !== undefined) return v.stringValue;
+  if (v.integerValue !== undefined) return Number(v.integerValue);
+  if (v.doubleValue  !== undefined) return v.doubleValue;
+  if (v.booleanValue !== undefined) return v.booleanValue;
+  if (v.nullValue    !== undefined) return null;
+  if (v.timestampValue !== undefined) return { toDate: () => new Date(v.timestampValue), seconds: Math.floor(new Date(v.timestampValue).getTime()/1000) };
+  if (v.mapValue)   return _fsParseFields(v.mapValue.fields || {});
+  if (v.arrayValue) return (v.arrayValue.values || []).map(_fsParseVal);
+  return null;
+}
+function _fsParseFields(fields) {
+  const out = {};
+  for (const [k, v] of Object.entries(fields)) out[k] = _fsParseVal(v);
+  return out;
+}
+
+async function fsGetDoc(path, idToken) {
+  const r = await fetch(`${FS_BASE}/${path}`, {
+    headers: idToken ? { Authorization: `Bearer ${idToken}` } : {}
+  });
+  if (r.status === 404) return { exists: () => false };
+  if (!r.ok) throw new Error(`fsGet ${r.status}`);
+  const json = await r.json();
+  const data = _fsParseFields(json.fields || {});
+  return { exists: () => true, data: () => data, id: path.split('/').pop() };
+}
+
+async function fsQuery(collectionPath, filters, idToken) {
+  // filters: [{field, op, value}]  op: 'EQUAL'
+  const whereClause = filters.length === 1
+    ? { fieldFilter: { field: { fieldPath: filters[0].field }, op: filters[0].op, value: { stringValue: filters[0].value } } }
+    : { compositeFilter: { op: 'AND', filters: filters.map(f => ({ fieldFilter: { field: { fieldPath: f.field }, op: f.op, value: { stringValue: f.value } } })) } };
+  const r = await fetch(`${FS_BASE}:runQuery`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(idToken ? { Authorization: `Bearer ${idToken}` } : {}) },
+    body: JSON.stringify({ structuredQuery: { from: [{ collectionId: collectionPath }], where: whereClause } })
+  });
+  if (!r.ok) throw new Error(`fsQuery ${r.status}`);
+  const results = await r.json();
+  return (results || []).filter(r => r.document).map(r => ({
+    id: r.document.name.split('/').pop(),
+    data: () => _fsParseFields(r.document.fields || {})
+  }));
+}
 
 const ERR_FR = {
   'auth/wrong-password':       'Mot de passe incorrect.',
@@ -595,14 +646,14 @@ onAuthStateChanged(auth, async user => {
     // ── Mise à jour depuis Firestore en arrière-plan (rôle, adresse, etc.) ──
     const _loadProfile = async () => {
       try {
-        const snap = await withTimeout(getDoc(doc(db, 'users', user.uid)), 20000);
+        const idToken = await user.getIdToken();
+        const snap = await withTimeout(fsGetDoc(`users/${user.uid}`, idToken), 15000);
         if (snap.exists()) {
           const d = snap.data();
           const prenom   = d.prenom || d.firstName || pAuth[0] || '';
           const nom      = d.nom    || d.lastName  || pAuth.slice(1).join(' ') || '';
           const fullName = (prenom+' '+nom).trim() || displayNameAuth;
           const role     = (d.hasAdminAccess === true || d.role === 'admin' || d.isAdmin === true) ? 'admin' : (d.role || 'user');
-
           applyUserRole(role, fullName, user);
           document.getElementById('userName').textContent = fullName;
           document.getElementById('pPrenom').value = prenom;
@@ -617,31 +668,26 @@ onAuthStateChanged(auth, async user => {
             const initials = ((prenom[0]||'')+(nom[0]||'')).toUpperCase() || user.email[0].toUpperCase();
             avEl.textContent = initials;
           }
-          // Retirer le bouton retry si présent
-          const rb = document.getElementById('roleRetryBtn');
-          if (rb) rb.remove();
+          const rb = document.getElementById('roleRetryBtn'); if (rb) rb.remove();
         } else {
           document.getElementById('pPrenom').value = pAuth[0]||'';
           document.getElementById('pNom').value    = pAuth.slice(1).join(' ')||'';
           setDoc(doc(db,'users',user.uid),{prenom:pAuth[0]||'',nom:pAuth.slice(1).join(' ')||'',email:user.email,role:'user',createdAt:new Date().toISOString()},{merge:true}).catch(()=>{});
         }
       } catch(e) {
-        console.warn('[TBT3D] Firestore profil inaccessible:', e.message);
-        // Afficher un bouton "Réessayer" sous le badge rôle
+        console.warn('[TBT3D] Profil REST échoué:', e.message);
         const roleBadgeEl = document.getElementById('roleBadge');
         if (roleBadgeEl && !document.getElementById('roleRetryBtn')) {
           const btn = document.createElement('a');
-          btn.id = 'roleRetryBtn';
-          btn.href = '#';
-          btn.textContent = '↻ Actualiser';
+          btn.id = 'roleRetryBtn'; btn.href = '#'; btn.textContent = '↻ Actualiser';
           btn.style.cssText = 'font-size:11px;color:var(--acc,#ff6b35);font-family:inherit;margin-left:8px;text-decoration:underline;vertical-align:middle';
-          btn.onclick = (e) => { e.preventDefault(); btn.textContent = '…'; _loadProfile(); };
+          btn.onclick = e => { e.preventDefault(); btn.textContent = '…'; _loadProfile(); };
           roleBadgeEl.parentNode.insertBefore(btn, roleBadgeEl.nextSibling);
         }
       }
     };
     _loadProfile();
-    // Commandes : chargement different au premier clic
+    // Commandes : chargement au premier clic
   } else {
     document.getElementById('authWall').style.display    = 'flex';
     document.getElementById('accountDash').style.display = 'none';
@@ -710,23 +756,24 @@ async function _loadMessagesOnce(user) {
   const spinner = document.getElementById('msgsLoading');
   const list    = document.getElementById('msgList');
 
-  // Bouton réessayer après 8s si ça tourne encore
+  // Bouton réessayer après 5s si ça tourne encore
   const retryTimer = setTimeout(() => {
     if (spinner.style.display !== 'none') {
       spinner.innerHTML = '<div style="text-align:center"><div class="spin" style="margin:0 auto 12px"></div><div style="font-size:12px;color:#aaa;font-family:\'JetBrains Mono\',monospace;margin-bottom:10px">Connexion lente…</div><a href="#" onclick="event.preventDefault();_loaded.messages=false;document.getElementById(\'msgsLoading\').innerHTML=\'<div class=\\\'spin\\\'></div>\';_loadMessagesOnce(auth.currentUser)" style="font-size:12px;color:var(--acc);font-family:\'JetBrains Mono\',monospace;text-decoration:underline">Réessayer</a></div>';
     }
-  }, 8000);
+  }, 5000);
 
   try {
-    const [snapUid, snapEmail] = await withTimeout(Promise.all([
-      getDocs(query(collection(db,'messages'), where('userId','==',uid))),
-      user?.email ? getDocs(query(collection(db,'messages'), where('email','==',user.email))) : Promise.resolve({docs:[]}),
-    ]), 20000);
+    const idToken = await user.getIdToken();
+    const [docsUid, docsEmail] = await withTimeout(Promise.all([
+      fsQuery('messages', [{ field: 'userId', op: 'EQUAL', value: uid }], idToken),
+      user?.email ? fsQuery('messages', [{ field: 'email', op: 'EQUAL', value: user.email }], idToken) : Promise.resolve([]),
+    ]), 15000);
     clearTimeout(retryTimer);
     // Fusionner et dedupliquer
     const seen = new Set();
     const allDocs = [];
-    [...snapUid.docs, ...snapEmail.docs].forEach(d => { if(!seen.has(d.id)){seen.add(d.id);allDocs.push(d);} });
+    [...docsUid, ...docsEmail].forEach(d => { if(!seen.has(d.id)){seen.add(d.id);allDocs.push(d);} });
     allDocs.sort((a,b) => (b.data().createdAt?.seconds||0)-(a.data().createdAt?.seconds||0));
 
     spinner.style.display = 'none';
@@ -799,12 +846,9 @@ async function _loadOrdersOnce(user) {
   try {
     let rows = [];
     if (user && user.email) {
-      const q = query(
-        collection(db, 'commandes'),
-        where('client.email', '==', user.email)
-      );
-      const snap = await withTimeout(getDocs(q), 8000);
-      snap.docs.forEach(d => rows.push({ _fid: d.id, ...d.data() }));
+      const idToken = await user.getIdToken();
+      const docs = await withTimeout(fsQuery('commandes', [{ field: 'client.email', op: 'EQUAL', value: user.email }], idToken), 15000);
+      docs.forEach(d => rows.push({ _fid: d.id, ...d.data() }));
       // Tri côté JS par date décroissante (évite l'index composite Firestore)
       rows.sort((a,b) => {
         const ta = a.createdAt?.seconds || (a.createdAt ? new Date(a.createdAt).getTime()/1000 : 0);
@@ -976,13 +1020,13 @@ window.trackOrder = async () => {
   if (!ref) { result.innerHTML = ''; return; }
   result.innerHTML = '<div style="text-align:center;padding:30px"><div class="spin" style="margin:0 auto"></div></div>';
   try {
-    const q    = query(collection(db, 'orders'), where('ref','==',ref));
-    const snap = await getDocs(q);
-    if (snap.empty) {
+    const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+    const docs = await fsQuery('orders', [{ field: 'ref', op: 'EQUAL', value: ref }], idToken);
+    if (!docs.length) {
       result.innerHTML = `<div class="order-not-found"><div class="order-not-found-icon">🔍</div><div class="order-not-found-txt">Commande introuvable.<br>Vérifiez le numéro ou <a href="/contact.html" style="color:var(--acc)">contactez-nous</a>.</div></div>`;
       return;
     }
-    const order = snap.docs[0].data();
+    const order = docs[0].data();
     const STATUS_LABELS = { en_attente:'En attente de paiement', preparation:'En préparation', impression:'Impression en cours', expedition:'Expédié', livre:'Livré', annule:'Annulé' };
     const STATUS_ICONS  = { en_attente:'⏳', preparation:'🔧', impression:'🖨️', expedition:'🚚', livre:'✅', annule:'❌' };
     const STEPS = ['en_attente','preparation','impression','expedition','livre'];
