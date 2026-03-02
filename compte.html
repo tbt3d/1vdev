@@ -529,7 +529,7 @@
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, deleteDoc, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, initializeFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, deleteDoc, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, updatePassword, updateProfile, deleteUser } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 const firebaseConfig = {
@@ -540,7 +540,8 @@ const firebaseConfig = {
   appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
 };
 const app  = initializeApp(firebaseConfig);
-const db   = getFirestore(app);
+// Désactive la persistence IndexedDB — résout le blocage sur iOS Safari
+const db   = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
 const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
@@ -573,54 +574,51 @@ onAuthStateChanged(auth, async user => {
     document.getElementById('userEmail').textContent = user.email;
     document.getElementById('pEmail').value = user.email;
 
+    // ── Affichage immédiat depuis Firebase Auth (pas besoin de Firestore) ──
+    const displayNameAuth = user.displayName || user.email.split('@')[0] || 'Client';
+    const pAuth = displayNameAuth.split(' ');
+    document.getElementById('userName').textContent = displayNameAuth;
+    const avEl = document.getElementById('userAvatar');
+    if (user.photoURL) avEl.innerHTML = '<img src="'+user.photoURL+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    else avEl.textContent = displayNameAuth[0].toUpperCase();
+    // Afficher le dashboard de suite — le rôle sera mis à jour dès que Firestore répond
+    applyUserRole('user', displayNameAuth, user);
+    _loadMessagesOnce(user);
+
+    // ── Mise à jour depuis Firestore en arrière-plan (rôle, adresse, etc.) ──
     try {
-      const snap = await getDoc(doc(db, 'users', user.uid));
+      const snap = await withTimeout(getDoc(doc(db, 'users', user.uid)), 10000);
       if (snap.exists()) {
         const d = snap.data();
-        const prenom   = d.prenom || d.firstName || (user.displayName||'').split(' ')[0] || '';
-        const nom      = d.nom    || d.lastName  || (user.displayName||'').split(' ').slice(1).join(' ') || '';
-        const fullName = (prenom+' '+nom).trim() || user.displayName || 'Client';
+        const prenom   = d.prenom || d.firstName || pAuth[0] || '';
+        const nom      = d.nom    || d.lastName  || pAuth.slice(1).join(' ') || '';
+        const fullName = (prenom+' '+nom).trim() || displayNameAuth;
         const role     = (d.hasAdminAccess === true || d.role === 'admin' || d.isAdmin === true) ? 'admin' : (d.role || 'user');
 
-        // ── Gestion des rôles ──
         applyUserRole(role, fullName, user);
-
         document.getElementById('userName').textContent = fullName;
         document.getElementById('pPrenom').value = prenom;
         document.getElementById('pNom').value    = nom;
-        if (d.tel)   document.getElementById('pTel').value   = d.tel;
-        if (d.ville) document.getElementById('pVille').value = d.ville;
+        if (d.tel)         document.getElementById('pTel').value         = d.tel;
+        if (d.ville)       document.getElementById('pVille').value       = d.ville;
         if (d.addrLine1)   document.getElementById('pAddrLine1').value   = d.addrLine1;
         if (d.addrZip)     document.getElementById('pAddrZip').value     = d.addrZip;
         if (d.addrCity)    document.getElementById('pAddrCity').value    = d.addrCity;
         if (d.addrCountry) document.getElementById('pAddrCountry').value = d.addrCountry;
-
-        const av       = document.getElementById('userAvatar');
-        const initials = ((prenom[0]||'')+(nom[0]||'')).toUpperCase() || user.email[0].toUpperCase();
-        if (user.photoURL) av.innerHTML = '<img src="'+user.photoURL+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
-        else av.textContent = initials;
-
+        if (!user.photoURL) {
+          const initials = ((prenom[0]||'')+(nom[0]||'')).toUpperCase() || user.email[0].toUpperCase();
+          avEl.textContent = initials;
+        }
       } else {
-        // Pas de doc Firestore
-        const displayName = user.displayName || 'Client';
-        document.getElementById('userName').textContent = displayName;
-        const p = displayName.split(' ');
-        document.getElementById('pPrenom').value = p[0]||'';
-        document.getElementById('pNom').value    = p.slice(1).join(' ')||'';
-        const av = document.getElementById('userAvatar');
-        av.textContent = (user.displayName||user.email)[0].toUpperCase();
-        applyUserRole('user', displayName, user);
-        await setDoc(doc(db,'users',user.uid),{prenom:p[0]||'',nom:p.slice(1).join(' ')||'',email:user.email,role:'user',createdAt:new Date().toISOString()},{merge:true});
+        // Pas de doc Firestore — créer un profil minimal
+        document.getElementById('pPrenom').value = pAuth[0]||'';
+        document.getElementById('pNom').value    = pAuth.slice(1).join(' ')||'';
+        setDoc(doc(db,'users',user.uid),{prenom:pAuth[0]||'',nom:pAuth.slice(1).join(' ')||'',email:user.email,role:'user',createdAt:new Date().toISOString()},{merge:true}).catch(()=>{});
       }
     } catch(e) {
-      console.error(e);
-      const displayName = user.displayName || 'Client';
-      document.getElementById('userName').textContent = displayName;
-      const av = document.getElementById('userAvatar');
-      av.textContent = (user.displayName||user.email)[0].toUpperCase();
-      applyUserRole('user', displayName, user);
+      // Firestore injoignable — on reste avec les infos Auth, pas de crash
+      console.warn('Firestore profil inaccessible:', e.message);
     }
-    _loadMessagesOnce(user);
     // Commandes : chargement different au premier clic
   } else {
     document.getElementById('authWall').style.display    = 'flex';
@@ -685,15 +683,24 @@ function applyUserRole(role, fullName, user) {
 // ── Load messages (lazy, once) ──
 async function _loadMessagesOnce(user) {
   if (_loaded.messages) return;
-  _loaded.messages = true; // verrou anti-doublon pendant le chargement
+  _loaded.messages = true;
   const uid = user.uid;
   const spinner = document.getElementById('msgsLoading');
   const list    = document.getElementById('msgList');
+
+  // Bouton réessayer après 5s si ça tourne encore
+  const retryTimer = setTimeout(() => {
+    if (spinner.style.display !== 'none') {
+      spinner.innerHTML = '<div style="text-align:center"><div class="spin" style="margin:0 auto 12px"></div><div style="font-size:12px;color:#aaa;font-family:\'JetBrains Mono\',monospace;margin-bottom:10px">Connexion lente…</div><a href="#" onclick="event.preventDefault();_loaded.messages=false;document.getElementById(\'msgsLoading\').innerHTML=\'<div class=\\\'spin\\\'></div>\';_loadMessagesOnce(auth.currentUser)" style="font-size:12px;color:var(--acc);font-family:\'JetBrains Mono\',monospace;text-decoration:underline">Réessayer</a></div>';
+    }
+  }, 5000);
+
   try {
     const [snapUid, snapEmail] = await withTimeout(Promise.all([
       getDocs(query(collection(db,'messages'), where('userId','==',uid))),
       user?.email ? getDocs(query(collection(db,'messages'), where('email','==',user.email))) : Promise.resolve({docs:[]}),
     ]), 8000);
+    clearTimeout(retryTimer);
     // Fusionner et dedupliquer
     const seen = new Set();
     const allDocs = [];
@@ -750,6 +757,7 @@ async function _loadMessagesOnce(user) {
       </div>`;
     }).join('');
   } catch(e) {
+    clearTimeout(retryTimer);
     // Reset le flag pour permettre un retry au prochain clic sur l'onglet
     _loaded.messages = false;
     spinner.style.display = 'none';
