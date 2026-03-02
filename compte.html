@@ -393,7 +393,7 @@
       <div class="panel-header">
         <div class="panel-title">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          Historique de mes demandes
+          Historique des messages
         </div>
         <a href="/contact.html" class="msg-new-btn" style="font-size:11px;padding:8px 16px;margin-top:0">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -580,7 +580,7 @@ onAuthStateChanged(auth, async user => {
         const prenom   = d.prenom || d.firstName || (user.displayName||'').split(' ')[0] || '';
         const nom      = d.nom    || d.lastName  || (user.displayName||'').split(' ').slice(1).join(' ') || '';
         const fullName = (prenom+' '+nom).trim() || user.displayName || 'Client';
-        const role     = d.hasAdminAccess ? 'admin' : (d.role || 'user');
+        const role     = (d.hasAdminAccess === true || d.role === 'admin' || d.isAdmin === true) ? 'admin' : (d.role || 'user');
 
         // ── Gestion des rôles ──
         applyUserRole(role, fullName, user);
