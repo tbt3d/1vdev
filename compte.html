@@ -685,7 +685,7 @@ function applyUserRole(role, fullName, user) {
 // ── Load messages (lazy, once) ──
 async function _loadMessagesOnce(user) {
   if (_loaded.messages) return;
-  _loaded.messages = true;
+  _loaded.messages = true; // verrou anti-doublon pendant le chargement
   const uid = user.uid;
   const spinner = document.getElementById('msgsLoading');
   const list    = document.getElementById('msgList');
@@ -750,8 +750,11 @@ async function _loadMessagesOnce(user) {
       </div>`;
     }).join('');
   } catch(e) {
-    spinner.style.display = 'none'; list.style.display = 'flex';
-    list.innerHTML = `<div class="msg-empty"><div class="msg-empty-txt">Erreur de chargement. Vérifiez les règles Firestore.</div></div>`;
+    // Reset le flag pour permettre un retry au prochain clic sur l'onglet
+    _loaded.messages = false;
+    spinner.style.display = 'none';
+    list.style.display = 'flex';
+    list.innerHTML = `<div class="msg-empty"><div class="msg-empty-icon">⚠️</div><div class="msg-empty-txt">Chargement échoué.<br><a href="#" onclick="event.preventDefault();_loaded.messages=false;document.getElementById('msgsLoading').style.display='flex';document.getElementById('msgList').style.display='none';_loadMessagesOnce(auth.currentUser)" style="color:var(--acc);text-decoration:underline">Réessayer</a></div></div>`;
     console.error(e);
   }
 }
@@ -759,7 +762,7 @@ async function _loadMessagesOnce(user) {
 // ── Load orders (lazy, once) ──
 async function _loadOrdersOnce(user) {
   if (_loaded.commandes) return;
-  _loaded.commandes = true;
+  _loaded.commandes = true; // verrou anti-doublon pendant le chargement
   const uid = user.uid;
   const spinner = document.getElementById('ordersLoading');
   const listEl  = document.getElementById('ordersList');
@@ -926,11 +929,12 @@ async function _loadOrdersOnce(user) {
     listEl.innerHTML = html;
 
   } catch(e) {
+    _loaded.commandes = false; // reset pour permettre un retry
     spinner.style.display = 'none';
     listEl.innerHTML =
-      '<div class="orders-empty"><div class="orders-empty-txt">' +
-      'Erreur de chargement : ' + e.message + '<br>' +
-      'Vérifiez les règles Firestore (index sur client.email + createdAt).' +
+      '<div class="orders-empty"><div class="orders-empty-icon">⚠️</div><div class="orders-empty-txt">' +
+      'Chargement échoué — connexion lente ?<br>' +
+      '<a href="#" onclick="event.preventDefault();_loaded.commandes=false;document.getElementById(\'ordersLoading\').style.display=\'flex\';document.getElementById(\'ordersList\').innerHTML=\'\';_loadOrdersOnce(auth.currentUser)" style="color:var(--acc);text-decoration:underline">Réessayer</a>' +
       '</div></div>';
     console.error('loadOrders error:', e);
   }
