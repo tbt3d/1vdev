@@ -540,16 +540,13 @@ const firebaseConfig = {
   appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
 };
 const app = initializeApp(firebaseConfig);
-// AutoDetect est plus robuste que ForceLongPolling sur iOS Safari
-const db  = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
+// forceLongPolling + useFetchStreams:false = XHR pur → seul transport fiable sur Safari iOS strict
+const db  = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
 
-// Safari ITP bloque localStorage à l'init → initializeAuth définit la persistence AVANT tout accès storage
-// Fallback : localStorage → sessionStorage → mémoire (inMemory fonctionne toujours)
+// initializeAuth définit la persistence AVANT tout accès storage → évite "insecure" sur Safari
 function _safePersistence() {
-  try { localStorage.setItem('_tbt_test','1'); localStorage.removeItem('_tbt_test'); return [browserLocalPersistence]; }
-  catch(_) {}
-  try { sessionStorage.setItem('_tbt_test','1'); sessionStorage.removeItem('_tbt_test'); return [browserSessionPersistence]; }
-  catch(_) {}
+  try { localStorage.setItem('_tbt','1'); localStorage.removeItem('_tbt'); return [browserLocalPersistence]; } catch(_){}
+  try { sessionStorage.setItem('_tbt','1'); sessionStorage.removeItem('_tbt'); return [browserSessionPersistence]; } catch(_){}
   return [inMemoryPersistence];
 }
 const auth = initializeAuth(app, { persistence: _safePersistence() });
@@ -596,39 +593,54 @@ onAuthStateChanged(auth, async user => {
     _loadMessagesOnce(user);
 
     // ── Mise à jour depuis Firestore en arrière-plan (rôle, adresse, etc.) ──
-    try {
-      const snap = await withTimeout(getDoc(doc(db, 'users', user.uid)), 10000);
-      if (snap.exists()) {
-        const d = snap.data();
-        const prenom   = d.prenom || d.firstName || pAuth[0] || '';
-        const nom      = d.nom    || d.lastName  || pAuth.slice(1).join(' ') || '';
-        const fullName = (prenom+' '+nom).trim() || displayNameAuth;
-        const role     = (d.hasAdminAccess === true || d.role === 'admin' || d.isAdmin === true) ? 'admin' : (d.role || 'user');
+    const _loadProfile = async () => {
+      try {
+        const snap = await withTimeout(getDoc(doc(db, 'users', user.uid)), 20000);
+        if (snap.exists()) {
+          const d = snap.data();
+          const prenom   = d.prenom || d.firstName || pAuth[0] || '';
+          const nom      = d.nom    || d.lastName  || pAuth.slice(1).join(' ') || '';
+          const fullName = (prenom+' '+nom).trim() || displayNameAuth;
+          const role     = (d.hasAdminAccess === true || d.role === 'admin' || d.isAdmin === true) ? 'admin' : (d.role || 'user');
 
-        applyUserRole(role, fullName, user);
-        document.getElementById('userName').textContent = fullName;
-        document.getElementById('pPrenom').value = prenom;
-        document.getElementById('pNom').value    = nom;
-        if (d.tel)         document.getElementById('pTel').value         = d.tel;
-        if (d.ville)       document.getElementById('pVille').value       = d.ville;
-        if (d.addrLine1)   document.getElementById('pAddrLine1').value   = d.addrLine1;
-        if (d.addrZip)     document.getElementById('pAddrZip').value     = d.addrZip;
-        if (d.addrCity)    document.getElementById('pAddrCity').value    = d.addrCity;
-        if (d.addrCountry) document.getElementById('pAddrCountry').value = d.addrCountry;
-        if (!user.photoURL) {
-          const initials = ((prenom[0]||'')+(nom[0]||'')).toUpperCase() || user.email[0].toUpperCase();
-          avEl.textContent = initials;
+          applyUserRole(role, fullName, user);
+          document.getElementById('userName').textContent = fullName;
+          document.getElementById('pPrenom').value = prenom;
+          document.getElementById('pNom').value    = nom;
+          if (d.tel)         document.getElementById('pTel').value         = d.tel;
+          if (d.ville)       document.getElementById('pVille').value       = d.ville;
+          if (d.addrLine1)   document.getElementById('pAddrLine1').value   = d.addrLine1;
+          if (d.addrZip)     document.getElementById('pAddrZip').value     = d.addrZip;
+          if (d.addrCity)    document.getElementById('pAddrCity').value    = d.addrCity;
+          if (d.addrCountry) document.getElementById('pAddrCountry').value = d.addrCountry;
+          if (!user.photoURL) {
+            const initials = ((prenom[0]||'')+(nom[0]||'')).toUpperCase() || user.email[0].toUpperCase();
+            avEl.textContent = initials;
+          }
+          // Retirer le bouton retry si présent
+          const rb = document.getElementById('roleRetryBtn');
+          if (rb) rb.remove();
+        } else {
+          document.getElementById('pPrenom').value = pAuth[0]||'';
+          document.getElementById('pNom').value    = pAuth.slice(1).join(' ')||'';
+          setDoc(doc(db,'users',user.uid),{prenom:pAuth[0]||'',nom:pAuth.slice(1).join(' ')||'',email:user.email,role:'user',createdAt:new Date().toISOString()},{merge:true}).catch(()=>{});
         }
-      } else {
-        // Pas de doc Firestore — créer un profil minimal
-        document.getElementById('pPrenom').value = pAuth[0]||'';
-        document.getElementById('pNom').value    = pAuth.slice(1).join(' ')||'';
-        setDoc(doc(db,'users',user.uid),{prenom:pAuth[0]||'',nom:pAuth.slice(1).join(' ')||'',email:user.email,role:'user',createdAt:new Date().toISOString()},{merge:true}).catch(()=>{});
+      } catch(e) {
+        console.warn('[TBT3D] Firestore profil inaccessible:', e.message);
+        // Afficher un bouton "Réessayer" sous le badge rôle
+        const roleBadgeEl = document.getElementById('roleBadge');
+        if (roleBadgeEl && !document.getElementById('roleRetryBtn')) {
+          const btn = document.createElement('a');
+          btn.id = 'roleRetryBtn';
+          btn.href = '#';
+          btn.textContent = '↻ Actualiser';
+          btn.style.cssText = 'font-size:11px;color:var(--acc,#ff6b35);font-family:inherit;margin-left:8px;text-decoration:underline;vertical-align:middle';
+          btn.onclick = (e) => { e.preventDefault(); btn.textContent = '…'; _loadProfile(); };
+          roleBadgeEl.parentNode.insertBefore(btn, roleBadgeEl.nextSibling);
+        }
       }
-    } catch(e) {
-      // Firestore injoignable — on reste avec les infos Auth, pas de crash
-      console.warn('Firestore profil inaccessible:', e.message);
-    }
+    };
+    _loadProfile();
     // Commandes : chargement different au premier clic
   } else {
     document.getElementById('authWall').style.display    = 'flex';
@@ -698,18 +710,18 @@ async function _loadMessagesOnce(user) {
   const spinner = document.getElementById('msgsLoading');
   const list    = document.getElementById('msgList');
 
-  // Bouton réessayer après 5s si ça tourne encore
+  // Bouton réessayer après 8s si ça tourne encore
   const retryTimer = setTimeout(() => {
     if (spinner.style.display !== 'none') {
       spinner.innerHTML = '<div style="text-align:center"><div class="spin" style="margin:0 auto 12px"></div><div style="font-size:12px;color:#aaa;font-family:\'JetBrains Mono\',monospace;margin-bottom:10px">Connexion lente…</div><a href="#" onclick="event.preventDefault();_loaded.messages=false;document.getElementById(\'msgsLoading\').innerHTML=\'<div class=\\\'spin\\\'></div>\';_loadMessagesOnce(auth.currentUser)" style="font-size:12px;color:var(--acc);font-family:\'JetBrains Mono\',monospace;text-decoration:underline">Réessayer</a></div>';
     }
-  }, 5000);
+  }, 8000);
 
   try {
     const [snapUid, snapEmail] = await withTimeout(Promise.all([
       getDocs(query(collection(db,'messages'), where('userId','==',uid))),
       user?.email ? getDocs(query(collection(db,'messages'), where('email','==',user.email))) : Promise.resolve({docs:[]}),
-    ]), 8000);
+    ]), 20000);
     clearTimeout(retryTimer);
     // Fusionner et dedupliquer
     const seen = new Set();
