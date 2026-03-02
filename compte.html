@@ -530,7 +530,7 @@
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, initializeFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, deleteDoc, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, updatePassword, updateProfile, deleteUser } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail, updatePassword, updateProfile, deleteUser, browserLocalPersistence, setPersistence } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
@@ -540,9 +540,11 @@ const firebaseConfig = {
   appId: "1:10842592812:web:f06cbd6c6892f29a6ca389"
 };
 const app  = initializeApp(firebaseConfig);
-// Désactive la persistence IndexedDB — résout le blocage sur iOS Safari
-const db   = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+// experimentalAutoDetectLongPolling : plus robuste que forceLongPolling sur iOS Safari
+const db   = initializeFirestore(app, { experimentalAutoDetectLongPolling: true, useFetchStreams: false });
 const auth = getAuth(app);
+// Force localStorage persistence — résout le blocage des cookies tiers sur Safari iOS (ITP)
+setPersistence(auth, browserLocalPersistence).catch(() => {});
 const googleProvider = new GoogleAuthProvider();
 
 const ERR_FR = {
@@ -617,7 +619,7 @@ onAuthStateChanged(auth, async user => {
       }
     } catch(e) {
       // Firestore injoignable — on reste avec les infos Auth, pas de crash
-      console.warn('Firestore profil inaccessible:', e.message);
+      console.warn('[TBT3D] Firestore profil inaccessible:', e.message, '| code:', e.code);
     }
     // Commandes : chargement different au premier clic
   } else {
