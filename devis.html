@@ -1040,9 +1040,13 @@ document.querySelectorAll('#techChips .chip').forEach(ch => {
     ch.classList.add('on');
     document.getElementById('techVal').textContent = ch.textContent;
     document.getElementById('fillBlock').style.display = S.tech === 'sla' ? 'none' : '';
-    buildMat(); calcVol();
-    if (S.dims) checkSlaSize(parseFloat(S.dims.x), parseFloat(S.dims.y), parseFloat(S.dims.z));
-    price();
+    // ── Switcher la palette de couleurs selon la techno ──
+    if (S.tech === 'sla' && window._devisColorsSla) {
+      _buildColorChips(window._devisColorsSla);
+    } else if (S.tech === 'fdm' && window._devisColorsFdm) {
+      _buildColorChips(window._devisColorsFdm);
+    }
+    buildMat(); checkSlaSize(); price();
   };
 });
 
@@ -1588,31 +1592,39 @@ let _devisFirebaseDb = null;
     if (snap.exists()) {
       const cfg = snap.data();
       if (cfg.workerUrl) WORKER_URL = cfg.workerUrl;
-      // ── Chargement dynamique des couleurs ──
-      if (Array.isArray(cfg.colors) && cfg.colors.length > 0) {
-        _buildColorChips(cfg.colors);
-      }
+      // ── Couleurs dynamiques FDM + SLA ──
+      const fdmColors = Array.isArray(cfg.colorsFdm) && cfg.colorsFdm.length
+        ? cfg.colorsFdm.filter(c => !c.archived)
+        : null;
+      const slaColors = Array.isArray(cfg.colorsSla) && cfg.colorsSla.length
+        ? cfg.colorsSla.filter(c => !c.archived)
+        : null;
+      // Fallback : ancienne palette unique en FDM
+      const legacyColors = Array.isArray(cfg.colors) && cfg.colors.length
+        ? cfg.colors.filter(c => !c.archived)
+        : null;
+      window._devisColorsFdm = fdmColors || legacyColors;
+      window._devisColorsSla = slaColors || null;
+      // Construire les chips pour la techno par défaut (fdm)
+      if (window._devisColorsFdm) _buildColorChips(window._devisColorsFdm);
     }
   } catch(e) {
-    console.log('Firebase config non disponible, URL par défaut utilisée');
+    console.log('Firebase config non disponible, couleurs par défaut utilisées');
   }
 })();
 
 function _buildColorChips(colors) {
   const container = document.getElementById('colorChips');
-  if (!container) return;
-  // Sauvegarder la couleur actuellement sélectionnée
+  if (!container || !colors || !colors.length) return;
   const currentColor = document.querySelector('.color-chip.on')?.dataset?.v || null;
-  // Vider et reconstruire
   container.innerHTML = '';
   colors.forEach((c, i) => {
-    const isWhite = c.hex === '#f0f0f0' || c.hex === '#ffffff' || c.hex === '#FFFFFF';
-    const dotStyle = isWhite ? `background:${c.hex};border-color:#ccc` : `background:${c.hex}`;
+    const isWhite = c.hex === '#f0f0f0' || c.hex === '#ffffff';
     const chip = document.createElement('div');
-    chip.className = 'color-chip' + (i === 0 && !currentColor ? ' on' : '');
+    chip.className = 'color-chip' + (!currentColor && i === 0 ? ' on' : '');
     chip.dataset.v   = c.name;
     chip.dataset.hex = c.hex;
-    chip.innerHTML = `<div class="dot" style="${dotStyle}"></div>${c.name}`;
+    chip.innerHTML = `<div class="dot" style="background:${c.hex}${isWhite?';border-color:#ccc':''}"></div>${c.name}`;
     chip.onclick = () => {
       S.color = c.name;
       document.querySelectorAll('.color-chip').forEach(x => x.classList.remove('on'));
@@ -1621,27 +1633,23 @@ function _buildColorChips(colors) {
       if (el) el.textContent = c.name;
       if (window._mesh) window._mesh.material.color.set(c.hex);
     };
-    // Restaurer la sélection si c'était cette couleur
     if (currentColor && c.name === currentColor) {
       document.querySelectorAll('.color-chip').forEach(x => x.classList.remove('on'));
       chip.classList.add('on');
     }
     container.appendChild(chip);
   });
-  // Si aucun chip n'est sélectionné, sélectionner le premier
-  if (!container.querySelector('.color-chip.on') && container.firstChild) {
-    container.firstChild.classList.add('on');
-  }
-  // Appliquer la couleur au mesh si chargé
-  const activChip = container.querySelector('.color-chip.on');
-  if (activChip && window._mesh) {
-    window._mesh.material.color.set(activChip.dataset.hex);
-  }
-  // Mettre à jour l'état S
-  if (activChip) {
-    S.color = activChip.dataset.v;
+  // Sélectionner le premier si rien n'est actif
+  const active = container.querySelector('.color-chip.on');
+  const first  = container.querySelector('.color-chip');
+  if (!active && first) first.classList.add('on');
+  // Appliquer au mesh + état S
+  const sel = container.querySelector('.color-chip.on');
+  if (sel) {
+    S.color = sel.dataset.v;
     const el = document.getElementById('colorVal');
-    if (el) el.textContent = activChip.dataset.v;
+    if (el) el.textContent = sel.dataset.v;
+    if (window._mesh) window._mesh.material.color.set(sel.dataset.hex);
   }
 }
 
