@@ -778,15 +778,7 @@ body { font-family: var(--font); color: var(--text); background: var(--white); p
     <div class="opt-block">
       <div class="opt-label">Couleur <span class="opt-val" id="colorVal">Noir</span></div>
       <div class="chips" id="colorChips">
-        <div class="color-chip on" data-v="Noir" data-hex="#1a1a1a"><div class="dot" style="background:#1a1a1a"></div>Noir</div>
-        <div class="color-chip" data-v="Blanc" data-hex="#f0f0f0"><div class="dot" style="background:#f0f0f0;border-color:#ccc"></div>Blanc</div>
-        <div class="color-chip" data-v="Gris" data-hex="#888"><div class="dot" style="background:#888"></div>Gris</div>
-        <div class="color-chip" data-v="Rouge" data-hex="#d63a2f"><div class="dot" style="background:#d63a2f"></div>Rouge</div>
-        <div class="color-chip" data-v="Bleu" data-hex="#2563eb"><div class="dot" style="background:#2563eb"></div>Bleu</div>
-        <div class="color-chip" data-v="Vert" data-hex="#16a34a"><div class="dot" style="background:#16a34a"></div>Vert</div>
-        <div class="color-chip" data-v="Jaune" data-hex="#eab308"><div class="dot" style="background:#eab308"></div>Jaune</div>
-        <div class="color-chip" data-v="Orange" data-hex="#ea580c"><div class="dot" style="background:#ea580c"></div>Orange</div>
-        <div class="color-chip" data-v="Bois" data-hex="#c8956c"><div class="dot" style="background:linear-gradient(135deg,#c8956c,#a0714f)"></div>Bois</div>
+        <!-- Chips chargés dynamiquement depuis Firebase -->
       </div>
     </div>
 
@@ -1046,7 +1038,10 @@ document.querySelectorAll('#techChips .chip').forEach(ch => {
     } else if (S.tech === 'fdm' && window._devisColorsFdm) {
       _buildColorChips(window._devisColorsFdm);
     }
-    buildMat(); checkSlaSize(); price();
+    buildMat(); 
+    if (S.dims) checkSlaSize(parseFloat(S.dims.x), parseFloat(S.dims.y), parseFloat(S.dims.z));
+    else checkSlaSize();
+    price();
   };
 });
 
@@ -1610,6 +1605,21 @@ let _devisFirebaseDb = null;
     }
   } catch(e) {
     console.log('Firebase config non disponible, couleurs par défaut utilisées');
+  }
+  // Fallback si Firebase n'a pas de couleurs configurées
+  if (!window._devisColorsFdm) {
+    window._devisColorsFdm = [
+      {name:'Gris',hex:'#888888'},{name:'Noir',hex:'#1a1a1a'},{name:'Blanc',hex:'#f0f0f0'},
+      {name:'Rouge',hex:'#d63a2f'},{name:'Bleu',hex:'#2563eb'},{name:'Vert',hex:'#16a34a'},
+      {name:'Jaune',hex:'#eab308'},{name:'Orange',hex:'#ea580c'},{name:'Bois',hex:'#c8956c'},
+    ];
+    _buildColorChips(window._devisColorsFdm);
+  }
+  if (!window._devisColorsSla) {
+    window._devisColorsSla = [
+      {name:'Blanc',hex:'#f0f0f0'},{name:'Gris clair',hex:'#cccccc'},
+      {name:'Transparent',hex:'#d4eaf7'},{name:'Noir',hex:'#1a1a1a'},
+    ];
   }
 })();
 
