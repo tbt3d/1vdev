@@ -2,6 +2,10 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Impression sur mesure — TBT3D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1584,11 +1588,62 @@ let _devisFirebaseDb = null;
     if (snap.exists()) {
       const cfg = snap.data();
       if (cfg.workerUrl) WORKER_URL = cfg.workerUrl;
+      // ── Chargement dynamique des couleurs ──
+      if (Array.isArray(cfg.colors) && cfg.colors.length > 0) {
+        _buildColorChips(cfg.colors);
+      }
     }
   } catch(e) {
     console.log('Firebase config non disponible, URL par défaut utilisée');
   }
 })();
+
+function _buildColorChips(colors) {
+  const container = document.getElementById('colorChips');
+  if (!container) return;
+  // Sauvegarder la couleur actuellement sélectionnée
+  const currentColor = document.querySelector('.color-chip.on')?.dataset?.v || null;
+  // Vider et reconstruire
+  container.innerHTML = '';
+  colors.forEach((c, i) => {
+    const isWhite = c.hex === '#f0f0f0' || c.hex === '#ffffff' || c.hex === '#FFFFFF';
+    const dotStyle = isWhite ? `background:${c.hex};border-color:#ccc` : `background:${c.hex}`;
+    const chip = document.createElement('div');
+    chip.className = 'color-chip' + (i === 0 && !currentColor ? ' on' : '');
+    chip.dataset.v   = c.name;
+    chip.dataset.hex = c.hex;
+    chip.innerHTML = `<div class="dot" style="${dotStyle}"></div>${c.name}`;
+    chip.onclick = () => {
+      S.color = c.name;
+      document.querySelectorAll('.color-chip').forEach(x => x.classList.remove('on'));
+      chip.classList.add('on');
+      const el = document.getElementById('colorVal');
+      if (el) el.textContent = c.name;
+      if (window._mesh) window._mesh.material.color.set(c.hex);
+    };
+    // Restaurer la sélection si c'était cette couleur
+    if (currentColor && c.name === currentColor) {
+      document.querySelectorAll('.color-chip').forEach(x => x.classList.remove('on'));
+      chip.classList.add('on');
+    }
+    container.appendChild(chip);
+  });
+  // Si aucun chip n'est sélectionné, sélectionner le premier
+  if (!container.querySelector('.color-chip.on') && container.firstChild) {
+    container.firstChild.classList.add('on');
+  }
+  // Appliquer la couleur au mesh si chargé
+  const activChip = container.querySelector('.color-chip.on');
+  if (activChip && window._mesh) {
+    window._mesh.material.color.set(activChip.dataset.hex);
+  }
+  // Mettre à jour l'état S
+  if (activChip) {
+    S.color = activChip.dataset.v;
+    const el = document.getElementById('colorVal');
+    if (el) el.textContent = activChip.dataset.v;
+  }
+}
 
 // ── Sauvegarde commande 3D dans Firebase ──
 async function saveDevisOrderToFirebase(orderData) {

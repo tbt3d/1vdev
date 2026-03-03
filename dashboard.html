@@ -2,6 +2,10 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TBT3D — Dashboard Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -622,6 +626,10 @@ tr:hover td{background:rgba(255,255,255,.01)}
   <button class="nav-item" onclick="goPage('devis-cfg',this)" id="navDevisCfg">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
     Config Devis
+  </button>
+  <button class="nav-item" onclick="goPage('devis-colors',this)" id="navDevisColors">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 012-2h6a2 2 0 012 2v1.662"/></svg>
+    Couleurs Devis
   </button>
 
   <div class="sb-section">Site</div>
@@ -1724,6 +1732,125 @@ tr:hover td{background:rgba(255,255,255,.01)}
     </div>
   </div>
 
+  <!-- ═══ PAGE COULEURS DEVIS ═══ -->
+  <div class="page" id="page-devis-colors">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
+        <div class="topbar-title">Couleurs — Page Devis</div>
+      </div>
+      <div class="topbar-right">
+        <button onclick="toggleTheme()" title="Changer de thème" style="display:inline-flex;align-items:center;gap:7px;padding:6px 13px;border-radius:20px;font-family:var(--font);font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:var(--bg3);color:var(--soft);transition:all .2s;letter-spacing:.02em"><span id="themeIco">☀️</span><span id="themeLabel">Clair</span></button>
+        <div class="sync-indicator"><div class="sync-dot"></div>Firebase Config</div>
+        <button class="btn btn-a" onclick="addDevisColor()" style="font-size:11px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Ajouter une couleur
+        </button>
+      </div>
+    </div>
+    <div class="ps" style="flex:1;overflow-y:auto">
+
+      <!-- Info -->
+      <div class="dcfg-info" style="display:flex;align-items:center;gap:9px;background:rgba(155,114,255,.07);border:1px solid rgba(155,114,255,.18);border-radius:var(--r);padding:11px 16px;margin-bottom:22px;font-size:12px;color:rgba(155,114,255,.9)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Les couleurs sont sauvegardées sur Firebase et chargées dynamiquement par <strong style="margin:0 3px">devis.html</strong>. Le choix d'une couleur applique la teinte sur la pièce 3D en temps réel.
+      </div>
+
+      <!-- Grille couleurs -->
+      <div class="fsec" style="margin-bottom:22px">
+        <div class="fsec-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+          <span class="fsec-title">Palette de couleurs disponibles</span>
+          <span id="colorsCount" style="margin-left:auto;font-size:9px;font-family:var(--mono);background:rgba(155,114,255,.15);color:var(--purple);padding:2px 8px;border-radius:20px">0 couleur</span>
+        </div>
+        <div class="fsec-body">
+          <div id="colorsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;min-height:60px">
+            <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:12px;font-family:var(--mono)">
+              <div style="width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px"></div>
+              Chargement…
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aperçu -->
+      <div class="fsec" style="margin-bottom:22px">
+        <div class="fsec-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="fsec-title">Aperçu — rendu sur la page Devis</span>
+        </div>
+        <div class="fsec-body">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:12px;font-family:var(--mono)">Prévisualisation des chips couleur tels qu'ils apparaissent sur la page devis.html</div>
+          <div id="colorsPreview" style="display:flex;flex-wrap:wrap;gap:8px;min-height:44px;align-items:center"></div>
+        </div>
+      </div>
+
+      <!-- Bouton sauvegarder -->
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-g" onclick="loadDevisColors()" style="font-size:12px">↺ Réinitialiser</button>
+        <button class="btn btn-a" onclick="saveDevisColors()" style="font-size:12px;flex:1;justify-content:center" id="btnSaveDevisColors">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
+          Enregistrer les couleurs
+        </button>
+      </div>
+      <div id="devisColorsFeedback" style="display:none;margin-top:14px;font-size:12px;text-align:center;padding:10px;border-radius:8px"></div>
+
+    </div>
+  </div>
+
+  <!-- MODAL ÉDITION COULEUR -->
+  <div id="colorEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:3000;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:18px;width:360px;max-width:100%;box-shadow:0 24px 60px rgba(0,0,0,.6);overflow:hidden">
+      <div style="padding:18px 22px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:13px;font-weight:700" id="colorModalTitle">Ajouter une couleur</div>
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px">Filament / résine disponible</div>
+        </div>
+        <button onclick="closeColorModal()" style="width:28px;height:28px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--soft);font-size:16px;font-weight:400;transition:all .15s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">✕</button>
+      </div>
+      <div style="padding:22px">
+        <div class="field">
+          <label>Nom de la couleur</label>
+          <input type="text" id="colorEditName" placeholder="ex: Bleu électrique" maxlength="40"
+            style="width:100%;padding:10px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--font);font-size:13px;border-radius:var(--r);outline:none;transition:border-color .2s,box-shadow .2s"
+            onfocus="this.style.borderColor='var(--accent)';this.style.boxShadow='0 0 0 3px var(--accent-glow)'" onblur="this.style.borderColor='var(--border2)';this.style.boxShadow='none'">
+        </div>
+        <div class="field" style="margin-top:14px">
+          <label>Couleur hex</label>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input type="color" id="colorEditPicker" value="#ff6b35"
+              style="width:50px;height:42px;border:1.5px solid var(--border2);border-radius:var(--r);background:var(--bg3);cursor:pointer;padding:3px;flex-shrink:0"
+              oninput="syncColorHex(this.value)">
+            <input type="text" id="colorEditHex" placeholder="#ff6b35" maxlength="7"
+              style="flex:1;padding:10px 14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:13px;border-radius:var(--r);outline:none;transition:border-color .2s"
+              oninput="syncColorPicker(this.value)"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+          </div>
+        </div>
+        <!-- Aperçu live -->
+        <div style="margin-top:14px;padding:14px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);display:flex;align-items:center;gap:12px">
+          <div id="colorModalDot" style="width:32px;height:32px;border-radius:50%;background:#ff6b35;border:2px solid rgba(255,255,255,.15);flex-shrink:0;transition:background .15s"></div>
+          <div>
+            <div style="font-size:12px;font-weight:600" id="colorModalPreviewName">Aperçu</div>
+            <div style="font-size:10px;font-family:var(--mono);color:var(--muted)" id="colorModalPreviewHex">#ff6b35</div>
+          </div>
+          <div id="colorModalChipPreview" style="margin-left:auto;display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:500;background:var(--bg4);border:1.5px solid var(--border2);cursor:default">
+            <span id="colorModalChipDot" style="width:10px;height:10px;border-radius:50%;background:#ff6b35;flex-shrink:0;border:1px solid rgba(255,255,255,.15)"></span>
+            <span id="colorModalChipName">Aperçu</span>
+          </div>
+        </div>
+        <div id="colorModalError" style="display:none;font-size:11px;color:var(--red);margin-top:10px;padding:8px 12px;background:rgba(255,61,90,.07);border-radius:6px"></div>
+      </div>
+      <div style="padding:0 22px 22px;display:flex;gap:8px">
+        <button onclick="closeColorModal()" class="btn btn-g" style="font-size:12px;flex:0 0 auto">Annuler</button>
+        <button onclick="saveColorFromModal()" class="btn btn-a" style="font-size:12px;flex:1;justify-content:center" id="colorModalSaveBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg>
+          Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ PAGE UTILISATEURS ═══ -->
   <div class="page" id="page-users">
 
@@ -2305,6 +2432,7 @@ window.goPage = (id, btn) => {
   if(id==='panier-cfg') loadPanierCfg();
   if(id==='livraison-cfg') loadLivraisonCfg();
   if(id==='devis-cfg') loadDevisCfg();
+  if(id==='devis-colors') loadDevisColors();
   if(id==='analytics') loadAnalytics();
   if(id==='promos') loadPromos();
   // Close sidebar on mobile after navigation
@@ -6038,6 +6166,190 @@ window.saveDevisCfg = async () => {
     fb.textContent = '⚠ Erreur : ' + e.message;
     btn.disabled = false;
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer la configuration';
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// ── COULEURS DEVIS ──────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+
+const DEVIS_DEFAULT_COLORS = [
+  { name: 'Noir',   hex: '#1a1a1a' },
+  { name: 'Blanc',  hex: '#f0f0f0' },
+  { name: 'Gris',   hex: '#888888' },
+  { name: 'Rouge',  hex: '#d63a2f' },
+  { name: 'Bleu',   hex: '#2563eb' },
+  { name: 'Vert',   hex: '#16a34a' },
+  { name: 'Jaune',  hex: '#eab308' },
+  { name: 'Orange', hex: '#ea580c' },
+  { name: 'Bois',   hex: '#c8956c' },
+];
+
+let _devisColors = []; // tableau courant [{ name, hex }, ...]
+let _editingColorIdx = null; // null = ajout, number = édition
+
+window.loadDevisColors = async () => {
+  const list = document.getElementById('colorsList');
+  if (list) list.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:12px;font-family:var(--mono)"><div style="width:28px;height:28px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px"></div>Chargement…</div>';
+  try {
+    const data = await fbGetConfig('devis');
+    _devisColors = (data && Array.isArray(data.colors) && data.colors.length)
+      ? data.colors
+      : [...DEVIS_DEFAULT_COLORS];
+  } catch(e) {
+    _devisColors = [...DEVIS_DEFAULT_COLORS];
+  }
+  renderDevisColorsList();
+};
+
+function renderDevisColorsList() {
+  const list    = document.getElementById('colorsList');
+  const preview = document.getElementById('colorsPreview');
+  const count   = document.getElementById('colorsCount');
+  if (!list) return;
+
+  count.textContent = `${_devisColors.length} couleur${_devisColors.length > 1 ? 's' : ''}`;
+
+  if (_devisColors.length === 0) {
+    list.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--muted);font-size:12px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="width:36px;height:36px;opacity:.2;margin:0 auto 12px;display:block"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/></svg>
+      Aucune couleur — cliquez sur <strong>Ajouter une couleur</strong>
+    </div>`;
+    preview.innerHTML = '<span style="font-size:11px;color:var(--muted);font-family:var(--mono)">Aucune couleur</span>';
+    return;
+  }
+
+  // Cards
+  list.innerHTML = _devisColors.map((c, i) => `
+    <div style="background:var(--bg3);border:1.5px solid var(--border2);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;transition:border-color .15s" onmouseover="this.style.borderColor='var(--border)'" onmouseout="this.style.borderColor='var(--border2)'">
+      <div style="width:40px;height:40px;border-radius:50%;background:${c.hex};flex-shrink:0;border:2px solid rgba(255,255,255,.1);box-shadow:0 2px 8px rgba(0,0,0,.3)"></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.name)}</div>
+        <div style="font-size:10px;font-family:var(--mono);color:var(--muted)">${esc(c.hex)}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button onclick="editDevisColor(${i})" title="Modifier" style="width:30px;height:30px;background:var(--bg4);border:1px solid var(--border2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--soft)" onmouseover="this.style.borderColor='var(--accent);this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button onclick="deleteDevisColor(${i})" title="Supprimer" style="width:30px;height:30px;background:rgba(255,61,90,.07);border:1px solid rgba(255,61,90,.15);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--red)" onmouseover="this.style.background='rgba(255,61,90,.15)'" onmouseout="this.style.background='rgba(255,61,90,.07)'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  // Preview chips (comme devis.html)
+  preview.innerHTML = _devisColors.map((c, i) => {
+    const isWhite = c.hex.toLowerCase() === '#f0f0f0' || c.hex.toLowerCase() === '#ffffff';
+    return `<div style="display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:500;background:#f4f4f4;border:1.5px solid ${i===0?'#111':'#ddd'};cursor:pointer;transition:all .15s;${i===0?'background:#111;color:#fff':'color:#555'}" title="${esc(c.name)}">
+      <span style="width:10px;height:10px;border-radius:50%;background:${c.hex};flex-shrink:0;border:1px solid ${isWhite?'#ccc':'rgba(0,0,0,.15)'}"></span>
+      ${esc(c.name)}
+    </div>`;
+  }).join('');
+}
+
+window.addDevisColor = () => {
+  _editingColorIdx = null;
+  document.getElementById('colorModalTitle').textContent = 'Ajouter une couleur';
+  document.getElementById('colorModalSaveBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Ajouter';
+  document.getElementById('colorEditName').value = '';
+  document.getElementById('colorEditPicker').value = '#ff6b35';
+  document.getElementById('colorEditHex').value = '#ff6b35';
+  document.getElementById('colorModalError').style.display = 'none';
+  _updateColorModalPreview('#ff6b35', '');
+  document.getElementById('colorEditModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('colorEditName').focus(), 80);
+};
+
+window.editDevisColor = (i) => {
+  const c = _devisColors[i];
+  if (!c) return;
+  _editingColorIdx = i;
+  document.getElementById('colorModalTitle').textContent = 'Modifier la couleur';
+  document.getElementById('colorModalSaveBtn').innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer';
+  document.getElementById('colorEditName').value = c.name;
+  document.getElementById('colorEditPicker').value = c.hex;
+  document.getElementById('colorEditHex').value = c.hex;
+  document.getElementById('colorModalError').style.display = 'none';
+  _updateColorModalPreview(c.hex, c.name);
+  document.getElementById('colorEditModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('colorEditName').focus(), 80);
+};
+
+window.deleteDevisColor = (i) => {
+  const c = _devisColors[i];
+  if (!c || !confirm(`Supprimer la couleur "${c.name}" ?`)) return;
+  _devisColors.splice(i, 1);
+  renderDevisColorsList();
+};
+
+window.closeColorModal = () => {
+  document.getElementById('colorEditModal').style.display = 'none';
+};
+
+window.syncColorHex = (val) => {
+  document.getElementById('colorEditHex').value = val;
+  _updateColorModalPreview(val, document.getElementById('colorEditName').value);
+};
+
+window.syncColorPicker = (val) => {
+  if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+    document.getElementById('colorEditPicker').value = val;
+    _updateColorModalPreview(val, document.getElementById('colorEditName').value);
+  }
+};
+
+function _updateColorModalPreview(hex, name) {
+  const safeHex = /^#[0-9a-fA-F]{6}$/.test(hex) ? hex : '#888888';
+  document.getElementById('colorModalDot').style.background = safeHex;
+  document.getElementById('colorModalPreviewHex').textContent = safeHex;
+  document.getElementById('colorModalPreviewName').textContent = name || 'Aperçu';
+  document.getElementById('colorModalChipDot').style.background = safeHex;
+  document.getElementById('colorModalChipName').textContent = name || 'Aperçu';
+}
+
+// Sync preview when name changes too
+document.addEventListener('input', e => {
+  if (e.target.id === 'colorEditName') {
+    _updateColorModalPreview(document.getElementById('colorEditHex').value, e.target.value);
+  }
+});
+
+window.saveColorFromModal = () => {
+  const name = (document.getElementById('colorEditName').value || '').trim();
+  const hex  = (document.getElementById('colorEditHex').value  || '').trim();
+  const err  = document.getElementById('colorModalError');
+  if (!name) { err.textContent='⚠ Le nom est obligatoire.'; err.style.display='block'; return; }
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) { err.textContent='⚠ Code hex invalide (ex: #ff6b35).'; err.style.display='block'; return; }
+  err.style.display = 'none';
+  if (_editingColorIdx === null) {
+    _devisColors.push({ name, hex });
+  } else {
+    _devisColors[_editingColorIdx] = { name, hex };
+  }
+  renderDevisColorsList();
+  closeColorModal();
+};
+
+window.saveDevisColors = async () => {
+  const btn = document.getElementById('btnSaveDevisColors');
+  const fb  = document.getElementById('devisColorsFeedback');
+  btn.disabled = true;
+  btn.innerHTML = '<div style="width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div> Enregistrement…';
+  fb.style.display = 'none';
+  try {
+    const existing = await fbGetConfig('devis') || {};
+    await fbSetConfig('devis', { ...existing, colors: _devisColors, updatedAt: new Date() });
+    fb.style.cssText = 'display:block;color:#16a34a;background:rgba(22,163,74,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center;margin-top:14px';
+    fb.textContent = '✓ Couleurs sauvegardées ! La page devis.html utilisera ces couleurs au prochain chargement.';
+    toast('Couleurs Devis sauvegardées ✓');
+    setTimeout(() => fb.style.display = 'none', 5000);
+  } catch(e) {
+    fb.style.cssText = 'display:block;color:#e11d48;background:rgba(225,29,72,.1);border-radius:8px;padding:10px;font-size:12px;text-align:center;margin-top:14px';
+    fb.textContent = '⚠ Erreur : ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Enregistrer les couleurs';
   }
 };
 
