@@ -6298,7 +6298,14 @@ window.renderDevisColorsList = () => {
           <div style="font-size:9px;font-family:var(--mono);color:var(--muted)">${esc(c.hex)}</div>
           ${archived ? '<div style="font-size:9px;color:var(--soft);font-family:var(--mono);margin-top:2px">● archivée</div>' : ''}
         </div>
-        <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0">
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;margin-right:2px">
+          <button onclick="moveDevisColor(${i},-1)" title="Monter" ${i===0?'disabled':''} style="width:22px;height:22px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;cursor:${i===0?'default':'pointer'};display:flex;align-items:center;justify-content:center;color:${i===0?'var(--border2)':'var(--soft)'};transition:all .15s;padding:0" ${i===0?'':'onmouseover="this.style.borderColor=\'var(--accent)\';this.style.color=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border2)\';this.style.color=\'var(--soft)\'"'}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px"><polyline points="18 15 12 9 6 15"/></svg>
+          </button>
+          <button onclick="moveDevisColor(${i},1)" title="Descendre" ${i===all.length-1?'disabled':''} style="width:22px;height:22px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;cursor:${i===all.length-1?'default':'pointer'};display:flex;align-items:center;justify-content:center;color:${i===all.length-1?'var(--border2)':'var(--soft)'};transition:all .15s;padding:0" ${i===all.length-1?'':'onmouseover="this.style.borderColor=\'var(--accent)\';this.style.color=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border2)\';this.style.color=\'var(--soft)\'"'}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+        </div>
           <!-- Toggle archiver -->
           <button onclick="toggleArchiveColor(${i})" title="${archived?'Remettre en ligne':'Archiver'}"
             style="padding:4px 9px;border-radius:7px;cursor:pointer;font-size:9px;font-family:var(--mono);font-weight:700;letter-spacing:.04em;transition:all .15s;
@@ -6335,6 +6342,14 @@ window.renderDevisColorsList = () => {
       }).join('');
     }
   }
+};
+
+window.moveDevisColor = (i, dir) => {
+  const arr = _devisColors[_colorTab];
+  const j = i + dir;
+  if (j < 0 || j >= arr.length) return;
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+  renderDevisColorsList();
 };
 
 window.toggleArchiveColor = (i) => {
