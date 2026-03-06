@@ -3387,7 +3387,7 @@ const ART_SHIP_COUNTRIES = [
   {code:'CA', flag:'🇨🇦', name:'Canada'},
 ];
 
-function lvArtToggle() {
+window.lvArtToggle = function() {
   const cb = document.getElementById('aShippingEnabled');
   cb.checked = !cb.checked;
   const on = cb.checked;
@@ -3395,7 +3395,7 @@ function lvArtToggle() {
   document.getElementById('aShippingThumb').style.left = on ? '22px' : '2px';
   document.getElementById('aShippingRatesWrap').style.display = on ? '' : 'none';
   if (on && !document.querySelector('#aShippingRatesList .asr-row')) renderArtShippingRows();
-}
+};
 
 function renderArtShippingRows(overrides={}) {
   const list = document.getElementById('aShippingRatesList');
