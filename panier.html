@@ -680,7 +680,8 @@ function rebuildCountrySelect() {
     sel.appendChild(og);
   });
   if (!hasCur && sel.options.length) sel.options[0].selected = true;
-  updateSummaryTotals();
+  // Ne recalculer les totaux que si le panier est déjà prêt (évite un calcul prématuré avec panier vide)
+  if (_cartReady) updateSummaryTotals();
 }
 
 function getShippingCountry() {
@@ -692,20 +693,24 @@ function getShippingCost() {
   if (!SHIPPING_ENABLED) return 0;
   const c = getShippingCountry();
   const globalRate = SHIPPING_RATES[c] !== undefined ? SHIPPING_RATES[c] : DEFAULT_SHIPPING;
-  console.log('[TBT3D] getShippingCost → pays:', c, 'globalRate:', globalRate, 'mapSize:', Object.keys(_articleShippingMap).length);
 
   // Chercher un tarif spécifique par article dans le panier
   const items = TBTCart.load();
   let articleOverride = null;
 
   items.forEach(function(item) {
-    // Chercher par toutes les clés possibles de l'article
-    const keys = [
-      String(item.id   || ''),
-      String(item.slug || ''),
+    // Toutes les clés possibles, en casse originale ET lowercase
+    const rawKeys = [
+      item.id   ? String(item.id)   : null,
+      item.slug ? String(item.slug) : null,
+      item.name ? String(item.name) : null,
     ].filter(Boolean);
 
+    const keys = [];
+    rawKeys.forEach(function(k) { keys.push(k); keys.push(_normKey(k)); });
+
     keys.forEach(function(k) {
+      if (!k) return;
       const ov = _articleShippingMap[k];
       if (ov && ov[c] !== undefined) {
         console.log('[TBT3D] Override trouvé pour', k, '->', c, '=', ov[c]);
@@ -716,7 +721,9 @@ function getShippingCost() {
     });
   });
 
-  return articleOverride !== null ? articleOverride : globalRate;
+  const result = articleOverride !== null ? articleOverride : globalRate;
+  console.log('[TBT3D] getShippingCost → pays:', c, 'globalRate:', globalRate, 'override:', articleOverride, 'résultat:', result, 'items:', items.length, 'mapSize:', Object.keys(_articleShippingMap).length);
+  return result;
 }
 
 // ── Code promo ──────────────────────────────────────────────
@@ -1427,64 +1434,70 @@ window.addEventListener('cart:updated', function() {
   if (_cartReady) renderCart();
 });
 
-// Charger config livraison PUIS articles + panier en parallèle
+// ── Normalise une clé pour le matching (trim + lowercase)
+function _normKey(s) { return s ? String(s).trim().toLowerCase() : ''; }
+
+// ── Indexe un article dans _articleShippingMap avec toutes ses clés
+function _indexArticleShipping(keys, overrides) {
+  keys.forEach(function(k) {
+    if (!k) return;
+    var nk = _normKey(k);
+    if (nk) _articleShippingMap[nk] = overrides;
+    // aussi en casse originale
+    _articleShippingMap[k] = overrides;
+  });
+}
+
+function loadArticleShipping() {
+  return fetch('https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/articles?pageSize=100&key=AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8')
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (!data || !data.documents) { console.warn('[TBT3D] Aucun article trouvé'); return; }
+      data.documents.forEach(function(doc) {
+        const fields = doc.fields || {};
+        const shipF  = fields.shippingOverrides;
+        if (!shipF || !shipF.mapValue || !shipF.mapValue.fields) return;
+
+        // Parse les overrides
+        const overrides = {};
+        Object.entries(shipF.mapValue.fields).forEach(function([country, val]) {
+          const price = parseFloat(
+            val.doubleValue  !== undefined ? val.doubleValue  :
+            val.integerValue !== undefined ? val.integerValue :
+            val.stringValue  || 0
+          );
+          if (!isNaN(price) && price >= 0) overrides[country.trim().toUpperCase()] = price;
+        });
+        if (!Object.keys(overrides).length) return;
+
+        // Collecter toutes les clés possibles (id, slug, path, name)
+        const idByField = fields.id   ? (fields.id.stringValue   || String(fields.id.integerValue   || '')) : null;
+        const idBySlug  = fields.slug ? (fields.slug.stringValue  || '') : null;
+        const idByPath  = doc.name    ? doc.name.split('/').pop()         : null;
+        const idByName  = fields.name ? (fields.name.stringValue  || '') : null;
+
+        console.log('[TBT3D] Article indexé:', { idByField, idBySlug, idByPath, idByName, overrides });
+        _indexArticleShipping([idByField, idBySlug, idByPath, idByName], overrides);
+      });
+      console.log('[TBT3D] ShippingMap keys:', Object.keys(_articleShippingMap));
+    })
+    .catch(function(e) { console.warn('[TBT3D] Erreur article shipping:', e); });
+}
+
+// ── Séquence de chargement garantie : config → panier + articles → rendu
 getLivraisonCfg().then(function(cfg) {
   applyLivraisonCfg(cfg);
 
-  function loadArticleShipping() {
-    return fetch('https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/articles?pageSize=100&key=AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8')
-      .then(function(r) { return r.ok ? r.json() : null; })
-      .then(function(data) {
-        if (!data || !data.documents) { console.warn('[TBT3D] Aucun article trouvé'); return; }
-        data.documents.forEach(function(doc) {
-          const fields = doc.fields || {};
-          const shipF  = fields.shippingOverrides;
-          if (!shipF || !shipF.mapValue || !shipF.mapValue.fields) return;
-
-          // Parse les overrides
-          const overrides = {};
-          Object.entries(shipF.mapValue.fields).forEach(function([country, val]) {
-            const price = parseFloat(
-              val.doubleValue  !== undefined ? val.doubleValue  :
-              val.integerValue !== undefined ? val.integerValue :
-              val.stringValue  || 0
-            );
-            if (!isNaN(price) && price >= 0) overrides[country] = price;
-          });
-          if (!Object.keys(overrides).length) return;
-
-          // Indexer par toutes les clés possibles
-          const idByField = fields.id   ? (fields.id.stringValue   || String(fields.id.integerValue   || '')) : null;
-          const idBySlug  = fields.slug ? (fields.slug.stringValue  || '') : null;
-          const idByPath  = doc.name    ? doc.name.split('/').pop()         : null;
-          const idByName  = fields.name ? (fields.name.stringValue  || '') : null;
-
-          console.log('[TBT3D] Article livraison indexé:', { idByField, idBySlug, idByPath, idByName, overrides });
-
-          if (idByField) _articleShippingMap[idByField] = overrides;
-          if (idBySlug  && idBySlug  !== idByField) _articleShippingMap[idBySlug]  = overrides;
-          if (idByPath  && idByPath  !== idByField && idByPath  !== idBySlug) _articleShippingMap[idByPath]  = overrides;
-          if (idByName  && !_articleShippingMap[idByName]) _articleShippingMap[idByName] = overrides;
-        });
-        // Log les items du panier pour vérifier la correspondance
-        setTimeout(function() {
-          const cartItems = TBTCart.load();
-          console.log('[TBT3D] Items panier:', cartItems.map(function(i){ return {id: i.id, slug: i.slug, key: i.key, name: i.name}; }));
-          console.log('[TBT3D] ShippingMap keys:', Object.keys(_articleShippingMap));
-        // Forcer recalcul maintenant que la map est prête
-        if (_cartReady) updateSummaryTotals();
-        }, 100);
-      })
-      .catch(function(e) { console.warn('[TBT3D] Erreur article shipping:', e); });
-  }
-
-  // Attendre que les deux soient prêts avant de rendre le panier
+  // Les deux en parallèle, rendu seulement quand les deux sont finis
   Promise.all([
     TBTCart.init(),
     loadArticleShipping()
-  ]).then(function() {
-    _cartReady = true;   // ← maintenant la map est prête, on peut rendre
-    renderCart();
+  ]).then(function(results) {
+    var cartItems = results[0] || TBTCart.load();
+    console.log('[TBT3D] Panier chargé:', cartItems.map(function(i){ return {id: i.id, slug: i.slug, name: i.name}; }));
+    _cartReady = true;
+    renderCart();       // renderCart appelle updateSummaryTotals à la fin
+    updateSummaryTotals(); // forcer un second appel pour être sûr
     validateAddress();
   });
 });
