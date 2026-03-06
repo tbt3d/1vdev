@@ -1090,6 +1090,45 @@ tr:hover td{background:rgba(255,255,255,.01)}
               <div id="suggestionsList"></div>
             </div>
           </div>
+
+          <!-- ═══ LIVRAISON SPÉCIFIQUE PAR ARTICLE ═══ -->
+          <div class="fsec">
+            <div class="fsec-head">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <span class="fsec-title">Livraison spécifique</span>
+              <span style="margin-left:auto;font-size:10px;color:var(--muted)">surcharge par pays</span>
+            </div>
+            <div class="fsec-body">
+              <div class="fhint" style="margin-bottom:14px">
+                Définissez un tarif de livraison <strong>spécifique à cet article</strong> par pays. Si renseigné, il remplace le tarif global du panier pour ce produit.
+                Laissez vide pour utiliser le tarif global par défaut.
+              </div>
+
+              <!-- Toggle activer/désactiver -->
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--bg);border-radius:10px;border:1.5px solid var(--border)">
+                <div style="flex:1">
+                  <div style="font-size:13px;font-weight:600">Tarifs personnalisés</div>
+                  <div class="fhint" style="margin-top:2px">Activer pour définir des tarifs propres à cet article</div>
+                </div>
+                <div style="position:relative;width:44px;height:24px;cursor:pointer" onclick="lvArtToggle()">
+                  <input type="checkbox" id="aShippingEnabled" style="opacity:0;width:0;height:0;position:absolute">
+                  <span id="aShippingTrack" style="position:absolute;inset:0;border-radius:24px;background:var(--border2);transition:.2s">
+                    <span id="aShippingThumb" style="position:absolute;left:2px;top:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.3)"></span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Tableau des tarifs par pays -->
+              <div id="aShippingRatesWrap" style="display:none">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;padding:0 2px">
+                  <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Pays</span>
+                  <span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Tarif (€) — vide = tarif global</span>
+                </div>
+                <div id="aShippingRatesList"></div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <div class="art-sidebar-sticky">
@@ -1421,6 +1460,19 @@ tr:hover td{background:rgba(255,255,255,.01)}
                 <input type="number" id="lvTvaRate" min="0" max="100" step="0.1" placeholder="20">
                 <div class="fhint">Entrez 20 pour 20%. Ignoré si TVA désactivée.</div>
               </div>
+            </div>
+            <!-- TVA sur les frais de port -->
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px;padding:14px 16px;background:var(--bg3);border-radius:10px;border:1.5px solid var(--border2)">
+              <div>
+                <div style="font-size:13px;font-weight:600">TVA sur les frais de port</div>
+                <div class="fhint" style="margin-top:3px">Si activée, la TVA s'applique aussi sur le montant de la livraison (en plus des produits).</div>
+              </div>
+              <label style="position:relative;display:inline-flex;flex-shrink:0;width:44px;height:24px;cursor:pointer">
+                <input type="checkbox" id="lvTvaOnShipping" style="opacity:0;width:0;height:0;position:absolute" onchange="lvToggleTvaShippingTrack(this.checked)">
+                <span id="lvTvaShippingTrack" style="position:absolute;inset:0;border-radius:24px;background:var(--border2);transition:.2s">
+                  <span id="lvTvaShippingThumb" style="position:absolute;left:2px;top:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.3)"></span>
+                </span>
+              </label>
             </div>
           </div>
         </div>
@@ -3161,6 +3213,7 @@ window.submitArticle = async () => {
     comboLinks: Object.fromEntries(
       Object.entries(window.comboLinks || {}).filter(([,v]) => v.url && v.url.trim())
     ),
+    shippingOverrides: collectShippingOverrides(),
     createdAt: editId?(arts.find(a=>a.id===editId)?.createdAt||new Date().toISOString()):new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -3264,6 +3317,7 @@ window.editArt=i=>{
   renderMoodGrid();
   renderSuggestions();
   renderComboLinks();
+  loadArtShipping(a.shippingOverrides || {});
 
   document.getElementById('artPageTitle').textContent='Modifier — '+a.name;
   const btn=document.getElementById('btnSubmit');
@@ -3316,6 +3370,76 @@ function updateBadges(){
   document.getElementById('boutBadge').textContent=boutSlots.length||arts.filter(a=>a.status==='published').length;
 }
 
+// ── LIVRAISON SPÉCIFIQUE PAR ARTICLE ─────────────────────────────────────────
+const ART_SHIP_COUNTRIES = [
+  {code:'FR', flag:'🇫🇷', name:'France'},
+  {code:'BE', flag:'🇧🇪', name:'Belgique'},
+  {code:'CH', flag:'🇨🇭', name:'Suisse'},
+  {code:'LU', flag:'🇱🇺', name:'Luxembourg'},
+  {code:'DE', flag:'🇩🇪', name:'Allemagne'},
+  {code:'IT', flag:'🇮🇹', name:'Italie'},
+  {code:'ES', flag:'🇪🇸', name:'Espagne'},
+  {code:'PT', flag:'🇵🇹', name:'Portugal'},
+  {code:'NL', flag:'🇳🇱', name:'Pays-Bas'},
+  {code:'AT', flag:'🇦🇹', name:'Autriche'},
+  {code:'GB', flag:'🇬🇧', name:'Royaume-Uni'},
+  {code:'US', flag:'🇺🇸', name:'États-Unis'},
+  {code:'CA', flag:'🇨🇦', name:'Canada'},
+];
+
+function lvArtToggle() {
+  const cb = document.getElementById('aShippingEnabled');
+  cb.checked = !cb.checked;
+  const on = cb.checked;
+  document.getElementById('aShippingTrack').style.background = on ? 'var(--accent)' : 'var(--border2)';
+  document.getElementById('aShippingThumb').style.left = on ? '22px' : '2px';
+  document.getElementById('aShippingRatesWrap').style.display = on ? '' : 'none';
+  if (on && !document.querySelector('#aShippingRatesList .asr-row')) renderArtShippingRows();
+}
+
+function renderArtShippingRows(overrides={}) {
+  const list = document.getElementById('aShippingRatesList');
+  if (!list) return;
+  list.innerHTML = ART_SHIP_COUNTRIES.map(c => `
+    <div class="asr-row" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;align-items:center">
+      <div style="font-size:13px;display:flex;align-items:center;gap:7px">
+        <span style="font-size:16px">${c.flag}</span>
+        <span style="font-weight:500">${c.name}</span>
+        <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">${c.code}</span>
+      </div>
+      <input type="number" min="0" step="0.5" placeholder="tarif global"
+        id="asrInput_${c.code}"
+        value="${overrides[c.code]!==undefined ? overrides[c.code] : ''}"
+        style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:var(--font);background:var(--white);color:var(--text)">
+    </div>
+  `).join('');
+}
+
+function collectShippingOverrides() {
+  const cb = document.getElementById('aShippingEnabled');
+  if (!cb || !cb.checked) return {};
+  const overrides = {};
+  ART_SHIP_COUNTRIES.forEach(c => {
+    const el = document.getElementById('asrInput_'+c.code);
+    if (el && el.value !== '') {
+      const v = parseFloat(el.value);
+      if (!isNaN(v)) overrides[c.code] = v;
+    }
+  });
+  return overrides;
+}
+
+function loadArtShipping(overrides={}) {
+  const hasOverrides = overrides && Object.keys(overrides).length > 0;
+  const cb = document.getElementById('aShippingEnabled');
+  if (!cb) return;
+  cb.checked = hasOverrides;
+  document.getElementById('aShippingTrack').style.background = hasOverrides ? 'var(--accent)' : 'var(--border2)';
+  document.getElementById('aShippingThumb').style.left = hasOverrides ? '22px' : '2px';
+  document.getElementById('aShippingRatesWrap').style.display = hasOverrides ? '' : 'none';
+  renderArtShippingRows(overrides || {});
+}
+
 window.resetForm=()=>{
   editId=null;
   ['aName','aPrice','aOldPrice','aTagline','aSlug','aPayhip','aStripePriceTest','aStripePriceLive','aDesc'].forEach(id=>{
@@ -3328,6 +3452,7 @@ window.resetForm=()=>{
   window.caracs=caracs; window.variants=variants; window.photos=photos;
   window.moodPhotos=moodPhotos; window.selectedSuggestions=selectedSuggestions; window.comboLinks=comboLinks;
   renderPhotoSlots(); renderCaracs(); renderVariants(); renderMoodGrid(); renderSuggestions(); renderComboLinks();
+  loadArtShipping({});
   document.getElementById('artPageTitle').textContent='Créer un article';
   document.getElementById('btnCancel').style.display='none';
   // Remettre le bouton submit proprement
@@ -5664,6 +5789,11 @@ window.lvToggleTrack = (on) => {
   document.getElementById('lvTvaThumb').style.left = on ? '22px' : '2px';
 };
 
+window.lvToggleTvaShippingTrack = (on) => {
+  document.getElementById('lvTvaShippingTrack').style.background = on ? 'var(--accent)' : 'var(--border2)';
+  document.getElementById('lvTvaShippingThumb').style.left = on ? '22px' : '2px';
+};
+
 let _lvCurrentRates = {};
 
 window.lvRenderGrid = (rates) => {
@@ -5728,10 +5858,15 @@ window.loadLivraisonCfg = async () => {
     lvToggleShippingTrack(shippingOn);
     document.getElementById('lvTvaRate').value = Math.round((cfg.tvaRate || LV_DEFAULTS.tvaRate) * 100);
     document.getElementById('lvDefaultShipping').value = cfg.defaultShipping ?? LV_DEFAULTS.defaultShipping;
+    const tvaShipOn = cfg.tvaOnShipping === true;
+    document.getElementById('lvTvaOnShipping').checked = tvaShipOn;
+    lvToggleTvaShippingTrack(tvaShipOn);
     lvRenderGrid(cfg.shippingRates || LV_DEFAULTS.shippingRates);
   } catch(e) {
     document.getElementById('lvTvaEnabled').checked = true;
     lvToggleTrack(true);
+    document.getElementById('lvTvaOnShipping').checked = false;
+    lvToggleTvaShippingTrack(false);
     document.getElementById('lvTvaRate').value = 20;
     document.getElementById('lvDefaultShipping').value = 8;
     lvRenderGrid(LV_DEFAULTS.shippingRates);
@@ -5747,6 +5882,7 @@ window.saveLivraisonCfg = async () => {
   try {
     const cfg = {
       tvaEnabled:      document.getElementById('lvTvaEnabled').checked,
+      tvaOnShipping:   document.getElementById('lvTvaOnShipping').checked,
       shippingEnabled: document.getElementById('lvShippingEnabled').checked,
       tvaRate:         (parseFloat(document.getElementById('lvTvaRate').value)||20) / 100,
       defaultShipping: parseFloat(document.getElementById('lvDefaultShipping').value)||8,
