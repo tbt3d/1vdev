@@ -693,17 +693,26 @@ function getShippingCost() {
   const c = getShippingCountry();
   const globalRate = SHIPPING_RATES[c] !== undefined ? SHIPPING_RATES[c] : DEFAULT_SHIPPING;
 
-  // Vérifier les tarifs spécifiques par article dans le panier
+  // Chercher un tarif spécifique par article dans le panier
   const items = TBTCart.load();
   let articleOverride = null;
+
   items.forEach(function(item) {
-    const overrides = _articleShippingMap[item.id];
-    if (overrides && overrides[c] !== undefined) {
-      // Prend le tarif le plus élevé parmi les articles du panier
-      if (articleOverride === null || overrides[c] > articleOverride) {
-        articleOverride = overrides[c];
+    // Chercher par toutes les clés possibles de l'article
+    const keys = [
+      String(item.id   || ''),
+      String(item.slug || ''),
+    ].filter(Boolean);
+
+    keys.forEach(function(k) {
+      const ov = _articleShippingMap[k];
+      if (ov && ov[c] !== undefined) {
+        // Si plusieurs articles avec override, prend le plus élevé
+        if (articleOverride === null || ov[c] > articleOverride) {
+          articleOverride = ov[c];
+        }
       }
-    }
+    });
   });
 
   return articleOverride !== null ? articleOverride : globalRate;
@@ -1412,35 +1421,59 @@ document.addEventListener('keydown', e => {
 });
 
 window.addEventListener('cart:updated', renderCart);
-// Charger config livraison PUIS initialiser le panier
+
+// Charger config livraison PUIS articles + panier en parallèle
 getLivraisonCfg().then(function(cfg) {
   applyLivraisonCfg(cfg);
-  // Charger les tarifs de livraison spécifiques par article
-  fetch('https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/articles?pageSize=50&key=AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8')
-    .then(r => r.ok ? r.json() : null)
-    .then(data => {
-      if (data && data.documents) {
-        data.documents.forEach(doc => {
+
+  function loadArticleShipping() {
+    return fetch('https://firestore.googleapis.com/v1/projects/tbt3d-a0f04/databases/(default)/documents/articles?pageSize=100&key=AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8')
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data || !data.documents) return;
+        data.documents.forEach(function(doc) {
           const fields = doc.fields || {};
-          const idF = fields.id;
-          const shipF = fields.shippingOverrides;
-          if (idF && shipF && shipF.mapValue && shipF.mapValue.fields) {
-            const artId = idF.stringValue || idF.integerValue;
-            const overrides = {};
-            Object.entries(shipF.mapValue.fields).forEach(([country, val]) => {
-              const price = parseFloat(val.doubleValue || val.integerValue || val.stringValue || 0);
-              if (!isNaN(price)) overrides[country] = price;
-            });
-            if (artId && Object.keys(overrides).length) {
-              _articleShippingMap[artId] = overrides;
-            }
-          }
+          const shipF  = fields.shippingOverrides;
+          if (!shipF || !shipF.mapValue || !shipF.mapValue.fields) return;
+
+          // Parse les overrides
+          const overrides = {};
+          Object.entries(shipF.mapValue.fields).forEach(function([country, val]) {
+            const price = parseFloat(
+              val.doubleValue  !== undefined ? val.doubleValue  :
+              val.integerValue !== undefined ? val.integerValue :
+              val.stringValue  || 0
+            );
+            if (!isNaN(price) && price >= 0) overrides[country] = price;
+          });
+          if (!Object.keys(overrides).length) return;
+
+          // Indexer par TOUTES les clés possibles que item.id peut avoir
+          // 1. champ id (timestamp string ex: "1712345678901")
+          const idByField = fields.id
+            ? (fields.id.stringValue || String(fields.id.integerValue || ''))
+            : null;
+          // 2. slug de l'article (ex: "lampe-karma")
+          const idBySlug = fields.slug
+            ? (fields.slug.stringValue || '')
+            : null;
+          // 3. nom du document Firestore (dernier segment du path)
+          const idByPath = doc.name ? doc.name.split('/').pop() : null;
+
+          if (idByField) _articleShippingMap[idByField] = overrides;
+          if (idBySlug && idBySlug !== idByField) _articleShippingMap[idBySlug] = overrides;
+          if (idByPath  && idByPath  !== idByField && idByPath !== idBySlug)
+            _articleShippingMap[idByPath] = overrides;
         });
-      }
-      updateSummaryTotals();
-    })
-    .catch(() => {});
-  TBTCart.init().then(function() {
+      })
+      .catch(function() {/* fetch échoue → on utilise le tarif global */});
+  }
+
+  // Attendre que les deux soient prêts avant de rendre le panier
+  Promise.all([
+    TBTCart.init(),
+    loadArticleShipping()
+  ]).then(function() {
     renderCart();
     validateAddress();
   });
