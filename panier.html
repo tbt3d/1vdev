@@ -692,6 +692,7 @@ function getShippingCost() {
   if (!SHIPPING_ENABLED) return 0;
   const c = getShippingCountry();
   const globalRate = SHIPPING_RATES[c] !== undefined ? SHIPPING_RATES[c] : DEFAULT_SHIPPING;
+  console.log('[TBT3D] getShippingCost → pays:', c, 'globalRate:', globalRate, 'mapSize:', Object.keys(_articleShippingMap).length);
 
   // Chercher un tarif spécifique par article dans le panier
   const items = TBTCart.load();
@@ -1470,6 +1471,8 @@ getLivraisonCfg().then(function(cfg) {
           const cartItems = TBTCart.load();
           console.log('[TBT3D] Items panier:', cartItems.map(function(i){ return {id: i.id, slug: i.slug, key: i.key, name: i.name}; }));
           console.log('[TBT3D] ShippingMap keys:', Object.keys(_articleShippingMap));
+        // Forcer recalcul maintenant que la map est prête
+        if (_cartReady) updateSummaryTotals();
         }, 100);
       })
       .catch(function(e) { console.warn('[TBT3D] Erreur article shipping:', e); });
