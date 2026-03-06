@@ -1420,7 +1420,11 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeCheckout();
 });
 
-window.addEventListener('cart:updated', renderCart);
+let _cartReady = false; // bloque le rendu tant que la map n'est pas prête
+
+window.addEventListener('cart:updated', function() {
+  if (_cartReady) renderCart();
+});
 
 // Charger config livraison PUIS articles + panier en parallèle
 getLivraisonCfg().then(function(cfg) {
@@ -1476,6 +1480,7 @@ getLivraisonCfg().then(function(cfg) {
     TBTCart.init(),
     loadArticleShipping()
   ]).then(function() {
+    _cartReady = true;   // ← maintenant la map est prête, on peut rendre
     renderCart();
     validateAddress();
   });
