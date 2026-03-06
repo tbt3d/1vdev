@@ -659,6 +659,24 @@ function applyLivraisonCfg(cfg) {
   rebuildCountrySelect();
 }
 
+// Retourne le prix de livraison affiché pour un pays donné (override article si dispo)
+function _displayRateForCountry(code) {
+  const items = TBTCart.load();
+  let override = null;
+  items.forEach(function(item) {
+    const rawKeys = [item.id, item.slug, item.name].filter(Boolean).map(String);
+    const keys = [];
+    rawKeys.forEach(function(k) { keys.push(k); keys.push(_normKey(k)); });
+    keys.forEach(function(k) {
+      const ov = _articleShippingMap[k];
+      if (ov && ov[code] !== undefined) {
+        if (override === null || ov[code] > override) override = ov[code];
+      }
+    });
+  });
+  return override !== null ? override : (SHIPPING_RATES[code] !== undefined ? SHIPPING_RATES[code] : DEFAULT_SHIPPING);
+}
+
 function rebuildCountrySelect() {
   const sel = document.getElementById('shippingCountry');
   if (!sel) return;
@@ -673,14 +691,15 @@ function rebuildCountrySelect() {
     avail.forEach(code => {
       const opt = document.createElement('option');
       opt.value = code;
-      opt.textContent = (_LV_FLAGS[code]||'') + ' ' + (_LV_NAMES[code]||code) + ' — ' + SHIPPING_RATES[code].toFixed(2).replace('.',',') + ' €';
+      // Affiche le vrai prix (override article ou tarif global)
+      const displayRate = _cartReady ? _displayRateForCountry(code) : SHIPPING_RATES[code];
+      opt.textContent = (_LV_FLAGS[code]||'') + ' ' + (_LV_NAMES[code]||code) + ' — ' + displayRate.toFixed(2).replace('.',',') + ' €';
       if (code === cur) { opt.selected = true; hasCur = true; }
       og.appendChild(opt);
     });
     sel.appendChild(og);
   });
   if (!hasCur && sel.options.length) sel.options[0].selected = true;
-  // Ne recalculer les totaux que si le panier est déjà prêt (évite un calcul prématuré avec panier vide)
   if (_cartReady) updateSummaryTotals();
 }
 
@@ -1496,8 +1515,9 @@ getLivraisonCfg().then(function(cfg) {
     var cartItems = results[0] || TBTCart.load();
     console.log('[TBT3D] Panier chargé:', cartItems.map(function(i){ return {id: i.id, slug: i.slug, name: i.name}; }));
     _cartReady = true;
-    renderCart();       // renderCart appelle updateSummaryTotals à la fin
-    updateSummaryTotals(); // forcer un second appel pour être sûr
+    rebuildCountrySelect(); // reconstruire le select avec les vrais prix (overrides inclus)
+    renderCart();           // renderCart appelle updateSummaryTotals à la fin
+    updateSummaryTotals();  // forcer un second appel pour être sûr
     validateAddress();
   });
 });
