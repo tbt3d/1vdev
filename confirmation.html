@@ -430,15 +430,20 @@ async function generateAndSaveFacture(stripeData, fbData, orderId) {
 
   // Totaux
   const allItems = stripeData?.lineItems || fbData?.lineItems || [];
-  let tvaAmt = null, shippingAmt = null, subtotalAmt = null, stripePromoAmt = null;
+  let tvaAmt = null, shippingAmt = null, subtotalAmt = null, stripePromoAmt = null, tvaShippingAmt = null;
+  // Lire tvaShipping depuis Firestore si disponible
+  if (fbData?.tvaShipping != null && parseFloat(fbData.tvaShipping) > 0) {
+    tvaShippingAmt = parseFloat(fbData.tvaShipping);
+  }
   allItems.forEach(it => {
     const n = (it.name||'').toLowerCase();
     const a = it.amount != null ? it.amount/100 : null;
-    if (n.includes('tva')||n.includes('tax')) tvaAmt = a;
+    if (n.includes('tva livraison') || n.includes('tva ship')) tvaShippingAmt = a;
+    else if (n.includes('tva')||n.includes('tax')) tvaAmt = a;
     else if (n.includes('livraison')||n.includes('shipping')||n.includes('frais')) shippingAmt = a;
     else if (n.includes('réduction')||n.includes('reduction')) stripePromoAmt = a;
   });
-  if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0) - (stripePromoAmt||0);
+  if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0) - (tvaShippingAmt||0) - (stripePromoAmt||0);
 
   const fbPromoCode = fbData?.promoCode || null;
   const fbPromoDiscount = fbData?.promoDiscount ? parseFloat(fbData.promoDiscount) : 0;
@@ -452,7 +457,8 @@ async function generateAndSaveFacture(stripeData, fbData, orderId) {
   const totalsHtml = subtotalAmt !== null ? `
     <div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total HT</span><span>${subtotalAmt.toFixed(2)} €</span></div>
     ${tvaAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>TVA</span><span>${tvaAmt.toFixed(2)} €</span></div>`:''}
-    ${shippingAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Livraison</span><span>${shippingAmt.toFixed(2)} €</span></div>`:''}
+    ${shippingAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Livraison HT</span><span>${shippingAmt.toFixed(2)} €</span></div>`:''}
+    ${tvaShippingAmt!==null&&tvaShippingAmt>0?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>TVA livraison</span><span>${tvaShippingAmt.toFixed(2)} €</span></div>`:''}
     ${promoLineHtml}
   ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${totalTTC.toFixed(2)} €</span></div>${promoLineHtml}`;
 
@@ -804,17 +810,22 @@ function displayConfirmation(data, orderId, fbData) {
   // Toujours utiliser le montant Stripe comme référence TTC (fbData.total ne contient que les articles HT)
   const totalTTC = data.amountTotal ? data.amountTotal / 100 : (fbData?.total || 0);
   const allLineItems = data.lineItems || fbData?.lineItems || [];
-  let tvaAmt = null, shippingAmt = null, subtotalAmt = null, stripePromoAmt = null;
+  let tvaAmt = null, shippingAmt = null, subtotalAmt = null, stripePromoAmt = null, tvaShippingAmt = null;
+  // Lire tvaShipping depuis Firestore si disponible
+  if (fbData?.tvaShipping != null && parseFloat(fbData.tvaShipping) > 0) {
+    tvaShippingAmt = parseFloat(fbData.tvaShipping);
+  }
   allLineItems.forEach(item => {
     const n = (item.name||'').toLowerCase();
     const a = item.amount != null ? item.amount / 100 : null;
-    if (n.includes('tva') || n.includes('tax')) tvaAmt = a;
+    if (n.includes('tva livraison') || n.includes('tva ship')) tvaShippingAmt = a;
+    else if (n.includes('tva') || n.includes('tax')) tvaAmt = a;
     else if (n.includes('livraison') || n.includes('shipping') || n.includes('frais')) shippingAmt = a;
     else if (n.includes('réduction') || n.includes('reduction')) stripePromoAmt = a; // montant négatif
   });
   if (tvaAmt !== null || shippingAmt !== null) {
     // stripePromoAmt est négatif → le soustraire revient à le rajouter au sous-total
-    subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0) - (stripePromoAmt||0);
+    subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0) - (tvaShippingAmt||0) - (stripePromoAmt||0);
   }
   const promoCode = fbData?.promoCode || null;
   const promoDiscount = fbData?.promoDiscount ? parseFloat(fbData.promoDiscount) : 0;
@@ -825,7 +836,8 @@ function displayConfirmation(data, orderId, fbData) {
   totalRows.innerHTML = subtotalAmt !== null ? `
     <div class="total-row"><span>Sous-total HT</span><span>${subtotalAmt.toFixed(2)} €</span></div>
     ${tvaAmt !== null ? `<div class="total-row"><span>TVA</span><span>${tvaAmt.toFixed(2)} €</span></div>` : ''}
-    ${shippingAmt !== null ? `<div class="total-row"><span>Livraison</span><span>${shippingAmt.toFixed(2)} €</span></div>` : ''}
+    ${shippingAmt !== null ? `<div class="total-row"><span>Livraison HT</span><span>${shippingAmt.toFixed(2)} €</span></div>` : ''}
+    ${tvaShippingAmt !== null && tvaShippingAmt > 0 ? `<div class="total-row"><span>TVA livraison</span><span>${tvaShippingAmt.toFixed(2)} €</span></div>` : ''}
     ${promoCode && promoDiscount > 0 ? `<div class="total-row" style="color:var(--green)"><span>🎟 Code promo ${promoCode}${promoLabel ? ' ('+promoLabel+')' : ''}</span><span>−${promoDiscount.toFixed(2)} €</span></div>` : ''}
     <div class="total-row main"><span>Total TTC payé</span><strong>${totalTTC.toFixed(2)} €</strong></div>
   ` : `
@@ -930,15 +942,20 @@ window.downloadFacture = async function() {
       // Total
       const totalTTC = stripeData.amountTotal ? stripeData.amountTotal / 100 : (fbData.total || 0);
       const allItems = stripeData.lineItems || fbData.lineItems || [];
-      let tvaAmt = null, shippingAmt = null, subtotalAmt = null, stripePromoAmt = null;
+      let tvaAmt = null, shippingAmt = null, subtotalAmt = null, stripePromoAmt = null, tvaShippingAmt = null;
+      // Lire tvaShipping depuis Firestore si disponible
+      if (fbData?.tvaShipping != null && parseFloat(fbData.tvaShipping) > 0) {
+        tvaShippingAmt = parseFloat(fbData.tvaShipping);
+      }
       allItems.forEach(it => {
         const n = (it.name||'').toLowerCase();
         const a = it.amount != null ? it.amount/100 : null;
-        if (n.includes('tva')||n.includes('tax')) tvaAmt = a;
+        if (n.includes('tva livraison') || n.includes('tva ship')) tvaShippingAmt = a;
+        else if (n.includes('tva')||n.includes('tax')) tvaAmt = a;
         else if (n.includes('livraison')||n.includes('shipping')) shippingAmt = a;
         else if (n.includes('réduction')||n.includes('reduction')) stripePromoAmt = a;
       });
-      if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0) - (stripePromoAmt||0);
+      if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0) - (tvaShippingAmt||0) - (stripePromoAmt||0);
 
       const dlPromoCode = fbData?.promoCode || null;
       const dlPromoDiscount = fbData?.promoDiscount ? parseFloat(fbData.promoDiscount) : 0;
@@ -952,7 +969,8 @@ window.downloadFacture = async function() {
       const totalsHtml = subtotalAmt !== null ? `
         <div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total HT</span><span>${subtotalAmt.toFixed(2)} €</span></div>
         ${tvaAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>TVA</span><span>${tvaAmt.toFixed(2)} €</span></div>`:''}
-        ${shippingAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Livraison</span><span>${shippingAmt.toFixed(2)} €</span></div>`:''}
+        ${shippingAmt!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Livraison HT</span><span>${shippingAmt.toFixed(2)} €</span></div>`:''}
+        ${tvaShippingAmt!==null&&tvaShippingAmt>0?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>TVA livraison</span><span>${tvaShippingAmt.toFixed(2)} €</span></div>`:''}
         ${dlPromoLine}
       ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${totalTTC.toFixed(2)} €</span></div>${dlPromoLine}`;
 

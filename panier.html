@@ -1214,6 +1214,19 @@ function buildWorkerItems(items, mode) {
     qty: 1,
   });
 
+  // Ajouter TVA livraison comme ligne dynamique séparée (si activée)
+  const { tvaShipping } = computeTotals();
+  if (TVA_ENABLED && TVA_ON_SHIPPING && tvaShipping > 0) {
+    workerItems.push({
+      isDynamic: true,
+      name: 'TVA livraison (' + Math.round(TVA_RATE * 100) + '%)',
+      variant: '',
+      note: '',
+      price: tvaShipping,
+      qty: 1,
+    });
+  }
+
   // ── Correction d'arrondi ──
   // La somme des lignes arrondies individuellement peut différer du total attendu.
   // On ajuste la ligne TVA (ou livraison en fallback) pour absorber l'écart.
@@ -1267,7 +1280,7 @@ async function saveOrderToFirebase(items, source, addr) {
       image: i.image || null,
     }));
 
-    const { subtotal, discount, tva, shipping, total: totalTTC } = computeTotals();
+    const { subtotal, discount, tva, tvaShipping, shipping, total: totalTTC } = computeTotals();
     const orderDoc = {
       createdAt: new Date(),
       status: 'initié',
@@ -1283,6 +1296,7 @@ async function saveOrderToFirebase(items, source, addr) {
       } : { name:'', email:'', address:'', city:'', zip:'', country:'', phone:'' },
       items: orderItems,
       total: parseFloat(totalTTC.toFixed(2)),
+      tvaShipping: parseFloat((tvaShipping || 0).toFixed(2)),
       ...((_appliedPromo && discount > 0) ? {
         promoCode: _appliedPromo.code,
         promoType: _appliedPromo.type,
@@ -1617,7 +1631,7 @@ getLivraisonCfg().then(function(cfg) {
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#7c081e084e4c4f521f1312081d1f083c1b111d1510521f1311"><span class="__cf_email__" data-cfemail="087c6a7c3a383b266b67667c696b7c486f65696164266b6765">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
@@ -1636,7 +1650,7 @@ getLivraisonCfg().then(function(cfg) {
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   document.getElementById('footerYear').textContent = new Date().getFullYear();
 </script>
 <!-- TBT3D Analytics -->
