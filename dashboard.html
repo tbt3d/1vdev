@@ -632,6 +632,11 @@ tr:hover td{background:rgba(255,255,255,.01)}
     Couleurs Devis
   </button>
 
+  <button class="nav-item" onclick="goPage('rgpd',this)" id="navRgpd">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    RGPD &amp; Données<span class="nb nb-r" id="rgpdBadge" style="display:none">!</span>
+  </button>
+
   <div class="sb-section">Site</div>
   <a href="index.html" target="_blank" class="nav-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
@@ -2267,6 +2272,74 @@ tr:hover td{background:rgba(255,255,255,.01)}
     </div>
   </div>
 
+
+  <!-- ═══════════════════════════════════════════════ PAGE RGPD & DONNÉES ══ -->
+  <div class="page" id="page-rgpd">
+    <div class="topbar">
+      <div class="topbar-title">RGPD &amp; Données</div>
+      <div class="topbar-right">
+        <button class="btn btn-g" onclick="loadRgpd()" style="font-size:11px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Actualiser
+        </button>
+      </div>
+    </div>
+    <div class="ps" style="display:flex;flex-direction:column;gap:24px">
+
+      <!-- Bandeau résumé RGPD -->
+      <div id="rgpdSummary" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+        <div class="sc"><div class="sc-lbl">Fichiers total</div><div class="sc-val" id="rgpdTotalFiles" style="font-size:28px">—</div><div class="sc-sub">dans Firebase Storage</div></div>
+        <div class="sc" style="border-color:rgba(245,166,35,.3)"><div class="sc-lbl">Expiration &lt; 7j <span style="color:var(--orange)">⚠</span></div><div class="sc-val" id="rgpdExpiringSoon" style="font-size:28px;color:var(--orange)">—</div><div class="sc-sub">à supprimer bientôt</div></div>
+        <div class="sc" style="border-color:rgba(255,61,90,.3)"><div class="sc-lbl">Adresses &gt; 3 ans <span style="color:var(--red)">⚠</span></div><div class="sc-val" id="rgpdOldAddresses" style="font-size:28px;color:var(--red)">—</div><div class="sc-sub">à anonymiser</div></div>
+      </div>
+
+      <!-- Section fichiers -->
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:2px">Fichiers clients (Firebase Storage)</div>
+            <div style="font-size:11px;color:var(--soft)">Fichiers STL/images uploadés lors des devis — suppression automatique après 30 jours selon vos CGV</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a href="https://cloudinary.com/console/c-dfcrqwbee/media_library" target="_blank" class="btn btn-g" style="font-size:11px;border-color:rgba(77,166,255,.3);color:var(--blue);text-decoration:none">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+              Ouvrir Cloudinary →
+            </a>
+            <button class="btn btn-g" onclick="unlinkExpiredFiles()" style="font-size:11px;border-color:rgba(245,166,35,.4);color:var(--orange)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              Délier les expirés
+            </button>
+            <button class="btn btn-g" onclick="unlinkAllFiles()" style="font-size:11px;border-color:rgba(255,61,90,.3);color:var(--red)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M3 6h18M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+              Tout délier
+            </button>
+          </div>
+        </div>
+        <div id="rgpdFilesList" style="min-height:80px;display:flex;align-items:center;justify-content:center;color:var(--soft);font-size:12px">
+          <div style="text-align:center;padding:40px"><div class="spinner" style="width:24px;height:24px;border-width:2px;margin:0 auto 12px"></div>Chargement…</div>
+        </div>
+      </div>
+
+      <!-- Section adresses -->
+      <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden">
+        <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:2px">Adresses de livraison (Firestore)</div>
+            <div style="font-size:11px;color:var(--soft)">Conservées 3 ans selon vos CGV — anonymisation irréversible (remplace l'adresse par "Données supprimées")</div>
+          </div>
+          <button class="btn btn-g" onclick="anonymizeAllOldAddresses()" style="font-size:11px;border-color:rgba(255,61,90,.3);color:var(--red)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="3" x2="3" y2="21"/></svg>
+            Anonymiser tous &gt; 3 ans
+          </button>
+        </div>
+        <div id="rgpdAddressList" style="min-height:80px;display:flex;align-items:center;justify-content:center;color:var(--soft);font-size:12px">
+          <div style="text-align:center;padding:40px"><div class="spinner" style="width:24px;height:24px;border-width:2px;margin:0 auto 12px"></div>Chargement…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div><!-- /#appMain -->
 
 <div class="toast" id="toast"><div class="tdot" id="tdot"></div><span id="toastTxt"></span></div>
@@ -2294,6 +2367,7 @@ const EMAILJS_PUBLIC_KEY_EXPEDITION = 'OwuwOtWfKrVUrtc6k';
    Dans EmailJS, champ "Message" : {{{message_html}}}  (3 accolades = HTML non-échappé)
 */
 const EMAILJS_PUBLIC_KEY      = 'Hz2TaEfDTVW8Usv6Q';
+const EMAILJS_TPL_NOTIF_ADMIN = 'template_p5yfit6'; // notif admin commandes/messages → tbt203.contact@gmail.com
 // Expose to window for module script access
 window.EMAILJS_SERVICE               = EMAILJS_SERVICE;
 window.EMAILJS_TPL_ADMIN             = EMAILJS_TPL_ADMIN;
@@ -2311,7 +2385,7 @@ emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, doc, getDocs, setDoc, addDoc, deleteDoc, getDoc, updateDoc, query, orderBy, onSnapshot, Timestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBKdHfHKLxCTKeTVZ-tS5CXXmBe4Xedch8",
@@ -2499,6 +2573,7 @@ window.goPage = (id, btn) => {
   if(id==='users') loadUsers();
   if(id==='commandes') loadCommandes();
   if(id==='panier-cfg') loadPanierCfg();
+  if(id==='rgpd') loadRgpd();
   if(id==='livraison-cfg') loadLivraisonCfg();
   if(id==='devis-cfg') loadDevisCfg();
   if(id==='devis-colors') loadDevisColors();
@@ -3498,7 +3573,34 @@ const SUBJ_LABELS={commande:'🛒 Commande',devis:'📐 Devis',produit:'🏮 Pro
 function startMsgsListener(){
   if(msgUnsubscribe) msgUnsubscribe();
   const q=query(collection(db,'messages'),orderBy('createdAt','desc'));
+  let _msgListenerReady = false; // évite les notifs au 1er chargement
   msgUnsubscribe=onSnapshot(q,snap=>{
+    // ── Détection nouveaux messages pour notif admin ──────────────────────
+    if(_msgListenerReady){
+      snap.docChanges().forEach(change => {
+        if(change.type !== 'added') return;
+        const m = {id: change.doc.id, ...change.doc.data()};
+        const sentKey = 'notif_msg_' + m.id;
+        if(localStorage.getItem(sentKey)) return; // déjà notifié
+        localStorage.setItem(sentKey, '1');
+        // Envoi EmailJS
+        try {
+          emailjs.send(EMAILJS_SERVICE, EMAILJS_TPL_NOTIF_ADMIN, {
+            to_email:    'tbt203.contact@gmail.com',
+            type:        '📩 Nouveau message',
+            client_name: m.prenom || m.name || '—',
+            client_email: m.email || '—',
+            date:        m.createdAt?.toDate ? m.createdAt.toDate().toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR'),
+            facture_num: '—',
+            total:       '—',
+            summary:     (m.sujet ? 'Sujet : ' + m.sujet + '\n' : '') + (m.message || m.content || '').slice(0, 300),
+            dashboard_url: 'https://tbt3d.fr/dashboard.html',
+          }).then(()=>console.log('✓ Notif admin message envoyée')).catch(e=>console.warn('Notif admin msg échouée:',e));
+        } catch(e){ console.warn('EmailJS notif error:', e); }
+      });
+    }
+    _msgListenerReady = true;
+    // ─────────────────────────────────────────────────────────────────────
     allMsgs=snap.docs.map(d=>({id:d.id,...d.data()}));
     updateMsgBadges();
     const unread=allMsgs.filter(m=>m.status==='nouveau').length;
@@ -6902,6 +7004,315 @@ window.deletePromo = async function(id) {
     renderPromoStats(); filterPromos();
   } catch(e) { toast('Erreur : ' + e.message); }
 };
+
+
+
+// ══════════════════════════════════════════════════════════ RGPD & DONNÉES ══
+
+const FILE_EXPIRY_DAYS    = 30;
+const ADDRESS_EXPIRY_YEARS = 3;
+
+window.loadRgpd = async function() {
+  await Promise.all([loadRgpdFiles(), loadRgpdAddresses()]);
+  updateRgpdBadge();
+};
+
+// ── Charge les fichiers STL/clients depuis Firestore (URLs Cloudinary) ──
+async function loadRgpdFiles() {
+  const listEl  = document.getElementById('rgpdFilesList');
+  const totalEl = document.getElementById('rgpdTotalFiles');
+  const soonEl  = document.getElementById('rgpdExpiringSoon');
+  if(!listEl) return;
+  listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--soft);font-size:12px">Chargement…</div>';
+
+  try {
+    const { getDocs, collection } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const [msgSnap, cmdSnap] = await Promise.all([
+      getDocs(collection(db, 'messages')),
+      getDocs(collection(db, 'commandes')),
+    ]);
+
+    const files = [];
+    const now   = Date.now();
+
+    // Messages (formulaire devis)
+    msgSnap.forEach(docSnap => {
+      const d = docSnap.data();
+      if((!d.fileUrl && !d.fileName) || d.fileDeleted) return;
+      const ts       = d.createdAt?.seconds ? d.createdAt.seconds*1000 : (d.createdAt ? new Date(d.createdAt).getTime() : null);
+      const daysOld  = ts ? Math.floor((now - ts) / 86400000) : null;
+      const expired  = daysOld !== null && daysOld >= FILE_EXPIRY_DAYS;
+      const soon     = daysOld !== null && daysOld >= (FILE_EXPIRY_DAYS - 7) && !expired;
+      // Extraire le public_id Cloudinary depuis l'URL
+      const cloudPublicId = _extractCloudinaryId(d.fileUrl);
+      files.push({ id: docSnap.id, source: 'messages', fileName: d.fileName||'fichier', fileUrl: d.fileUrl||null, cloudPublicId, ts, daysOld, expired, soon, client: d.name||d.email||'—' });
+    });
+
+    // Commandes (items avec fichier STL)
+    cmdSnap.forEach(docSnap => {
+      const d = docSnap.data();
+      (d.items||[]).forEach((item, i) => {
+        if((!item.fileUrl && !item.fileName) || item.fileDeleted) return;
+        const ts      = d.createdAt?.seconds ? d.createdAt.seconds*1000 : null;
+        const daysOld = ts ? Math.floor((now - ts) / 86400000) : null;
+        const expired = daysOld !== null && daysOld >= FILE_EXPIRY_DAYS;
+        const soon    = daysOld !== null && daysOld >= (FILE_EXPIRY_DAYS - 7) && !expired;
+        const cloudPublicId = _extractCloudinaryId(item.fileUrl);
+        files.push({ id: docSnap.id, itemIndex: i, source: 'commandes', fileName: item.fileName||'fichier', fileUrl: item.fileUrl||null, cloudPublicId, ts, daysOld, expired, soon, client: d.client?.name||d.client?.email||'—' });
+      });
+    });
+
+    window._rgpdFiles = files;
+
+    const alertCount = files.filter(f => f.expired || f.soon).length;
+    if(totalEl) totalEl.textContent = files.length;
+    if(soonEl)  soonEl.textContent  = alertCount;
+
+    if(!files.length) {
+      listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--soft);font-size:12px">Aucun fichier trouvé</div>';
+      return;
+    }
+
+    files.sort((a,b) => (b.expired - a.expired) || (b.soon - a.soon) || (b.daysOld||0) - (a.daysOld||0));
+
+    listEl.innerHTML = `
+      <div style="padding:10px 16px;background:rgba(245,166,35,.06);border-bottom:1px solid rgba(245,166,35,.2);font-size:11px;color:var(--orange);display:flex;align-items:center;gap:8px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Les fichiers sont hébergés sur <strong style="margin:0 3px">Cloudinary</strong>. 
+        "Délier" supprime le lien dans Firestore. Pour supprimer définitivement de Cloudinary, utilisez le bouton <strong style="margin:0 3px">Ouvrir Cloudinary →</strong>.
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:10px 16px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Fichier</th>
+            <th style="padding:10px 16px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Client</th>
+            <th style="padding:10px 16px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Source</th>
+            <th style="padding:10px 16px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Age</th>
+            <th style="padding:10px 16px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Statut</th>
+            <th style="padding:10px 16px;text-align:right;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Actions</th>
+          </tr>
+        </thead>
+        <tbody>${files.map((f,i) => {
+          const badgeColor  = f.expired ? 'var(--red)' : (f.soon ? 'var(--orange)' : 'var(--green)');
+          const badgeBg     = f.expired ? 'rgba(255,61,90,.1)' : (f.soon ? 'rgba(245,166,35,.1)' : 'rgba(46,204,138,.08)');
+          const badgeBorder = f.expired ? 'rgba(255,61,90,.3)' : (f.soon ? 'rgba(245,166,35,.3)' : 'rgba(46,204,138,.25)');
+          const badgeLabel  = f.expired ? `EXPIRÉ (${f.daysOld}j)` : (f.soon ? `Expire dans ${FILE_EXPIRY_DAYS - f.daysOld}j` : (f.daysOld !== null ? `${f.daysOld}j` : '—'));
+          const cloudUrl = `https://cloudinary.com/console/c-${CLOUDINARY_CLOUD}/media_library`;
+          return `<tr style="border-bottom:1px solid var(--border);${f.expired?'background:rgba(255,61,90,.025)':''}">
+            <td style="padding:10px 16px">
+              <div style="font-size:12px;font-weight:600;color:var(--text)">${f.fileName}</div>
+              ${f.fileUrl ? `<a href="${f.fileUrl}" target="_blank" style="font-size:10px;color:var(--accent);text-decoration:none">Voir ↗</a>` : '<span style="font-size:10px;color:var(--muted)">URL manquante</span>'}
+            </td>
+            <td style="padding:10px 16px;font-size:12px;color:var(--soft)">${f.client}</td>
+            <td style="padding:10px 16px;font-size:11px;color:var(--soft);font-family:var(--mono)">${f.source}<br><span style="font-size:9px">#${f.id.slice(-8).toUpperCase()}</span></td>
+            <td style="padding:10px 16px;font-size:12px;color:var(--soft)">${f.daysOld !== null ? f.daysOld+'j' : '—'}</td>
+            <td style="padding:10px 16px">
+              <span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--mono);color:${badgeColor};background:${badgeBg};border:1px solid ${badgeBorder}">${badgeLabel}</span>
+            </td>
+            <td style="padding:10px 16px;text-align:right;display:flex;gap:6px;justify-content:flex-end;align-items:center">
+              <a href="${cloudUrl}" target="_blank" style="padding:5px 9px;background:rgba(77,166,255,.08);border:1px solid rgba(77,166,255,.25);color:var(--blue);border-radius:6px;font-size:10px;font-weight:600;text-decoration:none;white-space:nowrap">Cloudinary ↗</a>
+              <button onclick="unlinkOneFile(${i})" style="padding:5px 9px;background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.25);color:var(--red);border-radius:6px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600" title="Retire le lien dans Firestore">Délier</button>
+            </td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`;
+  } catch(e) {
+    listEl.innerHTML = `<div style="text-align:center;padding:40px;color:var(--red);font-size:12px">Erreur : ${e.message}</div>`;
+  }
+}
+
+// Extrait le public_id Cloudinary depuis une URL
+function _extractCloudinaryId(url) {
+  if(!url) return null;
+  try {
+    const m = url.match(/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/);
+    return m ? m[1] : null;
+  } catch(e) { return null; }
+}
+
+// ── Charge les adresses — avec vérification compte Firebase ──
+async function loadRgpdAddresses() {
+  const listEl = document.getElementById('rgpdAddressList');
+  const oldEl  = document.getElementById('rgpdOldAddresses');
+  if(!listEl) return;
+  listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--soft);font-size:12px">Chargement…</div>';
+
+  try {
+    const { getDocs, collection, query, where } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const [cmdSnap, usersSnap] = await Promise.all([
+      getDocs(collection(db, 'commandes')),
+      getDocs(collection(db, 'users')),
+    ]);
+
+    // Construire un Set des emails ayant un compte
+    const accountEmails = new Set();
+    usersSnap.forEach(d => {
+      const u = d.data();
+      if(u.email) accountEmails.add(u.email.toLowerCase().trim());
+    });
+
+    const now     = Date.now();
+    const limitMs = ADDRESS_EXPIRY_YEARS * 365 * 24 * 3600 * 1000;
+    const rows    = [];
+
+    cmdSnap.forEach(docSnap => {
+      const d    = docSnap.data();
+      const addr = d.client?.address || '';
+      if(!addr || addr === 'Données supprimées') return;
+      const ts      = d.createdAt?.seconds ? d.createdAt.seconds*1000 : (d.paidAt?.seconds ? d.paidAt.seconds*1000 : null);
+      const age     = ts ? now - ts : null;
+      const years   = age ? age / (365 * 24 * 3600 * 1000) : null;
+      const overdue = years !== null && years >= ADDRESS_EXPIRY_YEARS;
+      const email   = (d.client?.email || '').toLowerCase().trim();
+      const hasAccount = email && accountEmails.has(email);
+      rows.push({ id: docSnap.id, clientName: d.client?.name||'—', email: d.client?.email||'', address: addr, city: d.client?.city||'', zip: d.client?.zip||'', ts, years, overdue, hasAccount, factureNum: d.factureNum||'' });
+    });
+
+    window._rgpdAddresses = rows;
+    // Pour le badge : seulement les overdue SANS compte
+    const overdueNoAccount = rows.filter(r => r.overdue && !r.hasAccount).length;
+    if(oldEl) oldEl.textContent = overdueNoAccount;
+
+    if(!rows.length) {
+      listEl.innerHTML = '<div style="text-align:center;padding:40px;color:var(--soft);font-size:12px">Aucune adresse trouvée</div>';
+      return;
+    }
+
+    // Trier : overdue sans compte en premier, puis overdue avec compte, puis reste
+    rows.sort((a,b) => {
+      const pa = (a.overdue && !a.hasAccount) ? 2 : (a.overdue ? 1 : 0);
+      const pb = (b.overdue && !b.hasAccount) ? 2 : (b.overdue ? 1 : 0);
+      return pb - pa || (b.years||0) - (a.years||0);
+    });
+
+    listEl.innerHTML = `
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border)">
+            <th style="padding:10px 16px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Client</th>
+            <th style="padding:10px 16px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Adresse</th>
+            <th style="padding:10px 16px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Compte</th>
+            <th style="padding:10px 16px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Age</th>
+            <th style="padding:10px 16px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Statut</th>
+            <th style="padding:10px 16px;text-align:right;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--soft);font-weight:700">Action</th>
+          </tr>
+        </thead>
+        <tbody>${rows.map((r,i) => {
+          const ageStr = r.years !== null ? (r.years >= 1 ? r.years.toFixed(1)+' ans' : Math.floor(r.years*12)+' mois') : '—';
+          const mustAno = r.overdue && !r.hasAccount;
+          const canAno  = !r.hasAccount;
+          const badgeHtml = mustAno
+            ? `<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--mono);color:var(--red);background:rgba(255,61,90,.1);border:1px solid rgba(255,61,90,.3)">A ANONYMISER</span>`
+            : r.hasAccount
+            ? `<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--mono);color:var(--blue);background:rgba(77,166,255,.08);border:1px solid rgba(77,166,255,.2)">${ageStr}</span>`
+            : `<span style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;font-family:var(--mono);color:var(--soft);background:var(--bg3);border:1px solid var(--border2)">${ageStr}</span>`;
+          const accountBadge = r.hasAccount
+            ? `<span style="font-size:9px;padding:2px 7px;border-radius:20px;background:rgba(77,166,255,.1);color:var(--blue);border:1px solid rgba(77,166,255,.2);font-family:var(--mono);font-weight:700">COMPTE ✓</span>`
+            : `<span style="font-size:9px;padding:2px 7px;border-radius:20px;background:var(--bg3);color:var(--soft);border:1px solid var(--border);font-family:var(--mono)">invité</span>`;
+          const btnHtml = canAno
+            ? `<button onclick="anonymizeOneAddress(${i})" style="padding:5px 9px;background:rgba(255,61,90,.08);border:1px solid rgba(255,61,90,.25);color:var(--red);border-radius:6px;cursor:pointer;font-family:var(--font);font-size:10px;font-weight:600">Anonymiser</button>`
+            : `<span style="font-size:10px;color:var(--muted);padding:5px 9px" title="Client avec compte — conservation des données justifiée">Compte actif</span>`;
+          return `<tr style="border-bottom:1px solid var(--border);${mustAno?'background:rgba(255,61,90,.02)':''}">
+            <td style="padding:10px 16px">
+              <div style="font-size:12px;font-weight:600">${r.clientName}</div>
+              <div style="font-size:10px;color:var(--soft)">${r.email}</div>
+            </td>
+            <td style="padding:10px 16px;font-size:11px;color:var(--soft)">${r.address}${r.zip||r.city ? ', '+r.zip+' '+r.city : ''}</td>
+            <td style="padding:10px 16px">${accountBadge}</td>
+            <td style="padding:10px 16px">${badgeHtml}</td>
+            <td style="padding:10px 16px;font-size:11px;font-family:var(--mono);color:var(--soft)">${r.factureNum||('#'+r.id.slice(-8).toUpperCase())}</td>
+            <td style="padding:10px 16px;text-align:right">${btnHtml}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`;
+  } catch(e) {
+    listEl.innerHTML = `<div style="text-align:center;padding:40px;color:var(--red);font-size:12px">Erreur : ${e.message}</div>`;
+  }
+}
+
+// ── Délier un fichier (retire l'URL de Firestore) ──
+window.unlinkOneFile = async function(idx) {
+  const f = (window._rgpdFiles||[])[idx];
+  if(!f) return;
+  if(!confirm(`Délier "${f.fileName}" de Firestore ?\n\nNote : le fichier restera sur Cloudinary — allez sur Cloudinary pour le supprimer définitivement.`)) return;
+  await _doUnlinkFile(f);
+  toast('Fichier délié de Firestore ✓');
+  await loadRgpdFiles(); updateRgpdBadge();
+};
+
+window.unlinkExpiredFiles = async function() {
+  const expired = (window._rgpdFiles||[]).filter(f => f.expired);
+  if(!expired.length) { toast('Aucun fichier expiré', false); return; }
+  if(!confirm(`Délier ${expired.length} fichier(s) expiré(s) de Firestore ?\nSupprimez-les ensuite dans Cloudinary.`)) return;
+  let done = 0;
+  for(const f of expired) { try { await _doUnlinkFile(f); done++; } catch(e){} }
+  toast(`${done} fichier(s) déliés ✓`);
+  await loadRgpdFiles(); updateRgpdBadge();
+};
+
+window.unlinkAllFiles = async function() {
+  const files = window._rgpdFiles||[];
+  if(!files.length) { toast('Aucun fichier', false); return; }
+  if(!confirm(`Délier TOUS les ${files.length} fichier(s) de Firestore ?\nSupprimez-les ensuite dans Cloudinary.`)) return;
+  let done = 0;
+  for(const f of files) { try { await _doUnlinkFile(f); done++; } catch(e){} }
+  toast(`${done} fichier(s) déliés ✓`);
+  await loadRgpdFiles(); updateRgpdBadge();
+};
+
+async function _doUnlinkFile(f) {
+  const { updateDoc, doc: fsDoc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+  if(f.source === 'messages') {
+    await updateDoc(fsDoc(db,'messages',f.id), { fileUrl: null, fileName: null, fileDeleted: true, fileDeletedAt: new Date() });
+  } else if(f.source === 'commandes') {
+    const snap = await getDoc(fsDoc(db,'commandes',f.id));
+    if(snap.exists()) {
+      const items = [...(snap.data().items||[])];
+      if(items[f.itemIndex]) { items[f.itemIndex] = { ...items[f.itemIndex], fileUrl: null, fileName: null, fileDeleted: true }; }
+      await updateDoc(fsDoc(db,'commandes',f.id), { items });
+    }
+  }
+}
+
+// ── Anonymiser une adresse ──
+window.anonymizeOneAddress = async function(idx) {
+  const r = (window._rgpdAddresses||[])[idx];
+  if(!r) return;
+  if(r.hasAccount) { toast('Client avec compte — non anonymisable', true); return; }
+  if(!confirm(`Anonymiser l'adresse de "${r.clientName}" ?\nIrréversible.`)) return;
+  await _doAnonymizeAddress(r.id);
+  toast('Adresse anonymisée ✓');
+  await loadRgpdAddresses(); updateRgpdBadge();
+};
+
+window.anonymizeAllOldAddresses = async function() {
+  // Seulement les overdue SANS compte
+  const toAnonymize = (window._rgpdAddresses||[]).filter(r => r.overdue && !r.hasAccount);
+  if(!toAnonymize.length) { toast('Aucune adresse à anonymiser (sans compte)', false); return; }
+  if(!confirm(`Anonymiser ${toAnonymize.length} adresse(s) de plus de ${ADDRESS_EXPIRY_YEARS} ans (clients sans compte) ?\nIrréversible.`)) return;
+  let done = 0;
+  for(const r of toAnonymize) { try { await _doAnonymizeAddress(r.id); done++; } catch(e){} }
+  toast(`${done} adresse(s) anonymisée(s) ✓`);
+  await loadRgpdAddresses(); updateRgpdBadge();
+};
+
+async function _doAnonymizeAddress(cmdId) {
+  const { updateDoc, doc: fsDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+  await updateDoc(fsDoc(db,'commandes',cmdId), {
+    'client.address': 'Données supprimées',
+    'client.city': '', 'client.zip': '', 'client.phone': '',
+    addressAnonymizedAt: new Date(), updatedAt: new Date(),
+  });
+}
+
+function updateRgpdBadge() {
+  const files     = window._rgpdFiles    || [];
+  const addresses = window._rgpdAddresses|| [];
+  const alertCount = files.filter(f => f.expired || f.soon).length
+                   + addresses.filter(r => r.overdue && !r.hasAccount).length;
+  const badge = document.getElementById('rgpdBadge');
+  if(badge) { badge.textContent = alertCount||'!'; badge.style.display = alertCount > 0 ? 'inline-flex' : 'none'; }
+}
 
 
 // ── THEME TOGGLE ──

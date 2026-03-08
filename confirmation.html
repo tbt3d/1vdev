@@ -17,6 +17,7 @@
     const CONF_EMAILJS_SERVICE  = 'service_f73dvuk';
     const CONF_EMAILJS_TEMPLATE = 'template_q5h5f0v';
     const CONF_EMAILJS_KEY      = 'Hz2TaEfDTVW8Usv6Q';
+    const CONF_EMAILJS_ADMIN_TPL = 'template_p5yfit6';   // notif admin → tbt203.contact@gmail.com
     emailjs.init(CONF_EMAILJS_KEY);
   </script>
   <style>
@@ -710,6 +711,28 @@ async function sendAutoConfirmationEmail(stripeData, fbData, orderId) {
     } catch(e) { console.warn('Could not mark email sent:', e); }
   }
 
+  // ── Notif admin (nouvelle commande) ──────────────────────────────────────
+  try {
+    const itemsSummary = items.map(it => {
+      const qty = it.qty || it.quantity || 1;
+      return `• ${it.name||'Article'}${it.variant?' ('+it.variant+')':''} × ${qty}`;
+    }).join('\n');
+    await emailjs.send(CONF_EMAILJS_SERVICE, CONF_EMAILJS_ADMIN_TPL, {
+      to_email:    'tbt203.contact@gmail.com',
+      type:        '🛒 Nouvelle commande',
+      client_name: clientName,
+      client_email: email,
+      date:        dateStr,
+      facture_num: factureNum,
+      total:       totalTTC.toFixed(2) + ' €',
+      summary:     itemsSummary || '—',
+      dashboard_url: 'https://tbt3d.fr/dashboard.html',
+    });
+    console.log('✓ Notif admin commande envoyée');
+  } catch(adminErr) {
+    console.warn('Notif admin échouée (non bloquant) :', adminErr);
+  }
+  // ─────────────────────────────────────────────────────────────────────────
   console.log('✓ Email de confirmation envoyé automatiquement à', email);
 }
 // ─────────────────────────────────────────────────────────────────────────────
