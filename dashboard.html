@@ -2288,7 +2288,7 @@ tr:hover td{background:rgba(255,255,255,.01)}
 
       <!-- Bandeau résumé RGPD -->
       <div id="rgpdSummary" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-        <div class="sc"><div class="sc-lbl">Fichiers total</div><div class="sc-val" id="rgpdTotalFiles" style="font-size:28px">—</div><div class="sc-sub">dans Firebase Storage</div></div>
+        <div class="sc"><div class="sc-lbl">Fichiers total</div><div class="sc-val" id="rgpdTotalFiles" style="font-size:28px">—</div><div class="sc-sub">liens dans Firestore</div></div>
         <div class="sc" style="border-color:rgba(245,166,35,.3)"><div class="sc-lbl">Expiration &lt; 7j <span style="color:var(--orange)">⚠</span></div><div class="sc-val" id="rgpdExpiringSoon" style="font-size:28px;color:var(--orange)">—</div><div class="sc-sub">à supprimer bientôt</div></div>
         <div class="sc" style="border-color:rgba(255,61,90,.3)"><div class="sc-lbl">Adresses &gt; 3 ans <span style="color:var(--red)">⚠</span></div><div class="sc-val" id="rgpdOldAddresses" style="font-size:28px;color:var(--red)">—</div><div class="sc-sub">à anonymiser</div></div>
       </div>
@@ -2297,7 +2297,7 @@ tr:hover td{background:rgba(255,255,255,.01)}
       <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);overflow:hidden">
         <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
           <div>
-            <div style="font-size:13px;font-weight:700;margin-bottom:2px">Fichiers clients (Firebase Storage)</div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:2px">Fichiers clients (Cloudinary)</div>
             <div style="font-size:11px;color:var(--soft)">Fichiers STL/images uploadés lors des devis — suppression automatique après 30 jours selon vos CGV</div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -7050,7 +7050,9 @@ async function loadRgpdFiles() {
     // Commandes (items avec fichier STL)
     cmdSnap.forEach(docSnap => {
       const d = docSnap.data();
-      (d.items||[]).forEach((item, i) => {
+      // items peut être un tableau ou un objet {0:{...}, 1:{...}} selon la version
+      const itemsArr = Array.isArray(d.items) ? d.items : (d.items && typeof d.items === 'object' ? Object.values(d.items) : []);
+      itemsArr.forEach((item, i) => {
         if((!item.fileUrl && !item.fileName) || item.fileDeleted) return;
         const ts      = d.createdAt?.seconds ? d.createdAt.seconds*1000 : null;
         const daysOld = ts ? Math.floor((now - ts) / 86400000) : null;
