@@ -1230,19 +1230,24 @@ function buildWorkerItems(items, mode) {
   // ── Correction d'arrondi ──
   // La somme des lignes arrondies individuellement peut différer du total attendu.
   // On ajuste la ligne TVA (ou livraison en fallback) pour absorber l'écart.
+  // IMPORTANT : on saute la correction si un item utilise un prix Stripe statique
+  // (pas de champ `price`), car Math.round(undefined*100) = NaN et corrompt la TVA.
   const { total } = computeTotals();
-  const sumItems = workerItems.reduce((s, i) => s + Math.round(i.price * 100) * i.qty, 0); // en centimes
-  const expectedCents = Math.round(total * 100);
-  const diffCents = expectedCents - sumItems;
-  if (diffCents !== 0) {
-    // Chercher la ligne TVA pour ajuster
-    const tvaLine = workerItems.find(i => i.name && i.name.startsWith('TVA'));
-    if (tvaLine) {
-      tvaLine.price = parseFloat((tvaLine.price + diffCents / 100).toFixed(2));
-    } else {
-      // Fallback : ajuster la livraison
-      const shipLine = workerItems.find(i => i.name && i.name.startsWith('Livraison'));
-      if (shipLine) shipLine.price = parseFloat((shipLine.price + diffCents / 100).toFixed(2));
+  const hasPriceIdOnly = workerItems.some(i => i.stripePrice && i.price == null);
+  if (!hasPriceIdOnly) {
+    const sumItems = workerItems.reduce((s, i) => s + Math.round((i.price || 0) * 100) * (i.qty || 1), 0); // en centimes
+    const expectedCents = Math.round(total * 100);
+    const diffCents = expectedCents - sumItems;
+    if (diffCents !== 0) {
+      // Chercher la ligne TVA pour ajuster
+      const tvaLine = workerItems.find(i => i.name && i.name.startsWith('TVA'));
+      if (tvaLine) {
+        tvaLine.price = parseFloat((tvaLine.price + diffCents / 100).toFixed(2));
+      } else {
+        // Fallback : ajuster la livraison
+        const shipLine = workerItems.find(i => i.name && i.name.startsWith('Livraison'));
+        if (shipLine) shipLine.price = parseFloat((shipLine.price + diffCents / 100).toFixed(2));
+      }
     }
   }
 

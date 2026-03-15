@@ -312,18 +312,27 @@ async function verifyAndDisplay(sessionId) {
     // 2. Paiement confirmé → mettre à jour en Firestore
     const { id: orderId, fbData } = await saveOrderIfNew(sessionId, data);
 
-    // 3. Générer et sauvegarder la facture HTML immédiatement dans Firestore
-    generateAndSaveFacture(data, fbData, orderId).catch(e => console.warn('Facture gen error:', e));
+    // 3. Générer facture, puis envoyer l'email avec le bon factureNum
+    generateAndSaveFacture(data, fbData, orderId)
+      .then(factureNum => {
+        if (!fbData?.confirmationEmailSent) {
+          const fbDataWithFacture = { ...fbData, factureNum };
+          sendAutoConfirmationEmail(data, fbDataWithFacture, orderId)
+            .catch(e => console.warn('Email auto error:', e));
+        }
+      })
+      .catch(e => {
+        console.warn('Facture gen error:', e);
+        if (!fbData?.confirmationEmailSent) {
+          sendAutoConfirmationEmail(data, fbData, orderId)
+            .catch(e2 => console.warn('Email auto error (fallback):', e2));
+        }
+      });
 
     // 4. Paiement confirmé → vider le panier maintenant
     if (typeof TBTCart !== 'undefined') TBTCart.clear();
 
-    // 5. Envoyer l'email de confirmation automatiquement (si pas déjà envoyé)
-    if (!fbData?.confirmationEmailSent) {
-      sendAutoConfirmationEmail(data, fbData, orderId).catch(e => console.warn('Email auto error:', e));
-    }
-
-    // 6. Afficher la confirmation — priorité aux données Firebase (adresse, téléphone)
+    // 5. Afficher la confirmation — priorité aux données Firebase (adresse, téléphone)
     displayConfirmation(data, orderId, fbData);
 
   } catch (err) {
@@ -412,8 +421,27 @@ async function generateAndSaveFacture(stripeData, fbData, orderId) {
   const paidAt = new Date();
   const dateStr = paidAt.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
 
-  // Numéro de facture séquentiel simple basé sur timestamp
-  const factureNum = 'FAC-' + paidAt.getFullYear() + '-' + String(Date.now()).slice(-4);
+  // Numéro de facture séquentiel via compteur atomique Firestore
+  let factureNum;
+  {
+    const { runTransaction, doc: fsDocTx } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const year = paidAt.getFullYear();
+    const counterRef = fsDocTx(db, 'config', 'factureCounter');
+    try {
+      const nextNum = await runTransaction(db, async (tx) => {
+        const snap = await tx.get(counterRef);
+        const data = snap.exists() ? snap.data() : {};
+        const storedYear = data.year || year;
+        const current = (storedYear === year) ? (data.nextNum || 1) : 1;
+        tx.set(counterRef, { nextNum: current + 1, year }, { merge: false });
+        return current;
+      });
+      factureNum = 'FAC-' + year + '-' + String(nextNum).padStart(4, '0');
+    } catch(e) {
+      console.warn('factureCounter transaction failed, fallback timestamp:', e);
+      factureNum = 'FAC-' + year + '-' + String(Date.now()).slice(-4);
+    }
+  }
 
   // Lignes articles (5 colonnes)
   const itemsRows = items.map(item => {
@@ -445,6 +473,19 @@ async function generateAndSaveFacture(stripeData, fbData, orderId) {
     else if (n.includes('réduction')||n.includes('reduction')) stripePromoAmt = a;
   });
   if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt||0) - (shippingAmt||0) - (tvaShippingAmt||0) - (stripePromoAmt||0);
+
+  // Fallback TVA : si Stripe n'a pas renvoyé de ligne TVA explicite, on la recalcule
+  if (tvaAmt === null && items.length > 0) {
+    const rate = window._tvaRate || 0.20;
+    tvaAmt = Math.round(items.reduce((s, item) => {
+      const puHT = parseFloat(item.price || (item.amount ? item.amount / 100 : 0));
+      const qty = parseInt(item.qty || item.quantity || 1);
+      return s + puHT * qty * rate;
+    }, 0) * 100) / 100;
+    if (tvaAmt > 0 && subtotalAmt === null) {
+      subtotalAmt = totalTTC - tvaAmt - (shippingAmt||0) - (tvaShippingAmt||0) - (stripePromoAmt||0);
+    }
+  }
 
   const fbPromoCode = fbData?.promoCode || null;
   const fbPromoDiscount = fbData?.promoDiscount ? parseFloat(fbData.promoDiscount) : 0;
@@ -543,6 +584,7 @@ async function generateAndSaveFacture(stripeData, fbData, orderId) {
     factureGeneratedAt: new Date(),
   });
   console.log('✓ Facture générée et sauvegardée :', factureNum);
+  return factureNum;
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -565,8 +607,8 @@ async function sendAutoConfirmationEmail(stripeData, fbData, orderId) {
     : new Date();
   const dateStr = paidAt.toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' });
 
-  // Numéro de facture (simple, basé sur l'orderId)
-  const factureNum = fbData?.factureNum || ('FAC-' + paidAt.getFullYear() + '-' + orderId.slice(-4).toUpperCase());
+  // Numéro de facture — toujours issu de Firestore (généré avant l'envoi de l'email)
+  const factureNum = fbData?.factureNum || ('FAC-' + paidAt.getFullYear() + '-XXXX');
 
   // Lignes articles
   const itemsRows = items.map(item => {
@@ -590,6 +632,13 @@ async function sendAutoConfirmationEmail(stripeData, fbData, orderId) {
     else if (n.includes('réduction') || n.includes('reduction')) stripePromoAmt = a;
   });
   if (tvaAmt !== null || shippingAmt !== null) subtotalAmt = totalTTC - (tvaAmt || 0) - (shippingAmt || 0) - (stripePromoAmt || 0);
+
+  // Fallback TVA : si Stripe n'a pas renvoyé de ligne TVA explicite, on la recalcule
+  if (tvaAmt === null && items.length > 0) {
+    const rate = window._tvaRate || 0.20;
+    tvaAmt = Math.round(items.reduce((s, i) => s + parseFloat(i.price || 0) * parseInt(i.qty || 1) * rate, 0) * 100) / 100;
+    if (tvaAmt > 0 && subtotalAmt === null) subtotalAmt = totalTTC - tvaAmt - (shippingAmt||0) - (stripePromoAmt||0);
+  }
 
   const totalsHtml = subtotalAmt !== null ? `
     <tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">Sous-total HT</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${subtotalAmt.toFixed(2)} €</td></tr>
