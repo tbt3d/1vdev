@@ -4916,12 +4916,22 @@ window.downloadFacturePdf = async (id) => {
     </tr>`;
   }).join('');
 
-  const _promoLine1 = c.promoCode && parseFloat(c.promoDiscount||0)>0 ? `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#16a34a;border-bottom:1px solid #e8e8e8;font-weight:500"><span>🎟 Code ${c.promoCode}${c.promoType==='percent'?' (-'+c.promoValue+'%)':''}</span><span>−${parseFloat(c.promoDiscount).toFixed(2)} €</span></div>` : '';
-  const _tvaLabel1 = c.promoDiscount > 0 ? `TVA (${Math.round((getTvaRate(c))*100)}% sur ${(getSubtotalHT(c)-parseFloat(c.promoDiscount||0)).toFixed(2)} €)` : `TVA (${Math.round((getTvaRate(c))*100)}%)`;
+  const _promoDisc1 = parseFloat(c.promoDiscount||0);
+  const _discBase1  = Math.max(0, getSubtotalHT(c) - _promoDisc1);
+  const _tvaLabel1  = _promoDisc1 > 0
+    ? `TVA (${Math.round((getTvaRate(c))*100)}% sur ${_discBase1.toFixed(2)} €)`
+    : `TVA (${Math.round((getTvaRate(c))*100)}%)`;
+  const _promoLine1 = c.promoCode && _promoDisc1 > 0
+    ? `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#16a34a;border-bottom:1px solid #e8e8e8;font-weight:500"><span>🎟 Code ${c.promoCode}${c.promoType==='percent'?' (-'+c.promoValue+'%)':''}</span><span>−${_promoDisc1.toFixed(2)} €</span></div>` : '';
+  // Fallback TVA si Stripe ne renvoie pas de ligne TVA
+  let _tva1 = _ts.tva;
+  if (_tva1 === null && _ts.subtotal !== null) {
+    _tva1 = Math.round(_discBase1 * getTvaRate(c) * 100) / 100;
+  }
   const factureTotalsHtml = _ts.subtotal !== null ? `
     <div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total HT</span><span>${_ts.subtotal.toFixed(2)} €</span></div>
     ${_promoLine1}
-    ${_ts.tva!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>${_tvaLabel1}</span><span>${_ts.tva.toFixed(2)} €</span></div>`:''}
+    ${_tva1!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>${_tvaLabel1}</span><span>${_tva1.toFixed(2)} €</span></div>`:''}
     ${_ts.shipping!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Frais de livraison</span><span>${_ts.shipping.toFixed(2)} €</span></div>`:''}
   ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${total.toFixed(2)} €</span></div>${_promoLine1}`;
 
@@ -5009,20 +5019,34 @@ window.sendConfirmationEmail = async (c) => {
   }).join('');
 
   // Totaux (commun)
-  const _promoLine2 = c.promoCode && parseFloat(c.promoDiscount||0)>0 ? `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#16a34a;border-bottom:1px solid #e8e8e8;font-weight:500"><span>🎟 Code ${c.promoCode}${c.promoType==='percent'?' (-'+c.promoValue+'%)':''}</span><span>−${parseFloat(c.promoDiscount).toFixed(2)} €</span></div>` : '';
-  const _promoLineEmail = c.promoCode && parseFloat(c.promoDiscount||0)>0 ? `<tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#16a34a;border-bottom:1px solid #f0f0f0;font-weight:500">🎟 Code ${c.promoCode}${c.promoType==='percent'?' (-'+c.promoValue+'%)':''}</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#16a34a;border-bottom:1px solid #f0f0f0;font-weight:500">−${parseFloat(c.promoDiscount).toFixed(2)} €</td></tr>` : '';
-  const _tvaLabel2 = parseFloat(c.promoDiscount||0) > 0 ? `TVA (${Math.round((getTvaRate(c))*100)}% sur ${(getSubtotalHT(c)-parseFloat(c.promoDiscount||0)).toFixed(2)} €)` : `TVA (${Math.round((getTvaRate(c))*100)}%)`;
+  const _promoDisc2 = parseFloat(c.promoDiscount||0);
+  const _discBase2  = Math.max(0, getSubtotalHT(c) - _promoDisc2);
+  const _tvaLabel2  = _promoDisc2 > 0
+    ? `TVA (${Math.round((getTvaRate(c))*100)}% sur ${_discBase2.toFixed(2)} €)`
+    : `TVA (${Math.round((getTvaRate(c))*100)}%)`;
+  const _promoLine2 = c.promoCode && _promoDisc2 > 0
+    ? `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#16a34a;border-bottom:1px solid #e8e8e8;font-weight:500"><span>🎟 Code ${c.promoCode}${c.promoType==='percent'?' (-'+c.promoValue+'%)':''}</span><span>−${_promoDisc2.toFixed(2)} €</span></div>` : '';
+  const _promoLineEmail = c.promoCode && _promoDisc2 > 0
+    ? `<tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#16a34a;border-bottom:1px solid #f0f0f0;font-weight:500">🎟 Code ${c.promoCode}${c.promoType==='percent'?' (-'+c.promoValue+'%)':''}</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#16a34a;border-bottom:1px solid #f0f0f0;font-weight:500">−${_promoDisc2.toFixed(2)} €</td></tr>` : '';
+
+  // Fallback TVA si Stripe ne renvoie pas de ligne TVA
+  let _tva2 = _ts.tva;
+  if (_tva2 === null && _ts.subtotal !== null) {
+    _tva2 = Math.round(_discBase2 * getTvaRate(c) * 100) / 100;
+  }
+
+  // Ordre : Sous-total → Promo → TVA → Livraison
   const emailTotalsHtml = _ts.subtotal !== null ? `
     <tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">Sous-total HT</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${_ts.subtotal.toFixed(2)} €</td></tr>
     ${_promoLineEmail}
-    ${_ts.tva!==null?`<tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${_tvaLabel2}</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${_ts.tva.toFixed(2)} €</td></tr>`:''}
+    ${_tva2!==null?`<tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${_tvaLabel2}</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${_tva2.toFixed(2)} €</td></tr>`:''}
     ${_ts.shipping!==null?`<tr><td colspan="2" style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">Livraison</td><td style="padding:8px 16px;text-align:right;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">${_ts.shipping.toFixed(2)} €</td></tr>`:''}
   ` : '';
 
   const factureTotalsHtml = _ts.subtotal !== null ? `
     <div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total HT</span><span>${_ts.subtotal.toFixed(2)} €</span></div>
     ${_promoLine2}
-    ${_ts.tva!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>${_tvaLabel2}</span><span>${_ts.tva.toFixed(2)} €</span></div>`:''}
+    ${_tva2!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>${_tvaLabel2}</span><span>${_tva2.toFixed(2)} €</span></div>`:''}
     ${_ts.shipping!==null?`<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Frais de livraison</span><span>${_ts.shipping.toFixed(2)} €</span></div>`:''}
   ` : `<div style="display:flex;justify-content:space-between;padding:10px 16px;font-size:13px;color:#555;border-bottom:1px solid #e8e8e8"><span>Sous-total</span><span>${total.toFixed(2)} €</span></div>${_promoLine2}`;
 
