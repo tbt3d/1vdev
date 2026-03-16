@@ -119,6 +119,14 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 .footer-bottom{max-width:1280px;margin:0 auto;padding:20px 32px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.3);flex-wrap:wrap;gap:12px}
 .footer-pay{display:flex;gap:6px;align-items:center}
 @media(max-width:600px){.footer-bottom{padding:16px 20px}}
+
+/* ─── MONDA SECTION ─── */
+.monda-wrap{background:#f5f5f5;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding-bottom:72px}
+.monda-divider{display:flex;align-items:center;gap:20px;max-width:1280px;margin:0 auto;padding:52px 32px 40px}
+.monda-divider::before,.monda-divider::after{content:'';flex:1;height:1px;background:#d0d0d0}
+.monda-divider-label{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#666;white-space:nowrap;font-weight:500}
+.monda-grid{max-width:960px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:28px;justify-content:center}
+@media(max-width:600px){.monda-divider{padding:36px 20px 28px}.monda-grid{padding:0 20px}}
 </style>
 <script>
 /* ── TBTCart — stockage Firestore (Safari compatible) ── */
@@ -361,7 +369,7 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 </div>
 
 <!-- ─── GRILLE ─── -->
-<div class="container" style="padding-bottom:80px">
+<div class="container" style="padding-bottom:56px">
   <div class="filters" id="filterBar">
     <button class="filter-btn active" data-filter="all" onclick="setFilter(this)">Tout</button>
   </div>
@@ -372,6 +380,11 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
     <div class="skel-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line" style="width:75%"></div><div class="skeleton skel-line" style="width:45%"></div></div>
     <div class="skel-card"><div class="skeleton skel-img"></div><div class="skeleton skel-line" style="width:55%"></div><div class="skeleton skel-line" style="width:30%"></div></div>
   </div>
+</div>
+
+<!-- ─── MONDA SECTION ─── -->
+<div id="mondaWrap" class="monda-wrap" style="display:none">
+  <div id="mondaSection"></div>
 </div>
 
 <!-- ─── BANNER DEVIS ─── -->
@@ -595,76 +608,122 @@ window.setFilter = function(btn) {
   renderGrid();
 };
 
+// ─── HELPER : construit un élément card ────────────────────────────────────
+function makeCard(a) {
+  const slug = a.slug || a.id;
+  const prodUrl = '/produit.html?id=' + encodeURIComponent(slug);
+  const card = document.createElement('a');
+  card.className = 'product-card';
+  card.href = prodUrl;
+  card.dataset.id = a.id;
+  card.dataset.name = a.name;
+  card.dataset.tagline = a.tagline || '';
+  card.dataset.badge = a.badge || '';
+  const img = a.photos && a.photos[0]
+    ? '<img src="' + a.photos[0] + '" alt="' + esc(a.name) + '" loading="lazy">'
+    : '<div class="product-img-placeholder">🏮</div>';
+  const badge = a.badge ? '<div class="product-badge">' + esc(a.badge) + '</div>' : '';
+  const oldP = a.oldPrice
+    ? '<span class="price-old">' + parseFloat(a.oldPrice).toFixed(2).replace('.', ',') + ' €</span>'
+    : '';
+  const priceDisplay = a._displayPrice || (parseFloat(a.price).toFixed(2).replace('.', ',') + ' €');
+  const fromSpan = a._from ? '<span class="price-from">À partir de</span>' : '';
+  const defaultVariant = (a.variants && a.variants.length > 0)
+    ? a.variants.map(vg => vg.options && vg.options[0] ? vg.options[0].label : '').filter(Boolean).join(' · ')
+    : '';
+  let defaultPrice = parseFloat(a.price);
+  if (a.variants && a.variants.length > 0 && a.comboLinks) {
+    const defaultKey = a.variants.map(vg => vg.options && vg.options[0] ? vg.options[0].label : '').filter(Boolean).join('|');
+    const combo = a.comboLinks[defaultKey];
+    if (combo && combo.price) defaultPrice = parseFloat(combo.price);
+  }
+  const buyBtn = '<button class="btn-buy" onclick="event.stopPropagation();event.preventDefault();addToCartAndGo(\'' + esc(a.slug||a.id) + '\',\'' + esc(a.name) + '\',' + defaultPrice + ',' + (a.oldPrice ? parseFloat(a.oldPrice) : 'null') + ',\'' + esc((a.photos&&a.photos[0])||'') + '\',\'' + esc(a.stripePrice||'') + '\',\'' + esc(a.payhip||'') + '\',\'' + esc(defaultVariant) + '\')">Acheter</button>';
+  const detailBtn = '<a href="' + prodUrl + '" class="btn-details" onclick="event.stopPropagation()">Détails</a>';
+  card.innerHTML =
+    '<div class="product-img">' + img + badge + '</div>' +
+    '<div class="product-name">' + esc(a.name) + '</div>' +
+    '<div class="product-tagline">' + esc(a.tagline || 'Lampe imprimée 3D · Made in France') + '</div>' +
+    '<div class="product-price">' + oldP + fromSpan + priceDisplay + '</div>' +
+    '<div class="product-actions">' + buyBtn + detailBtn + '</div>';
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(16px)';
+  card.style.transition = 'opacity .4s ease, transform .4s ease';
+  return card;
+}
+
 // ─── RENDU GRILLE ──────────────────────────────────────────────────────────
 function renderGrid() {
   const grid = document.getElementById('productGrid');
-  if (activeFilter === 'mesure') { grid.innerHTML = ''; addMesureCard(grid); return; }
+  const mondaWrap = document.getElementById('mondaWrap');
+  const mondaSection = document.getElementById('mondaSection');
+
+  if (activeFilter === 'mesure') {
+    grid.innerHTML = '';
+    mondaWrap.style.display = 'none';
+    mondaSection.innerHTML = '';
+    addMesureCard(grid);
+    return;
+  }
 
   const filtered = activeFilter === 'all'
     ? allArticles
     : allArticles.filter(a => a.badge && a.badge.toLowerCase() === activeFilter);
 
   grid.innerHTML = '';
+  mondaSection.innerHTML = '';
+
+  // Détection des articles Monda (par nom ou slug)
+  const isMonda = a => {
+    const n = (a.name || '').toUpperCase();
+    const s = (a.slug || a.id || '').toLowerCase();
+    return n.startsWith('MONDA') || s.startsWith('monda');
+  };
+
+  const regularArts = filtered.filter(a => !isMonda(a));
+  // Monda toujours affiché dans sa section dédiée si filtre = tout
+  const mondaArts = activeFilter === 'all' ? allArticles.filter(isMonda) : filtered.filter(isMonda);
 
   if (!allArticles.length) {
     grid.innerHTML = '<div class="empty-boutique"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg><h3>La boutique arrive bientôt</h3><p>Les articles sont en cours de création.</p></div>';
-    addMesureCard(grid);
+    mondaWrap.style.display = 'none';
+    if (activeFilter === 'all') addMesureCard(grid);
     return;
   }
 
-  filtered.forEach(a => {
-    const slug = a.slug || a.id;
-    const prodUrl = '/produit.html?id=' + encodeURIComponent(slug);
-
-    const card = document.createElement('a');
-    card.className = 'product-card';
-    card.href = prodUrl;
-    card.dataset.id = a.id;
-    card.dataset.name = a.name;
-    card.dataset.tagline = a.tagline || '';
-    card.dataset.badge = a.badge || '';
-
-    const img = a.photos && a.photos[0]
-      ? '<img src="' + a.photos[0] + '" alt="' + esc(a.name) + '" loading="lazy">'
-      : '<div class="product-img-placeholder">🏮</div>';
-    const badge = a.badge ? '<div class="product-badge">' + esc(a.badge) + '</div>' : '';
-    const oldP = a.oldPrice
-      ? '<span class="price-old">' + parseFloat(a.oldPrice).toFixed(2).replace('.', ',') + ' €</span>'
-      : '';
-    const priceDisplay = a._displayPrice || (parseFloat(a.price).toFixed(2).replace('.', ',') + ' €');
-    const fromSpan = a._from ? '<span class="price-from">À partir de</span>' : '';
-
-    // Variante par défaut = 1ère option de chaque groupe
-    const defaultVariant = (a.variants && a.variants.length > 0)
-      ? a.variants.map(vg => vg.options && vg.options[0] ? vg.options[0].label : '').filter(Boolean).join(' · ')
-      : '';
-
-    // Prix du combo par défaut si disponible
-    let defaultPrice = parseFloat(a.price);
-    if (a.variants && a.variants.length > 0 && a.comboLinks) {
-      const defaultKey = a.variants.map(vg => vg.options && vg.options[0] ? vg.options[0].label : '').filter(Boolean).join('|');
-      const combo = a.comboLinks[defaultKey];
-      if (combo && combo.price) defaultPrice = parseFloat(combo.price);
-    }
-
-    const buyBtn = '<button class="btn-buy" onclick="event.stopPropagation();event.preventDefault();addToCartAndGo(\'' + esc(a.slug||a.id) + '\',\'' + esc(a.name) + '\',' + defaultPrice + ',' + (a.oldPrice ? parseFloat(a.oldPrice) : 'null') + ',\'' + esc((a.photos&&a.photos[0])||'') + '\',\'' + esc(a.stripePrice||'') + '\',\'' + esc(a.payhip||'') + '\',\'' + esc(defaultVariant) + '\')">Acheter</button>';
-    const detailBtn = '<a href="' + prodUrl + '" class="btn-details" onclick="event.stopPropagation()">Détails</a>';
-
-    card.innerHTML =
-      '<div class="product-img">' + img + badge + '</div>' +
-      '<div class="product-name">' + esc(a.name) + '</div>' +
-      '<div class="product-tagline">' + esc(a.tagline || 'Lampe imprimée 3D · Made in France') + '</div>' +
-      '<div class="product-price">' + oldP + fromSpan + priceDisplay + '</div>' +
-      '<div class="product-actions">' + buyBtn + detailBtn + '</div>';
-
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(16px)';
-    card.style.transition = 'opacity .4s ease, transform .4s ease';
+  // ── Grille principale (lampes hors Monda) ──
+  regularArts.forEach(a => {
+    const card = makeCard(a);
     grid.appendChild(card);
     requestAnimationFrame(() => { card.style.opacity = '1'; card.style.transform = 'none'; });
   });
 
-  if (activeFilter === 'all') addMesureCard(grid);
+  // ── Section Monda mise en évidence ──
+  if (mondaArts.length) {
+    mondaWrap.style.display = '';
+
+    // Ligne séparatrice avec label centré
+    const divider = document.createElement('div');
+    divider.className = 'monda-divider';
+    divider.innerHTML = '<span class="monda-divider-label">Monda</span>';
+    mondaSection.appendChild(divider);
+
+    // Grille centrée
+    const mondaGrid = document.createElement('div');
+    mondaGrid.className = 'monda-grid';
+    mondaSection.appendChild(mondaGrid);
+
+    mondaArts.forEach(a => {
+      const card = makeCard(a);
+      mondaGrid.appendChild(card);
+      requestAnimationFrame(() => { card.style.opacity = '1'; card.style.transform = 'none'; });
+    });
+
+    // Carte impression sur mesure à la suite des Monda
+    addMesureCard(mondaGrid);
+  } else {
+    mondaWrap.style.display = 'none';
+    if (activeFilter === 'all') addMesureCard(grid);
+  }
 }
 
 function addMesureCard(grid, customSlots) {
