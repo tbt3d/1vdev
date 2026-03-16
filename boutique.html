@@ -127,6 +127,18 @@ body{font-family:var(--font);color:var(--black);background:var(--white);padding-
 .monda-divider-label{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#666;white-space:nowrap;font-weight:500}
 .monda-grid{max-width:960px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:28px;justify-content:center}
 @media(max-width:600px){.monda-divider{padding:36px 20px 28px}.monda-grid{padding:0 20px}}
+/* ─── MONDA MESURE BLOCK ─── */
+.monda-mesure{max-width:960px;margin:40px auto 0;padding:0 32px}
+.monda-mesure-inner{border:1.5px solid var(--border);border-radius:16px;padding:64px 56px;display:flex;align-items:center;justify-content:space-between;gap:40px;background:var(--white)}
+.monda-mesure-icon{flex-shrink:0;width:90px;height:90px;background:var(--bg);border-radius:12px;display:flex;align-items:center;justify-content:center}
+.monda-mesure-icon svg{width:48px;height:48px;opacity:.35}
+.monda-mesure-text{flex:1}
+.monda-mesure-text h3{font-size:26px;font-weight:400;letter-spacing:-.02em;margin-bottom:10px}
+.monda-mesure-text p{font-size:15px;color:var(--muted);line-height:1.65;max-width:420px}
+.btn-mesure{display:inline-block;padding:16px 36px;background:var(--black);color:var(--white);border-radius:var(--r);text-decoration:none;font-size:14px;font-weight:500;white-space:nowrap;transition:opacity .2s;flex-shrink:0}
+.btn-mesure:hover{opacity:.8}
+@media(max-width:700px){.monda-mesure-inner{flex-direction:column;text-align:center;padding:48px 32px;gap:28px}.monda-mesure-icon{margin:0 auto}.monda-mesure-text p{max-width:100%}}
+@media(max-width:600px){.monda-mesure{padding:0 20px}}
 </style>
 <script>
 /* ── TBTCart — stockage Firestore (Safari compatible) ── */
@@ -718,8 +730,25 @@ function renderGrid() {
       requestAnimationFrame(() => { card.style.opacity = '1'; card.style.transform = 'none'; });
     });
 
-    // Carte impression sur mesure à la suite des Monda
-    addMesureCard(mondaGrid);
+    // Bloc "Impression sur mesure" sous les cartes Monda
+    const mesureSlots = window.allCustomCards || [];
+    const mesureHref = mesureSlots.length && mesureSlots[0].customLink ? mesureSlots[0].customLink : '/devis.html';
+    const mesureLabel = mesureSlots.length ? (mesureSlots[0].customLabel || 'Impression sur mesure') : 'Impression sur mesure';
+    const mesureSub = mesureSlots.length ? (mesureSlots[0].customSub || 'Votre fichier STL · FDM ou résine · Prix instantané') : 'Votre fichier STL · FDM ou résine · Prix instantané';
+    const mesureDiv = document.createElement('div');
+    mesureDiv.className = 'monda-mesure';
+    mesureDiv.innerHTML =
+      '<div class="monda-mesure-inner">' +
+        '<div class="monda-mesure-icon">' +
+          '<svg viewBox="0 0 40 40" fill="none"><path d="M20 3L3 11v18l17 8 17-8V11L20 3z" stroke="currentColor" stroke-width="1.4"/><path d="M20 3v26M3 11l17 8M37 11l-17 8" stroke="currentColor" stroke-width="1" opacity=".6"/></svg>' +
+        '</div>' +
+        '<div class="monda-mesure-text">' +
+          '<h3>' + mesureLabel + '</h3>' +
+          '<p>' + mesureSub + '</p>' +
+        '</div>' +
+        '<a href="' + mesureHref + '" class="btn-mesure">Calculer mon devis →</a>' +
+      '</div>';
+    mondaSection.appendChild(mesureDiv);
   } else {
     mondaWrap.style.display = 'none';
     if (activeFilter === 'all') addMesureCard(grid);
