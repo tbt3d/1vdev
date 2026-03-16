@@ -120,6 +120,13 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
 .section-title { font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; letter-spacing: -.01em; }
 .section-sub { font-size: 15px; color: var(--soft); margin-top: 12px; line-height: 1.7; }
 
+/* ─── SÉRIE MONDA ─── */
+.monda-section{max-width:var(--max);margin:0 auto;padding:0 32px 80px}
+.monda-hp-divider{display:flex;align-items:center;gap:20px;padding:0 0 40px}
+.monda-hp-divider::before,.monda-hp-divider::after{content:'';flex:1;height:1px;background:#e2e2e2}
+.monda-hp-label{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#111;white-space:nowrap;font-weight:600}
+@media(max-width:600px){.monda-section{padding:0 20px 60px}}
+
 /* ─── PRODUITS ─── */
 .section { padding: 80px 32px; max-width: var(--max); margin: 0 auto; }
 @media(max-width:600px){ .section { padding: 60px 20px; } }
@@ -253,6 +260,12 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
   </div>
   <div class="products-grid" id="productsGrid"></div>
 </div>
+<div id="mondaSectionHp" style="display:none">
+  <div class="monda-section">
+    <div class="monda-hp-divider"><span class="monda-hp-label">Série Monda</span></div>
+    <div class="products-grid" id="mondaGridHp"></div>
+  </div>
+</div>
 
 <!-- ─── VALEURS ─── -->
 <div class="section-gray">
@@ -302,7 +315,7 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
     </div>
     <div class="footer-col">
       <div class="footer-col-title">Contact</div>
-      <a href="mailto:tbt203.contact@gmail.com">tbt203.contact@gmail.com</a>
+      <a href="/cdn-cgi/l/email-protection#cdb9afb9fffdfee3aea2a3b9acaeb98daaa0aca4a1e3aea2a0"><span class="__cf_email__" data-cfemail="136771672123203d707c7d6772706753747e727a7f3d707c7e">[email&#160;protected]</span></a>
       <a href="/contact.html">Formulaire</a>
       <a href="/devis.html">Devis STL</a>
       <div class="footer-social">
@@ -321,7 +334,7 @@ body { font-family: var(--font); color: var(--black); background: var(--white); 
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, doc, getDocs, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -361,8 +374,60 @@ window.toggleMobileNav = toggleMobileNav;
 // ══════════════════════════════════════════════════════
 // PRODUITS DYNAMIQUES depuis Firebase (dashboard)
 // ══════════════════════════════════════════════════════
+function makeCardHtml(slot, arts) {
+  if(slot.type === 'article') {
+    const art = arts.find(a => a.id === slot.articleId);
+    if(!art) return '';
+    const badge    = slot.overrideBadge !== undefined ? slot.overrideBadge : art.badge;
+    const rawPrice = slot.overridePrice || null;
+    const from     = slot.overrideFrom && !slot.overridePrice;
+    const oldPrice = !slot.overridePrice && art.oldPrice ? parseFloat(art.oldPrice).toFixed(2) + ' €' : '';
+    const price    = rawPrice || (parseFloat(art.price).toFixed(2) + ' €');
+    const slug     = art.slug || art.id;
+    const link     = '/produit.html?id=' + encodeURIComponent(slug);
+    const img      = art.photos?.[0];
+    const sub      = art.tagline || '';
+    return `<a href="${link}" class="product-card">
+      <div class="product-card-img">
+        ${img ? `<img src="${img}" alt="${art.name}">` : `<div class="product-card-img-placeholder">📷 Photo à venir</div>`}
+        ${badge ? `<div class="product-badge">${badge}</div>` : ''}
+      </div>
+      <div class="product-name">${art.name}</div>
+      ${sub ? `<div class="product-sub">${sub}</div>` : ''}
+      <div class="product-price">
+        ${oldPrice ? `<span class="product-price-old">${oldPrice}</span>` : ''}
+        ${from ? `<span class="product-price-from">À partir de</span>` : ''}
+        ${price}
+      </div>
+    </a>`;
+  } else {
+    const dark    = slot.customDark;
+    const badge   = slot.customBadge;
+    const bStyle  = slot.customBadgeStyle || 'white';
+    const link    = slot.customLink || '/devis.html';
+    const custImg = slot.customImage || null;
+    const imgContent = custImg
+      ? `<img src="${custImg}" alt="${slot.customLabel || 'Sur mesure'}" style="width:100%;height:100%;object-fit:cover">`
+      : `<div class="product-card-img-placeholder" style="${dark ? 'background:#111;color:rgba(255,255,255,.3);flex-direction:column;gap:10px' : ''}">
+          ${dark ? `<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 4L4 12v16l16 8 16-8V12L20 4z" stroke="currentColor" stroke-width="1.5"/></svg>` : ''}
+          ${slot.customLabel || ''}
+        </div>`;
+    return `<a href="${link}" class="product-card">
+      <div class="product-card-img" style="${!custImg && dark ? 'background:#111' : ''}">
+        ${imgContent}
+        ${badge ? `<div class="product-badge ${bStyle === 'white' ? 'white' : ''}" style="${bStyle === 'white' ? 'background:#fff;color:#111' : 'background:#111;color:#fff'}">${badge}</div>` : ''}
+      </div>
+      <div class="product-name">${slot.customLabel || ''}</div>
+      ${slot.customSub ? `<div class="product-sub">${slot.customSub}</div>` : ''}
+      <div class="product-price">${slot.customPrice || ''}</div>
+    </a>`;
+  }
+}
+
 async function buildProductsGrid() {
-  const grid = document.getElementById('productsGrid');
+  const grid          = document.getElementById('productsGrid');
+  const mondaSectionEl = document.getElementById('mondaSectionHp');
+  const mondaGrid     = document.getElementById('mondaGridHp');
 
   const [artsSnap, hpDoc] = await Promise.all([
     getDocs(collection(db, 'articles')),
@@ -371,66 +436,30 @@ async function buildProductsGrid() {
   const arts  = artsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
   const hpCfg = hpDoc.exists() ? hpDoc.data() : null;
 
+  const isSlotMonda = slot => {
+    if(slot.type !== 'article') return false;
+    const art = arts.find(a => a.id === slot.articleId);
+    if(!art) return false;
+    return (art.name||'').toUpperCase().startsWith('MONDA') || (art.slug||art.id||'').toLowerCase().startsWith('monda');
+  };
+
   // ── Config dashboard ──
   if(hpCfg && hpCfg.slots && hpCfg.slots.length) {
-    grid.innerHTML = hpCfg.slots.map(slot => {
-      if(slot.type === 'article') {
-        const art = arts.find(a => a.id === slot.articleId);
-        if(!art) return '';
-        const badge    = slot.overrideBadge !== undefined ? slot.overrideBadge : art.badge;
-        const rawPrice = slot.overridePrice || null;
-        const from     = slot.overrideFrom && !slot.overridePrice;
-        const oldPrice = !slot.overridePrice && art.oldPrice ? parseFloat(art.oldPrice).toFixed(2) + ' €' : '';
-        const price    = rawPrice || (parseFloat(art.price).toFixed(2) + ' €');
-        const slug     = art.slug || art.id;
-        const link     = '/produit.html?id=' + encodeURIComponent(slug);
-        const img      = art.photos?.[0];
-        const sub      = art.tagline || '';
-        return `<a href="${link}" class="product-card">
-          <div class="product-card-img">
-            ${img ? `<img src="${img}" alt="${art.name}">` : `<div class="product-card-img-placeholder">📷 Photo à venir</div>`}
-            ${badge ? `<div class="product-badge">${badge}</div>` : ''}
-          </div>
-          <div class="product-name">${art.name}</div>
-          ${sub ? `<div class="product-sub">${sub}</div>` : ''}
-          <div class="product-price">
-            ${oldPrice ? `<span class="product-price-old">${oldPrice}</span>` : ''}
-            ${from ? `<span class="product-price-from">À partir de</span>` : ''}
-            ${price}
-          </div>
-        </a>`;
-      } else {
-        const dark    = slot.customDark;
-        const badge   = slot.customBadge;
-        const bStyle  = slot.customBadgeStyle || 'white';
-        const link    = slot.customLink || '/devis.html';
-        const custImg = slot.customImage || null;
-        const imgContent = custImg
-          ? `<img src="${custImg}" alt="${slot.customLabel || 'Sur mesure'}" style="width:100%;height:100%;object-fit:cover">`
-          : `<div class="product-card-img-placeholder" style="${dark ? 'background:#111;color:rgba(255,255,255,.3);flex-direction:column;gap:10px' : ''}">
-              ${dark ? `<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 4L4 12v16l16 8 16-8V12L20 4z" stroke="currentColor" stroke-width="1.5"/></svg>` : ''}
-              ${slot.customLabel || ''}
-            </div>`;
-        return `<a href="${link}" class="product-card">
-          <div class="product-card-img" style="${!custImg && dark ? 'background:#111' : ''}">
-            ${imgContent}
-            ${badge ? `<div class="product-badge ${bStyle === 'white' ? 'white' : ''}" style="${bStyle === 'white' ? 'background:#fff;color:#111' : 'background:#111;color:#fff'}">${badge}</div>` : ''}
-          </div>
-          <div class="product-name">${slot.customLabel || ''}</div>
-          ${slot.customSub ? `<div class="product-sub">${slot.customSub}</div>` : ''}
-          <div class="product-price">${slot.customPrice || ''}</div>
-        </a>`;
-      }
-    }).join('');
+    const regularSlots = hpCfg.slots.filter(s => !isSlotMonda(s));
+    const mondaSlots   = hpCfg.slots.filter(s => isSlotMonda(s));
+    grid.innerHTML = regularSlots.map(s => makeCardHtml(s, arts)).join('');
+    if(mondaSlots.length) {
+      mondaSectionEl.style.display = '';
+      mondaGrid.innerHTML = mondaSlots.map(s => makeCardHtml(s, arts)).join('');
+    }
     return;
   }
 
   // ── Fallback : articles publiés ──
   const published = arts.filter(a => a.status === 'published').slice(0, 4);
   if(published.length) {
-    grid.innerHTML = published.map(art => {
-      const img  = art.photos?.[0];
-      const slug = art.slug || art.id;
+    const makeArtCard = art => {
+      const img = art.photos?.[0]; const slug = art.slug || art.id;
       return `<a href="/produit.html?id=${encodeURIComponent(slug)}" class="product-card">
         <div class="product-card-img">
           ${img ? `<img src="${img}" alt="${art.name}">` : `<div class="product-card-img-placeholder">📷 Photo à venir</div>`}
@@ -440,11 +469,15 @@ async function buildProductsGrid() {
         ${art.tagline ? `<div class="product-sub">${art.tagline}</div>` : ''}
         <div class="product-price"><span class="product-price-from">À partir de</span>${parseFloat(art.price).toFixed(2)} €</div>
       </a>`;
-    }).join('');
+    };
+    const regular = published.filter(a => !(a.name||'').toUpperCase().startsWith('MONDA') && !(a.slug||a.id||'').toLowerCase().startsWith('monda'));
+    const mondas  = published.filter(a => (a.name||'').toUpperCase().startsWith('MONDA') || (a.slug||a.id||'').toLowerCase().startsWith('monda'));
+    grid.innerHTML = regular.map(makeArtCard).join('');
+    if(mondas.length) { mondaSectionEl.style.display = ''; mondaGrid.innerHTML = mondas.map(makeArtCard).join(''); }
     return;
   }
 
-  // ── Fallback statique (aucun article dans Firebase) ──
+  // ── Fallback statique ──
   grid.innerHTML = `
     <a href="/boutique.html#eta" class="product-card">
       <div class="product-card-img"><div class="product-card-img-placeholder">📷 Photo ETA à venir</div><div class="product-badge">Bestseller</div></div>
